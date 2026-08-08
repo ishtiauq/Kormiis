@@ -79,6 +79,8 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
         </div>
       </div>
 
+      <div className="border-t border-border border-headline" />
+
       {/* --- EMPLOYEE VIEW --- */}
       {!isAdmin && (
         <>

@@ -14,8 +14,8 @@ const AlertDialogTrigger = AriaDialogTrigger
 const AlertDialogOverlay = React.forwardRef(({ className, ...props }, ref) => (
   <AriaModalOverlay
     ref={ref}
-      className={cn(
-      "fixed inset-0 z-50 bg-black/50 transition-all duration-200 data-[entering]:animate-in data-[entering]:fade-in-0 data-[exiting]:animate-out data-[exiting]:fade-out-0 flex items-center justify-center p-4",
+    className={cn(
+      "fixed inset-0 z-50 bg-black/60 backdrop-blur-xs transition-all duration-200 data-[entering]:animate-in data-[entering]:fade-in-0 data-[exiting]:animate-out data-[exiting]:fade-out-0 flex items-center justify-center p-4",
       className
     )}
     {...props}
@@ -28,13 +28,14 @@ const AlertDialogContent = React.forwardRef(({ className, children, ...props }, 
     <AriaModal
       ref={ref}
       className={cn(
-        "w-full max-w-md flex flex-col overflow-hidden rounded-2xl border border-border bg-background text-popover-foreground shadow-2xl transition-all duration-200 data-[entering]:animate-in data-[entering]:zoom-in-95 data-[exiting]:animate-out data-[exiting]:zoom-out-95 p-0",
+        "w-full max-w-md flex flex-col overflow-hidden rounded-2xl border border-border bg-card text-card-foreground shadow-2xl transition-all duration-200 data-[entering]:animate-in data-[entering]:zoom-in-95 data-[exiting]:animate-out data-[exiting]:zoom-out-95 p-0 relative",
         className
       )}
       {...props}
     >
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-500 via-rose-500 to-primary z-10" />
-      <AriaDialog className="outline-none focus:outline-none flex flex-col w-full h-full p-6 sm:p-8 gap-4 overflow-y-auto">
+      {/* Top Animated Gradient Bar */}
+      <div className="w-full h-1.5 bg-gradient-to-r from-orange-500 via-rose-500 to-blue-500 animate-pulse z-30 shrink-0" />
+      <AriaDialog className="outline-none focus:outline-none flex flex-col w-full h-full p-6 sm:p-7 gap-4 overflow-y-auto">
         {children}
       </AriaDialog>
     </AriaModal>
@@ -43,31 +44,35 @@ const AlertDialogContent = React.forwardRef(({ className, children, ...props }, 
 AlertDialogContent.displayName = "AlertDialogContent"
 
 const AlertDialogHeader = ({ className, ...props }) => (
-  <div className={cn("flex flex-col space-y-1 text-left", className)} {...props} />
+  <div className={cn("flex flex-col space-y-1.5 text-left", className)} {...props} />
 )
 AlertDialogHeader.displayName = "AlertDialogHeader"
 
 const AlertDialogFooter = ({ className, ...props }) => (
-  <div className={cn("flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-3", className)} {...props} />
+  <div className={cn("flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5 pt-3 border-t border-border/40 mt-1", className)} {...props} />
 )
 AlertDialogFooter.displayName = "AlertDialogFooter"
 
 const AlertDialogTitle = React.forwardRef(({ className, ...props }, ref) => (
-  <h2 ref={ref} className={cn("text-lg font-extrabold tracking-tight text-foreground leading-none", className)} {...props} />
+  <h2 ref={ref} className={cn("text-lg font-bold tracking-tight text-foreground leading-none flex items-center gap-2", className)} {...props} />
 ))
 AlertDialogTitle.displayName = "AlertDialogTitle"
 
 const AlertDialogDescription = React.forwardRef(({ className, ...props }, ref) => (
-  <p ref={ref} className={cn("text-sm text-muted-foreground", className)} {...props} />
+  <p ref={ref} className={cn("text-sm text-muted-foreground leading-relaxed", className)} {...props} />
 ))
 AlertDialogDescription.displayName = "AlertDialogDescription"
 
-const AlertDialogAction = ({ className, variant = 'destructive', ...props }) => (
-  <Button variant={variant} className={cn(className)} {...props} />
+const AlertDialogAction = ({ className, style, ...props }) => (
+  <Button
+    className={cn("rounded-full font-semibold !bg-red-600 hover:!bg-red-700 !text-white shadow-sm border-none px-5", className)}
+    style={{ backgroundColor: '#dc2626', color: '#ffffff', ...style }}
+    {...props}
+  />
 )
 
 const AlertDialogCancel = ({ className, ...props }) => (
-  <Button variant="outline" className={cn(className)} {...props} />
+  <Button variant="outline" className={cn("rounded-full font-semibold px-5", className)} {...props} />
 )
 
 export {

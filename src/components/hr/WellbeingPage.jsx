@@ -73,6 +73,8 @@ export default function WellbeingPage({ adminUid, currentUser, addToast }) {
         </div>
       </div>
 
+      <div className="border-t border-border border-headline" />
+
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card>
           <CardContent className="p-5">
