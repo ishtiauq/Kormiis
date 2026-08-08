@@ -211,6 +211,32 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
             <span className="text-[11px] text-muted-foreground mt-1.5">Rewarded for completing requests helping colleagues.</span>
           </div>
         </CardContent>
+
+        {/* Grade Threshold Scale */}
+        <div className="mx-6 mb-5 p-3.5 rounded-xl bg-muted/20 border border-border/50 flex flex-col gap-2.5">
+          <div className="text-xs font-bold text-foreground flex items-center gap-1.5">
+            <Icon name="military_tech" size={16} className="text-amber-500" />
+            <span>Performance Grade Scale</span>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+            <div className="flex items-center justify-between p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs">
+              <span className="font-bold text-emerald-600">Grade A</span>
+              <span className="font-bold text-emerald-700 tabular-nums">85 – 100 pts</span>
+            </div>
+            <div className="flex items-center justify-between p-2 rounded-xl bg-sky-500/10 border border-sky-500/20 text-xs">
+              <span className="font-bold text-sky-600">Grade B</span>
+              <span className="font-bold text-sky-700 tabular-nums">70 – 84 pts</span>
+            </div>
+            <div className="flex items-center justify-between p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs">
+              <span className="font-bold text-amber-600">Grade C</span>
+              <span className="font-bold text-amber-700 tabular-nums">50 – 69 pts</span>
+            </div>
+            <div className="flex items-center justify-between p-2 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs">
+              <span className="font-bold text-rose-600">Grade D</span>
+              <span className="font-bold text-rose-700 tabular-nums">0 – 49 pts</span>
+            </div>
+          </div>
+        </div>
       </Card>
 
       {/* --- EMPLOYEE VIEW --- */}

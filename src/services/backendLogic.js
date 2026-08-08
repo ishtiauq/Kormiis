@@ -437,29 +437,6 @@ export const gigApiLocal = {
     await setSnapshot(companyId, 'gigs', gigs.filter((g) => g.id !== gigId));
     return { ok: true };
   }),
-  getTrends: onCall(async (request) => {
-    const uid = assertAuth(request);
-    const companyId = await getCompanyIdForUid(uid);
-    if (!companyId) throw new Error('failed-precondition: Account is not linked to a company.');
-    const data = request.data || {};
-    const empId = data.employeeId || uid;
-    const scores = (await getSnapshot(companyId, 'performance_scores', [])) || [];
-    const empScores = scores.filter((s) => s.employeeId === empId).sort((a, b) => (a.yearMonth > b.yearMonth ? 1 : -1)).slice(-6);
-    return { scores: empScores };
-  }),
-  getWeights: onCall(async (request) => {
-    const uid = assertAuth(request);
-    const companyId = await getCompanyIdForUid(uid);
-    if (!companyId) throw new Error('failed-precondition: Account is not linked to a company.');
-    const weights = await getWeights(companyId);
-    return { weights };
-  }),
-  updateWeights: onCall(async (request) => {
-    const { companyId } = await requireAdmin(request);
-    const weights = request.data.weights || {};
-    await setSnapshot(companyId, 'performance_weights', { ...DEFAULT_WEIGHTS, ...weights });
-    return { success: true };
-  }),
   getOpenGigs: onCall(async (request) => {
     const uid = assertAuth(request);
     const companyId = await getCompanyIdForUid(uid);
@@ -815,5 +792,18 @@ export const performanceApiLocal = {
     if (!employeeId) throw new Error('invalid-argument: Missing employeeId.');
     const scores = (await getSnapshot(companyId, 'performance_scores', [])) || [];
     return { scores: scores.filter((s) => s.employeeId === employeeId).sort((a, b) => (a.yearMonth < b.yearMonth ? -1 : 1)).map((s) => ({ yearMonth: s.yearMonth, totalScore: s.totalScore, grade: s.grade })) };
+  }),
+  getWeights: onCall(async (request) => {
+    const uid = assertAuth(request);
+    const companyId = await getCompanyIdForUid(uid);
+    if (!companyId) throw new Error('failed-precondition: Account is not linked to a company.');
+    const w = await getWeights(companyId);
+    return { weights: w };
+  }),
+  updateWeights: onCall(async (request) => {
+    const { companyId } = await requireAdmin(request);
+    const weights = (request.data && request.data.weights) || {};
+    await setSnapshot(companyId, 'performance_weights', { ...DEFAULT_WEIGHTS, ...weights });
+    return { success: true };
   })
 };
