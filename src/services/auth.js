@@ -52,38 +52,88 @@ export const getCompanyForUser = async (uid) => {
 };
 
 /**
- * Creates a real Firebase Auth account for a teammate and links it to the
- * admin's company. Teammates sign in with email + password (no company ID).
+ * Reads a company invite for an email address. Invites are written by the
+ * workspace owner when they add a teammate by email; the invite is what lets
+ * a brand-new Google user discover and auto-link to the company.
  */
-export const provisionEmployeeAccount = async ({ email, password, name, role, companyUid, employeeId, department, avatar }) => {
-  if (!auth) throw new Error('Firebase not configured');
-  if (!email || !password) throw new Error('Email and password are required to create a teammate account.');
-  if (!companyUid) throw new Error('Missing company ID — cannot provision teammate account.');
+export const getInviteByEmail = async (email) => {
+  if (!db || !email) return null;
+  const key = email.trim().toLowerCase();
+  try {
+    const snap = await getDoc(doc(db, 'invites', key));
+    if (!snap.exists()) return null;
+    const data = snap.data();
+    if (data.status === 'revoked') return null;
+    return { ...data, id: key };
+  } catch (error) {
+    console.error('Failed to read invite:', error);
+    return null;
+  }
+};
 
-  const result = await createUserWithEmailAndPassword(auth, email, password);
-  const uid = result.user.uid;
+/**
+ * Links a Google-authenticated user to the company that invited their email.
+ * Creates users/{uid} (so the dashboard knows their company) and registers
+ * them in companies/{ownerUid}/members/{uid}.
+ */
+export const acceptInvite = async (user, invite) => {
+  if (!db || !user) throw new Error('Firebase not configured');
+  if (!invite?.companyUid) throw new Error('This invite is invalid or already used.');
+  const email = (user.email || '').trim().toLowerCase();
+  const uid = user.uid;
 
-  if (db) {
-    await setDoc(doc(db, 'users', uid), {
-      uid,
-      email,
-      fullName: name || '',
-      companyUid,
-      employeeId,
-      role: role || 'Teammate',
-      department: department || '',
-      avatar: avatar || '',
-      createdAt: serverTimestamp(),
-    });
-    await setDoc(doc(db, 'companies', companyUid, 'members', uid), {
-      employeeId: employeeId || '',
-      email,
-      name: name || '',
-      role: role || 'Teammate',
-      registeredAt: serverTimestamp(),
+  await setDoc(doc(db, 'users', uid), {
+    uid,
+    email,
+    fullName: invite.name || user.displayName || '',
+    companyUid: invite.companyUid,
+    employeeId: invite.employeeId || '',
+    role: invite.role || 'Teammate',
+    department: invite.department || '',
+    joinedAt: serverTimestamp(),
+  });
+
+  await setDoc(doc(db, 'companies', invite.companyUid, 'members', uid), {
+    employeeId: invite.employeeId || '',
+    email,
+    name: invite.name || user.displayName || '',
+    role: invite.role || 'Teammate',
+    registeredAt: serverTimestamp(),
+  }, { merge: true });
+
+  if (email) {
+    await setDoc(doc(db, 'invites', email), {
+      ...invite,
+      status: 'linked',
+      linkedUid: uid,
+      linkedAt: serverTimestamp(),
     }, { merge: true });
   }
-  return { uid };
+};
+
+/**
+ * Registers a teammate by email (Google-only sign-in). No Firebase Auth
+ * password account is created — the teammate signs in with their own Google
+ * account and is auto-linked when their email matches this invite.
+ */
+export const provisionEmployeeAccount = async ({ email, name, role, companyUid, employeeId, department, avatar }) => {
+  if (!db) throw new Error('Firebase not configured');
+  if (!email) throw new Error('Teammate email is required to send an invite.');
+  if (!companyUid) throw new Error('Missing company ID — cannot invite teammate.');
+  const key = email.trim().toLowerCase();
+
+  await setDoc(doc(db, 'invites', key), {
+    companyUid,
+    employeeId: employeeId || '',
+    name: name || '',
+    role: role || 'Teammate',
+    department: department || '',
+    avatar: avatar || '',
+    status: 'invited',
+    createdAt: serverTimestamp(),
+  });
+
+  return { uid: null, invited: true };
 };
 
 /**

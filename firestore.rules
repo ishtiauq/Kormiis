@@ -11,6 +11,18 @@ service cloud.firestore {
         && exists(/databases/$(database)/documents/companies/$(adminUid)/members/$(request.auth.uid));
     }
 
+    // A workspace owner is a user whose users/{uid} doc either has no
+    // companyUid (legacy owners) or has companyUid === their own uid.
+    // Teammates have companyUid set to the owner's uid, so they fail both.
+    function isWorkspaceOwner() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && (
+          !('companyUid' in get(/databases/$(database)/documents/users/$(request.auth.uid)).data)
+          || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.companyUid == request.auth.uid
+        );
+    }
+
     // Company data snapshots: admin + registered members can read/write.
     // This powers real-time sync across all devices.
     match /companies/{adminUid}/snapshots/{document=**} {
@@ -35,6 +47,14 @@ service cloud.firestore {
     // Users collection
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Email invites — workspace owners invite teammates by email; the invite
+    // lets that exact email address auto-link to the company on first Google
+    // sign-in. Only the invite owner and workspace owners can touch them.
+    match /invites/{email} {
+      allow read, write: if request.auth != null
+        && (request.auth.token.email != null && request.auth.token.email == email || isWorkspaceOwner());
     }
   }
 }

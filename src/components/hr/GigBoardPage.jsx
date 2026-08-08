@@ -300,11 +300,23 @@ export default function GigBoardPage({ adminUid, currentUser, addToast }) {
                     <CardTitle className="text-base font-bold leading-snug pt-0.5">{gig.title}</CardTitle>
                     <div className="flex items-center gap-1.5 shrink-0">
                       {gig.status === 'open' ? (
-                        <Badge variant="outline" className="px-3 py-1 text-xs font-bold text-rose-500 border-rose-500/30 bg-rose-500/10 flex items-center gap-1.5 rounded-full shrink-0">
-                          <Icon name="front_hand" size={13} />
-                          <span>Need help</span>
-                          {expiryText && <span className="font-semibold opacity-80">({expiryText})</span>}
-                        </Badge>
+                        isPosted ? (
+                          <Badge variant="outline" className="px-3 py-1 text-xs font-bold text-rose-500 border-rose-500/30 bg-rose-500/10 flex items-center gap-1.5 rounded-full shrink-0">
+                            <Icon name="front_hand" size={13} />
+                            <span>Need help</span>
+                            {expiryText && <span className="font-semibold opacity-80">({expiryText})</span>}
+                          </Badge>
+                        ) : (
+                          gig.hasOffered ? (
+                            <Badge variant="secondary" className="px-3 py-1 bg-amber-500/10 text-amber-600 border-amber-500/20 font-bold flex items-center gap-1 rounded-full shrink-0 text-xs">
+                              ✋ Help Offered
+                            </Badge>
+                          ) : (
+                            <Button size="sm" className="rounded-full px-3.5 h-8 text-xs font-bold shadow-sm" onClick={() => offerHelp(gig)}>
+                              <Icon name="front_hand" size={14} className="mr-1" /> Help
+                            </Button>
+                          )
+                        )
                       ) : (
                         <Badge variant="outline" className={`capitalize shrink-0 ${statusTone[gig.status] || ''}`}>
                           {gig.status === 'accepted' ? 'Help Accepted' : 'Completed'}
@@ -399,21 +411,7 @@ export default function GigBoardPage({ adminUid, currentUser, addToast }) {
                   )}
 
                   {/* Action Buttons & Footer Bottom Row */}
-                  <div className="mt-auto pt-3 flex flex-col gap-2.5 border-t border-border/40">
-                    {!isPosted && gig.status === 'open' && (
-                      <div>
-                        {gig.hasOffered ? (
-                          <Badge variant="secondary" className="px-3 py-1 bg-amber-500/10 text-amber-600 border-amber-500/20">
-                            ✋ Help Offered
-                          </Badge>
-                        ) : (
-                          <Button size="sm" className="rounded-full px-4" onClick={() => offerHelp(gig)}>
-                            <Icon name="front_hand" size={14} className="mr-1.5" /> Help
-                          </Button>
-                        )}
-                      </div>
-                    )}
-
+                  <div className="mt-auto pt-2 flex flex-col gap-2 border-t border-border/40">
                     {(isPosted || (gig.helper && gig.helper.id === myEmpId) || isAdmin) && isAccepted && (
                       <div>
                         <Button size="sm" variant="outline" className="rounded-full text-emerald-600 border-emerald-500/30 hover:bg-emerald-500/10" onClick={() => markComplete(gig)}>
