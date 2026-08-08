@@ -61,6 +61,12 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
           const trendRes = await performanceApi.getTrends({ employeeId: currentUserId })
           setTrends(trendRes.scores || [])
         }
+        try {
+          const topRes = await performanceApi.getTopPerformers({ month })
+          setScores(topRes.topPerformers || [])
+        } catch (e) {
+          console.error("Failed to fetch top performers", e)
+        }
       }
     } catch (e) {
       addToast(e.message, 'error')
@@ -104,8 +110,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
     }
   }
 
-  const avg = scores.length ? Math.round(scores.reduce((a, s) => a + (s.totalScore || s.score || 0), 0) / scores.length) : 0
-  const top = scores.length ? [...scores].sort((a, b) => (b.totalScore || b.score || 0) - (a.totalScore || a.score || 0))[0] : null
+  const topPerformers = scores.length ? [...scores].sort((a, b) => (b.totalScore || b.score || 0) - (a.totalScore || a.score || 0)).slice(0, 3) : []
 
   return (
     <div className="animate-fade-in flex flex-col gap-5 max-w-[1200px] mx-auto w-full">
@@ -218,20 +223,20 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
             <Icon name="military_tech" size={16} className="text-amber-500" />
             <span>Performance Grade Scale</span>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-            <div className="flex items-center justify-between p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs">
+          <div className="grid grid-cols-1 min-[500px]:grid-cols-2 lg:grid-cols-4 gap-2.5">
+            <div className="flex flex-wrap items-center justify-between gap-1 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs">
               <span className="font-bold text-emerald-600">Grade A</span>
               <span className="font-bold text-emerald-700 tabular-nums">85 – 100 pts</span>
             </div>
-            <div className="flex items-center justify-between p-2 rounded-xl bg-sky-500/10 border border-sky-500/20 text-xs">
+            <div className="flex flex-wrap items-center justify-between gap-1 p-3 rounded-xl bg-sky-500/10 border border-sky-500/20 text-xs">
               <span className="font-bold text-sky-600">Grade B</span>
               <span className="font-bold text-sky-700 tabular-nums">70 – 84 pts</span>
             </div>
-            <div className="flex items-center justify-between p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs">
+            <div className="flex flex-wrap items-center justify-between gap-1 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs">
               <span className="font-bold text-amber-600">Grade C</span>
               <span className="font-bold text-amber-700 tabular-nums">50 – 69 pts</span>
             </div>
-            <div className="flex items-center justify-between p-2 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs">
+            <div className="flex flex-wrap items-center justify-between gap-1 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs">
               <span className="font-bold text-rose-600">Grade D</span>
               <span className="font-bold text-rose-700 tabular-nums">0 – 49 pts</span>
             </div>
@@ -316,6 +321,31 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
                   </CardContent>
                 </Card>
               )}
+
+              {/* Top Performers for Employee View */}
+              {topPerformers.length > 0 && (
+                <div className="grid grid-cols-1 gap-4 mt-2">
+                  <Card className="border border-border/80 shadow-sm rounded-2xl">
+                    <CardContent className="p-5">
+                      <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Top Performers — {month}</div>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        {topPerformers.map((p, i) => (
+                          <div key={p.employeeId || p.id} className="flex items-center justify-between p-3 rounded-xl bg-muted/30 border border-border/60">
+                            <div className="flex items-center gap-2.5">
+                              <div className="size-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[11px] font-bold">#{i + 1}</div>
+                              <span className="text-sm font-bold text-foreground truncate max-w-[120px]" title={p.employeeName}>{p.employeeName}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-bold text-muted-foreground tabular-nums">{p.totalScore || p.score} pts</span>
+                              <Badge variant="outline" className={`px-1.5 py-0 h-5 text-[10px] ${gradeTone[p.grade] || ''}`}>{p.grade}</Badge>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
             </>
           )}
         </>
@@ -324,18 +354,28 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
       {/* --- ADMIN VIEW --- */}
       {isAdmin && (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4">
             <Card className="border border-border/80 shadow-sm rounded-2xl">
               <CardContent className="p-5">
-                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Company Average Score</div>
-                <div className="text-3xl font-black tabular-nums text-foreground mt-1">{loading ? '—' : avg} <span className="text-sm font-normal text-muted-foreground">pts</span></div>
-              </CardContent>
-            </Card>
-            <Card className="border border-border/80 shadow-sm rounded-2xl">
-              <CardContent className="p-5">
-                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Top Performer</div>
-                <div className="text-xl font-bold text-foreground mt-1">{top ? top.employeeName : '—'}</div>
-                <div className="text-xs text-muted-foreground">{top ? `${top.totalScore || top.score} pts (Grade ${top.grade})` : ''}</div>
+                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Top Performers</div>
+                {topPerformers.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {topPerformers.map((p, i) => (
+                      <div key={p.employeeId || p.id} className="flex items-center justify-between p-3 rounded-xl bg-muted/30 border border-border/60">
+                        <div className="flex items-center gap-2.5">
+                          <div className="size-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[11px] font-bold">#{i + 1}</div>
+                          <span className="text-sm font-bold text-foreground truncate max-w-[120px]" title={p.employeeName}>{p.employeeName}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-muted-foreground tabular-nums">{p.totalScore || p.score} pts</span>
+                          <Badge variant="outline" className={`px-1.5 py-0 h-5 text-[10px] ${gradeTone[p.grade] || ''}`}>{p.grade}</Badge>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-sm text-muted-foreground">—</div>
+                )}
               </CardContent>
             </Card>
           </div>

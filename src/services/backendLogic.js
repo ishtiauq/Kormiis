@@ -786,6 +786,23 @@ export const performanceApiLocal = {
     const mine = scores.filter((s) => s.yearMonth === ym && s.employeeId === myEmployeeId)[0] || null;
     return { month: ym, score: mine };
   }),
+  getTopPerformers: onCall(async (request) => {
+    const uid = assertAuth(request);
+    const companyId = await getCompanyIdForUid(uid);
+    if (!companyId) throw new Error('failed-precondition: Account is not linked to a company.');
+    const ym = (request.data && request.data.month) || lastMonthKey();
+    const scores = (await getSnapshot(companyId, 'performance_scores', [])) || [];
+    const employees = (await getSnapshot(companyId, 'employees', [])) || [];
+    const empMap = new Map(employees.map((e) => [e.id, e]));
+    
+    const topList = scores.filter((s) => s.yearMonth === ym).sort((a, b) => b.totalScore - a.totalScore).slice(0, 3).map((s) => ({
+      employeeId: s.employeeId, 
+      employeeName: (empMap.get(s.employeeId) || {}).name || s.employeeId, 
+      totalScore: s.totalScore, 
+      grade: s.grade,
+    }));
+    return { month: ym, topPerformers: topList };
+  }),
   getTrends: onCall(async (request) => {
     const { companyId } = await requireAdmin(request);
     const employeeId = request.data && request.data.employeeId;
