@@ -431,6 +431,11 @@ html:not(.fonts-loaded) .msr {
   opacity: 0;
 }
 
+/* Preserve Orange Color on Dark Mode Logo */
+.logo-dark-mode {
+  filter: invert(1) hue-rotate(180deg) !important;
+}
+
 /* Bottom Nav Mobile Icon States */
 button[role="tab"] .msr {
   font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0 !important;

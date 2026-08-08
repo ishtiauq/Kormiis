@@ -16,6 +16,7 @@ const gradeTone = {
 
 export default function PerformancePage({ adminUid, currentUser, addToast }) {
   const isAdmin = currentUser?.role === 'Admin' || currentUser?.role === 'HR'
+  const currentUserId = currentUser?.employeeId || currentUser?.id || currentUser?.uid
   const [month, setMonth] = useState(isAdmin ? lastMonthKey() : currentMonthKey())
   const [scores, setScores] = useState([])
   const [myScore, setMyScore] = useState(null)
@@ -32,9 +33,8 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
       } else {
         const myScoreRes = await performanceApi.getMyScore({ month })
         setMyScore(myScoreRes.score || null)
-        const myEmpId = currentUser?.employeeId || currentUser?.id
-        if (myEmpId) {
-          const trendRes = await performanceApi.getTrends({ employeeId: myEmpId })
+        if (currentUserId) {
+          const trendRes = await performanceApi.getTrends({ employeeId: currentUserId })
           setTrends(trendRes.scores || [])
         }
       }
@@ -43,7 +43,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
     } finally {
       setLoading(false)
     }
-  }, [isAdmin, month, currentUser, addToast])
+  }, [isAdmin, month, currentUserId, addToast])
 
   useEffect(() => { load() }, [load])
 

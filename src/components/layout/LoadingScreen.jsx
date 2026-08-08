@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import kormiisLogo from '../../Assets/Kormiis Logo Final.svg'
+import kormiisLogoDark from '../../Assets/Kormiis Logo Dark.svg'
 
 export default function LoadingScreen({ message = "Preparing workspace...", isDarkMode = false, duration = 1200 }) {
   const [progress, setProgress] = useState(0)
@@ -58,9 +59,9 @@ export default function LoadingScreen({ message = "Preparing workspace...", isDa
           className="relative flex items-center justify-center p-4"
         >
           <img
-            src={kormiisLogo}
+            src={isDarkMode ? kormiisLogoDark : kormiisLogo}
             alt="Kormiis Logo"
-            className={`h-12 sm:h-16 w-auto object-contain drop-shadow-lg ${isDarkMode ? 'invert' : ''}`}
+            className="h-12 sm:h-16 w-auto object-contain drop-shadow-lg"
           />
         </motion.div>
 

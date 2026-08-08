@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import { motion, useScroll, useTransform, useSpring, useMotionValueEvent, useMotionValue, useMotionTemplate } from 'framer-motion'
 import Icon from "@/components/ui/Icon.jsx"
 import kormiisLogo from '../Assets/Kormiis Logo Final.svg'
+import kormiisLogoDark from '../Assets/Kormiis Logo Dark.svg'
 import kormiisMembershipLogo from '../Assets/Kormiis Logo Membership.svg'
 import heroCharacters from '../Assets/hero-characters.png'
 import { loginWithGoogle, getGoogleRedirectResult, loginWithEmail, registerWithEmail, checkAndCreateUserDoc, getCompanyForUser, setupRecaptcha, requestPhoneOtp, verifyPhoneOtp } from '../services/auth.js'
@@ -341,9 +342,9 @@ function FooterSection({ themeMode, logoSrc }) {
       {/* Top Logo Section - Full Screen Width */}
       <div className="w-full flex justify-center pb-8 border-b border-border mb-8 px-[10px]">
         <img 
-          src={logoSrc} 
+          src={themeMode === 'dark' ? kormiisLogoDark : logoSrc} 
           alt="Kormiis Logo" 
-          className={`block w-full h-auto object-contain ${themeMode === 'dark' ? 'invert' : ''}`} 
+          className="block w-full h-auto object-contain" 
         />
       </div>
 
@@ -681,9 +682,9 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
             className="flex items-center gap-3"
           >
             <img 
-              src={kormiisLogo} 
+              src={themeMode === 'dark' ? kormiisLogoDark : kormiisLogo} 
               alt="Kormiis Logo" 
-              className={`block h-7 sm:h-9 w-auto max-w-[130px] sm:max-w-[160px] object-contain shrink-0 drop-shadow-sm ${themeMode === 'dark' ? 'invert' : ''}`} 
+              className="block h-7 sm:h-9 w-auto max-w-[130px] sm:max-w-[160px] object-contain shrink-0 drop-shadow-sm" 
             />
           </motion.div>
           <motion.div 
