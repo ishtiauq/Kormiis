@@ -99,11 +99,9 @@ export default function GigBoardPage({ adminUid, currentUser, employees, addToas
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient m-0">
           <Icon name="workspaces" size={20} className="text-foreground" /> Gig Marketplace
         </h1>
-        {isAdmin && (
-          <Button onClick={() => setCreateOpen(true)}>
-            <Icon name="add" size={16} className="mr-1.5" /> Post a gig
-          </Button>
-        )}
+        <Button onClick={() => setCreateOpen(true)}>
+          <Icon name="add" size={16} className="mr-1.5" /> Post a gig
+        </Button>
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3">
