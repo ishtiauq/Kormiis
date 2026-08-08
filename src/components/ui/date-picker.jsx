@@ -22,8 +22,8 @@ export function DatePicker({ label, value, onChange, className, required, ...pro
       isRequired={required}
       {...props}
     >
-      {label && <label className="text-sm font-semibold text-muted-foreground">{label}</label>}
-      <Group className="flex h-10 w-full items-center rounded-md border border-input bg-background/50 text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 transition-all cursor-text">
+      {label && <label className="text-xs font-semibold text-foreground">{label}</label>}
+      <Group className="flex h-10 w-full items-center rounded-xl border border-input bg-background text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 transition-all cursor-text">
         <DateInput className="flex flex-1 items-center px-3 gap-0.5 outline-none bg-transparent h-full">
           {segment => (
             <DateSegment segment={segment} className="px-0.5 tabular-nums focus:bg-primary focus:text-primary-foreground rounded-sm outline-none caret-transparent" />
@@ -33,8 +33,8 @@ export function DatePicker({ label, value, onChange, className, required, ...pro
           <Icon name="calendar_month" size={16} />
         </AriaButton>
       </Group>
-      <AriaPopover className="z-50 animate-in fade-in-0 zoom-in-95 origin-top" offset={8}>
-        <Dialog className="outline-none flex flex-col rounded-2xl p-4 overflow-hidden">
+      <AriaPopover className="z-50 animate-in fade-in-0 zoom-in-95 origin-top rounded-2xl border border-border bg-popover text-popover-foreground shadow-2xl p-0 overflow-hidden" offset={8}>
+        <Dialog className="outline-none flex flex-col rounded-2xl p-4 bg-popover text-popover-foreground border-none">
           <Calendar />
         </Dialog>
       </AriaPopover>

@@ -4,7 +4,10 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog"
 import { Input } from "@/components/ui/input"
+import { DatePicker } from "@/components/ui/date-picker.jsx"
+import { GlassTimePicker } from "../attendance/GlassTimePicker.jsx"
 import { gigApi } from '../../services/hr.js'
 
 const statusTone = {
@@ -29,6 +32,36 @@ function formatExpiry(isoString) {
   return `Destroys in ${diffMins}m`
 }
 
+function isoTo12HrTime(isoOrDateTimeStr) {
+  if (!isoOrDateTimeStr) return '09:00 AM'
+  const dt = new Date(isoOrDateTimeStr)
+  if (isNaN(dt.getTime())) return '09:00 AM'
+  let hours = dt.getHours()
+  const period = hours >= 12 ? 'PM' : 'AM'
+  hours = hours % 12
+  if (hours === 0) hours = 12
+  const mins = String(dt.getMinutes()).padStart(2, '0')
+  return `${String(hours).padStart(2, '0')}:${mins} ${period}`
+}
+
+function updateIsoWith12HrTime(isoOrDateTimeStr, time12HrStr) {
+  const dt = isoOrDateTimeStr ? new Date(isoOrDateTimeStr) : new Date(Date.now() + 24 * 60 * 60 * 1000)
+  const datePart = !isNaN(dt.getTime())
+    ? `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`
+    : new Date().toISOString().slice(0, 10)
+
+  if (!time12HrStr) return `${datePart}T09:00`
+  const [tPart, period] = time12HrStr.split(' ')
+  if (!tPart) return `${datePart}T09:00`
+  const [hStr, mStr] = tPart.split(':')
+  let hours = parseInt(hStr || '9', 10)
+  if (period === 'PM' && hours < 12) hours += 12
+  if (period === 'AM' && hours === 12) hours = 0
+  const formattedH = String(hours).padStart(2, '0')
+  const formattedM = String(mStr || '00').padStart(2, '0')
+  return `${datePart}T${formattedH}:${formattedM}`
+}
+
 export default function GigBoardPage({ adminUid, currentUser, addToast }) {
   const isAdmin = currentUser?.role === 'Admin' || currentUser?.role === 'HR'
   const [tab, setTab] = useState('browse')
@@ -36,9 +69,16 @@ export default function GigBoardPage({ adminUid, currentUser, addToast }) {
   const [myEmpId, setMyEmpId] = useState(null)
   const [loading, setLoading] = useState(false)
 
-  // Dialog State (Used for both Create and Edit)
+  // Dialog State (Used for Create & Edit)
   const [modalOpen, setModalOpen] = useState(false)
   const [editingGigId, setEditingGigId] = useState(null)
+
+  // Global GlassTimePicker Popover Modal State
+  const [timePickerOpen, setTimePickerOpen] = useState(false)
+
+  // Delete Alert State (App Native Shadcn Alert)
+  const [deleteTargetId, setDeleteTargetId] = useState(null)
+
   const [form, setForm] = useState({
     title: '',
     description: '',
@@ -87,39 +127,73 @@ export default function GigBoardPage({ adminUid, currentUser, addToast }) {
       addToast('Title is required.', 'error')
       return
     }
-    try {
-      if (editingGigId) {
-        await gigApi.updateGig({
-          gigId: editingGigId,
-          title: form.title.trim(),
-          description: form.description.trim(),
-          expiresAt: form.expiresAt ? new Date(form.expiresAt).toISOString() : null,
-        })
-        addToast('Help request updated.', 'success')
-      } else {
-        await gigApi.createGig({
-          title: form.title.trim(),
-          description: form.description.trim(),
-          expiresAt: form.expiresAt ? new Date(form.expiresAt).toISOString() : null,
-        })
-        addToast('Help request posted successfully.', 'success')
-      }
+
+    const title = form.title.trim()
+    const description = form.description.trim()
+    const expiresAt = form.expiresAt ? new Date(form.expiresAt).toISOString() : null
+
+    // Immediate UI responsiveness
+    let posterName = currentUser?.name || currentUser?.displayName || 'You'
+    let posterAvatar = currentUser?.avatar || currentUser?.photoURL || `https://i.pravatar.cc/150?u=${myEmpId || 'me'}`
+
+    if (editingGigId) {
+      // Instant Optimistic Edit
+      const targetId = editingGigId
+      setGigs((prev) =>
+        prev.map((g) =>
+          g.id === targetId
+            ? { ...g, title, description, expiresAt: expiresAt || g.expiresAt }
+            : g
+        )
+      )
       setModalOpen(false)
-      load()
-    } catch (e) {
-      addToast(e.message, 'error')
+      addToast('Help request updated.', 'success')
+
+      gigApi.updateGig({ gigId: targetId, title, description, expiresAt })
+        .catch((e) => {
+          addToast(e.message || 'Failed to save changes.', 'error')
+          load()
+        })
+    } else {
+      // Instant Optimistic Create
+      const tempId = `gig-temp-${Date.now()}`
+      const newGig = {
+        id: tempId,
+        title,
+        description,
+        postedBy: myEmpId || 'me',
+        postedByName: posterName,
+        posterAvatar,
+        expiresAt: expiresAt || new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        status: 'open',
+        helper: null,
+        offers: [],
+        createdAt: new Date().toISOString(),
+        completedAt: null,
+      }
+
+      setGigs((prev) => [newGig, ...prev])
+      setModalOpen(false)
+      addToast('Help request posted successfully.', 'success')
+
+      gigApi.createGig({ title, description, expiresAt })
+        .then(() => load())
+        .catch((e) => {
+          setGigs((prev) => prev.filter((g) => g.id !== tempId))
+          addToast(e.message || 'Failed to post request.', 'error')
+        })
     }
   }
 
-  const deleteGig = async (gigId) => {
-    if (!window.confirm('Are you sure you want to delete this help request?')) return
-    try {
-      await gigApi.deleteGig({ gigId })
-      addToast('Help request deleted.', 'success')
+  const confirmDeleteGig = async (gigId) => {
+    // Instant Optimistic Delete
+    setGigs((prev) => prev.filter((g) => g.id !== gigId))
+    addToast('Help request deleted.', 'success')
+
+    gigApi.deleteGig({ gigId }).catch((e) => {
+      addToast(e.message || 'Failed to delete request.', 'error')
       load()
-    } catch (e) {
-      addToast(e.message, 'error')
-    }
+    })
   }
 
   const offerHelp = async (gig) => {
@@ -164,6 +238,20 @@ export default function GigBoardPage({ adminUid, currentUser, addToast }) {
       <Icon name={icon} size={15} /> {label}
     </button>
   )
+
+  const dateStr = form.expiresAt ? form.expiresAt.slice(0, 10) : new Date().toISOString().slice(0, 10)
+  const time12Str = isoTo12HrTime(form.expiresAt)
+
+  const handleDateChange = (newDateVal) => {
+    if (!newDateVal) return
+    const timePart = form.expiresAt ? form.expiresAt.slice(11, 16) : '09:00'
+    setForm({ ...form, expiresAt: `${newDateVal}T${timePart}` })
+  }
+
+  const handleTimeChange = (new12HrStr) => {
+    const updatedIso = updateIsoWith12HrTime(form.expiresAt, new12HrStr)
+    setForm({ ...form, expiresAt: updatedIso })
+  }
 
   return (
     <div className="animate-fade-in flex flex-col gap-5 max-w-[1200px] mx-auto w-full">
@@ -222,7 +310,7 @@ export default function GigBoardPage({ adminUid, currentUser, addToast }) {
                             <Icon name="edit" size={15} />
                           </button>
                           <button
-                            onClick={() => deleteGig(gig.id)}
+                            onClick={() => setDeleteTargetId(gig.id)}
                             title="Delete Request"
                             className="p-1 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
                           >
@@ -394,18 +482,35 @@ export default function GigBoardPage({ adminUid, currentUser, addToast }) {
               />
             </div>
 
-            {/* Expiry Time */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-foreground">Expiry Time</label>
-              <Input
-                type="datetime-local"
-                value={form.expiresAt}
-                onChange={(e) => setForm({ ...form, expiresAt: e.target.value })}
-                className="w-full text-sm rounded-xl border-input bg-background"
-              />
-              <p className="text-[11px] text-muted-foreground leading-relaxed mt-0.5">
-                If no colleague's help is accepted before this time, the request will be automatically deleted.
-              </p>
+            {/* Global Date & Time Pickers Container */}
+            <div className="flex flex-col gap-3 rounded-2xl border border-border/80 bg-muted/20 p-4">
+              {/* Global DatePicker */}
+              <div className="flex flex-col gap-1">
+                <DatePicker
+                  label="Expiry Date"
+                  value={dateStr}
+                  onChange={(e) => handleDateChange(e.target.value)}
+                />
+              </div>
+
+              {/* Global GlassTimePicker Trigger Button */}
+              <div className="flex flex-col gap-1.5 pt-1">
+                <label className="text-xs font-semibold text-foreground">Expiry Time</label>
+                <button
+                  type="button"
+                  onClick={() => setTimePickerOpen(true)}
+                  className="flex h-10 w-full items-center justify-between rounded-xl border border-input bg-background px-3 text-sm font-semibold text-foreground hover:bg-muted/40 transition-all cursor-pointer shadow-xs"
+                >
+                  <span className="flex items-center gap-2">
+                    <Icon name="schedule" size={16} className="text-primary" />
+                    {time12Str}
+                  </span>
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground font-normal">
+                    <span>Change Time</span>
+                    <Icon name="unfold_more" size={16} />
+                  </div>
+                </button>
+              </div>
             </div>
 
             {/* Modal Actions */}
@@ -421,6 +526,43 @@ export default function GigBoardPage({ adminUid, currentUser, addToast }) {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Global GlassTimePicker Modal */}
+      <GlassTimePicker
+        isOpen={timePickerOpen}
+        setIsOpen={setTimePickerOpen}
+        time={time12Str}
+        onTimeChange={handleTimeChange}
+        label="Select Expiry Time"
+      />
+
+      {/* App Native Shadcn AlertDialog for Delete Confirmation */}
+      <AlertDialog open={!!deleteTargetId} onOpenChange={(open) => !open && setDeleteTargetId(null)}>
+        <AlertDialogContent className="rounded-2xl border border-border bg-card text-card-foreground p-6">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-lg font-bold flex items-center gap-2 text-destructive">
+              <Icon name="delete" size={20} /> Delete Help Request?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-sm text-muted-foreground">
+              Are you sure you want to delete this help request? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2 pt-2">
+            <AlertDialogCancel className="rounded-full" onClick={() => setDeleteTargetId(null)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (deleteTargetId) confirmDeleteGig(deleteTargetId)
+                setDeleteTargetId(null)
+              }}
+            >
+              Delete Request
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

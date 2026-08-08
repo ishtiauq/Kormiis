@@ -103,10 +103,18 @@ async function updateSnapshot(companyId, table, updater, fallback = null) {
   return next;
 }
 
+const userCache = new Map();
 async function getUser(uid) {
   if (!uid) return null;
-  const snap = await getDoc(doc(db, `users/${uid}`));
-  return snap.exists() ? snap.data() : null;
+  if (userCache.has(uid)) return userCache.get(uid);
+  try {
+    const snap = await getDoc(doc(db, `users/${uid}`));
+    const data = snap.exists() ? snap.data() : null;
+    if (data) userCache.set(uid, data);
+    return data;
+  } catch(e) {
+    return null;
+  }
 }
 
 async function getCompanyIdForUid(uid) {

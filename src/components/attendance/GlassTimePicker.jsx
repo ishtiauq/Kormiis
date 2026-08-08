@@ -55,7 +55,8 @@ const Wheel = ({ items, value, onChange, label }) => {
         {items.map((item) => (
           <div 
             key={item} 
-            className={`h-[44px] flex items-center justify-center snap-center text-xl font-black tabular-nums transition-all ${value === item ? 'text-primary scale-110' : 'text-muted-foreground/40 scale-90'}`}
+            className={`h-[44px] flex items-center justify-center snap-center text-xl font-black font-sans tabular-nums transition-all ${value === item ? 'text-primary scale-110' : 'text-muted-foreground/40 scale-90'}`}
+            style={{ fontFamily: "'Inter', sans-serif" }}
           >
             {item}
           </div>
@@ -92,28 +93,28 @@ export function GlassTimePicker({ time, onTimeChange, isOpen, setIsOpen, label }
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="max-w-[340px] bg-popover border-border shadow-2xl rounded-3xl p-6 outline-none">
+      <DialogContent className="max-w-[360px] bg-card text-card-foreground border border-border/80 shadow-xl rounded-2xl p-6 outline-none">
         <DialogTitle className="text-center text-lg font-bold flex items-center justify-center gap-2 mb-4 headline-gradient">
-          <Icon name="schedule" size={18} className="text-primary" /> {label || 'Select Time'}
+          <Icon name="schedule" size={20} className="text-primary" /> {label || 'Select Time'}
         </DialogTitle>
 
-        <div className="bg-muted/10 border border-border/50 rounded-2xl p-4 mb-4 flex gap-2">
+        <div className="bg-muted/20 border border-border/80 rounded-2xl p-4 mb-4 flex gap-2 shadow-inner">
           <Wheel items={hoursList} value={h} onChange={setH} label="Hour" />
-          <div className="text-2xl font-black text-muted-foreground/30 flex items-center justify-center mt-6 mb-0">:</div>
+          <div className="text-2xl font-black text-muted-foreground/40 flex items-center justify-center mt-6 mb-0">:</div>
           <Wheel items={minutesList} value={m} onChange={setM} label="Minute" />
           <div className="w-px bg-border/50 mt-6 mx-2" />
           <Wheel items={ampmList} value={ampm} onChange={setAmpm} label="Period" />
         </div>
         
         {/* Result display */}
-        <div className="flex justify-center items-center gap-2 mb-6">
-          <span className="text-3xl font-black font-mono tracking-tighter">{h}:{m}</span>
+        <div className="flex justify-center items-center gap-2.5 mb-5 p-2 rounded-xl bg-muted/20 border border-border/40" style={{ fontFamily: "'Inter', sans-serif" }}>
+          <span className="text-3xl font-black font-sans tracking-tight text-foreground">{h}:{m}</span>
           <span className="text-xl font-bold text-primary">{ampm}</span>
         </div>
 
-        <div className="flex gap-3">
-          <Button variant="ghost" className="flex-1 rounded-full bg-muted/50 hover:bg-muted" onClick={() => setIsOpen(false)}>Cancel</Button>
-          <Button className="flex-1 rounded-full shadow-md font-bold" onClick={handleSave}>Confirm</Button>
+        <div className="flex items-center gap-3">
+          <Button variant="outline" className="flex-1 rounded-full" onClick={() => setIsOpen(false)}>Cancel</Button>
+          <Button className="flex-1 rounded-full shadow-sm font-bold" onClick={handleSave}>Confirm</Button>
         </div>
       </DialogContent>
     </Dialog>
