@@ -338,27 +338,21 @@ export const gigApiLocal = {
 
     const data = request.data || {};
     const title = String(data.title || '').trim();
-    const requiredSkill = String(data.requiredSkill || '').trim();
-    if (!title || !requiredSkill) throw new Error('invalid-argument: title and requiredSkill are required.');
-    const estimatedHours = Math.max(0, Number(data.estimatedHours) || 0);
+    if (!title) throw new Error('invalid-argument: Title is required.');
     const description = String(data.description || '').trim();
+    
+    // Default destroying time: 24 hours if not provided
+    const expiresAt = data.expiresAt ? new Date(data.expiresAt).toISOString() : new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
     const poster = await getUser(uid);
     const posterEmployeeId = (poster && poster.employeeId) || uid;
 
     const gig = {
       id: `gig-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-      title, description, postedBy: posterEmployeeId, postedByUid: uid, requiredSkill, estimatedHours,
-      status: 'open', assignedTo: null, createdAt: timestamp(), completedAt: null, notifiedTo: [],
+      title, description, postedBy: posterEmployeeId, postedByUid: uid,
+      expiresAt,
+      status: 'open', helper: null, offers: [], createdAt: timestamp(), completedAt: null,
     };
-
-    const skills = await getSkillsForCompany(companyId);
-    const want = normalizeSkill(requiredSkill);
-    const matches = Object.keys(skills).filter((empId) => (skills[empId] || []).some((s) => normalizeSkill(s) === want));
-    gig.notifiedTo = matches;
-    for (const empId of matches) {
-      await pushNotification(companyId, empId, `A new gig "${title}" matches your skill (${requiredSkill}).`, { table: 'gigs', id: gig.id });
-    }
 
     await updateSnapshot(companyId, 'gigs', async (current) => { const list = Array.isArray(current) ? current : []; return [gig, ...list]; }, []);
     return { gig };
@@ -371,30 +365,42 @@ export const gigApiLocal = {
     const me = await getUser(uid);
     const myEmployeeId = (me && me.employeeId) || uid;
 
-    const gigs = (await getSnapshot(companyId, 'gigs', [])) || [];
-    const applications = (await getSnapshot(companyId, 'gig_applications', [])) || [];
+    let gigs = (await getSnapshot(companyId, 'gigs', [])) || [];
     const employees = (await getSnapshot(companyId, 'employees', [])) || [];
     const empMap = new Map(employees.map((e) => [e.id, e]));
-    const skills = await getSkillsForCompany(companyId);
-    const mySkills = (skills[myEmployeeId] || []).map(normalizeSkill);
 
-    const decorate = (g) => ({
-      id: g.id, title: g.title, description: g.description || '', postedBy: g.postedBy,
-      postedByName: (empMap.get(g.postedBy) || {}).name || g.postedBy, requiredSkill: g.requiredSkill,
-      estimatedHours: g.estimatedHours || 0, status: g.status, assignedTo: g.assignedTo,
-      assignedToName: g.assignedTo ? (empMap.get(g.assignedTo) || {}).name || g.assignedTo : null,
-      matchesMySkill: mySkills.includes(normalizeSkill(g.requiredSkill)),
-      applied: applications.some((a) => a.gigId === g.id && a.applicantId === myEmployeeId && a.status !== 'rejected'),
-      createdAt: iso(g.createdAt), completedAt: iso(g.completedAt),
+    const now = new Date();
+    // Filter out unaccepted expired gigs (Auto-delete)
+    gigs = gigs.filter((g) => {
+      if (g.status === 'open' && g.expiresAt && new Date(g.expiresAt) <= now) {
+        return false; // Auto-deleted on expiry if not accepted
+      }
+      return true;
     });
+
+    const decorate = (g) => {
+      const offers = Array.isArray(g.offers) ? g.offers : [];
+      const hasOffered = offers.some((o) => o.id === myEmployeeId);
+      const posterName = (empMap.get(g.postedBy) || {}).name || g.postedByName || g.postedBy;
+      const helperName = g.helper ? ((empMap.get(g.helper.id) || {}).name || g.helper.name) : null;
+      return {
+        id: g.id, title: g.title, description: g.description || '',
+        postedBy: g.postedBy, postedByName: posterName,
+        expiresAt: g.expiresAt, status: g.status,
+        helper: g.helper ? { id: g.helper.id, name: helperName } : null,
+        offers,
+        hasOffered,
+        createdAt: iso(g.createdAt), completedAt: iso(g.completedAt),
+      };
+    };
 
     const open = gigs.filter((g) => g.status === 'open').map(decorate);
     const myPosted = gigs.filter((g) => g.postedBy === myEmployeeId).map(decorate);
-    const myAssigned = gigs.filter((g) => g.assignedTo === myEmployeeId).map(decorate);
+    const myAssigned = gigs.filter((g) => g.helper && g.helper.id === myEmployeeId).map(decorate);
 
     return { open, myPosted, myAssigned, myEmployeeId };
   }),
-  applyForGig: onCall(async (request) => {
+  offerHelp: onCall(async (request) => {
     const uid = assertAuth(request);
     const companyId = await getCompanyIdForUid(uid);
     if (!companyId) throw new Error('failed-precondition: Account is not linked to a company.');
@@ -403,53 +409,52 @@ export const gigApiLocal = {
 
     const me = await getUser(uid);
     const myEmployeeId = (me && me.employeeId) || uid;
+    const myName = (me && me.name) || 'A colleague';
 
     const gigs = (await getSnapshot(companyId, 'gigs', [])) || [];
     const gig = gigs.find((g) => g.id === gigId);
     if (!gig) throw new Error('not-found: Gig not found.');
-    if (gig.status !== 'open') throw new Error('failed-precondition: This gig is no longer open.');
-    if (gig.postedBy === myEmployeeId) throw new Error('failed-precondition: You cannot apply to your own gig.');
+    if (gig.status !== 'open') throw new Error('failed-precondition: This help request is no longer open.');
+    if (gig.postedBy === myEmployeeId) throw new Error('failed-precondition: You cannot offer help to your own request.');
 
-    const application = {
-      id: `app-${Date.now()}-${Math.floor(Math.random() * 1000)}`, gigId, applicantId: myEmployeeId, applicantUid: uid, status: 'pending', appliedAt: timestamp(),
-    };
+    const currentOffers = Array.isArray(gig.offers) ? gig.offers : [];
+    if (!currentOffers.some((o) => o.id === myEmployeeId)) {
+      currentOffers.push({ id: myEmployeeId, name: myName, offeredAt: new Date().toISOString() });
+    }
 
-    await updateSnapshot(companyId, 'gig_applications', async (current) => {
-      const list = Array.isArray(current) ? current : [];
-      const dup = list.find((a) => a.gigId === gigId && a.applicantId === myEmployeeId && a.status === 'pending');
-      if (dup) return list;
-      return [application, ...list];
-    }, []);
-
-    await pushNotification(companyId, gig.postedBy, `An employee applied to your gig "${gig.title}".`, { table: 'gigs', id: gigId });
-    return { application };
+    await setSnapshot(companyId, 'gigs', gigs.map((g) => g.id === gigId ? { ...g, offers: currentOffers } : g));
+    await pushNotification(companyId, gig.postedBy, `${myName} offered to help with "${gig.title}".`, { table: 'gigs', id: gigId });
+    return { ok: true };
   }),
-  assignGig: onCall(async (request) => {
+  acceptHelp: onCall(async (request) => {
     const uid = assertAuth(request);
     const companyId = await getCompanyIdForUid(uid);
     if (!companyId) throw new Error('failed-precondition: Account is not linked to a company.');
 
-    const { gigId, applicantId } = request.data || {};
-    if (!gigId || !applicantId) throw new Error('invalid-argument: gigId and applicantId are required.');
+    const { gigId, helperId } = request.data || {};
+    if (!gigId || !helperId) throw new Error('invalid-argument: gigId and helperId are required.');
 
-    const isHr = await requireAdmin(request).then(() => true).catch(() => false);
     const me = await getUser(uid);
     const myEmployeeId = (me && me.employeeId) || uid;
 
     const gigs = (await getSnapshot(companyId, 'gigs', [])) || [];
     const gig = gigs.find((g) => g.id === gigId);
     if (!gig) throw new Error('not-found: Gig not found.');
-    if (!isHr && gig.postedBy !== myEmployeeId) throw new Error('permission-denied: Only the gig poster or an admin can assign.');
-    if (gig.status !== 'open') throw new Error('failed-precondition: Gig is not open.');
+    if (gig.postedBy !== myEmployeeId) throw new Error('permission-denied: Only the poster can accept help.');
 
-    await setSnapshot(companyId, 'gigs', gigs.map((g) => g.id === gigId ? { ...g, status: 'in_progress', assignedTo: applicantId } : g));
-    await updateSnapshot(companyId, 'gig_applications', async (current) => {
-      const list = Array.isArray(current) ? current : [];
-      return list.map((a) => a.gigId === gigId ? { ...a, status: a.applicantId === applicantId ? 'accepted' : 'rejected' } : a);
-    }, []);
+    const employees = (await getSnapshot(companyId, 'employees', [])) || [];
+    const helperEmp = employees.find((e) => e.id === helperId);
+    const helperName = helperEmp?.name || 'Helper';
 
-    await pushNotification(companyId, applicantId, `Your application for "${gig.title}" was accepted.`, { table: 'gigs', id: gigId });
-    return { gig: { ...gig, status: 'in_progress', assignedTo: applicantId } };
+    const updatedGig = {
+      ...gig,
+      status: 'accepted',
+      helper: { id: helperId, name: helperName },
+    };
+
+    await setSnapshot(companyId, 'gigs', gigs.map((g) => g.id === gigId ? updatedGig : g));
+    await pushNotification(companyId, helperId, `Your offer to help with "${gig.title}" was accepted!`, { table: 'gigs', id: gigId });
+    return { gig: updatedGig };
   }),
   completeGig: onCall(async (request) => {
     const uid = assertAuth(request);
@@ -458,25 +463,27 @@ export const gigApiLocal = {
     const gigId = request.data && request.data.gigId;
     if (!gigId) throw new Error('invalid-argument: Missing gigId.');
 
-    const isHr = await requireAdmin(request).then(() => true).catch(() => false);
     const me = await getUser(uid);
     const myEmployeeId = (me && me.employeeId) || uid;
 
     const gigs = (await getSnapshot(companyId, 'gigs', [])) || [];
     const gig = gigs.find((g) => g.id === gigId);
     if (!gig) throw new Error('not-found: Gig not found.');
-    if (gig.status !== 'in_progress') throw new Error('failed-precondition: Only in-progress gigs can be completed.');
-    if (!isHr && gig.assignedTo !== myEmployeeId && gig.postedBy !== myEmployeeId) throw new Error('permission-denied: Only the assignee, poster, or an admin can complete.');
+    if (gig.status !== 'accepted' && gig.status !== 'in_progress') throw new Error('failed-precondition: Only accepted help requests can be completed.');
+    if (gig.postedBy !== myEmployeeId && (!gig.helper || gig.helper.id !== myEmployeeId)) throw new Error('permission-denied: Only poster or accepted helper can complete.');
 
     const completedAt = timestamp();
     await setSnapshot(companyId, 'gigs', gigs.map((g) => g.id === gigId ? { ...g, status: 'completed', completedAt } : g));
-    await updateSnapshot(companyId, 'gig_contributions', async (current) => {
-      const list = Array.isArray(current) ? current : [];
-      return [{ id: `contrib-${Date.now()}-${Math.floor(Math.random() * 1000)}`, employeeId: gig.assignedTo, gigId, completedAt, yearMonth: new Date().toISOString().slice(0, 7) }, ...list];
-    }, []);
+    if (gig.helper) {
+      await updateSnapshot(companyId, 'gig_contributions', async (current) => {
+        const list = Array.isArray(current) ? current : [];
+        return [{ id: `contrib-${Date.now()}-${Math.floor(Math.random() * 1000)}`, employeeId: gig.helper.id, gigId, completedAt, yearMonth: new Date().toISOString().slice(0, 7) }, ...list];
+      }, []);
+    }
 
     return { ok: true };
-  }),
+  })
+};
   getMySkills: onCall(async (request) => {
     const uid = assertAuth(request);
     const companyId = await getCompanyIdForUid(uid);
