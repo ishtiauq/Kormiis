@@ -564,11 +564,12 @@ export const gigApiLocal = {
     const employees = (await getSnapshot(companyId, 'employees', [])) || [];
     const helperEmp = employees.find((e) => e.id === helperId);
     const helperName = helperEmp?.name || 'Helper';
+    const helperAvatar = helperEmp?.avatar || helperEmp?.photoURL || '';
 
     const updatedGig = {
       ...gig,
       status: 'accepted',
-      helper: { id: helperId, name: helperName },
+      helper: { id: helperId, name: helperName, avatar: helperAvatar },
     };
 
     await setSnapshot(companyId, 'gigs', gigs.map((g) => g.id === gigId ? updatedGig : g));

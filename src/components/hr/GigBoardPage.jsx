@@ -211,23 +211,52 @@ export default function GigBoardPage({ adminUid, currentUser, addToast }) {
   }
 
   const offerHelp = async (gig) => {
-    try {
-      await gigApi.offerHelp({ gigId: gig.id })
-      addToast('Your offer to help was sent!', 'success')
+    // Instant Optimistic Update
+    setGigs((prev) =>
+      prev.map((g) =>
+        g.id === gig.id
+          ? {
+              ...g,
+              hasOffered: true,
+              offers: [
+                ...(g.offers || []),
+                { id: myEmpId, name: currentUser?.name || 'You', offeredAt: new Date().toISOString() },
+              ],
+            }
+          : g
+      )
+    )
+    addToast('Your offer to help was sent!', 'success')
+
+    gigApi.offerHelp({ gigId: gig.id }).catch((e) => {
+      addToast(e.message || 'Failed to offer help.', 'error')
       load()
-    } catch (e) {
-      addToast(e.message, 'error')
-    }
+    })
   }
 
   const acceptHelp = async (gig, helperId) => {
-    try {
-      await gigApi.acceptHelp({ gigId: gig.id, helperId })
-      addToast('Help accepted successfully!', 'success')
+    const targetOffer = (gig.offers || []).find((o) => o.id === helperId)
+    const helperName = targetOffer?.name || 'Helper'
+    const helperAvatar = targetOffer?.avatar || ''
+
+    // Instant Optimistic Update
+    setGigs((prev) =>
+      prev.map((g) =>
+        g.id === gig.id
+          ? {
+              ...g,
+              status: 'accepted',
+              helper: { id: helperId, name: helperName, avatar: helperAvatar },
+            }
+          : g
+      )
+    )
+    addToast('Help accepted successfully!', 'success')
+
+    gigApi.acceptHelp({ gigId: gig.id, helperId }).catch((e) => {
+      addToast(e.message || 'Failed to accept help.', 'error')
       load()
-    } catch (e) {
-      addToast(e.message, 'error')
-    }
+    })
   }
 
   const declineHelp = async (gig, helperId) => {
@@ -248,13 +277,20 @@ export default function GigBoardPage({ adminUid, currentUser, addToast }) {
   }
 
   const markComplete = async (gig) => {
-    try {
-      await gigApi.completeGig({ gigId: gig.id })
-      addToast('Task marked as complete.', 'success')
+    // Instant Optimistic Update
+    setGigs((prev) =>
+      prev.map((g) =>
+        g.id === gig.id
+          ? { ...g, status: 'completed', completedAt: new Date().toISOString() }
+          : g
+      )
+    )
+    addToast('Task marked as complete.', 'success')
+
+    gigApi.completeGig({ gigId: gig.id }).catch((e) => {
+      addToast(e.message || 'Failed to complete task.', 'error')
       load()
-    } catch (e) {
-      addToast(e.message, 'error')
-    }
+    })
   }
 
   const tabBtn = (key, label, icon) => (
