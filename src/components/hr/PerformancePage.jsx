@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
 import { Input } from "@/components/ui/input"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { performanceApi, currentMonthKey, lastMonthKey } from '../../services/hr.js'
 
 const gradeTone = {
@@ -12,6 +13,15 @@ const gradeTone = {
   B: 'bg-sky-500/10 text-sky-600 border-sky-500/20',
   C: 'bg-amber-500/10 text-amber-600 border-amber-500/20',
   D: 'bg-red-500/10 text-red-600 border-red-500/20',
+}
+
+const DEFAULT_WEIGHTS = {
+  on_time: 30,
+  late_penalty: 10,
+  absence_penalty: 20,
+  overtime_discourage: 10,
+  leave_utilization: 10,
+  gig_contribution: 20,
 }
 
 export default function PerformancePage({ adminUid, currentUser, addToast }) {
@@ -24,9 +34,23 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
   const [loading, setLoading] = useState(false)
   const [calculating, setCalculating] = useState(false)
 
+  // Evaluation Criteria Weights State
+  const [weights, setWeights] = useState(DEFAULT_WEIGHTS)
+  const [criteriaModalOpen, setCriteriaModalOpen] = useState(false)
+  const [editWeights, setEditWeights] = useState(DEFAULT_WEIGHTS)
+  const [savingCriteria, setSavingCriteria] = useState(false)
+
   const load = useCallback(async () => {
     setLoading(true)
     try {
+      // Fetch current criteria weights
+      try {
+        const wRes = await performanceApi.getWeights()
+        if (wRes && wRes.weights) {
+          setWeights(wRes.weights)
+        }
+      } catch (e) {}
+
       if (isAdmin) {
         const scoreRes = await performanceApi.getScores({ month })
         setScores(scoreRes.scores || [])
@@ -60,6 +84,26 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
     }
   }
 
+  const openEditCriteria = () => {
+    setEditWeights({ ...weights })
+    setCriteriaModalOpen(true)
+  }
+
+  const handleSaveCriteria = async () => {
+    setSavingCriteria(true)
+    try {
+      await performanceApi.updateWeights({ weights: editWeights })
+      addToast('Evaluation criteria weights updated.', 'success')
+      setWeights(editWeights)
+      setCriteriaModalOpen(false)
+      load()
+    } catch (e) {
+      addToast(e.message, 'error')
+    } finally {
+      setSavingCriteria(false)
+    }
+  }
+
   const avg = scores.length ? Math.round(scores.reduce((a, s) => a + (s.totalScore || s.score || 0), 0) / scores.length) : 0
   const top = scores.length ? [...scores].sort((a, b) => (b.totalScore || b.score || 0) - (a.totalScore || a.score || 0))[0] : null
 
@@ -72,14 +116,107 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
         <div className="flex items-center gap-2">
           <Input type="month" value={month} onChange={(e) => setMonth(e.target.value)} className="w-auto" />
           {isAdmin && (
-            <Button size="sm" variant="outline" onClick={handleCalculate} disabled={calculating}>
-              <Icon name="calculate" size={14} className="mr-1.5" /> {calculating ? 'Calculating...' : 'Calculate month'}
-            </Button>
+            <>
+              <Button size="sm" variant="outline" onClick={openEditCriteria} className="rounded-full">
+                <Icon name="tune" size={14} className="mr-1.5" /> Edit Criteria
+              </Button>
+              <Button size="sm" variant="default" onClick={handleCalculate} disabled={calculating} className="rounded-full shadow-sm">
+                <Icon name="calculate" size={14} className="mr-1.5" /> {calculating ? 'Calculating...' : 'Calculate month'}
+              </Button>
+            </>
           )}
         </div>
       </div>
 
       <div className="border-t border-border border-headline" />
+
+      {/* --- EVALUATION CRITERIA OVERVIEW CARD --- */}
+      <Card className="border border-border/80 shadow-sm rounded-2xl">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+          <div className="flex items-center gap-2">
+            <Icon name="rule" size={18} className="text-primary" />
+            <CardTitle className="text-base font-bold">Evaluation Criteria & Weightage</CardTitle>
+          </div>
+          {isAdmin && (
+            <Button size="sm" variant="ghost" className="h-8 text-xs font-semibold rounded-full text-primary hover:text-primary hover:bg-primary/10" onClick={openEditCriteria}>
+              <Icon name="edit" size={14} className="mr-1" /> Edit Weights
+            </Button>
+          )}
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 pt-0">
+          <div className="p-3 rounded-xl bg-muted/30 border border-border/60 flex flex-col justify-between">
+            <div className="flex items-center justify-between gap-1">
+              <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                <Icon name="check_circle" size={15} className="text-emerald-500" /> On-Time Attendance
+              </span>
+              <Badge variant="secondary" className="text-xs font-bold bg-emerald-500/10 text-emerald-600 border-emerald-500/20">
+                +{weights.on_time || 30} pts
+              </Badge>
+            </div>
+            <span className="text-[11px] text-muted-foreground mt-1.5">Rewarded based on percentage of on-time workdays.</span>
+          </div>
+
+          <div className="p-3 rounded-xl bg-muted/30 border border-border/60 flex flex-col justify-between">
+            <div className="flex items-center justify-between gap-1">
+              <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                <Icon name="schedule" size={15} className="text-rose-500" /> Late Arrival Penalty
+              </span>
+              <Badge variant="secondary" className="text-xs font-bold bg-rose-500/10 text-rose-600 border-rose-500/20">
+                -{weights.late_penalty || 10} pts
+              </Badge>
+            </div>
+            <span className="text-[11px] text-muted-foreground mt-1.5">Deducted for late check-ins beyond grace period.</span>
+          </div>
+
+          <div className="p-3 rounded-xl bg-muted/30 border border-border/60 flex flex-col justify-between">
+            <div className="flex items-center justify-between gap-1">
+              <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                <Icon name="cancel" size={15} className="text-rose-500" /> Absence Penalty
+              </span>
+              <Badge variant="secondary" className="text-xs font-bold bg-rose-500/10 text-rose-600 border-rose-500/20">
+                -{weights.absence_penalty || 20} pts
+              </Badge>
+            </div>
+            <span className="text-[11px] text-muted-foreground mt-1.5">Deducted for unexcused absences without leave.</span>
+          </div>
+
+          <div className="p-3 rounded-xl bg-muted/30 border border-border/60 flex flex-col justify-between">
+            <div className="flex items-center justify-between gap-1">
+              <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                <Icon name="more_time" size={15} className="text-amber-500" /> Overtime Deduction
+              </span>
+              <Badge variant="secondary" className="text-xs font-bold bg-amber-500/10 text-amber-600 border-amber-500/20">
+                -{weights.overtime_discourage || 10} pts
+              </Badge>
+            </div>
+            <span className="text-[11px] text-muted-foreground mt-1.5">Deducted if monthly overtime exceeds 20 hours.</span>
+          </div>
+
+          <div className="p-3 rounded-xl bg-muted/30 border border-border/60 flex flex-col justify-between">
+            <div className="flex items-center justify-between gap-1">
+              <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                <Icon name="beach_access" size={15} className="text-sky-500" /> Leave Utilization
+              </span>
+              <Badge variant="secondary" className="text-xs font-bold bg-sky-500/10 text-sky-600 border-sky-500/20">
+                +{weights.leave_utilization || 10} pts
+              </Badge>
+            </div>
+            <span className="text-[11px] text-muted-foreground mt-1.5">Rewarded for taking healthy, approved time off.</span>
+          </div>
+
+          <div className="p-3 rounded-xl bg-muted/30 border border-border/60 flex flex-col justify-between">
+            <div className="flex items-center justify-between gap-1">
+              <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                <Icon name="handshake" size={15} className="text-emerald-500" /> Help Hub Contributions
+              </span>
+              <Badge variant="secondary" className="text-xs font-bold bg-emerald-500/10 text-emerald-600 border-emerald-500/20">
+                +{weights.gig_contribution || 20} pts
+              </Badge>
+            </div>
+            <span className="text-[11px] text-muted-foreground mt-1.5">Rewarded for completing requests helping colleagues.</span>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* --- EMPLOYEE VIEW --- */}
       {!isAdmin && (
@@ -95,7 +232,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
             </Card>
           ) : (
             <>
-              <Card>
+              <Card className="border border-border/80 shadow-sm rounded-2xl">
                 <CardContent className="p-6 flex flex-wrap items-center justify-between gap-4">
                   <div>
                     <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">My Performance Score • {month}</div>
@@ -110,9 +247,9 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
               </Card>
 
               {/* Evaluation Breakdown */}
-              <Card>
-                <CardHeader><CardTitle>Score Breakdown — {month}</CardTitle></CardHeader>
-                <CardContent className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <Card className="border border-border/80 shadow-sm rounded-2xl">
+                <CardHeader><CardTitle className="text-base font-bold">Score Breakdown — {month}</CardTitle></CardHeader>
+                <CardContent className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-0">
                   <div className="p-4 rounded-xl bg-muted/40 border border-border flex flex-col justify-between">
                     <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">On-Time Attendance</span>
                     <span className="text-2xl font-black text-emerald-600 mt-2">+{myScore.onTimePoints ?? 0} pts</span>
@@ -142,9 +279,9 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
 
               {/* Personal Monthly Trends */}
               {trends.length > 0 && (
-                <Card>
-                  <CardHeader><CardTitle>My Monthly Performance Trend</CardTitle></CardHeader>
-                  <CardContent className="flex flex-col gap-3">
+                <Card className="border border-border/80 shadow-sm rounded-2xl">
+                  <CardHeader><CardTitle className="text-base font-bold">My Monthly Performance Trend</CardTitle></CardHeader>
+                  <CardContent className="flex flex-col gap-3 pt-0">
                     {trends.map((t) => (
                       <div key={t.yearMonth || t.month} className="flex items-center gap-3">
                         <span className="w-16 text-xs font-semibold text-muted-foreground tabular-nums">{t.yearMonth || t.month}</span>
@@ -167,13 +304,13 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
       {isAdmin && (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Card>
+            <Card className="border border-border/80 shadow-sm rounded-2xl">
               <CardContent className="p-5">
                 <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Company Average Score</div>
                 <div className="text-3xl font-black tabular-nums text-foreground mt-1">{loading ? '—' : avg} <span className="text-sm font-normal text-muted-foreground">pts</span></div>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="border border-border/80 shadow-sm rounded-2xl">
               <CardContent className="p-5">
                 <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Top Performer</div>
                 <div className="text-xl font-bold text-foreground mt-1">{top ? top.employeeName : '—'}</div>
@@ -182,9 +319,9 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
             </Card>
           </div>
 
-          <Card>
-            <CardHeader className="flex-row items-center justify-between space-y-0">
-              <CardTitle>Employee Performance Tracker — {month}</CardTitle>
+          <Card className="border border-border/80 shadow-sm rounded-2xl">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-base font-bold">Employee Performance Tracker — {month}</CardTitle>
               <Badge variant="secondary">{scores.length} employees evaluated</Badge>
             </CardHeader>
             <CardContent className="p-0">
@@ -196,7 +333,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
                   No performance scores evaluated for this month yet. Click "Calculate month".
                 </div>
               ) : (
-                <div className="rounded-b-xl border-t border-border overflow-x-auto">
+                <div className="rounded-b-2xl border-t border-border overflow-x-auto">
                   <Table className="min-w-[640px]">
                     <TableHeader>
                       <TableRow>
@@ -228,6 +365,99 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
           </Card>
         </>
       )}
+
+      {/* --- EDIT CRITERIA WEIGHTS DIALOG (ADMIN ONLY) --- */}
+      <Dialog open={criteriaModalOpen} onOpenChange={setCriteriaModalOpen}>
+        <DialogContent className="sm:max-w-md rounded-2xl p-5 border border-border/80 bg-card text-card-foreground shadow-xl">
+          <DialogHeader className="pb-2 border-b border-border/50">
+            <div className="flex items-center gap-2.5">
+              <div className="size-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                <Icon name="tune" size={18} />
+              </div>
+              <div>
+                <DialogTitle className="text-base font-bold">Configure Evaluation Criteria</DialogTitle>
+                <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+                  Adjust maximum point weightages and penalty deductions.
+                </DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+
+          <div className="flex flex-col gap-3 pt-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-semibold text-foreground">On-Time Attendance (Max Pts)</label>
+                <Input
+                  type="number"
+                  value={editWeights.on_time ?? 30}
+                  onChange={(e) => setEditWeights({ ...editWeights, on_time: Number(e.target.value) })}
+                  className="h-9 rounded-xl border-input bg-background text-xs font-bold"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-semibold text-foreground">Late Penalty (Max Pts)</label>
+                <Input
+                  type="number"
+                  value={editWeights.late_penalty ?? 10}
+                  onChange={(e) => setEditWeights({ ...editWeights, late_penalty: Number(e.target.value) })}
+                  className="h-9 rounded-xl border-input bg-background text-xs font-bold"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-semibold text-foreground">Absence Penalty (Max Pts)</label>
+                <Input
+                  type="number"
+                  value={editWeights.absence_penalty ?? 20}
+                  onChange={(e) => setEditWeights({ ...editWeights, absence_penalty: Number(e.target.value) })}
+                  className="h-9 rounded-xl border-input bg-background text-xs font-bold"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-semibold text-foreground">Overtime Deduct (Max Pts)</label>
+                <Input
+                  type="number"
+                  value={editWeights.overtime_discourage ?? 10}
+                  onChange={(e) => setEditWeights({ ...editWeights, overtime_discourage: Number(e.target.value) })}
+                  className="h-9 rounded-xl border-input bg-background text-xs font-bold"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-semibold text-foreground">Leave Utilization (Max Pts)</label>
+                <Input
+                  type="number"
+                  value={editWeights.leave_utilization ?? 10}
+                  onChange={(e) => setEditWeights({ ...editWeights, leave_utilization: Number(e.target.value) })}
+                  className="h-9 rounded-xl border-input bg-background text-xs font-bold"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-semibold text-foreground">Help Hub Contributions (Pts)</label>
+                <Input
+                  type="number"
+                  value={editWeights.gig_contribution ?? 20}
+                  onChange={(e) => setEditWeights({ ...editWeights, gig_contribution: Number(e.target.value) })}
+                  className="h-9 rounded-xl border-input bg-background text-xs font-bold"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-3 border-t border-border/50 mt-1">
+              <Button variant="outline" size="sm" className="rounded-full text-xs" onClick={() => setCriteriaModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button size="sm" className="rounded-full px-5 shadow-sm" onClick={handleSaveCriteria} disabled={savingCriteria}>
+                <Icon name="check" size={15} className="mr-1.5" />
+                {savingCriteria ? 'Saving...' : 'Save Criteria'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

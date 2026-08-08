@@ -137,6 +137,22 @@ export const provisionEmployeeAccount = async ({ email, name, role, companyUid, 
 };
 
 /**
+ * Marks a teammate's email invite as revoked so they can no longer auto-link.
+ */
+export const revokeInvite = async (email) => {
+  if (!db || !email) return;
+  const key = email.trim().toLowerCase();
+  try {
+    await setDoc(doc(db, 'invites', key), {
+      status: 'revoked',
+      revokedAt: serverTimestamp(),
+    }, { merge: true });
+  } catch (error) {
+    console.error('Failed to revoke invite:', error);
+  }
+};
+
+/**
  * Self-service password change for the currently signed-in user (teammate).
  * Re-authenticates with the current password first (which both validates it
  * and refreshes the session so updatePassword doesn't hit requires-recent-login).

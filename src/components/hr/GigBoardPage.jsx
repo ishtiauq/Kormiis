@@ -312,8 +312,10 @@ export default function GigBoardPage({ adminUid, currentUser, addToast }) {
                               ✋ Help Offered
                             </Badge>
                           ) : (
-                            <Button size="sm" className="rounded-full px-3.5 h-8 text-xs font-bold shadow-sm" onClick={() => offerHelp(gig)}>
-                              <Icon name="front_hand" size={14} className="mr-1" /> Help
+                            <Button size="sm" className="rounded-full px-3.5 h-8 text-xs font-bold shadow-sm flex items-center" onClick={() => offerHelp(gig)}>
+                              <Icon name="front_hand" size={14} className="mr-1" />
+                              <span>Help</span>
+                              {expiryText && <span className="font-medium opacity-90 ml-1.5 text-[11px]">({expiryText})</span>}
                             </Button>
                           )
                         )

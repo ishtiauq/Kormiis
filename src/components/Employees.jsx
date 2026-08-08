@@ -3,7 +3,7 @@ import Icon from "@/components/ui/Icon.jsx"
 import { useModal } from '../services/useModal.js'
 import AdSlot from './AdSlot.jsx'
 import { formatDate } from '../services/date.js'
-import { provisionEmployeeAccount, deleteEmployeeAccount } from '../services/auth.js'
+import { provisionEmployeeAccount, revokeInvite } from '../services/auth.js'
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -195,18 +195,17 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
         addLog('Identity Uploaded', `Uploaded ID/Passport (${newNidFileName}) for ${newName}`)
       }
     } else {
-      if (!newPassword) {
-        addToast('A password is required so the teammate can sign in.', 'warning')
+      if (!newEmail) {
+        addToast('An email is required so the teammate can be invited to sign in.', 'warning')
         return
       }
 
-      // Provision a real Firebase Auth account for the teammate
+      // Invite the teammate by email — they sign in with their own Google account
       let uid = null
       const companyUid = adminUid || currentUser?.uid
       try {
         const result = await provisionEmployeeAccount({
           email: newEmail,
-          password: newPassword,
           name: newName,
           role: newRole,
           companyUid,
@@ -284,11 +283,9 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
     setEmployees(prev => prev.filter(emp => emp.id !== id))
     addLog('Deleted employee record', `Removed ${name} (${id})`)
     if (addAuditLog) addAuditLog('DELETE', 'Employee', `Deleted employee profile for ${name} (${id})`)
-    if (emp?.uid) {
-      const removed = await deleteEmployeeAccount(emp.uid)
-      if (!removed) {
-        addLog('Login account retained', `Teammate login for ${name} can only be deleted via Firebase console (client SDK limitation).`, 'warning')
-      }
+    if (emp?.email) {
+      await revokeInvite(emp.email)
+      addLog('Access revoked', `Teammate invite for ${name} (${emp.email}) is no longer valid.`)
     }
   }
 
@@ -585,12 +582,11 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
                           errors.push(`Row ${i + 1}: ${error}`);
                           continue;
                         }
-                        if (row.password) {
+                        if (row.email) {
                           try {
                             const companyUid = adminUid || currentUser?.uid
                             const prov = await provisionEmployeeAccount({
                               email: row.email,
-                              password: row.password,
                               name: row.name,
                               role: row.role || 'Teammate',
                               companyUid,
@@ -598,9 +594,9 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
                               department: row.department || '',
                               avatar: row.avatar || ''
                             })
-                            row.uid = prov.uid
+                            row.uid = prov.uid || ''
                           } catch (provErr) {
-                            errors.push(`Row ${i + 1}: account not created (${provErr.message})`)
+                            errors.push(`Row ${i + 1}: invite not sent (${provErr.message})`)
                             continue
                           }
                           delete row.password;
@@ -1096,16 +1092,9 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
                 <Input type="email" required value={newEmail} onChange={(e) => setNewEmail(e.target.value)} />
               </div>
 
-              {!editingEmployee ? (
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm font-medium">Password</label>
-                  <Input type="password" placeholder="Set password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
-                </div>
-              ) : (
-                <div className="flex flex-col gap-2 rounded-md bg-muted/50 px-3 py-2.5 text-xs text-muted-foreground">
-                  Sign-in password is managed by the teammate from their Profile (Change Password). Sign-in email changes require the Firebase console.
-                </div>
-              )}
+              <div className="flex flex-col gap-2 rounded-md bg-muted/50 px-3 py-2.5 text-xs text-muted-foreground">
+                The teammate signs in with their own Google account using this email — they are linked to your workspace automatically.
+              </div>
 
               <DatePicker label="Date of Birth" value={newDob} onChange={(e) => setNewDob(e.target.value)} />
 

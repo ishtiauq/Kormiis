@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import Icon from "@/components/ui/Icon.jsx"
-import { uploadToFirebaseStorage } from '../services/bridge.js'
+import { subscribeToTable, writeToTable } from '../services/bridge.js'
+import { isDriveConfigured, getDriveToken, hasDriveToken, findOrCreateCompanyFolder, uploadToDriveFolder, deleteDriveFile } from '../services/drive.js'
 import { Card, CardContent } from "@/components/ui/card"
 import { useConfirm } from '../hooks/useConfirm'
 import { Button } from "@/components/ui/button"
@@ -50,6 +51,48 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
   const [showCategoryModal, setShowCategoryModal] = useState(false)
   const [editingCategory, setEditingCategory] = useState(null)
   const [catFormName, setCatFormName] = useState('')
+
+  // Google Drive storage config (shared folder, saved in Firestore by the admin)
+  const [driveConfig, setDriveConfig] = useState(null)
+  const [isConnectingDrive, setIsConnectingDrive] = useState(false)
+  const [driveConnected, setDriveConnected] = useState(() => hasDriveToken())
+
+  useEffect(() => {
+    if (!adminUid) return
+    return subscribeToTable(adminUid, 'drive', (data) => {
+      setDriveConfig(data || null)
+    })
+  }, [adminUid])
+
+  const handleConnectDrive = async () => {
+    if (!isDriveConfigured()) {
+      addToast('Google Drive is not configured yet. The admin needs to add the Google Client ID.', 'warning')
+      return
+    }
+    setIsConnectingDrive(true)
+    try {
+      await getDriveToken({ forcePrompt: true })
+      setDriveConnected(true)
+      const isOwner = currentUser?.role === 'Admin' || currentUser?.isWorkspaceOwner
+      if (isOwner) {
+        const { folderId, shareLink } = await findOrCreateCompanyFolder(adminUid, currentUser?.companyName || 'Company')
+        await writeToTable(adminUid, 'drive', {
+          folderId,
+          shareLink,
+          connectedEmail: currentUser?.email || '',
+          connectedAt: new Date().toISOString(),
+        })
+        setDriveConfig({ folderId, shareLink })
+        addToast('Google Drive connected. Shared folder created for the team.', 'success')
+      } else {
+        addToast('Google Drive connected. You can now upload documents to the shared folder.', 'success')
+      }
+    } catch (err) {
+      addToast(err.message || 'Could not connect Google Drive', 'error')
+    } finally {
+      setIsConnectingDrive(false)
+    }
+  }
 
   const { confirm, ConfirmDialog } = useConfirm()
 
@@ -123,10 +166,15 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
         const id = `doc-${Date.now()}`;
         const fileName = formFile?.name || `${formName.replace(/\s+/g, '_')}.pdf`;
         let downloadUrl = null;
+        let driveFileId = null;
         
         if (adminUid && formFile) {
-          const path = `${id}_${fileName}`;
-          downloadUrl = await uploadToFirebaseStorage(adminUid, formFile, path);
+          if (!driveConfig?.folderId) {
+            throw new Error('Google Drive is not connected yet. Ask the admin to connect it first.');
+          }
+          const info = await uploadToDriveFolder(driveConfig.folderId, formFile);
+          downloadUrl = info.downloadUrl;
+          driveFileId = info.id;
         }
 
         const newDoc = {
@@ -140,6 +188,7 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
           uploadedBy: currentUser?.id || 'unknown',
           uploadedAt: new Date().toISOString(),
           downloadUrl,
+          driveFileId,
           status: 'synced',
         }
         setDocuments(prev => [newDoc, ...prev])
@@ -171,6 +220,10 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
   const handleDelete = async (id) => {
     const ok = await confirm('This document will be permanently removed.', 'Delete Document?', { destructive: true })
     if (!ok) return
+    const target = documents.find(d => d.id === id)
+    if (target?.driveFileId) {
+      deleteDriveFile(target.driveFileId).catch(e => console.error('Drive delete failed:', e))
+    }
     setDocuments(prev => prev.filter(d => d.id !== id))
     addToast('Document deleted', 'info')
   }
@@ -307,6 +360,39 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
         </Card>
       )}
 
+      {!driveConfig?.folderId && (
+        <Card className="mb-6 p-4 sm:p-5 bg-muted/20 border-border/50 shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 text-sm font-bold text-foreground">
+                <Icon name="cloud" size={16} className="text-primary" />
+                Google Drive Storage
+              </div>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {currentUser?.role === 'Admin' || currentUser?.isWorkspaceOwner
+                  ? 'Connect your Google Drive to create a shared folder for all company documents.'
+                  : 'Ask your HR admin to connect Google Drive to enable document uploads.'}
+              </p>
+            </div>
+            {(currentUser?.role === 'Admin' || currentUser?.isWorkspaceOwner) && (
+              <Button variant="default" className="shrink-0 gap-2" onClick={handleConnectDrive} disabled={isConnectingDrive}>
+                <Icon name="cloud_upload" size={16} />
+                {isConnectingDrive ? 'Connecting...' : 'Connect Google Drive'}
+              </Button>
+            )}
+          </div>
+        </Card>
+      )}
+
+      {driveConfig?.folderId && !(driveConnected || hasDriveToken()) && (
+        <div className="mb-6 p-3.5 rounded-xl bg-muted/30 border border-border flex items-center gap-3">
+          <Icon name="cloud" size={16} className="text-primary shrink-0" />
+          <p className="text-xs text-muted-foreground flex-1">Connect your Google Drive to upload documents. Downloads work without it.</p>
+          <Button variant="secondary" size="sm" className="shrink-0" onClick={handleConnectDrive} disabled={isConnectingDrive}>
+            {isConnectingDrive ? 'Connecting...' : 'Connect'}
+          </Button>
+        </div>
+      )}
 
       {filteredDocs.length === 0 ? (
         <Card className="text-center p-8 sm:p-10 lg:p-12">

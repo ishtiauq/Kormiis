@@ -5,7 +5,7 @@ import kormiisLogo from '../Assets/Kormiis Logo Final.svg'
 import kormiisLogoDark from '../Assets/Kormiis Logo Dark.svg'
 import kormiisMembershipLogo from '../Assets/Kormiis Logo Membership.svg'
 import heroCharacters from '../Assets/hero-characters.png'
-import { loginWithGoogle, getGoogleRedirectResult, loginWithEmail, registerWithEmail, checkAndCreateUserDoc, getCompanyForUser, setupRecaptcha, requestPhoneOtp, verifyPhoneOtp } from '../services/auth.js'
+import { loginWithGoogle, getGoogleRedirectResult, checkAndCreateUserDoc, getCompanyForUser, getInviteByEmail, acceptInvite } from '../services/auth.js'
 import { recordLoginActivity } from '../services/hr.js'
 import painStripIllustration from '../Assets/pain-strip.png'
 import threeStepsIllustration from '../Assets/three-steps.png'
@@ -266,7 +266,7 @@ const FAQ_ITEMS = [
   },
   {
     q: 'How do teammates sign in?',
-    a: 'Your dashboard creates teammate accounts with work emails. Each teammate signs in with their email and a secure password — no extra setup.',
+    a: 'Your HR admin adds teammates by work email. Each teammate signs in with their own Google account and is linked to the company automatically — no passwords to remember.',
   },
   {
     q: 'Can I use Kormiis on any device?',
@@ -363,11 +363,6 @@ function FooterSection({ themeMode, logoSrc }) {
 }
 
 export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode }) {
-  const [role, setRole] = useState('admin') // 'admin' | 'employee'
-  const [mode, setMode] = useState('signin')
-  const [phoneNumber, setPhoneNumber] = useState('')
-  const [otpCode, setOtpCode] = useState('')
-  const [confirmationResult, setConfirmationResult] = useState(null) // 'signin' | 'signup'
   const [isLoading, setIsLoading] = useState(false)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
 
@@ -460,10 +455,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
     setShowTopbar(latest < 0.002)
   })
 
-  // --- Employee state ---
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
+  // --- Error state ---
   const [error, setError] = useState('')
 
   const adminSession = (account) => ({
@@ -479,42 +471,62 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
     token: account.id // stable key material for local encrypted cache
   })
 
-  // --- Admin signup (Firebase) ---
-  const handleSignup = async (e) => {
-    e.preventDefault()
-    setError('')
-    if (!email.trim() || !password) {
-      setError('Please fill in email and password.')
-      return
-    }
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters.')
-      return
-    }
+  // --- Complete admin sign in & enter dashboard ---
+  const completeAdminLogin = (user) => {
     setIsLoading(true)
-    try {
-      const user = await registerWithEmail(email.trim(), password)
-      await checkAndCreateUserDoc(user)
-      completeAdminLogin(user)
-    } catch (err) {
-      setError('Sign up failed: ' + err.message)
+    recordLoginActivity(user?.uid, user?.uid)
+    setTimeout(() => {
       setIsLoading(false)
-    }
+      onLogin(adminSession({ id: user?.uid || 'local', name: user?.displayName || 'System Admin', email: user?.email || 'admin@company.com', companyName: 'Kormiis Ltd.' }))
+    }, 300)
   }
 
-  // --- Admin login (Firebase) ---
-  const handleAdminPasswordSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
-    setIsLoading(true)
-    try {
-      const user = await loginWithEmail(email.trim(), password)
-      await checkAndCreateUserDoc(user)
-      completeAdminLogin(user)
-    } catch (err) {
-      setError('Login failed: ' + err.message)
-      setIsLoading(false)
+  // --- Complete teammate sign in (auto-linked via email invite) ---
+  const completeTeammateLogin = (company, user) => {
+    const employeeUser = {
+      name: company.fullName || company.name || user.displayName || user.email,
+      email: user.email,
+      role: company.role || 'Teammate',
+      department: company.department || '',
+      avatar: company.avatar || '',
+      isEmployee: true,
+      id: company.employeeId,
+      employeeId: company.employeeId,
+      adminUid: company.companyUid,
+      uid: user.uid,
+      token: ''
     }
+    recordLoginActivity(company.companyUid, user.uid)
+    onLogin(employeeUser)
+  }
+
+  // Single sign-in flow for both the button and the redirect-return path:
+  //   1. Already linked teammate  -> enter as teammate
+  //   2. Invited by email          -> auto-link + enter as teammate
+  //   3. Everything else           -> workspace owner (admin)
+  const finishGoogleLogin = async (user) => {
+    if (!user) return
+    const company = await getCompanyForUser(user.uid)
+
+    if (company?.companyUid && company.companyUid !== user.uid) {
+      completeTeammateLogin(company, user)
+      return
+    }
+
+    const invite = user.email ? await getInviteByEmail(user.email) : null
+    if (invite?.companyUid) {
+      try {
+        await acceptInvite(user, invite)
+        completeTeammateLogin(invite, user)
+      } catch (err) {
+        setError('Could not join your company: ' + err.message)
+        setIsLoading(false)
+      }
+      return
+    }
+
+    await checkAndCreateUserDoc(user)
+    completeAdminLogin(user)
   }
 
   // --- Google SSO (Firebase) ---
@@ -527,8 +539,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
         // Redirecting to Google — login continues in getGoogleRedirectResult on return
         return
       }
-      await checkAndCreateUserDoc(user)
-      completeAdminLogin(user)
+      await finishGoogleLogin(user)
     } catch (err) {
       setError('Google Login failed: ' + err.message)
       setIsLoading(false)
@@ -542,9 +553,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
       try {
         const user = await getGoogleRedirectResult()
         if (cancelled || !user) return
-        await checkAndCreateUserDoc(user)
-        if (cancelled) return
-        completeAdminLogin(user)
+        await finishGoogleLogin(user)
       } catch (err) {
         if (!cancelled) {
           setError('Google Login failed: ' + err.message)
@@ -555,91 +564,6 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
     finishGoogleRedirect()
     return () => { cancelled = true }
   }, [])
-
-  // --- Phone Auth (Firebase) ---
-  const handleSendPhoneOtp = async (e) => {
-    e.preventDefault()
-    setError('')
-    if (!phoneNumber.trim()) {
-      setError('Please enter a phone number.')
-      return
-    }
-    setIsLoading(true)
-    try {
-      const recaptchaVerifier = setupRecaptcha('recaptcha-container')
-      const confirmation = await requestPhoneOtp(phoneNumber, recaptchaVerifier)
-      setConfirmationResult(confirmation)
-      setIsLoading(false)
-    } catch (err) {
-      setError('Failed to send SMS: ' + err.message)
-      setIsLoading(false)
-    }
-  }
-
-  const handleVerifyPhoneOtp = async (e) => {
-    e.preventDefault()
-    setError('')
-    if (!otpCode.trim()) {
-      setError('Please enter the verification code.')
-      return
-    }
-    setIsLoading(true)
-    try {
-      const user = await verifyPhoneOtp(confirmationResult, otpCode)
-      await checkAndCreateUserDoc(user)
-      completeAdminLogin(user)
-    } catch (err) {
-      setError('Failed to verify code: ' + err.message)
-      setIsLoading(false)
-    }
-  }
-
-  // --- Complete admin sign in & enter dashboard ---
-  const completeAdminLogin = (user) => {
-    setIsLoading(true)
-    recordLoginActivity(user?.uid, user?.uid)
-    setTimeout(() => {
-      setIsLoading(false)
-      onLogin(adminSession({ id: user?.uid || 'local', name: user?.displayName || 'System Admin', email: user?.email || 'admin@company.com', companyName: 'Kormiis Ltd.' }))
-    }, 300)
-  }
-
-  // --- Employee login (Firebase) ---
-  const handleEmployeeSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
-    setIsLoading(true)
-
-    try {
-      const user = await loginWithEmail(email.trim(), password)
-      const company = await getCompanyForUser(user.uid)
-
-      if (!company?.companyUid) {
-        setError('This account is not linked to any company. Please contact your HR administrator.')
-        setIsLoading(false)
-        return
-      }
-
-      const employeeUser = {
-        name: company.fullName || user.displayName || email,
-        email: user.email,
-        role: company.role || 'Teammate',
-        department: company.department || '',
-        avatar: company.avatar || '',
-        isEmployee: true,
-        id: company.employeeId,
-        employeeId: company.employeeId,
-        adminUid: company.companyUid,
-        uid: user.uid,
-        token: ''
-      }
-      recordLoginActivity(company.companyUid, user.uid)
-      onLogin(employeeUser)
-    } catch (err) {
-      setError('Login failed: ' + err.message)
-      setIsLoading(false)
-    }
-  }
 
 
 
@@ -1051,278 +975,31 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
               <div className="login-auth-card-inner relative z-10 p-5 pt-10 sm:p-6 sm:pt-11">
                 {/* Title & Subtitle */}
                 <h2 className="text-2xl font-extrabold text-foreground tracking-tight">
-                  {mode === 'signup' ? 'Sign Up' : 'Sign In'}
+                  Sign in to Kormiis
                 </h2>
 
-                {mode === 'signup' ? (
-                  <>
-                    <form onSubmit={handleSignup} className="space-y-3.5 mt-5">
-                      <div>
-                        <label className="block text-base font-bold text-muted-foreground uppercase tracking-wider mb-2">Work Email</label>
-                        <input
-                          type="email"
-                          value={email}
-                          onChange={e => setEmail(e.target.value)}
-                          placeholder="name@company.com"
-                          className="w-full bg-background/40 border border-input text-foreground px-4 py-3 text-base font-medium rounded-xl focus:outline-none transition-all"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-base font-bold text-muted-foreground uppercase tracking-wider mb-2">Password</label>
-                        <div className="relative">
-                          <input
-                            type={showPassword ? 'text' : 'password'}
-                            value={password}
-                            onChange={e => setPassword(e.target.value)}
-                            placeholder="••••••••"
-                            className="w-full bg-background/40 border border-input text-foreground px-4 py-3 pr-11 text-base font-medium rounded-xl focus:outline-none transition-all"
-                            required
-                          />
-                          <button 
-                            type="button" 
-                            onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
-                          >
-                            {showPassword ? <Icon name="visibility_off" size={18} /> : <Icon name="visibility" size={18} />}
-                          </button>
-                        </div>
-                      </div>
-                      {error && (
-                        <div className="p-3.5 text-sm font-medium bg-red-500/10 border border-red-500/30 text-red-500 rounded-xl flex items-center gap-2">
-                          <div className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
-                          {error}
-                        </div>
-                      )}
-                      <button
-                        type="submit"
-                        disabled={isLoading}
-                        className="w-full py-4 rounded-full text-base font-bold flex items-center justify-center gap-2 bg-primary text-primary-foreground mt-2 disabled:opacity-50"
-                      >
-                        {isLoading ? 'Creating Account...' : 'Continue'} <Icon name="arrow_forward" size={18} />
-                      </button>
-                    </form>
-                  </>
-                ) : mode === 'signin' ? (
-                  <>
-                    <div className="flex p-1.5 bg-muted/60 rounded-full mb-4 mt-4 border border-border">
-                      <button
-                        onClick={() => setRole('admin')}
-                        className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 ${
-                          role === 'admin'
-                            ? 'bg-background text-foreground shadow-sm'
-                            : 'text-muted-foreground hover:text-foreground'
-                        }`}
-                      >
-                        <Icon name="shield" size={16} /> Admin
-                      </button>
-                      <button
-                        onClick={() => setRole('employee')}
-                        className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 ${
-                          role === 'employee'
-                            ? 'bg-background text-foreground shadow-sm'
-                            : 'text-muted-foreground hover:text-foreground'
-                        }`}
-                      >
-                        <Icon name="person" size={16} /> Teammate
-                      </button>
+                <div className="mt-6">
+                  {error && (
+                    <div className="p-4 mb-5 text-sm font-medium bg-red-500/10 border border-red-500/30 text-red-500 rounded-xl flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                      {error}
                     </div>
-
-                    <div className="min-h-[200px]">
-                      {error && (
-                        <div className="p-4 mb-6 text-sm font-medium bg-red-500/10 border border-red-500/30 text-red-500 rounded-xl flex items-center gap-2">
-                          <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
-                          {error}
-                        </div>
-                      )}
-
-                      {role === 'admin' ? (
-                        <>
-                          <form onSubmit={handleAdminPasswordSubmit} className="space-y-4">
-                            <div>
-                              <label className="block text-base font-bold text-muted-foreground uppercase tracking-wider mb-2">Work Email</label>
-                              <input
-                                type="email"
-                                value={email}
-                                onChange={e => setEmail(e.target.value)}
-                                placeholder="name@company.com"
-                                className="w-full bg-background/40 border border-input text-foreground px-4 py-3 text-base font-medium rounded-xl focus:outline-none transition-all"
-                                required
-                              />
-                            </div>
-                            <div>
-                              <label className="block text-base font-bold text-muted-foreground uppercase tracking-wider mb-2">Password</label>
-                              <div className="relative">
-                                <input
-                                  type={showPassword ? 'text' : 'password'}
-                                  value={password}
-                                  onChange={e => setPassword(e.target.value)}
-                                  placeholder="••••••••"
-                                  className="w-full bg-background/40 border border-input text-foreground px-4 py-3 pr-11 text-base font-medium rounded-xl focus:outline-none transition-all"
-                                  required
-                                />
-                                <button 
-                                  type="button" 
-                                  onClick={() => setShowPassword(!showPassword)}
-                                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
-                                >
-                                  {showPassword ? <Icon name="visibility_off" size={18} /> : <Icon name="visibility" size={18} />}
-                                </button>
-                              </div>
-                            </div>
-                            <button
-                              type="submit"
-                              disabled={isLoading}
-                              className="w-full py-4 rounded-full text-base font-bold flex items-center justify-center gap-2 bg-primary text-primary-foreground mt-2 disabled:opacity-50"
-                            >
-                              {isLoading ? 'Signing In...' : 'Sign In'} <Icon name="arrow_forward" size={18} />
-                            </button>
-                          </form>
-
-                          <div className="flex items-center my-4">
-                            <div className="flex-grow border-t border-border" />
-                            <span className="px-3 text-xs text-muted-foreground uppercase tracking-widest">OR</span>
-                            <div className="flex-grow border-t border-border" />
-                          </div>
-
-                          <div className="flex gap-3">
-                            <button 
-                              onClick={handleFirebaseGoogleLogin} 
-                              disabled={isLoading}
-                              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-muted/40 border border-border rounded-2xl text-sm font-semibold text-foreground hover:bg-muted transition disabled:opacity-50"
-                            >
-                              <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59a14.5 14.5 0 0 1 0-9.18l-7.98-6.19a24.01 24.01 0 0 0 0 21.56l7.98-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg> Google
-                            </button>
-                            <button 
-                              onClick={() => setMode('phone')} 
-                              disabled={isLoading}
-                              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-muted/40 border border-border rounded-2xl text-sm font-semibold text-foreground hover:bg-muted transition disabled:opacity-50"
-                            >
-                              <Icon name="smartphone" size={18} /> Phone
-                            </button>
-                          </div>
-                        </>
-                      ) : (
-                        <form onSubmit={handleEmployeeSubmit} className="space-y-4">
-                          <div>
-                            <label className="block text-base font-bold text-muted-foreground uppercase tracking-wider mb-2">Work Email</label>
-                            <input
-                              type="text"
-                              value={email}
-                              onChange={e => setEmail(e.target.value)}
-                              placeholder="name@company.com"
-                              className="w-full bg-background/40 border border-input text-foreground px-4 py-3 text-base font-medium rounded-xl focus:outline-none transition-all"
-                              required
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-base font-bold text-muted-foreground uppercase tracking-wider mb-2">Password</label>
-                            <div className="relative">
-                              <input
-                                type={showPassword ? 'text' : 'password'}
-                                value={password}
-                                onChange={e => setPassword(e.target.value)}
-                                placeholder="••••••••"
-                                className="w-full bg-background/40 border border-input text-foreground px-4 py-3 pr-11 text-base font-medium rounded-xl focus:outline-none transition-all"
-                                required
-                              />
-                              <button 
-                                type="button" 
-                                onClick={() => setShowPassword(!showPassword)}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
-                              >
-                                {showPassword ? <Icon name="visibility_off" size={18} /> : <Icon name="visibility" size={18} />}
-                              </button>
-                            </div>
-                          </div>
-                          <button
-                            type="submit"
-                            disabled={isLoading}
-                            className="w-full py-4 rounded-full text-base font-bold flex items-center justify-center gap-2 bg-primary text-primary-foreground mt-2 disabled:opacity-50"
-                          >
-                            {isLoading ? 'Signing In...' : 'Access Portal'} <Icon name="arrow_forward" size={18} />
-                          </button>
-                        </form>
-                      )}
-                    </div>
-                  </>
-                ) : mode === 'phone' ? (
-                  <div className="mt-5">
-                    {!confirmationResult ? (
-                      <form onSubmit={handleSendPhoneOtp} className="space-y-4">
-                        <div>
-                          <label className="block text-base font-bold text-muted-foreground uppercase tracking-wider mb-2">Phone Number</label>
-                          <input
-                            type="tel"
-                            value={phoneNumber}
-                            onChange={e => setPhoneNumber(e.target.value)}
-                            placeholder="+1 555-555-5555"
-                            className="w-full bg-background/40 border border-input text-foreground px-4 py-3 text-base font-medium rounded-xl focus:outline-none transition-all"
-                            required
-                          />
-                        </div>
-                        <div id="recaptcha-container"></div>
-                        {error && (
-                          <div className="p-3.5 text-sm font-medium bg-red-500/10 border border-red-500/30 text-red-500 rounded-xl flex items-center gap-2">
-                            <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
-                            {error}
-                          </div>
-                        )}
-                        <button
-                          type="submit"
-                          disabled={isLoading}
-                          className="w-full py-4 rounded-full text-base font-bold flex items-center justify-center gap-2 bg-primary text-primary-foreground mt-2 disabled:opacity-50"
-                        >
-                          {isLoading ? 'Sending SMS...' : 'Send SMS Code'} <Icon name="arrow_forward" size={18} />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setMode('signin')}
-                          className="w-full py-3 mt-2 text-sm font-medium text-muted-foreground hover:text-foreground transition"
-                        >
-                          Back to Email Login
-                        </button>
-                      </form>
-                    ) : (
-                      <form onSubmit={handleVerifyPhoneOtp} className="space-y-4">
-                        <div>
-                          <label className="block text-base font-bold text-muted-foreground uppercase tracking-wider mb-2">6-Digit Code</label>
-                          <input
-                            type="text"
-                            value={otpCode}
-                            onChange={e => setOtpCode(e.target.value)}
-                            placeholder="123456"
-                            className="w-full bg-background/40 border border-input text-foreground px-4 py-3 text-base font-medium rounded-xl focus:outline-none transition-all tracking-widest text-center"
-                            maxLength={6}
-                            required
-                          />
-                        </div>
-                        {error && (
-                          <div className="p-3.5 text-sm font-medium bg-red-500/10 border border-red-500/30 text-red-500 rounded-xl flex items-center gap-2">
-                            <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
-                            {error}
-                          </div>
-                        )}
-                        <button
-                          type="submit"
-                          disabled={isLoading}
-                          className="w-full py-4 rounded-full text-base font-bold flex items-center justify-center gap-2 bg-primary text-primary-foreground mt-2 disabled:opacity-50"
-                        >
-                          {isLoading ? 'Verifying...' : 'Verify & Continue'} <Icon name="check" size={18} />
-                        </button>
-                      </form>
-                    )}
-                  </div>
-                ) : null}
-
-                {/* Footer toggle */}
-                <p className="text-center text-sm text-muted-foreground mt-6">
-                  {mode === 'signup' ? (
-                    <>Already have an account? <button onClick={() => { setMode('signin'); setError('') }} className="text-primary font-semibold hover:underline cursor-pointer">Sign in</button></>
-                  ) : (
-                    <>Don't have an account? <button onClick={() => { setMode('signup'); setError('') }} className="text-primary font-semibold hover:underline cursor-pointer">Sign up</button></>
                   )}
-                </p>
+
+                  <button
+                    type="button"
+                    onClick={handleFirebaseGoogleLogin}
+                    disabled={isLoading}
+                    className="w-full flex items-center justify-center gap-3 px-4 py-4 bg-card border border-input rounded-2xl text-sm font-semibold text-foreground hover:bg-muted/50 transition disabled:opacity-50 shadow-sm"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59a14.5 14.5 0 0 1 0-9.18l-7.98-6.19a24.01 24.01 0 0 0 0 21.56l7.98-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+                    {isLoading ? 'Signing in...' : 'Continue with Google'}
+                  </button>
+
+                  <p className="text-center text-xs text-muted-foreground mt-5 leading-relaxed">
+                    Your HR admin adds you by email. Sign in with the same Google account to join your company workspace.
+                  </p>
+                </div>
               </div>
             </div>
             </motion.div>
