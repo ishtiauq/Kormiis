@@ -230,6 +230,23 @@ export default function GigBoardPage({ adminUid, currentUser, addToast }) {
     }
   }
 
+  const declineHelp = async (gig, helperId) => {
+    // Instant Optimistic Update
+    setGigs((prev) =>
+      prev.map((g) =>
+        g.id === gig.id
+          ? { ...g, offers: (g.offers || []).filter((o) => o.id !== helperId) }
+          : g
+      )
+    )
+    addToast('Help offer declined.', 'info')
+
+    gigApi.declineHelp({ gigId: gig.id, helperId }).catch((e) => {
+      addToast(e.message || 'Failed to decline offer.', 'error')
+      load()
+    })
+  }
+
   const markComplete = async (gig) => {
     try {
       await gigApi.completeGig({ gigId: gig.id })
@@ -394,7 +411,7 @@ export default function GigBoardPage({ adminUid, currentUser, addToast }) {
                       </span>
                       <div className="flex flex-col gap-1.5 max-h-36 overflow-y-auto">
                         {offers.map((offer) => (
-                          <div key={offer.id} className="flex items-center justify-between p-2 rounded-xl bg-background border border-border text-xs">
+                          <div key={offer.id} className="flex items-center justify-between p-2 rounded-xl bg-background border border-border text-xs gap-2">
                             <div className="flex items-center gap-2">
                               <img
                                 src={offer.avatar || "https://i.pravatar.cc/150?u=offer"}
@@ -403,9 +420,14 @@ export default function GigBoardPage({ adminUid, currentUser, addToast }) {
                               />
                               <span className="font-semibold text-foreground">{offer.name} offered to help</span>
                             </div>
-                            <Button size="sm" variant="default" className="h-7 text-xs px-2.5 rounded-full" onClick={() => acceptHelp(gig, offer.id)}>
-                              Accept Help
-                            </Button>
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              <Button size="sm" variant="outline" className="h-7 text-xs px-2.5 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10" onClick={() => declineHelp(gig, offer.id)}>
+                                Decline
+                              </Button>
+                              <Button size="sm" variant="default" className="h-7 text-xs px-3 rounded-full" onClick={() => acceptHelp(gig, offer.id)}>
+                                Accept
+                              </Button>
+                            </div>
                           </div>
                         ))}
                       </div>

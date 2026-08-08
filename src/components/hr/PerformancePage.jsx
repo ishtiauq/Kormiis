@@ -116,14 +116,9 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
         <div className="flex items-center gap-2">
           <Input type="month" value={month} onChange={(e) => setMonth(e.target.value)} className="w-auto" />
           {isAdmin && (
-            <>
-              <Button size="sm" variant="outline" onClick={openEditCriteria} className="rounded-full">
-                <Icon name="tune" size={14} className="mr-1.5" /> Edit Criteria
-              </Button>
-              <Button size="sm" variant="default" onClick={handleCalculate} disabled={calculating} className="rounded-full shadow-sm">
-                <Icon name="calculate" size={14} className="mr-1.5" /> {calculating ? 'Calculating...' : 'Calculate month'}
-              </Button>
-            </>
+            <Button size="sm" variant="default" onClick={handleCalculate} disabled={calculating} className="rounded-full shadow-sm">
+              <Icon name="calculate" size={14} className="mr-1.5" /> {calculating ? 'Calculating...' : 'Calculate month'}
+            </Button>
           )}
         </div>
       </div>
@@ -139,7 +134,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
           </div>
           {isAdmin && (
             <Button size="sm" variant="ghost" className="h-8 text-xs font-semibold rounded-full text-primary hover:text-primary hover:bg-primary/10" onClick={openEditCriteria}>
-              <Icon name="edit" size={14} className="mr-1" /> Edit Weights
+              <Icon name="edit" size={14} className="mr-1" /> Edit Criteria
             </Button>
           )}
         </CardHeader>
@@ -189,7 +184,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
                 -{weights.overtime_discourage || 10} pts
               </Badge>
             </div>
-            <span className="text-[11px] text-muted-foreground mt-1.5">Deducted if monthly overtime exceeds 20 hours.</span>
+            <span className="text-[11px] text-muted-foreground mt-1.5">Deducted if monthly check-out overtime exceeds 20 hours.</span>
           </div>
 
           <div className="p-3 rounded-xl bg-muted/30 border border-border/60 flex flex-col justify-between">

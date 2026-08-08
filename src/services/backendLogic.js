@@ -575,6 +575,33 @@ export const gigApiLocal = {
     await pushNotification(companyId, helperId, `Your offer to help with "${gig.title}" was accepted!`, { table: 'gigs', id: gigId });
     return { gig: updatedGig };
   }),
+  declineHelp: onCall(async (request) => {
+    const uid = assertAuth(request);
+    const companyId = await getCompanyIdForUid(uid);
+    if (!companyId) throw new Error('failed-precondition: Account is not linked to a company.');
+
+    const { gigId, helperId } = request.data || {};
+    if (!gigId || !helperId) throw new Error('invalid-argument: gigId and helperId are required.');
+
+    const me = await getUser(uid);
+    const myEmployeeId = (me && me.employeeId) || uid;
+
+    const gigs = (await getSnapshot(companyId, 'gigs', [])) || [];
+    const gig = gigs.find((g) => g.id === gigId);
+    if (!gig) throw new Error('not-found: Gig not found.');
+    if (gig.postedBy !== myEmployeeId) throw new Error('permission-denied: Only the poster can decline help.');
+
+    const currentOffers = Array.isArray(gig.offers) ? gig.offers : [];
+    const updatedOffers = currentOffers.filter((o) => o.id !== helperId);
+
+    const updatedGig = {
+      ...gig,
+      offers: updatedOffers,
+    };
+
+    await setSnapshot(companyId, 'gigs', gigs.map((g) => g.id === gigId ? updatedGig : g));
+    return { ok: true };
+  }),
   completeGig: onCall(async (request) => {
     const uid = assertAuth(request);
     const companyId = await getCompanyIdForUid(uid);
@@ -709,12 +736,6 @@ async function computeEmployee(companyId, emp, ym, weights, logs, leaves, leaveB
   for (const d of dates) {
     const log = logs[d] && logs[d][emp.id];
     if (log && Number(log.overtimeMinutes) > 0) overtimeHours += Number(log.overtimeMinutes) / 60;
-  }
-  const claims = (await getSnapshot(companyId, 'overtime_claims', [])) || [];
-  for (const c of claims) {
-    if (c.employeeId === emp.id && c.status === 'Approved' && (c.yearMonth || (c.date || '').slice(0, 7)) === ym) {
-      overtimeHours += Number(c.hours) || 0;
-    }
   }
   let overtimeDeduct = 0;
   if (overtimeHours > 20) overtimeDeduct = Math.min(weights.overtime_discourage, (overtimeHours - 20) * 0.5);
