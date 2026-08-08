@@ -290,7 +290,7 @@ export default function EmployeePortal({
     { id: 'documents', icon: <Icon name="folder_open" size={18} />, label: 'Documents' },
     { id: 'notes', icon: <Icon name="sticky_note_2" size={18} />, label: 'Notes' },
     { id: 'leave', icon: <Icon name="calendar_month" size={18} />, label: 'Leave' },
-    { id: 'gigs', icon: <Icon name="workspaces" size={18} />, label: 'Gigs' },
+    { id: 'gigs', icon: <Icon name="handshake" size={18} />, label: 'Help Hub' },
     { id: 'performance', icon: <Icon name="insights" size={18} />, label: 'Performance' },
     { id: 'profile', icon: <Icon name="person" size={18} />, label: 'Profile' }
   ]

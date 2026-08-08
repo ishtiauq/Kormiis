@@ -31,7 +31,7 @@ export const allNavItems = [
   { id: 'attendance', label: 'Attendance & Leaves', icon: createElement(Icon, { name: 'schedule', size: 18 }) },
   { id: 'expenses', label: 'Expenses', icon: createElement(Icon, { name: 'wallet', size: 18 }) },
   { id: 'assets', label: 'Assets', icon: createElement(Icon, { name: 'devices_other', size: 18 }) },
-  { id: 'gigs', label: 'Gigs', icon: createElement(Icon, { name: 'workspaces', size: 18 }) },
+  { id: 'gigs', label: 'Help Hub', icon: createElement(Icon, { name: 'handshake', size: 18 }) },
   { id: 'performance', label: 'Performance', icon: createElement(Icon, { name: 'insights', size: 18 }) },
   { id: 'wellbeing', label: 'Well-being', icon: createElement(Icon, { name: 'favorite', size: 18 }) },
   { id: 'settings', label: 'Settings', icon: createElement(Icon, { name: 'settings', size: 18 }) },

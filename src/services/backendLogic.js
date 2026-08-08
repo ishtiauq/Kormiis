@@ -330,6 +330,27 @@ async function pushNotification(companyId, employeeId, message, ref) {
   }, []);
 }
 
+function formatCleanName(rawName, rawEmail, fallback = 'Colleague') {
+  if (rawName && typeof rawName === 'string' && rawName.trim() && !rawName.includes('@')) {
+    return rawName.trim();
+  }
+  try {
+    const local = localStorage.getItem('kormiis_user');
+    if (local) {
+      const parsed = JSON.parse(local);
+      if (parsed.name && !parsed.name.includes('@')) return parsed.name;
+      if (parsed.displayName && !parsed.displayName.includes('@')) return parsed.displayName;
+    }
+  } catch(e) {}
+
+  const str = String(rawName || rawEmail || '').trim();
+  if (str.includes('@')) {
+    const handle = str.split('@')[0];
+    return handle.charAt(0).toUpperCase() + handle.slice(1);
+  }
+  return str || fallback;
+}
+
 export const gigApiLocal = {
   createGig: onCall(async (request) => {
     const uid = assertAuth(request);
@@ -346,16 +367,67 @@ export const gigApiLocal = {
 
     const poster = await getUser(uid);
     const posterEmployeeId = (poster && poster.employeeId) || uid;
+    const posterName = formatCleanName(poster?.name, poster?.email, 'Colleague');
+    const posterAvatar = (poster && poster.avatar) || `https://i.pravatar.cc/150?u=${posterEmployeeId}`;
 
     const gig = {
       id: `gig-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
       title, description, postedBy: posterEmployeeId, postedByUid: uid,
+      postedByName: posterName, posterAvatar,
       expiresAt,
       status: 'open', helper: null, offers: [], createdAt: timestamp(), completedAt: null,
     };
 
     await updateSnapshot(companyId, 'gigs', async (current) => { const list = Array.isArray(current) ? current : []; return [gig, ...list]; }, []);
     return { gig };
+  }),
+  updateGig: onCall(async (request) => {
+    const uid = assertAuth(request);
+    const companyId = await getCompanyIdForUid(uid);
+    if (!companyId) throw new Error('failed-precondition: Account is not linked to a company.');
+
+    const { gigId, title, description, expiresAt } = request.data || {};
+    if (!gigId) throw new Error('invalid-argument: Missing gigId.');
+    if (!title || !String(title).trim()) throw new Error('invalid-argument: Title is required.');
+
+    const isHr = await requireAdmin(request).then(() => true).catch(() => false);
+    const me = await getUser(uid);
+    const myEmployeeId = (me && me.employeeId) || uid;
+
+    const gigs = (await getSnapshot(companyId, 'gigs', [])) || [];
+    const gig = gigs.find((g) => g.id === gigId);
+    if (!gig) throw new Error('not-found: Gig not found.');
+    if (!isHr && gig.postedBy !== myEmployeeId) throw new Error('permission-denied: Only poster or admin can edit.');
+
+    const updated = gigs.map((g) => g.id === gigId ? {
+      ...g,
+      title: String(title).trim(),
+      description: String(description || '').trim(),
+      expiresAt: expiresAt ? new Date(expiresAt).toISOString() : g.expiresAt,
+    } : g);
+
+    await setSnapshot(companyId, 'gigs', updated);
+    return { ok: true };
+  }),
+  deleteGig: onCall(async (request) => {
+    const uid = assertAuth(request);
+    const companyId = await getCompanyIdForUid(uid);
+    if (!companyId) throw new Error('failed-precondition: Account is not linked to a company.');
+
+    const gigId = request.data && request.data.gigId;
+    if (!gigId) throw new Error('invalid-argument: Missing gigId.');
+
+    const isHr = await requireAdmin(request).then(() => true).catch(() => false);
+    const me = await getUser(uid);
+    const myEmployeeId = (me && me.employeeId) || uid;
+
+    const gigs = (await getSnapshot(companyId, 'gigs', [])) || [];
+    const gig = gigs.find((g) => g.id === gigId);
+    if (!gig) throw new Error('not-found: Gig not found.');
+    if (!isHr && gig.postedBy !== myEmployeeId) throw new Error('permission-denied: Only poster or admin can delete.');
+
+    await setSnapshot(companyId, 'gigs', gigs.filter((g) => g.id !== gigId));
+    return { ok: true };
   }),
   getOpenGigs: onCall(async (request) => {
     const uid = assertAuth(request);
@@ -379,15 +451,31 @@ export const gigApiLocal = {
     });
 
     const decorate = (g) => {
-      const offers = Array.isArray(g.offers) ? g.offers : [];
+      const offers = (Array.isArray(g.offers) ? g.offers : []).map((o) => {
+        const oEmp = empMap.get(o.id);
+        return {
+          ...o,
+          name: formatCleanName(oEmp?.name || o.name, oEmp?.email, 'Colleague'),
+          avatar: oEmp?.avatar || o.avatar || `https://i.pravatar.cc/150?u=${o.id}`,
+        };
+      });
       const hasOffered = offers.some((o) => o.id === myEmployeeId);
-      const posterName = (empMap.get(g.postedBy) || {}).name || g.postedByName || g.postedBy;
-      const helperName = g.helper ? ((empMap.get(g.helper.id) || {}).name || g.helper.name) : null;
+      const emp = empMap.get(g.postedBy) || empMap.get(g.postedByUid) || employees.find((e) => e.uid === g.postedByUid || e.uid === g.postedBy);
+      let rawPosterName = emp?.name || g.postedByName;
+      let posterAvatar = emp?.avatar || g.posterAvatar || (g.postedByUid === uid ? me?.avatar : null) || `https://i.pravatar.cc/150?u=${g.postedBy}`;
+      let posterName = formatCleanName(rawPosterName, emp?.email || me?.email, 'Colleague');
+      if (g.postedByUid === uid || g.postedBy === myEmployeeId) {
+        posterAvatar = me?.avatar || posterAvatar;
+      }
+      const helperEmp = g.helper ? empMap.get(g.helper.id) : null;
+      const helperName = g.helper ? formatCleanName(helperEmp?.name || g.helper.name, helperEmp?.email, 'Helper') : null;
+      const helperAvatar = g.helper ? (helperEmp?.avatar || g.helper.avatar || `https://i.pravatar.cc/150?u=${g.helper.id}`) : null;
+
       return {
         id: g.id, title: g.title, description: g.description || '',
-        postedBy: g.postedBy, postedByName: posterName,
+        postedBy: g.postedBy, postedByName: posterName, posterAvatar,
         expiresAt: g.expiresAt, status: g.status,
-        helper: g.helper ? { id: g.helper.id, name: helperName } : null,
+        helper: g.helper ? { id: g.helper.id, name: helperName, avatar: helperAvatar } : null,
         offers,
         hasOffered,
         createdAt: iso(g.createdAt), completedAt: iso(g.completedAt),
@@ -482,8 +570,7 @@ export const gigApiLocal = {
     }
 
     return { ok: true };
-  })
-};
+  }),
   getMySkills: onCall(async (request) => {
     const uid = assertAuth(request);
     const companyId = await getCompanyIdForUid(uid);

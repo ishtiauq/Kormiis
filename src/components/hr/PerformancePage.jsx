@@ -132,7 +132,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
                     <span className="text-2xl font-black text-emerald-600 mt-2">+{myScore.leaveUtilizationPoints ?? 0} pts</span>
                   </div>
                   <div className="p-4 rounded-xl bg-muted/40 border border-border flex flex-col justify-between">
-                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Gig Contributions</span>
+                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Help Hub Contributions</span>
                     <span className="text-2xl font-black text-emerald-600 mt-2">+{myScore.gigPoints ?? 0} pts</span>
                   </div>
                 </CardContent>
