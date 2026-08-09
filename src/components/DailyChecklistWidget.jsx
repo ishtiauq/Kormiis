@@ -26,7 +26,7 @@ export default function DailyChecklistWidget({ notes = [], setNotes, ownerId = '
           <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-primary/10 text-primary">
             <Icon name="task_alt" size={20}/>
           </div>
-          <CardTitle className="text-base font-extrabold m-0">
+          <CardTitle className="text-fluid-xl font-extrabold m-0">
             {checklistNote?.title || "Daily Checklist"}
           </CardTitle>
         </div>

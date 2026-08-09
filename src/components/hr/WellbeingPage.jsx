@@ -62,7 +62,7 @@ export default function WellbeingPage({ adminUid, currentUser, addToast }) {
   return (
     <div className="animate-fade-in flex flex-col gap-5 max-w-[1200px] mx-auto w-full">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient m-0">
+        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient m-0">
           <Icon name="favorite" className="text-foreground" size={20}/> Well-being Alerts
         </h1>
         <div className="flex items-center gap-2">
@@ -79,7 +79,7 @@ export default function WellbeingPage({ adminUid, currentUser, addToast }) {
         <Card>
           <CardContent className="p-5">
             <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">High-risk employees</div>
-            <div className="text-fluid-display font-black tabular-nums text-destructive mt-1">{loading ? 'â€”' : data?.highRiskCount ?? 0}</div>
+            <div className="text-fluid-display font-black tabular-nums text-destructive mt-1">{loading ? 'Ã¢â‚¬â€' : data?.highRiskCount ?? 0}</div>
           </CardContent>
         </Card>
         <Card>
@@ -128,7 +128,7 @@ export default function WellbeingPage({ adminUid, currentUser, addToast }) {
                     <TableRow key={r.id} className="cursor-pointer" onClick={() => setExpanded(expanded === r.id ? null : r.id)}>
                       <TableCell>
                         <div className="font-medium text-sm text-foreground">{r.employeeName}</div>
-                        <div className="text-xs text-muted-foreground">{r.department || 'â€”'}</div>
+                        <div className="text-xs text-muted-foreground">{r.department || 'Ã¢â‚¬â€'}</div>
                       </TableCell>
                       <TableCell className="text-center tabular-nums">{r.mondayFridaySickCount}</TableCell>
                       <TableCell className="text-center tabular-nums">{r.averageLateMinutes}</TableCell>
@@ -162,16 +162,16 @@ export default function WellbeingPage({ adminUid, currentUser, addToast }) {
       {expanded && (
         <Card>
           <CardHeader>
-            <CardTitle>Breakdown â€” {risks.find(r => r.id === expanded)?.employeeName}</CardTitle>
+            <CardTitle>Breakdown Ã¢â‚¬â€ {risks.find(r => r.id === expanded)?.employeeName}</CardTitle>
           </CardHeader>
           <CardContent>
             {(() => {
               const r = risks.find(x => x.id === expanded)
               if (!r) return null
               const breakdown = [
-                { label: 'Mon/Fri sick leave Ã— 15', value: r.mondayFridaySickCount, points: r.mondayFridaySickCount * 15 },
-                { label: 'Avg late minutes Ã— 2', value: r.averageLateMinutes, points: Math.round(r.averageLateMinutes * 2) },
-                { label: 'Unauthorized absences Ã— 20', value: r.unauthorizedAbsenceCount, points: r.unauthorizedAbsenceCount * 20 },
+                { label: 'Mon/Fri sick leave Ãƒâ€” 15', value: r.mondayFridaySickCount, points: r.mondayFridaySickCount * 15 },
+                { label: 'Avg late minutes Ãƒâ€” 2', value: r.averageLateMinutes, points: Math.round(r.averageLateMinutes * 2) },
+                { label: 'Unauthorized absences Ãƒâ€” 20', value: r.unauthorizedAbsenceCount, points: r.unauthorizedAbsenceCount * 20 },
                 { label: 'Login drop > 50%', value: r.loginDropFlag ? 'Yes' : 'No', points: r.loginDropFlag ? 30 : 0 },
               ]
               return (

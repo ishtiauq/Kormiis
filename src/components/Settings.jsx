@@ -63,7 +63,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
 
   const [activeSessions] = useState([]) // Sessions will be implemented with real backend auth
 
-  const [currency, setCurrency] = useState(settings.currency || 'à§³')
+  const [currency, setCurrency] = useState(settings.currency || 'Ã Â§Â³')
   const [salaryStructure, setSalaryStructure] = useState(settings.salaryStructure || [])
   const [expensePolicies, setExpensePolicies] = useState(settings.expensePolicies || { Travel: 500, Meals: 50, 'Office Supplies': 100, Medical: 200, Other: 50 })
   const [leavePolicies, setLeavePolicies] = useState(settings.leavePolicies || { Annual: 14, Sick: 7, Casual: 3, Unpaid: 0 })
@@ -279,11 +279,11 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
               <div className="w-full max-w-[260px]">
                 <Select value={currency} onChange={setCurrency} placeholder="$ (USD)">
                   <SelectItem id="$">$ (USD)</SelectItem>
-                  <SelectItem id="à§³">à§³ (BDT)</SelectItem>
-                  <SelectItem id="â‚¬">â‚¬ (EUR)</SelectItem>
-                  <SelectItem id="Â£">Â£ (GBP)</SelectItem>
-                  <SelectItem id="â‚¹">â‚¹ (INR)</SelectItem>
-                  <SelectItem id="Â¥">Â¥ (JPY)</SelectItem>
+                  <SelectItem id="Ã Â§Â³">Ã Â§Â³ (BDT)</SelectItem>
+                  <SelectItem id="Ã¢â€šÂ¬">Ã¢â€šÂ¬ (EUR)</SelectItem>
+                  <SelectItem id="Ã‚Â£">Ã‚Â£ (GBP)</SelectItem>
+                  <SelectItem id="Ã¢â€šÂ¹">Ã¢â€šÂ¹ (INR)</SelectItem>
+                  <SelectItem id="Ã‚Â¥">Ã‚Â¥ (JPY)</SelectItem>
                 </Select>
               </div>
             </CardContent>
@@ -720,7 +720,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                       {sess.current && <Badge className="bg-green-500 hover:bg-green-600">This Device</Badge>}
                     </div>
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <span>{sess.location}</span><span>â€¢</span><span>{sess.time}</span><span>â€¢</span><span>{sess.ip}</span>
+                      <span>{sess.location}</span><span>Ã¢â‚¬Â¢</span><span>{sess.time}</span><span>Ã¢â‚¬Â¢</span><span>{sess.ip}</span>
                     </div>
                   </div>
                   {!sess.current && (
@@ -747,7 +747,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
   return (
     <div className="animate-fade-in flex flex-col gap-6 w-full pb-10">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
+        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
           <Icon name="settings" className="text-foreground" size={20}/>
           Settings
         </h1>

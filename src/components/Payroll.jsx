@@ -377,7 +377,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
     doc.setTextColor(255, 255, 255)
     doc.setFontSize(11)
     doc.setFont('helvetica', 'bold')
-    doc.text('KORMIIS â€” PAYSLIP RECEIPT', pageW / 2, y + 9, { align: 'center' })
+    doc.text('KORMIIS Ã¢â‚¬â€ PAYSLIP RECEIPT', pageW / 2, y + 9, { align: 'center' })
     y += 22
 
     // Employee info
@@ -566,7 +566,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
       
       {/* Header and Month Selector */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
+        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
           <Icon name="account_balance" className="text-foreground" size={20}/>
           Payroll
         </h1>

@@ -24,7 +24,7 @@ const DashboardWidget = ({
           <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${iconClass}`}>
             {icon}
           </div>
-          <CardTitle className="text-base font-extrabold m-0">{title}</CardTitle>
+          <CardTitle className="text-fluid-xl font-extrabold m-0">{title}</CardTitle>
         </div>
         {action}
       </CardHeader>
@@ -228,15 +228,15 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
 
       {/* Page Title */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
+        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
           <Icon name="dashboard" className="text-foreground" size={20}/>
           Dashboard
         </h1>
       </div>
       <div className="border-t border-border border-headline" />
       
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-card p-5 sm:p-6 rounded-2xl border border-border shadow-sm bg-gradient-to-r from-card to-primary/5 gap-4">
-        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight flex items-center gap-3 text-foreground m-0">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-card p-5 sm:p-6 rounded-2xl border border-border shadow-sm gap-4">
+        <h2 className="text-fluid-xl font-extrabold tracking-tight flex items-center gap-3 text-foreground m-0">
           <Icon name="monitoring" className="text-primary shrink-0" size={24}/>
           Admin Overview
         </h2>
@@ -248,7 +248,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
       {/* Unified Responsive & Adaptive Dashboard Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3 gap-5 lg:gap-6 items-stretch">
         
-        {/* Widget 4 â€” Announcements (Span 6) */}
+        {/* Widget 4 Ã¢â‚¬â€ Announcements (Span 6) */}
         {canViewAnnouncements && (
           <DashboardWidget
           id="w4"
@@ -289,7 +289,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
         </DashboardWidget>
         )}
 
-        {/* Widget 2 â€” Today's Attendance (Span 4) */}
+        {/* Widget 2 Ã¢â‚¬â€ Today's Attendance (Span 4) */}
         {canViewAttendance && (
           <DashboardWidget
           id="w2"
@@ -302,7 +302,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
         >
           <div className="flex items-center justify-between gap-1 sm:gap-2 xl:gap-3 py-2">
             <div className="flex flex-col items-center flex-1">
-              <span className="text-fluid-2xl font-black text-emerald-600 dark:text-emerald-400 flex items-center gap-1 xl:gap-1.5">
+                  <span className="text-fluid-xl font-black text-emerald-600 dark:text-emerald-400 flex items-center gap-1 xl:gap-1.5">
                 <span className="pulse-dot pulse-dot-green m-0"></span>
                 {todayStats.present}
               </span>
@@ -310,7 +310,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
             </div>
             <div className="w-[1px] h-10 bg-border"></div>
             <div className="flex flex-col items-center flex-1">
-              <span className="text-fluid-2xl font-black text-destructive flex items-center gap-1 xl:gap-1.5">
+                  <span className="text-fluid-xl font-black text-destructive flex items-center gap-1 xl:gap-1.5">
                 <span className="pulse-dot pulse-dot-red m-0"></span>
                 {todayStats.absent}
               </span>
@@ -318,7 +318,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
             </div>
             <div className="w-[1px] h-10 bg-border"></div>
             <div className="flex flex-col items-center flex-1">
-              <span className="text-fluid-2xl font-black text-amber-500 flex items-center gap-1 xl:gap-1.5">
+                  <span className="text-fluid-xl font-black text-amber-500 flex items-center gap-1 xl:gap-1.5">
                 <span className="pulse-dot pulse-dot-orange m-0"></span>
                 {todayStats.onLeave}
               </span>
@@ -332,10 +332,10 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
         </DashboardWidget>
         )}
 
-        {/* Widget 4 â€” Daily Checklist */}
+        {/* Widget 4 Ã¢â‚¬â€ Daily Checklist */}
         <DailyChecklistWidget notes={notes} setNotes={setNotes} ownerId={currentUser?.id || currentUser?.uid || ''} cardClass="" />
 
-        {/* HR Automation â€” People Insights */}
+        {/* HR Automation Ã¢â‚¬â€ People Insights */}
         <HrOverview adminUid={currentUser?.uid} currentUser={currentUser} setCurrentView={setCurrentView} addToast={addToast} />
 
         {/* PERFORMANCE TRACKER WIDGET */}
@@ -395,7 +395,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
         >
           <div className="flex flex-col h-full justify-between gap-4">
             <div className="flex flex-col gap-1">
-              <span className="text-fluid-display font-black text-foreground">{pendingTasksCount}</span>
+                  <span className="text-fluid-xl font-black text-foreground">{pendingTasksCount}</span>
               <span className="text-sm font-medium text-muted-foreground">Pending Tasks</span>
             </div>
             {tasks.filter(t => t.status !== 'Done').slice(0, 2).map((t, i) => (
@@ -412,7 +412,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
         </DashboardWidget>
       )}
 
-        {/* Widget 8 â€” Upcoming Milestones (Span 4) */}
+        {/* Widget 8 Ã¢â‚¬â€ Upcoming Milestones (Span 4) */}
         {canViewEmployees && (
           <DashboardWidget
           id="w8"
@@ -500,7 +500,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
           </Card>
         )}
 
-      {/* Widget 6 â€” Upcoming Events */}
+      {/* Widget 6 Ã¢â‚¬â€ Upcoming Events */}
         {canViewCalendar && (
           <DashboardWidget
           id="w6"
@@ -573,7 +573,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
         </DashboardWidget>
       )}
 
-        {/* Widget 5 â€” Payroll Summary */}
+        {/* Widget 5 Ã¢â‚¬â€ Payroll Summary */}
         {canViewPayroll && (
           <DashboardWidget
           id="w5"
@@ -590,15 +590,15 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
               <div className="grid grid-cols-2 gap-3 p-3.5 rounded-lg bg-muted/40 border border-border/50">
                 <div>
                   <span className="block text-xs font-medium text-muted-foreground">Paid</span>
-                  <span className="text-fluid-2xl font-black tabular-nums text-emerald-600 dark:text-emerald-400 mt-0.5 block">{paidCount}</span>
+                  <span className="text-fluid-xl font-black tabular-nums text-emerald-600 dark:text-emerald-400 mt-0.5 block">{paidCount}</span>
                 </div>
                 <div>
                   <span className="block text-xs font-medium text-muted-foreground">Pending</span>
-                  <span className="text-fluid-2xl font-black tabular-nums text-amber-500 mt-0.5 block">{pendingCount}</span>
+                  <span className="text-fluid-xl font-black tabular-nums text-amber-500 mt-0.5 block">{pendingCount}</span>
                 </div>
                 <div className="col-span-2 border-t border-border/50 pt-2 mt-1">
                   <span className="block text-xs font-medium text-muted-foreground">Total Payroll</span>
-                  <span className="text-fluid-2xl font-black tabular-nums text-foreground mt-0.5 block">{settings?.currency || '$'}{totalPayrollCost.toLocaleString()}</span>
+                  <span className="text-fluid-xl font-black tabular-nums text-foreground mt-0.5 block">{settings?.currency || '$'}{totalPayrollCost.toLocaleString()}</span>
                 </div>
               </div>
               <div className="mt-3 pt-3 flex justify-between items-center border-t border-border">
@@ -610,7 +610,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
         </DashboardWidget>
         )}
 
-        {/* Widget 1 â€” Employee Directory */}
+        {/* Widget 1 Ã¢â‚¬â€ Employee Directory */}
         {canViewEmployees && (
           <DashboardWidget
           id="w1"
@@ -621,7 +621,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
           {...wProps}
         >
           <div className="flex flex-col items-center gap-1.5">
-            <span className="text-fluid-display font-black tabular-nums text-foreground">{activeCount}</span>
+                  <span className="text-fluid-xl font-black tabular-nums text-foreground">{activeCount}</span>
             <Badge variant="success" className="gap-1 xl:gap-1.5 py-1 px-2 xl:px-3 text-[10px] xl:text-xs">
               <span className="sync-dot sync-blink w-1.5 h-1.5 xl:w-2 xl:h-2 rounded-full bg-status-success"></span>
               Active
@@ -629,7 +629,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
           </div>
           <div className="w-[1px] h-12 bg-border"></div>
           <div className="flex flex-col items-center gap-1.5">
-            <span className="text-fluid-display font-black tabular-nums text-foreground">{inactiveCount}</span>
+                  <span className="text-fluid-xl font-black tabular-nums text-foreground">{inactiveCount}</span>
             <Badge variant="destructive" className="gap-1 xl:gap-1.5 py-1 px-2 xl:px-3 text-[10px] xl:text-xs">
               <span className="sync-dot w-1.5 h-1.5 xl:w-2 xl:h-2 rounded-full bg-status-error"></span>
               Inactive
@@ -656,7 +656,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
             <div className="flex items-center justify-between p-3 rounded-xl bg-teal-500/5 border border-teal-500/10">
               <div className="flex flex-col">
                 <span className="text-xs font-semibold text-teal-600/80 uppercase tracking-wider mb-1">Total Assets</span>
-                  <span className="text-fluid-2xl font-black text-foreground">{assets.length}</span>
+                  <span className="text-fluid-xl font-black text-foreground">{assets.length}</span>
               </div>
             </div>
             

@@ -389,7 +389,7 @@ export default function EmployeePortal({
                   <Icon name="check_circle" size={20}/>
                 </div>
                 <p className="text-fluid-sm font-semibold text-foreground">Today's attendance completed</p>
-                <p className="text-fluid-xs text-muted-foreground">In: {punchLog.checkIn} â€¢ Out: {punchLog.checkOut} â€¢ {punchLog.hours}h</p>
+                <p className="text-fluid-xs text-muted-foreground">In: {punchLog.checkIn} Ã¢â‚¬Â¢ Out: {punchLog.checkOut} Ã¢â‚¬Â¢ {punchLog.hours}h</p>
               </div>
             ) : (
               <Button
@@ -403,7 +403,7 @@ export default function EmployeePortal({
         </DialogContent>
       </Dialog>
 
-      {/* Bottom Tab Bar (Mobile) â€” Floating Pill */}
+      {/* Bottom Tab Bar (Mobile) Ã¢â‚¬â€ Floating Pill */}
       {isMobile && (
         <div className={`fixed bottom-0 left-0 right-0 z-40 flex justify-center pointer-events-none px-4 pb-3 sm:pb-4 transition-all duration-300 ${isScrollingDown && !showMobileMenu ? 'translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
           <nav className="bottom-bar bottom-bar-pill bg-foreground pointer-events-auto w-full max-w-[250px] flex items-center justify-around px-2 h-16 shadow-lg shadow-black/10 transition-all duration-300" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
@@ -520,20 +520,20 @@ function DashboardView({ currentUser, attendance, setAttendance, addToast, expen
   return (
     <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[1200px] mx-auto">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
+        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
           <Icon name="dashboard" className="text-foreground" size={20}/>
           Dashboard
         </h1>
       </div>
       <div className="border-t border-border border-headline" />
-      <Card className="bg-gradient-to-br from-primary/10 via-background to-background border-primary/20 shadow-sm">
+      <Card className="bg-card border-border shadow-sm">
         <CardContent className="p-6 sm:p-8 flex items-center gap-5 sm:gap-6">
           <div className="size-16 sm:size-20 bg-background rounded-full shadow-sm flex items-center justify-center p-1">
             {getInitialsAvatar(currentUser.name)}
           </div>
           <div className="flex flex-col gap-1 sm:gap-1.5">
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight m-0 text-foreground">Welcome back, {currentUser.name.split(' ')[0]}!</h1>
-            <p className="m-0 text-fluid font-medium text-muted-foreground">{currentUser.role} â€¢ {currentUser.department}</p>
+            <h1 className="text-fluid-xl font-extrabold tracking-tight m-0 text-foreground">Welcome back, {currentUser.name.split(' ')[0]}!</h1>
+            <p className="m-0 text-fluid font-medium text-muted-foreground">{currentUser.role} Ã¢â‚¬Â¢ {currentUser.department}</p>
           </div>
         </CardContent>
       </Card>
@@ -549,7 +549,7 @@ function DashboardView({ currentUser, attendance, setAttendance, addToast, expen
       {/* ANNOUNCEMENTS - MOVED TO TOP */}
       <div className="flex flex-col gap-4">
         <div className="flex justify-between items-center px-1">
-          <h3 className="text-lg font-semibold text-foreground m-0">Announcements</h3>
+          <h3 className="text-fluid-xl font-semibold text-foreground m-0">Announcements</h3>
           <button className="bg-transparent border-0 font-semibold cursor-pointer text-sm text-primary hover:text-primary/80 transition-colors" onClick={() => setActiveTab('announcements')}>View All</button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -582,9 +582,9 @@ function DashboardView({ currentUser, attendance, setAttendance, addToast, expen
           <CardContent className="p-5 flex flex-col justify-center">
             <div className="flex items-center gap-2 mb-2 text-primary">
               <Icon name="check_box" size={18}/>
-              <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground m-0">Active Tasks</h3>
+              <h3 className="text-fluid-sm font-bold uppercase tracking-wider text-muted-foreground m-0">Active Tasks</h3>
             </div>
-            <div className="text-fluid-display font-black tabular-nums text-foreground">
+            <div className="text-fluid-xl font-black tabular-nums text-foreground">
               {myActiveTasks.length} <span className="text-fluid-sm font-semibold text-muted-foreground ml-1">tasks</span>
             </div>
           </CardContent>
@@ -594,7 +594,7 @@ function DashboardView({ currentUser, attendance, setAttendance, addToast, expen
           <CardContent className="p-5 flex flex-col justify-center">
             <div className="flex items-center gap-2 mb-2 text-emerald-500">
               <Icon name="calendar_month" size={18}/>
-              <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground m-0">Next Event</h3>
+              <h3 className="text-fluid-sm font-bold uppercase tracking-wider text-muted-foreground m-0">Next Event</h3>
             </div>
             <div className="text-fluid-xl font-bold truncate text-foreground mb-1">
               {nextEvent ? nextEvent.title : 'None Scheduled'}
@@ -609,9 +609,9 @@ function DashboardView({ currentUser, attendance, setAttendance, addToast, expen
           <CardContent className="p-5 flex flex-col justify-center">
             <div className="flex items-center gap-2 mb-2 text-blue-500">
               <Icon name="calendar_month" size={18}/>
-              <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground m-0">Available Leave</h3>
+              <h3 className="text-fluid-sm font-bold uppercase tracking-wider text-muted-foreground m-0">Available Leave</h3>
             </div>
-            <div className="text-fluid-display font-black tabular-nums text-foreground">
+            <div className="text-fluid-xl font-black tabular-nums text-foreground">
               {currentBalances.annual.limit - currentBalances.annual.used + currentBalances.sick.limit - currentBalances.sick.used} <span className="text-fluid-sm font-semibold text-muted-foreground ml-1">days total</span>
             </div>
           </CardContent>
@@ -621,9 +621,9 @@ function DashboardView({ currentUser, attendance, setAttendance, addToast, expen
           <CardContent className="p-5 flex flex-col justify-center">
             <div className="flex items-center gap-2 mb-2 text-amber-500">
               <Icon name="monitor" size={18}/>
-              <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground m-0">Reimbursements</h3>
+              <h3 className="text-fluid-sm font-bold uppercase tracking-wider text-muted-foreground m-0">Reimbursements</h3>
             </div>
-            <div className="text-fluid-display font-black tabular-nums text-foreground">
+            <div className="text-fluid-xl font-black tabular-nums text-foreground">
               ${totalPending.toFixed(2)} <span className="text-fluid-sm font-semibold text-muted-foreground ml-1">pending</span>
             </div>
           </CardContent>
@@ -631,7 +631,7 @@ function DashboardView({ currentUser, attendance, setAttendance, addToast, expen
       </div>
 
       <div className="mt-4 flex flex-col gap-4">
-        <h3 className="text-lg font-semibold m-0">Quick Actions</h3>
+        <h3 className="text-fluid-xl font-semibold m-0">Quick Actions</h3>
         <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
           <Card className="hover:border-primary/50 transition-colors shadow-sm cursor-pointer h-28 flex items-center justify-center group" onClick={() => setActiveTab('leave')}>
             <CardContent className="p-0 flex flex-col gap-3 justify-center items-center">
@@ -754,7 +754,7 @@ function AttendanceView({
   return (
     <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[1000px] mx-auto pb-10">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
+        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
           <Icon name="schedule" className="text-foreground" size={20}/>
           Attendance
         </h1>
@@ -1045,7 +1045,7 @@ function PayslipsView({ currentUser, payroll, addToast }) {
   return (
     <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[1000px] mx-auto pb-10">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
+        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
           <Icon name="account_balance" className="text-foreground" size={20}/>
           Payslips
         </h1>
@@ -1131,7 +1131,7 @@ function LeaveView({ currentUser, attendance, setAttendance, addToast, addLog, s
   return (
     <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[1000px] mx-auto pb-10">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
+        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
           <Icon name="calendar_month" className="text-foreground" size={20}/>
           Leave
         </h1>
@@ -1395,7 +1395,7 @@ function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetR
   return (
     <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[900px] mx-auto pb-10">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
+        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
           <Icon name="monitor" className="text-foreground" size={20}/>
           Assets
         </h1>

@@ -228,7 +228,7 @@ export default function GeoCheckInWidget({ currentUser, attendance, setAttendanc
             <div className="p-2 rounded-md bg-primary/10 text-primary shrink-0">
               <Icon name="event_available" size={20}/>
             </div>
-            <CardTitle className="text-lg sm:text-xl font-extrabold m-0 truncate">Mark Attendance</CardTitle>
+            <CardTitle className="text-fluid-xl font-extrabold m-0 truncate">Mark Attendance</CardTitle>
           </div>
         </CardHeader>
       

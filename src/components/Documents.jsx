@@ -294,7 +294,7 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
   return (
     <div className="fade-in px-1 sm:px-0 pb-10">
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
+        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
           <Icon name="folder_open" className="text-foreground" size={20}/>
           Documents
         </h1>

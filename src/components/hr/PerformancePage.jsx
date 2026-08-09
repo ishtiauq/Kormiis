@@ -124,7 +124,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
   return (
     <div className="animate-fade-in flex flex-col gap-5 max-w-[1200px] mx-auto w-full">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient m-0">
+        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient m-0">
           <Icon name="insights" className="text-foreground" size={20}/> Performance Tracker
         </h1>
         <div className="flex items-center gap-2">
@@ -252,7 +252,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
                 className={`rounded-full px-4 justify-center ${selectedSortGrade !== 'A' ? 'text-muted-foreground hover:bg-muted hover:text-foreground' : ''}`}
                 onClick={() => isAdmin && setSelectedSortGrade(prev => prev === 'A' ? null : 'A')}
               >
-                Grade A (85 â€“ 100 pts)
+                Grade A (85 Ã¢â‚¬â€œ 100 pts)
               </Button>
               <Button
                 role="tab"
@@ -262,7 +262,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
                 className={`rounded-full px-4 justify-center ${selectedSortGrade !== 'B' ? 'text-muted-foreground hover:bg-muted hover:text-foreground' : ''}`}
                 onClick={() => isAdmin && setSelectedSortGrade(prev => prev === 'B' ? null : 'B')}
               >
-                Grade B (70 â€“ 84 pts)
+                Grade B (70 Ã¢â‚¬â€œ 84 pts)
               </Button>
               <Button
                 role="tab"
@@ -272,7 +272,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
                 className={`rounded-full px-4 justify-center ${selectedSortGrade !== 'C' ? 'text-muted-foreground hover:bg-muted hover:text-foreground' : ''}`}
                 onClick={() => isAdmin && setSelectedSortGrade(prev => prev === 'C' ? null : 'C')}
               >
-                Grade C (50 â€“ 69 pts)
+                Grade C (50 Ã¢â‚¬â€œ 69 pts)
               </Button>
               <Button
                 role="tab"
@@ -282,7 +282,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
                 className={`rounded-full px-4 justify-center ${selectedSortGrade !== 'D' ? 'text-muted-foreground hover:bg-muted hover:text-foreground' : ''}`}
                 onClick={() => isAdmin && setSelectedSortGrade(prev => prev === 'D' ? null : 'D')}
               >
-                Grade D (0 â€“ 49 pts)
+                Grade D (0 Ã¢â‚¬â€œ 49 pts)
               </Button>
             </div>
           </div>
@@ -306,20 +306,20 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
               <Card className="border border-border/80 shadow-sm rounded-2xl">
                 <CardContent className="p-6 flex flex-wrap items-center justify-between gap-4">
                   <div>
-                    <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">My Performance Score â€¢ {month}</div>
+                    <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">My Performance Score Ã¢â‚¬Â¢ {month}</div>
                     <div className="text-fluid-display font-black tabular-nums text-foreground mt-1">
                       {myScore.totalScore ?? myScore.score ?? 0}<span className="text-fluid-sm text-muted-foreground font-semibold">/100</span>
                     </div>
                   </div>
                   <Badge variant="outline" className={`text-base px-4 py-1 font-bold ${gradeTone[myScore.grade] || ''}`}>
-                    Grade {myScore.grade || 'â€”'}
+                    Grade {myScore.grade || 'Ã¢â‚¬â€'}
                   </Badge>
                 </CardContent>
               </Card>
 
               {/* Evaluation Breakdown */}
               <Card className="border border-border/80 shadow-sm rounded-2xl">
-                <CardHeader><CardTitle className="text-base font-bold">Score Breakdown â€” {month}</CardTitle></CardHeader>
+                <CardHeader><CardTitle className="text-base font-bold">Score Breakdown Ã¢â‚¬â€ {month}</CardTitle></CardHeader>
                 <CardContent className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-0">
                   <div className="p-4 rounded-xl bg-muted/40 border border-border flex flex-col justify-between">
                     <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">On-Time Attendance</span>
@@ -372,7 +372,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
                 <div className="grid grid-cols-1 gap-4 mt-2">
                   <Card className="border border-border/80 shadow-sm rounded-2xl">
                     <CardContent className="p-5">
-                      <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Top Performers â€” {month}</div>
+                      <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Top Performers Ã¢â‚¬â€ {month}</div>
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         {topPerformers.map((p, i) => (
                           <div key={p.employeeId || p.id} className="flex items-center justify-between p-3 rounded-xl bg-muted/30 border border-border/60">
@@ -419,7 +419,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
                     ))}
                   </div>
                 ) : (
-                  <div className="text-sm text-muted-foreground">â€”</div>
+                  <div className="text-sm text-muted-foreground">Ã¢â‚¬â€</div>
                 )}
               </CardContent>
             </Card>
@@ -427,7 +427,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
 
           <Card className="border border-border/80 shadow-sm rounded-2xl">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-              <CardTitle className="text-base font-bold">Employee Performance Tracker â€” {month}</CardTitle>
+              <CardTitle className="text-base font-bold">Employee Performance Tracker Ã¢â‚¬â€ {month}</CardTitle>
               <Badge variant="secondary">{scores.length} employees evaluated</Badge>
             </CardHeader>
             <CardContent className="p-0">
@@ -460,7 +460,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
                         <TableRow key={s.employeeId || s.id}>
                           <TableCell>
                             <div className="font-medium text-sm text-foreground">{s.employeeName}</div>
-                            <div className="text-xs text-muted-foreground">{s.department || 'â€”'}</div>
+                            <div className="text-xs text-muted-foreground">{s.department || 'Ã¢â‚¬â€'}</div>
                           </TableCell>
                           <TableCell className="text-center font-bold tabular-nums text-base">{s.totalScore || s.score}</TableCell>
                           <TableCell className="text-center">

@@ -162,7 +162,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
       // profile). The Firebase sign-in email can't be changed from the client
       // SDK, so an admin edit only updates the directory record here.
       if (newEmail && newEmail !== editingEmployee.email) {
-        addToast('Email updated in the directory. The sign-in email is unchanged â€” reset it in the Firebase console if needed.', 'warning')
+        addToast('Email updated in the directory. The sign-in email is unchanged Ã¢â‚¬â€ reset it in the Firebase console if needed.', 'warning')
       }
 
       // Update employee list
@@ -200,7 +200,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
         return
       }
 
-      // Invite the teammate by email â€” they sign in with their own Google account
+      // Invite the teammate by email Ã¢â‚¬â€ they sign in with their own Google account
       let uid = null
       const companyUid = adminUid || currentUser?.uid
       try {
@@ -464,7 +464,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
 
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient"><Icon name="group" className="text-foreground" size={20}/>Employees</h1>
+        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient"><Icon name="group" className="text-foreground" size={20}/>Employees</h1>
       </div>
 
       {/* Pending Profile Updates Queue */}
@@ -785,7 +785,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
                     </div>
                   </div>
 
-                  {/* Expand Toggle â€” always at the bottom of the card */}
+                  {/* Expand Toggle Ã¢â‚¬â€ always at the bottom of the card */}
                   <div className="flex justify-center mt-2">
                     <Button 
                       variant="ghost" 
@@ -1093,7 +1093,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
               </div>
 
               <div className="flex flex-col gap-2 rounded-md bg-muted/50 px-3 py-2.5 text-xs text-muted-foreground">
-                The teammate signs in with their own Google account using this email â€” they are linked to your workspace automatically.
+                The teammate signs in with their own Google account using this email Ã¢â‚¬â€ they are linked to your workspace automatically.
               </div>
 
               <DatePicker label="Date of Birth" value={newDob} onChange={(e) => setNewDob(e.target.value)} />

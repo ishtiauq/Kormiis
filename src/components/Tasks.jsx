@@ -203,7 +203,7 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
     <div className="w-full flex flex-col gap-6 animate-fade-in p-2 sm:p-4">
       {/* Header */}
       <div className="flex flex-col pb-4 border-b border-border border-headline mb-2">
-        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
+        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
           <Icon name="check_box" className="text-foreground" size={20}/> Tasks
         </h1>
       </div>

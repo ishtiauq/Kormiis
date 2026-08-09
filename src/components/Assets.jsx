@@ -184,7 +184,7 @@ function AssetCard({ asset, alert, onClick }) {
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <div className="font-bold text-foreground text-sm truncate">{asset.name}</div>
-            <div className="text-[11px] text-muted-foreground font-sans mt-0.5">{asset.id} â€¢ SN: {asset.serialNumber}</div>
+            <div className="text-[11px] text-muted-foreground font-sans mt-0.5">{asset.id} Ã¢â‚¬Â¢ SN: {asset.serialNumber}</div>
           </div>
           <Badge className={`shrink-0 border ${statusClass[asset.status] || 'bg-red-500/10 text-red-700 border-red-500/20 dark:text-red-400'}`}>
             {asset.status}
@@ -194,8 +194,8 @@ function AssetCard({ asset, alert, onClick }) {
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
           {categoryIcons[asset.category] || <Icon name="monitor" size={14}/>}
           <span>{asset.category}</span>
-          <span className="opacity-50">â€¢</span>
-          <span>Condition: {asset.condition || 'â€”'}</span>
+          <span className="opacity-50">Ã¢â‚¬Â¢</span>
+          <span>Condition: {asset.condition || 'Ã¢â‚¬â€'}</span>
         </div>
 
         <div className="flex items-center justify-between pt-2 border-t border-border/60">
@@ -207,7 +207,7 @@ function AssetCard({ asset, alert, onClick }) {
             <div className="text-[11px] text-muted-foreground uppercase tracking-wider flex items-center justify-end gap-1">
               Warranty {alert && <Icon name="warning" className="text-orange-500" size={14}/>}
             </div>
-            <div className="font-medium text-sm text-foreground">{asset.warrantyExpiry || 'â€”'}</div>
+            <div className="font-medium text-sm text-foreground">{asset.warrantyExpiry || 'Ã¢â‚¬â€'}</div>
           </div>
         </div>
       </CardContent>
@@ -255,7 +255,7 @@ function MetricBreakdownModal({ metricKey, metrics, assets, onClose }) {
                   <div key={a.id} className="p-3 rounded-lg border border-border bg-card flex items-center justify-between gap-3">
                     <div className="min-w-0">
                       <div className="font-medium text-sm truncate">{a.name}</div>
-                      <div className="text-[11px] text-muted-foreground font-sans">{a.id} â€¢ {a.serialNumber}</div>
+                      <div className="text-[11px] text-muted-foreground font-sans">{a.id} Ã¢â‚¬Â¢ {a.serialNumber}</div>
                     </div>
                     <Badge variant="outline" className="shrink-0 text-xs">{a.category}</Badge>
                   </div>
@@ -320,7 +320,7 @@ function DetailModal({ asset, onClose }) {
           <div className="flex items-start justify-between">
             <div>
               <DialogTitle className="text-2xl mb-1">{asset.name}</DialogTitle>
-              <DialogDescription className="text-sm">Asset ID: {asset.id} &nbsp;â€¢&nbsp; SN: {asset.serialNumber}</DialogDescription>
+              <DialogDescription className="text-sm">Asset ID: {asset.id} &nbsp;Ã¢â‚¬Â¢&nbsp; SN: {asset.serialNumber}</DialogDescription>
             </div>
             <Badge className={asset.status === 'Available' ? 'bg-green-500' : asset.status === 'Assigned' ? 'bg-blue-500' : 'bg-orange-500'}>{asset.status}</Badge>
           </div>
@@ -416,8 +416,8 @@ function AssetAssignments({ assets, employees, assignForm, setAssignForm, setAss
                       <Badge className="bg-green-500/10 text-green-700 border-green-500/20 hover:bg-green-500/20 dark:text-green-400">Available In Inventory</Badge>
                     )}
                   </TableCell>
-                  <TableCell className="text-sm">{asset.assignmentDate || <span className="text-muted-foreground/50">â€”</span>}</TableCell>
-                  <TableCell className="text-sm">{asset.condition || <span className="text-muted-foreground/50">â€”</span>}</TableCell>
+                  <TableCell className="text-sm">{asset.assignmentDate || <span className="text-muted-foreground/50">Ã¢â‚¬â€</span>}</TableCell>
+                  <TableCell className="text-sm">{asset.condition || <span className="text-muted-foreground/50">Ã¢â‚¬â€</span>}</TableCell>
                   <TableCell>
                     {asset.status === 'Available' ? (
                       <Button size="sm" onClick={() => { setAssignTarget(asset); setShowAssignModal(true) }} className="shadow-sm">
@@ -645,7 +645,7 @@ function AssetMaintenance({ assets, selectedAssetForMaint, setSelectedAssetForMa
                           </div>
                           <div className="flex items-center gap-2 mb-2 text-xs text-muted-foreground font-sans">
                             <span>{log.date}</span>
-                            <span>â€¢</span>
+                            <span>Ã¢â‚¬Â¢</span>
                             <span>{log.id}</span>
                           </div>
                           <div className="text-foreground">{log.issue}</div>
@@ -1029,7 +1029,7 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
   return (
     <div className="animate-fade-in pb-10 flex flex-col gap-6 w-full max-w-full overflow-x-hidden">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
+        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
           <Icon name="devices_other" className="text-foreground" size={20}/>
           Assets
         </h1>

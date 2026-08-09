@@ -312,7 +312,7 @@ export default function GigBoardPage({ adminUid, currentUser, addToast }) {
   return (
     <div className="animate-fade-in flex flex-col gap-5 max-w-[1200px] mx-auto w-full">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-1">
-        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient m-0">
+        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient m-0">
           <Icon name="handshake" className="text-foreground" size={22}/> Help Hub
         </h1>
         <Button onClick={openCreateModal} className="hidden sm:inline-flex rounded-full shadow-sm">
@@ -375,7 +375,7 @@ export default function GigBoardPage({ adminUid, currentUser, addToast }) {
                         ) : (
                           gig.hasOffered ? (
                             <Badge variant="secondary" className="px-3 py-1 bg-amber-500/10 text-amber-600 border-amber-500/20 font-bold flex items-center gap-1 rounded-full shrink-0 text-xs">
-                              âœ‹ Help Offered
+                              Ã¢Å“â€¹ Help Offered
                             </Badge>
                           ) : (
                             <Button size="sm" className="rounded-full px-3.5 h-8 text-xs font-bold shadow-sm flex items-center" onClick={() => offerHelp(gig)}>
