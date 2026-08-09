@@ -31,7 +31,7 @@ export default function LeaveRequests({ employees, attendance, setAttendance, ad
         </h3>
         {pendingLeaves.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
-            <Icon name="calendar_month" size={32} className="opacity-30 mx-auto mb-3" />
+            <Icon name="calendar_month" className="opacity-30 mx-auto mb-3" size={32}/>
             <p className="m-0">No pending leave requests.</p>
           </div>
         ) : (
@@ -54,16 +54,16 @@ export default function LeaveRequests({ employees, attendance, setAttendance, ad
                     <TableRow key={l.id}>
                       <TableCell><span className="text-sm text-foreground">{emp?.name || l.employeeId}</span></TableCell>
                       <TableCell><span className="text-sm text-foreground">{l.leaveType}</span></TableCell>
-                      <TableCell><span className="text-xs text-muted-foreground">{formatDateShort(l.startDate)} — {formatDateShort(l.endDate)}</span></TableCell>
-                      <TableCell className="text-center"><span className="text-sm font-semibold text-foreground">{l.days || '—'}</span></TableCell>
-                      <TableCell><span className="text-xs text-muted-foreground block max-w-[200px] break-words">{l.reason || '—'}</span></TableCell>
+                      <TableCell><span className="text-xs text-muted-foreground">{formatDateShort(l.startDate)} â€” {formatDateShort(l.endDate)}</span></TableCell>
+                      <TableCell className="text-center"><span className="text-sm font-semibold text-foreground">{l.days || 'â€”'}</span></TableCell>
+                      <TableCell><span className="text-xs text-muted-foreground block max-w-[200px] break-words">{l.reason || 'â€”'}</span></TableCell>
                       <TableCell className="text-right">
                         <div className="flex gap-2 justify-end">
                           <Button size="sm" variant="default" onClick={() => setPendingAction({ id: l.id, action: 'approve', empName: emp?.name || l.employeeId })}>
-                            <Icon name="check" size={13} className="mr-1" /> Approve
+                            <Icon name="check" className="mr-1" size={13}/> Approve
                           </Button>
                           <Button size="sm" variant="outline" className="text-destructive border-destructive/30 hover:text-destructive" onClick={() => setPendingAction({ id: l.id, action: 'reject', empName: emp?.name || l.employeeId })}>
-                            <Icon name="close" size={13} className="mr-1" /> Reject
+                            <Icon name="close" className="mr-1" size={13}/> Reject
                           </Button>
                         </div>
                       </TableCell>
@@ -80,7 +80,7 @@ export default function LeaveRequests({ employees, attendance, setAttendance, ad
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
-              <Icon name="warning" size={20} className="h-5 w-5 text-amber-500" />
+              <Icon name="warning" className="h-5 w-5 text-amber-500" size={20}/>
               {pendingAction?.action === 'approve' ? 'Approve' : 'Reject'} Leave Request?
             </AlertDialogTitle>
             <AlertDialogDescription>

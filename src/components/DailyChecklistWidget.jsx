@@ -24,7 +24,7 @@ export default function DailyChecklistWidget({ notes = [], setNotes, ownerId = '
       <CardHeader className="flex-row items-center justify-between pb-3.5 space-y-0">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-primary/10 text-primary">
-            <Icon name="task_alt" size={20} />
+            <Icon name="task_alt" size={20}/>
           </div>
           <CardTitle className="text-base font-extrabold m-0">
             {checklistNote?.title || "Daily Checklist"}
@@ -34,7 +34,7 @@ export default function DailyChecklistWidget({ notes = [], setNotes, ownerId = '
       <CardContent className="flex-1 p-4 flex flex-col pt-0">
         {!checklistNote ? (
           <div className="flex-1 flex flex-col items-center justify-center text-center py-6">
-            <Icon name="fact_check" size={48} className="text-muted-foreground/30 mb-3" />
+            <Icon name="fact_check" className="text-muted-foreground/30 mb-3" size={48}/>
             <p className="text-fluid-sm text-muted-foreground font-medium mb-1">No Daily Checklist</p>
             <p className="text-fluid-xs text-muted-foreground/70 max-w-[200px]">Create a Checklist Note and mark it as 'Daily Checklist' to see it here.</p>
           </div>
@@ -51,7 +51,7 @@ export default function DailyChecklistWidget({ notes = [], setNotes, ownerId = '
                 onClick={() => handleToggleItem(item.id)}
               >
                 <div className={`mt-0.5 flex-shrink-0 size-5 rounded-md border flex items-center justify-center transition-all duration-200 ${item.done ? 'bg-primary border-primary text-primary-foreground shadow-sm scale-110' : 'border-foreground/30 text-transparent group-hover:border-primary/50 group-hover:scale-105'}`}>
-                  <Icon name="check" size={14} className={item.done ? 'opacity-100' : 'opacity-0'} />
+                  <Icon name="check" className={item.done ? 'opacity-100' : 'opacity-0'} size={14}/>
                 </div>
                 <span className={`text-sm leading-relaxed transition-all duration-200 ${item.done ? 'text-muted-foreground line-through opacity-70' : 'text-foreground font-medium'}`}>
                   {item.text}

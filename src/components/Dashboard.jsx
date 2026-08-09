@@ -229,7 +229,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
       {/* Page Title */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
-          <Icon name="dashboard" size={20} className="text-foreground" />
+          <Icon name="dashboard" className="text-foreground" size={20}/>
           Dashboard
         </h1>
       </div>
@@ -237,7 +237,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
       
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-card p-5 sm:p-6 rounded-2xl border border-border shadow-sm bg-gradient-to-r from-card to-primary/5 gap-4">
         <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight flex items-center gap-3 text-foreground m-0">
-          <Icon name="monitoring" size={24} className="text-primary shrink-0" />
+          <Icon name="monitoring" className="text-primary shrink-0" size={24}/>
           Admin Overview
         </h2>
         <span className="text-sm font-semibold text-foreground bg-muted/80 px-4 py-2 rounded-md border border-border/50 shrink-0">
@@ -248,12 +248,12 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
       {/* Unified Responsive & Adaptive Dashboard Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3 gap-5 lg:gap-6 items-stretch">
         
-        {/* Widget 4 — Announcements (Span 6) */}
+        {/* Widget 4 â€” Announcements (Span 6) */}
         {canViewAnnouncements && (
           <DashboardWidget
           id="w4"
           title="Announcements"
-          icon={<Icon name="rss_feed" size={18} />}
+          icon={<Icon name="rss_feed" size={18}/>}
           iconClass="bg-amber-500/10 text-amber-500"
           cardClass="col-span-full"
           action={<Button variant="outline" size="sm" onClick={() => setCurrentView && setCurrentView('announcements')} className="text-xs font-semibold h-7">View All</Button>}
@@ -270,7 +270,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
                 onClick={() => setCurrentView && setCurrentView('announcements')}
               >
                 <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-amber-500/10 text-amber-500 shrink-0">
-                  <Icon name="rss_feed" size={16} />
+                  <Icon name="rss_feed" size={16}/>
                 </div>
                 <div className="flex-1 min-w-0 pr-2">
                   <p className="m-0 text-fluid-xs font-bold text-foreground break-words">{ann.title}</p>
@@ -289,12 +289,12 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
         </DashboardWidget>
         )}
 
-        {/* Widget 2 — Today's Attendance (Span 4) */}
+        {/* Widget 2 â€” Today's Attendance (Span 4) */}
         {canViewAttendance && (
           <DashboardWidget
           id="w2"
           title="Today's Attendance"
-          icon={<Icon name="group" size={18} />}
+          icon={<Icon name="group" size={18}/>}
           iconClass="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
           action={<Button variant="outline" size="sm" onClick={() => setShowAttDropdown(!showAttDropdown)} className="text-xs font-semibold h-7">{showAttDropdown ? 'Hide' : 'Details'}</Button>}
           contentClass="flex flex-col justify-between pt-4"
@@ -332,17 +332,17 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
         </DashboardWidget>
         )}
 
-        {/* Widget 4 — Daily Checklist */}
+        {/* Widget 4 â€” Daily Checklist */}
         <DailyChecklistWidget notes={notes} setNotes={setNotes} ownerId={currentUser?.id || currentUser?.uid || ''} cardClass="" />
 
-        {/* HR Automation — People Insights */}
+        {/* HR Automation â€” People Insights */}
         <HrOverview adminUid={currentUser?.uid} currentUser={currentUser} setCurrentView={setCurrentView} addToast={addToast} />
 
         {/* PERFORMANCE TRACKER WIDGET */}
         <DashboardWidget
           id="perf-widget"
           title="Performance Tracker"
-          icon={<Icon name="insights" size={18} />}
+          icon={<Icon name="insights" size={18}/>}
           iconClass="bg-purple-500/10 text-purple-600 dark:text-purple-400"
           {...wProps}
         >
@@ -384,7 +384,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
         <DashboardWidget
           id="tasks-widget"
           title="Tasks Overview"
-          icon={<Icon name="check_box" size={18} />}
+          icon={<Icon name="check_box" size={18}/>}
           iconClass="bg-orange-500/10 text-orange-500"
           {...wProps}
           action={
@@ -412,12 +412,12 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
         </DashboardWidget>
       )}
 
-        {/* Widget 8 — Upcoming Milestones (Span 4) */}
+        {/* Widget 8 â€” Upcoming Milestones (Span 4) */}
         {canViewEmployees && (
           <DashboardWidget
           id="w8"
           title="Upcoming Milestones"
-          icon={<Icon name="workspace_premium" size={18} />}
+          icon={<Icon name="workspace_premium" size={18}/>}
           iconClass="bg-amber-500/10 text-amber-500"
           action={<Badge variant="secondary" className="px-3 py-1">30 Days</Badge>}
           contentClass="flex flex-col justify-start pt-4"
@@ -425,7 +425,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
         >
           {upcomingMilestones.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center text-center p-5">
-              <Icon name="redeem" size={34} className="text-muted-foreground/40 mb-2" />
+              <Icon name="redeem" className="text-muted-foreground/40 mb-2" size={34}/>
               <p className="m-0 text-fluid-xs font-medium text-muted-foreground max-w-[200px] leading-relaxed">No birthdays or work anniversaries in the next 30 days.</p>
             </div>
           ) : (
@@ -434,7 +434,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
                 <div key={i} className="flex gap-4 p-4 border rounded-xl bg-card hover:shadow-md transition-shadow">
                   <Avatar className="w-8 h-8 shrink-0">
                     {milestone.avatar ? <AvatarImage src={milestone.avatar} alt={milestone.empName} className="object-cover" /> : null}
-                    <AvatarFallback className="bg-primary/10 text-primary"><Icon name="person" size={16} /></AvatarFallback>
+                    <AvatarFallback className="bg-primary/10 text-primary"><Icon name="person" size={16}/></AvatarFallback>
                   </Avatar>
                   <div className="flex-1 flex flex-col gap-1">
                     <p className="m-0 text-fluid-xs font-bold text-foreground break-words">{milestone.empName}</p>
@@ -483,7 +483,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
                         <div key={emp.id} className="flex items-center gap-3.5 py-2 border-b border-border/40 last:border-none">
                           <Avatar className="w-8 h-8 shrink-0">
                             {emp.avatar ? <AvatarImage src={emp.avatar} alt={emp.name} className="object-cover" /> : null}
-                            <AvatarFallback className="bg-primary/10 text-primary"><Icon name="person" size={16} /></AvatarFallback>
+                            <AvatarFallback className="bg-primary/10 text-primary"><Icon name="person" size={16}/></AvatarFallback>
                           </Avatar>
                           <div className="flex-1 min-w-0">
                             <span className="block text-xs font-extrabold text-foreground">{emp.name}</span>
@@ -500,12 +500,12 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
           </Card>
         )}
 
-      {/* Widget 6 — Upcoming Events */}
+      {/* Widget 6 â€” Upcoming Events */}
         {canViewCalendar && (
           <DashboardWidget
           id="w6"
           title="Upcoming Events"
-          icon={<Icon name="calendar_month" size={18} />}
+          icon={<Icon name="calendar_month" size={18}/>}
           iconClass="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
           cardClass="md:col-span-2 lg:col-span-2"
           action={<Button variant="outline" size="sm" onClick={() => setCurrentView && setCurrentView('calendar')} className="text-xs font-semibold h-7">Events</Button>}
@@ -524,7 +524,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
                 <div
                   className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
                 >
-                  <Icon name="calendar_month" size={16} style={{ color: evt.type === 'holiday' ? '#10b981' : evt.type === 'birthday' ? '#f59e0b' : '#3b82f6' }} />
+                  <Icon name="calendar_month" style={{ color: evt.type === 'holiday' ? '#10b981' : evt.type === 'birthday' ? '#f59e0b' : '#3b82f6' }} size={16}/>
                 </div>
                 <div className="flex-1 min-w-0 pr-2">
                   <p className="m-0 text-fluid-xs font-bold text-foreground break-words">{evt.title}</p>
@@ -546,7 +546,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
         <DashboardWidget
           id="documents-widget"
           title="Recent Documents"
-          icon={<Icon name="description" size={18} />}
+          icon={<Icon name="description" size={18}/>}
           iconClass="bg-blue-500/10 text-blue-500"
           {...wProps}
           action={
@@ -573,12 +573,12 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
         </DashboardWidget>
       )}
 
-        {/* Widget 5 — Payroll Summary */}
+        {/* Widget 5 â€” Payroll Summary */}
         {canViewPayroll && (
           <DashboardWidget
           id="w5"
           title="Payroll Summary"
-          icon={<Icon name="account_balance" size={18} />}
+          icon={<Icon name="account_balance" size={18}/>}
           action={currentPayrollMonth && <Badge variant="secondary" className="px-3 py-1 h-7">{currentPayrollMonth}</Badge>}
           contentClass="flex flex-col justify-between pt-4"
           {...wProps}
@@ -610,12 +610,12 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
         </DashboardWidget>
         )}
 
-        {/* Widget 1 — Employee Directory */}
+        {/* Widget 1 â€” Employee Directory */}
         {canViewEmployees && (
           <DashboardWidget
           id="w1"
           title="Employee Directory"
-          icon={<Icon name="group" size={18} />}
+          icon={<Icon name="group" size={18}/>}
           action={<Button variant="outline" size="sm" onClick={() => setCurrentView && setCurrentView('employees')} className="text-xs font-semibold h-7">View All</Button>}
           contentClass="flex items-center justify-around py-4"
           {...wProps}
@@ -643,7 +643,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
         <DashboardWidget
           id="assets-widget"
           title="Asset Inventory"
-          icon={<Icon name="devices_other" size={18} />}
+          icon={<Icon name="devices_other" size={18}/>}
           iconClass="bg-teal-500/10 text-teal-500"
           {...wProps}
           action={

@@ -81,7 +81,7 @@ export default function ClockWidget({ employees, attendance, setAttendance, addT
         </div>
 
         <div className="flex items-center gap-2.5 flex-wrap">
-          <Select value={clockEmpId} onChange={setClockEmpId} placeholder="— Select employee —">
+          <Select value={clockEmpId} onChange={setClockEmpId} placeholder="â€” Select employee â€”">
             {employees.map(emp => (
               <SelectItem key={emp.id} id={emp.id}>{emp.name}</SelectItem>
             ))}
@@ -93,7 +93,7 @@ export default function ClockWidget({ employees, attendance, setAttendance, addT
             className="rounded-full px-4 sm:px-6"
             style={{ background: canCheckIn ? '#28a745' : undefined }}
           >
-            <Icon name="schedule" size={15} /> Check In
+            <Icon name="schedule" size={15}/> Check In
           </Button>
 
           <Button

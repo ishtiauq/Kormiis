@@ -22,17 +22,17 @@ export default function ShiftSwaps({ employees, shiftSwaps, setShiftSwaps, roste
                 <div className="text-xs font-medium text-muted-foreground mb-1">{formatDateShort(swap.date)}</div>
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-sm font-semibold text-foreground">{r?.name}</span>
-                  <Icon name="repeat" size={14} className="opacity-60 text-muted-foreground" />
+                  <Icon name="repeat" className="opacity-60 text-muted-foreground" size={14}/>
                   <span className="text-sm font-semibold text-foreground">{t?.name}</span>
                 </div>
                 {swap.reason && <div className="text-xs text-muted-foreground mt-1">Reason: {swap.reason}</div>}
               </div>
               <div className="flex gap-2">
                 <Button size="sm" onClick={() => approveSwap(swap.id)}>
-                  <Icon name="check" size={13} /> Approve
+                  <Icon name="check" size={13}/> Approve
                 </Button>
                 <Button size="sm" variant="outline" className="text-destructive border-destructive/30 hover:text-destructive" onClick={() => rejectSwap(swap.id)}>
-                  <Icon name="close" size={13} /> Reject
+                  <Icon name="close" size={13}/> Reject
                 </Button>
               </div>
             </div>

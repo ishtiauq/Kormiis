@@ -183,7 +183,7 @@ export default function Notes({ notes = [], setNotes, currentUser, addToast }) {
       <div className="flex items-start justify-between gap-2 mb-3">
         {note.pinned ? (
           <div className="text-primary opacity-80">
-            <Icon name="push_pin" size={16} />
+            <Icon name="push_pin" size={16}/>
           </div>
         ) : <div />}
         <div className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border ${PRIORITY_STYLES[note.priority || 'Medium']}`}>
@@ -192,7 +192,7 @@ export default function Notes({ notes = [], setNotes, currentUser, addToast }) {
       </div>
 
       {note.title && <h3 className="text-lg font-bold text-foreground mb-2 leading-tight flex items-center gap-2">
-        {note.isDailyChecklist && <Icon name="task_alt" size={18} className="text-primary" />}
+        {note.isDailyChecklist && <Icon name="task_alt" className="text-primary" size={18}/>}
         {note.title}
       </h3>}
       
@@ -208,7 +208,7 @@ export default function Notes({ notes = [], setNotes, currentUser, addToast }) {
                 onClick={(e) => toggleChecklistItem(note.id, item.id, e)}
                 className={`flex-shrink-0 size-5 rounded border flex items-center justify-center transition-colors ${item.done ? 'bg-primary border-primary text-primary-foreground' : 'border-foreground/30 hover:border-primary'}`}
               >
-                {item.done && <Icon name="check" size={14} />}
+                {item.done && <Icon name="check" size={14}/>}
               </button>
               <span className={`text-sm truncate transition-all ${item.done ? 'text-foreground/40 line-through' : 'text-foreground/90'}`}>
                 {item.text}
@@ -222,7 +222,7 @@ export default function Notes({ notes = [], setNotes, currentUser, addToast }) {
       {note.audioURL && (
         <div className="mt-4 pt-4 border-t border-foreground/10" onClick={e => e.stopPropagation()}>
           <div className="flex items-center gap-2 text-xs font-semibold text-foreground/70 mb-2">
-            <Icon name="mic" size={14} /> Voice Note
+            <Icon name="mic" size={14}/> Voice Note
           </div>
           <audio src={note.audioURL} controls className="w-full h-8" />
         </div>
@@ -238,7 +238,7 @@ export default function Notes({ notes = [], setNotes, currentUser, addToast }) {
     <div className="animate-fade-in pb-10 flex flex-col gap-6 w-full max-w-full overflow-x-hidden">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
-          <Icon name="sticky_note_2" size={24} className="text-foreground" />
+          <Icon name="sticky_note_2" className="text-foreground" size={24}/>
           Notes
         </h1>
       </div>
@@ -246,14 +246,14 @@ export default function Notes({ notes = [], setNotes, currentUser, addToast }) {
       
       <div className="flex justify-end w-full">
         <Button onClick={() => { setEditingNote(null); setShowModal(true) }} className="hidden sm:flex gap-2 rounded-xl shadow-sm bg-primary hover:bg-primary/90">
-          <Icon name="add" size={18} /> New Note
+          <Icon name="add" size={18}/> New Note
         </Button>
       </div>
 
       {myNotes.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center px-4">
           <div className="size-20 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-4">
-            <Icon name="edit_note" size={40} />
+            <Icon name="edit_note" size={40}/>
           </div>
           <h3 className="text-xl font-bold text-foreground mb-2">No notes yet</h3>
           <p className="text-muted-foreground max-w-sm mb-6">Create your first note to capture ideas, to-dos, or voice memos!</p>
@@ -264,7 +264,7 @@ export default function Notes({ notes = [], setNotes, currentUser, addToast }) {
           {pinnedNotes.length > 0 && (
             <div>
               <div className="flex items-center gap-2 text-sm font-bold text-muted-foreground uppercase tracking-wider mb-4">
-                <Icon name="push_pin" size={16} /> Pinned
+                <Icon name="push_pin" size={16}/> Pinned
               </div>
               <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4">
                 <AnimatePresence>
@@ -278,7 +278,7 @@ export default function Notes({ notes = [], setNotes, currentUser, addToast }) {
             <div>
               {pinnedNotes.length > 0 && (
                 <div className="flex items-center gap-2 text-sm font-bold text-muted-foreground uppercase tracking-wider mb-4 mt-4">
-                  <Icon name="notes" size={16} /> Others
+                  <Icon name="notes" size={16}/> Others
                 </div>
               )}
               <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4">
@@ -307,15 +307,15 @@ export default function Notes({ notes = [], setNotes, currentUser, addToast }) {
               {/* Header */}
               <div className={`p-4 border-b flex items-center justify-between ${color.value} ${color.border}`}>
                 <div className="flex items-center gap-2">
-                  <Icon name={type === 'checklist' ? 'check_box' : 'edit_document'} size={20} className="text-foreground/70" />
+                  <Icon name={type === 'checklist' ? 'check_box' : 'edit_document'} className="text-foreground/70" size={20}/>
                   <span className="font-bold text-foreground">{editingNote ? 'Edit Note' : 'Create Note'}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <button onClick={() => setPinned(!pinned)} className={`p-2 rounded-xl transition-colors ${pinned ? 'bg-primary/20 text-primary' : 'hover:bg-black/10 dark:hover:bg-white/10 text-foreground/60'}`} title="Pin Note">
-                    <Icon name="push_pin" size={18} />
+                    <Icon name="push_pin" size={18}/>
                   </button>
                   <button onClick={() => setShowModal(false)} className="p-2 rounded-xl hover:bg-black/10 dark:hover:bg-white/10 text-foreground/60 transition-colors">
-                    <Icon name="close" size={18} />
+                    <Icon name="close" size={18}/>
                   </button>
                 </div>
               </div>
@@ -342,7 +342,7 @@ export default function Notes({ notes = [], setNotes, currentUser, addToast }) {
                           onClick={() => setItems(items.map(i => i.id === item.id ? { ...i, done: !i.done } : i))}
                           className={`flex-shrink-0 size-5 rounded border flex items-center justify-center transition-colors ${item.done ? 'bg-primary border-primary text-primary-foreground' : 'border-foreground/30'}`}
                         >
-                          {item.done && <Icon name="check" size={14} />}
+                          {item.done && <Icon name="check" size={14}/>}
                         </button>
                         <Input 
                           value={item.text} 
@@ -351,12 +351,12 @@ export default function Notes({ notes = [], setNotes, currentUser, addToast }) {
                           placeholder="List item..."
                         />
                         <button onClick={() => setItems(items.filter(i => i.id !== item.id))} className="opacity-0 group-hover:opacity-100 p-1 text-destructive hover:bg-destructive/10 rounded">
-                          <Icon name="close" size={16} />
+                          <Icon name="close" size={16}/>
                         </button>
                       </div>
                     ))}
                       <Button variant="ghost" size="sm" onClick={() => setItems([...items, { id: Date.now(), text: '', done: false }])} className="text-primary hover:text-primary hover:bg-primary/10 mt-2 self-start rounded-lg px-3">
-                        <Icon name="add" size={18} className="mr-1.5" /> Add Item
+                        <Icon name="add" className="mr-1.5" size={18}/> Add Item
                       </Button>
 
                       <div className="mt-4 pt-4 border-t border-border flex items-center gap-3">
@@ -378,7 +378,7 @@ export default function Notes({ notes = [], setNotes, currentUser, addToast }) {
                 {/* Audio Section */}
                 <div className="mt-2 p-4 bg-muted/40 rounded-xl border border-border">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-semibold flex items-center gap-2"><Icon name="mic" size={16} /> Audio Note</span>
+                    <span className="text-sm font-semibold flex items-center gap-2"><Icon name="mic" size={16}/> Audio Note</span>
                     {audioURL && (
                       <button onClick={removeAudio} className="text-xs text-destructive hover:underline">Remove</button>
                     )}
@@ -389,11 +389,11 @@ export default function Notes({ notes = [], setNotes, currentUser, addToast }) {
                     <div className="flex items-center gap-3">
                       {isRecording ? (
                         <Button onClick={stopRecording} variant="destructive" className="animate-pulse flex items-center gap-2">
-                          <Icon name="stop_circle" size={18} /> Stop Recording
+                          <Icon name="stop_circle" size={18}/> Stop Recording
                         </Button>
                       ) : (
                         <Button onClick={startRecording} variant="secondary" className="flex items-center gap-2">
-                          <Icon name="mic" size={18} /> Start Recording
+                          <Icon name="mic" size={18}/> Start Recording
                         </Button>
                       )}
                       {isRecording && <span className="text-xs font-bold text-destructive animate-pulse">Recording...</span>}
@@ -408,23 +408,23 @@ export default function Notes({ notes = [], setNotes, currentUser, addToast }) {
                   {/* Type Toggle */}
                   <div className="flex items-center bg-background border border-border rounded-lg overflow-hidden">
                     <button onClick={() => setType('text')} className={`px-3 py-1.5 text-xs font-bold flex items-center gap-1.5 ${type === 'text' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted'}`}>
-                      <Icon name="subject" size={16} /> Text
+                      <Icon name="subject" size={16}/> Text
                     </button>
                     <button onClick={() => setType('checklist')} className={`px-3 py-1.5 text-xs font-bold flex items-center gap-1.5 border-l border-border ${type === 'checklist' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted'}`}>
-                      <Icon name="check_box" size={16} /> List
+                      <Icon name="check_box" size={16}/> List
                     </button>
                   </div>
 
                   {/* Priority Select */}
                   <Select value={priority} onValueChange={setPriority}>
                     <SelectItem value="High">
-                      <div className="flex items-center gap-2 text-red-500"><Icon name="flag" size={14} /> High</div>
+                      <div className="flex items-center gap-2 text-red-500"><Icon name="flag" size={14}/> High</div>
                     </SelectItem>
                     <SelectItem value="Medium">
-                      <div className="flex items-center gap-2 text-amber-500"><Icon name="flag" size={14} /> Medium</div>
+                      <div className="flex items-center gap-2 text-amber-500"><Icon name="flag" size={14}/> Medium</div>
                     </SelectItem>
                     <SelectItem value="Low">
-                      <div className="flex items-center gap-2 text-blue-500"><Icon name="flag" size={14} /> Low</div>
+                      <div className="flex items-center gap-2 text-blue-500"><Icon name="flag" size={14}/> Low</div>
                     </SelectItem>
                   </Select>
 
@@ -467,12 +467,12 @@ export default function Notes({ notes = [], setNotes, currentUser, addToast }) {
                   <div className={`px-1.5 py-0.5 rounded-[4px] text-[8px] sm:text-[9px] font-bold uppercase tracking-wide border ${PRIORITY_STYLES[viewingNote.priority || 'Medium']}`}>
                     {viewingNote.priority || 'Medium'} Priority
                   </div>
-                  {viewingNote.pinned && <Icon name="push_pin" size={16} className="text-primary ml-1" />}
-                  {viewingNote.isDailyChecklist && <Icon name="task_alt" size={16} className="text-primary ml-1" />}
+                  {viewingNote.pinned && <Icon name="push_pin" className="text-primary ml-1" size={16}/>}
+                  {viewingNote.isDailyChecklist && <Icon name="task_alt" className="text-primary ml-1" size={16}/>}
                 </div>
                 <div className="flex items-center gap-2">
                   <button onClick={() => setShowViewModal(false)} className="p-2 rounded-xl hover:bg-black/10 dark:hover:bg-white/10 text-foreground/60 transition-colors">
-                    <Icon name="close" size={18} />
+                    <Icon name="close" size={18}/>
                   </button>
                 </div>
               </div>
@@ -497,7 +497,7 @@ export default function Notes({ notes = [], setNotes, currentUser, addToast }) {
                           onClick={(e) => toggleChecklistItem(viewingNote.id, item.id, e)}
                           className={`flex-shrink-0 size-6 rounded-md border-2 flex items-center justify-center transition-colors ${item.done ? 'bg-primary border-primary text-primary-foreground' : 'border-foreground/30 hover:border-primary'}`}
                         >
-                          {item.done && <Icon name="check" size={16} />}
+                          {item.done && <Icon name="check" size={16}/>}
                         </button>
                         <span className={`text-base transition-all break-words flex-1 ${item.done ? 'text-foreground/50 line-through' : 'text-foreground/90'}`}>
                           {item.text}
@@ -510,7 +510,7 @@ export default function Notes({ notes = [], setNotes, currentUser, addToast }) {
                 {viewingNote.audioURL && (
                   <div className="mt-4 p-4 bg-muted/30 rounded-xl border border-border">
                     <div className="flex items-center gap-2 text-sm font-semibold text-foreground mb-3">
-                      <Icon name="mic" size={18} className="text-primary" /> Voice Note
+                      <Icon name="mic" className="text-primary" size={18}/> Voice Note
                     </div>
                     <audio src={viewingNote.audioURL} controls className="w-full h-10" />
                   </div>
@@ -528,7 +528,7 @@ export default function Notes({ notes = [], setNotes, currentUser, addToast }) {
                   onClick={(e) => togglePin(viewingNote.id, e)} 
                   className={`rounded-xl px-4 sm:px-6 font-bold shadow-sm flex items-center gap-2 ${viewingNote.pinned ? 'border-primary text-primary bg-primary/5 hover:bg-primary/10' : ''}`}
                 >
-                  <Icon name="push_pin" size={18} /> {viewingNote.pinned ? "Unpin" : "Pin"}
+                  <Icon name="push_pin" size={18}/> {viewingNote.pinned ? "Unpin" : "Pin"}
                 </Button>
 
                 <Button 
@@ -539,7 +539,7 @@ export default function Notes({ notes = [], setNotes, currentUser, addToast }) {
                   }} 
                   className="rounded-xl px-4 sm:px-6 font-bold shadow-sm flex items-center gap-2"
                 >
-                  <Icon name="edit" size={18} /> Edit
+                  <Icon name="edit" size={18}/> Edit
                 </Button>
 
                 <Button 
@@ -547,7 +547,7 @@ export default function Notes({ notes = [], setNotes, currentUser, addToast }) {
                   onClick={(e) => handleDelete(viewingNote.id, e)} 
                   className="rounded-xl px-4 sm:px-6 flex items-center gap-2 bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground border-none font-bold shadow-none"
                 >
-                  <Icon name="delete" size={18} /> Delete
+                  <Icon name="delete" size={18}/> Delete
                 </Button>
               </div>
             </motion.div>
@@ -569,7 +569,7 @@ export default function Notes({ notes = [], setNotes, currentUser, addToast }) {
               className="relative w-full max-w-sm bg-card rounded-2xl shadow-2xl border border-border p-6 flex flex-col items-center text-center"
             >
               <div className="size-14 rounded-full bg-destructive/10 flex items-center justify-center text-destructive mb-4">
-                <Icon name="warning" size={28} />
+                <Icon name="warning" size={28}/>
               </div>
               <h3 className="text-xl font-bold text-foreground mb-2">Delete Note?</h3>
               <p className="text-fluid-sm text-muted-foreground mb-6">Are you sure you want to delete this note? This action cannot be undone.</p>
@@ -588,7 +588,7 @@ export default function Notes({ notes = [], setNotes, currentUser, addToast }) {
         onClick={() => { setEditingNote(null); setShowModal(true) }}
         aria-label="New Note"
       >
-        <Icon name="add" size={24} />
+        <Icon name="add" size={24}/>
       </Button>
     </div>
   )

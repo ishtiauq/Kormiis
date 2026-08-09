@@ -130,14 +130,14 @@ export function useCommandPalette({ employees, themeMode, toggleTheme, setCurren
   }
 
   const getCategoryIcon = (category, id) => {
-    if (category === 'Employees') return <Icon name="person" size={16} />
-    if (category === 'Recent Actions') return <Icon name="history" size={16} />
-    if (id.includes('darkmode')) return themeMode === 'light' ? <Icon name="dark_mode" size={16} /> : <Icon name="light_mode" size={16} />
-    if (id.includes('clearcache')) return <Icon name="delete" size={16} />
-    if (id.includes('dashboard')) return <Icon name="dashboard" size={16} />
-    if (id.includes('settings')) return <Icon name="settings" size={16} />
-    if (id.includes('employees')) return <Icon name="person" size={16} />
-    return <Icon name="description" size={16} />
+    if (category === 'Employees') return <Icon name="person" size={16}/>
+    if (category === 'Recent Actions') return <Icon name="history" size={16}/>
+    if (id.includes('darkmode')) return themeMode === 'light' ? <Icon name="dark_mode" size={16}/> : <Icon name="light_mode" size={16}/>
+    if (id.includes('clearcache')) return <Icon name="delete" size={16}/>
+    if (id.includes('dashboard')) return <Icon name="dashboard" size={16}/>
+    if (id.includes('settings')) return <Icon name="settings" size={16}/>
+    if (id.includes('employees')) return <Icon name="person" size={16}/>
+    return <Icon name="description" size={16}/>
   }
 
   return {

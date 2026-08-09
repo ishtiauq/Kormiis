@@ -112,7 +112,7 @@ export default function Sidebar({
               className="btn-shimmer mt-1 w-full flex items-center gap-3 px-3 rounded-md bg-[#dc2626] hover:bg-[#b91c1c] text-white transition-colors cursor-pointer h-9 box-border border-none"
             >
               <div className="size-6 flex items-center justify-center shrink-0">
-                <Icon name="logout" size={16} />
+                <Icon name="logout" size={16}/>
               </div>
               <span className="whitespace-nowrap overflow-hidden transition-[opacity,max-width] duration-300 text-left font-medium text-xs pr-2" style={{
                 opacity: (mobileMenuOpen || !isCollapsed) ? 1 : 0,

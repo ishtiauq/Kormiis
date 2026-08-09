@@ -91,7 +91,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
         priority,
         audience,
         attachments: [],
-        reactions: { '👍': [], '❤️': [], '👎': [] },
+        reactions: { 'ðŸ‘': [], 'â¤ï¸': [], 'ðŸ‘Ž': [] },
         comments: [],
         readBy: [currentUser?.id || 'admin'],
         poll: hasPoll && pollQuestion ? {
@@ -231,7 +231,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
             authorName: currentUser?.name || 'System Admin', 
             text, 
             date: new Date().toISOString(),
-            reactions: { '👍': [], '❤️': [] },
+            reactions: { 'ðŸ‘': [], 'â¤ï¸': [] },
             replies: []
           }]
         }
@@ -307,7 +307,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                   authorName: currentUser?.name || 'System Admin',
                   text,
                   date: new Date().toISOString(),
-                  reactions: { '👍': [] }
+                  reactions: { 'ðŸ‘': [] }
                 }]
               }
             }
@@ -468,7 +468,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
     <div className="fade-in pb-10 max-w-5xl mx-auto">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
-          <Icon name="rss_feed" size={20} className="text-foreground" />
+          <Icon name="rss_feed" className="text-foreground" size={20}/>
           {headline}
         </h1>
         
@@ -484,7 +484,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                 setContent('')
                 setHasPoll(false)
               }}>
-                <Icon name="add" size={16} className="mr-1 sm:mr-2" />
+                <Icon name="add" className="mr-1 sm:mr-2" size={16}/>
                 <span className="hidden sm:inline">New Post</span>
               </Button>
             </DialogTrigger>
@@ -510,7 +510,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                         </Select>
                       </div>
                       <button type="button" className="shrink-0 bg-primary/10 hover:bg-primary text-primary hover:text-primary-foreground border-none group/add h-10 px-4 rounded-lg flex items-center transition-all duration-300 ease-out overflow-hidden" onClick={() => { setEditingCategory(null); setCatFormName(''); setShowCategoryModal(true) }}>
-                        <Icon name="add" size={18} className="transition-transform duration-300 group-hover/add:rotate-90 group-hover/add:scale-110" />
+                        <Icon name="add" className="transition-transform duration-300 group-hover/add:rotate-90 group-hover/add:scale-110" size={18}/>
                         <span className="w-0 overflow-hidden whitespace-nowrap text-sm font-bold opacity-0 transition-all duration-300 ease-out group-hover/add:w-auto group-hover/add:opacity-100 group-hover/add:ml-2">Add</span>
                       </button>
                     </div>
@@ -542,7 +542,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
               <div className="flex flex-col gap-4 p-4 rounded-lg border border-dashed bg-muted/50">
                 <div className="flex justify-between items-center">
                   <span className="text-sm font-medium text-foreground flex items-center gap-2">
-                    <Icon name="warning" size={16} className="text-muted-foreground" /> Attach Poll (Optional)
+                    <Icon name="warning" className="text-muted-foreground" size={16}/> Attach Poll (Optional)
                   </span>
                   <button type="button" role="switch" aria-checked={hasPoll} onClick={() => setHasPoll(!hasPoll)}
                     className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${hasPoll ? 'bg-primary' : 'bg-input'}`}>
@@ -557,7 +557,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                       <Input key={i} aria-label={`Poll option ${i + 1}`} type="text" value={opt} onChange={(e) => handlePollOptionChange(i, e.target.value)} placeholder={`Option ${i + 1}`} />
                     ))}
                     <Button type="button" variant="outline" size="sm" onClick={handleAddPollOption} className="self-start mt-1">
-                      <Icon name="add" size={14} className="mr-1" /> Add Option
+                      <Icon name="add" className="mr-1" size={14}/> Add Option
                     </Button>
                   </div>
                 )}
@@ -591,7 +591,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
         {filteredAnnouncements.length === 0 ? (
           <Card className="border-dashed border-2 bg-muted/10">
             <CardContent className="p-12 text-center flex flex-col items-center gap-3 text-muted-foreground">
-              <Icon name="rss_feed" size={40} className="text-muted-foreground/50" />
+              <Icon name="rss_feed" className="text-muted-foreground/50" size={40}/>
               <p>No announcements found in this category.</p>
             </CardContent>
           </Card>
@@ -609,7 +609,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                       {author.avatar ? (
                         <AvatarImage src={author.avatar} alt={author.name} />
                       ) : (
-                        <AvatarFallback className="bg-primary/10 text-primary font-medium"><Icon name="person" size={20} /></AvatarFallback>
+                        <AvatarFallback className="bg-primary/10 text-primary font-medium"><Icon name="person" size={20}/></AvatarFallback>
                       )}
                     </Avatar>
                     <div className="flex flex-col gap-1">
@@ -628,10 +628,10 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                     {canModify(post.authorId) && (
                       <>
                         <Button variant="ghost" size="icon" onClick={() => handleEditPost(post)} className="h-8 w-8 text-muted-foreground hover:text-foreground" aria-label="Edit post">
-                          <Icon name="edit" size={14} />
+                          <Icon name="edit" size={14}/>
                         </Button>
                         <Button variant="ghost" size="icon" onClick={() => handleDelete(post.id)} className="h-8 w-8 text-muted-foreground hover:text-destructive" aria-label="Delete post">
-                          <Icon name="delete" size={14} />
+                          <Icon name="delete" size={14}/>
                         </Button>
                       </>
                     )}
@@ -647,7 +647,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                   {post.poll && (
                     <div className="mt-6 p-4 rounded-xl border border-border/50 bg-muted/20">
                       <h4 className="font-medium text-sm mb-4 flex items-center gap-2 text-foreground">
-                         <span className="text-lg">📊</span> {post.poll.question}
+                         <span className="text-lg">ðŸ“Š</span> {post.poll.question}
                       </h4>
                       <div className="flex flex-col gap-3">
                         {post.poll.options.map((opt, i) => {
@@ -673,28 +673,28 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                 
                 <CardFooter className="pt-3 pb-3 border-t flex flex-wrap justify-between items-center gap-3">
                   <div className="flex flex-wrap gap-1 -ml-2">
-                    <HoverTooltip content={getReactionTitle(post.reactions['👍'])}>
-                      <Button variant="ghost" size="sm" onClick={() => handleReaction(post.id, '👍')} className="h-8 px-2 text-muted-foreground hover:text-foreground hover:bg-muted/50">
-                        👍 <span className="ml-1.5 text-xs font-medium">{getReactionCount(post.reactions['👍'])}</span>
+                    <HoverTooltip content={getReactionTitle(post.reactions['ðŸ‘'])}>
+                      <Button variant="ghost" size="sm" onClick={() => handleReaction(post.id, 'ðŸ‘')} className="h-8 px-2 text-muted-foreground hover:text-foreground hover:bg-muted/50">
+                        ðŸ‘ <span className="ml-1.5 text-xs font-medium">{getReactionCount(post.reactions['ðŸ‘'])}</span>
                       </Button>
                     </HoverTooltip>
-                    <HoverTooltip content={getReactionTitle(post.reactions['❤️'])}>
-                      <Button variant="ghost" size="sm" onClick={() => handleReaction(post.id, '❤️')} className="h-8 px-2 text-muted-foreground hover:text-foreground hover:bg-muted/50">
-                        ❤️ <span className="ml-1.5 text-xs font-medium">{getReactionCount(post.reactions['❤️'])}</span>
+                    <HoverTooltip content={getReactionTitle(post.reactions['â¤ï¸'])}>
+                      <Button variant="ghost" size="sm" onClick={() => handleReaction(post.id, 'â¤ï¸')} className="h-8 px-2 text-muted-foreground hover:text-foreground hover:bg-muted/50">
+                        â¤ï¸ <span className="ml-1.5 text-xs font-medium">{getReactionCount(post.reactions['â¤ï¸'])}</span>
                       </Button>
                     </HoverTooltip>
-                    <HoverTooltip content={getReactionTitle(post.reactions['👎'])}>
-                      <Button variant="ghost" size="sm" onClick={() => handleReaction(post.id, '👎')} className="h-8 px-2 text-muted-foreground hover:text-foreground hover:bg-muted/50">
-                        👎 <span className="ml-1.5 text-xs font-medium">{getReactionCount(post.reactions['👎'])}</span>
+                    <HoverTooltip content={getReactionTitle(post.reactions['ðŸ‘Ž'])}>
+                      <Button variant="ghost" size="sm" onClick={() => handleReaction(post.id, 'ðŸ‘Ž')} className="h-8 px-2 text-muted-foreground hover:text-foreground hover:bg-muted/50">
+                        ðŸ‘Ž <span className="ml-1.5 text-xs font-medium">{getReactionCount(post.reactions['ðŸ‘Ž'])}</span>
                       </Button>
                     </HoverTooltip>
                     <Button variant="ghost" size="sm" onClick={() => toggleComments(post.id)} className="h-8 px-2 ml-1 text-muted-foreground hover:text-foreground hover:bg-muted/50">
-                      <Icon name="chat" size={14} className="mr-1.5" /> <span className="text-xs font-medium">{(post.comments || []).length}</span>
+                      <Icon name="chat" className="mr-1.5" size={14}/> <span className="text-xs font-medium">{(post.comments || []).length}</span>
                     </Button>
                   </div>
                   <HoverTooltip content={getReactionTitle(post.readBy)} position="right">
                     <div className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground cursor-help transition-colors py-1">
-                      <Icon name="group" size={13} /> {Array.isArray(post.readBy) ? post.readBy.length : 0} views
+                      <Icon name="group" size={13}/> {Array.isArray(post.readBy) ? post.readBy.length : 0} views
                     </div>
                   </HoverTooltip>
                 </CardFooter>
@@ -713,7 +713,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                               {commentAuthor?.avatar ? (
                                 <AvatarImage src={commentAuthor.avatar} alt={comment.authorName} />
                               ) : (
-                                <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-medium"><Icon name="person" size={14} /></AvatarFallback>
+                                <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-medium"><Icon name="person" size={14}/></AvatarFallback>
                               )}
                             </Avatar>
                             <div className="flex-1 flex flex-col">
@@ -739,19 +739,19 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                                 )}
                               </div>
                               <div className="flex items-center gap-3 mt-1 ml-1">
-                                <HoverTooltip content={getReactionTitle(comment.reactions?.['👍'])}>
-                                  <button onClick={() => handleCommentReaction(post.id, comment.id, '👍')} className="text-[10px] font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
-                                    👍 {getReactionCount(comment.reactions?.['👍'])}
+                                <HoverTooltip content={getReactionTitle(comment.reactions?.['ðŸ‘'])}>
+                                  <button onClick={() => handleCommentReaction(post.id, comment.id, 'ðŸ‘')} className="text-[10px] font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
+                                    ðŸ‘ {getReactionCount(comment.reactions?.['ðŸ‘'])}
                                   </button>
                                 </HoverTooltip>
-                                <HoverTooltip content={getReactionTitle(comment.reactions?.['❤️'])}>
-                                  <button onClick={() => handleCommentReaction(post.id, comment.id, '❤️')} className="text-[10px] font-medium text-muted-foreground hover:text-destructive transition-colors flex items-center gap-1">
-                                    ❤️ {getReactionCount(comment.reactions?.['❤️'])}
+                                <HoverTooltip content={getReactionTitle(comment.reactions?.['â¤ï¸'])}>
+                                  <button onClick={() => handleCommentReaction(post.id, comment.id, 'â¤ï¸')} className="text-[10px] font-medium text-muted-foreground hover:text-destructive transition-colors flex items-center gap-1">
+                                    â¤ï¸ {getReactionCount(comment.reactions?.['â¤ï¸'])}
                                   </button>
                                 </HoverTooltip>
-                                <HoverTooltip content={getReactionTitle(comment.reactions?.['👎'])}>
-                                  <button onClick={() => handleCommentReaction(post.id, comment.id, '👎')} className="text-[10px] font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
-                                    👎 {getReactionCount(comment.reactions?.['👎'])}
+                                <HoverTooltip content={getReactionTitle(comment.reactions?.['ðŸ‘Ž'])}>
+                                  <button onClick={() => handleCommentReaction(post.id, comment.id, 'ðŸ‘Ž')} className="text-[10px] font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
+                                    ðŸ‘Ž {getReactionCount(comment.reactions?.['ðŸ‘Ž'])}
                                   </button>
                                 </HoverTooltip>
                                 <button onClick={() => setExpandedComments(prev => ({ ...prev, [`reply-${comment.id}`]: !prev[`reply-${comment.id}`] }))} className="text-[10px] font-medium text-muted-foreground hover:text-primary transition-colors">
@@ -780,7 +780,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                                         {replyAuthor?.avatar ? (
                                           <AvatarImage src={replyAuthor.avatar} alt={reply.authorName} />
                                         ) : (
-                                          <AvatarFallback className="bg-primary/10 text-primary text-[8px] font-medium"><Icon name="person" size={12} /></AvatarFallback>
+                                          <AvatarFallback className="bg-primary/10 text-primary text-[8px] font-medium"><Icon name="person" size={12}/></AvatarFallback>
                                         )}
                                       </Avatar>
                                       <div className="flex-1">
@@ -805,19 +805,19 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                                           )}
                                         </div>
                                         <div className="flex items-center gap-3 mt-0.5 ml-1">
-                                          <HoverTooltip content={getReactionTitle(reply.reactions?.['👍'])}>
-                                            <button onClick={() => handleReplyReaction(post.id, comment.id, reply.id, '👍')} className="text-[9px] font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
-                                              👍 {getReactionCount(reply.reactions?.['👍'])}
+                                          <HoverTooltip content={getReactionTitle(reply.reactions?.['ðŸ‘'])}>
+                                            <button onClick={() => handleReplyReaction(post.id, comment.id, reply.id, 'ðŸ‘')} className="text-[9px] font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
+                                              ðŸ‘ {getReactionCount(reply.reactions?.['ðŸ‘'])}
                                             </button>
                                           </HoverTooltip>
-                                          <HoverTooltip content={getReactionTitle(reply.reactions?.['❤️'])}>
-                                            <button onClick={() => handleReplyReaction(post.id, comment.id, reply.id, '❤️')} className="text-[9px] font-medium text-muted-foreground hover:text-destructive transition-colors flex items-center gap-1">
-                                              ❤️ {getReactionCount(reply.reactions?.['❤️'])}
+                                          <HoverTooltip content={getReactionTitle(reply.reactions?.['â¤ï¸'])}>
+                                            <button onClick={() => handleReplyReaction(post.id, comment.id, reply.id, 'â¤ï¸')} className="text-[9px] font-medium text-muted-foreground hover:text-destructive transition-colors flex items-center gap-1">
+                                              â¤ï¸ {getReactionCount(reply.reactions?.['â¤ï¸'])}
                                             </button>
                                           </HoverTooltip>
-                                          <HoverTooltip content={getReactionTitle(reply.reactions?.['👎'])}>
-                                            <button onClick={() => handleReplyReaction(post.id, comment.id, reply.id, '👎')} className="text-[9px] font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
-                                              👎 {getReactionCount(reply.reactions?.['👎'])}
+                                          <HoverTooltip content={getReactionTitle(reply.reactions?.['ðŸ‘Ž'])}>
+                                            <button onClick={() => handleReplyReaction(post.id, comment.id, reply.id, 'ðŸ‘Ž')} className="text-[9px] font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
+                                              ðŸ‘Ž {getReactionCount(reply.reactions?.['ðŸ‘Ž'])}
                                             </button>
                                           </HoverTooltip>
                                           {canModify(reply.authorId) && (
@@ -844,7 +844,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                                         onKeyDown={(e) => { if (e.key === 'Enter') handleAddReply(post.id, comment.id) }}
                                       />
                                       <Button size="sm" className="h-6 px-2" onClick={() => handleAddReply(post.id, comment.id)}>
-                                        <Icon name="send" size={10} />
+                                        <Icon name="send" size={10}/>
                                       </Button>
                                     </div>
                                   )}
@@ -864,7 +864,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                         onKeyDown={(e) => { if (e.key === 'Enter') handleAddComment(post.id) }}
                       />
                       <Button size="sm" className="h-8 px-3" onClick={() => handleAddComment(post.id)}>
-                        <Icon name="send" size={14} />
+                        <Icon name="send" size={14}/>
                       </Button>
                     </div>
                   </div>
@@ -884,7 +884,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
           setIsDialogOpen(true)
         }}
       >
-        <Icon name="add" size={24} />
+        <Icon name="add" size={24}/>
       </Button>
 
       {/* Category Management Modal */}
@@ -893,7 +893,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
           <DialogHeader className="flex flex-row items-center justify-between border-b border-border pb-4 mb-4 space-y-0">
             <DialogTitle>Manage Categories</DialogTitle>
             <button className="rounded-full p-2 hover:bg-muted transition-colors" onClick={() => { setShowCategoryModal(false); setEditingCategory(null); setCatFormName('') }}>
-              <Icon name="close" size={16} />
+              <Icon name="close" size={16}/>
             </button>
           </DialogHeader>
           <div className="flex flex-col gap-5">
@@ -904,10 +904,10 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                   <div key={cat} className="flex items-center gap-2.5 p-2 px-3 rounded-lg bg-muted/30 border border-border">
                     <span className="flex-1 text-[0.9rem] font-medium text-foreground">{cat}</span>
                     <Button variant="ghost" size="icon-xs" aria-label="Edit category" onClick={() => { setEditingCategory(cat); setCatFormName(cat) }}>
-                      <Icon name="edit" size={14} />
+                      <Icon name="edit" size={14}/>
                     </Button>
                     <Button variant="ghost" size="icon-xs" aria-label="Delete category" onClick={() => handleDeleteCategory(cat)}>
-                      <Icon name="delete" size={14} />
+                      <Icon name="delete" size={14}/>
                     </Button>
                   </div>
                 ))}

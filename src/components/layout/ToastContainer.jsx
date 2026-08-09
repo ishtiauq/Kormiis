@@ -43,7 +43,7 @@ export default function ToastContainer({ toasts, removeToast }) {
             style={{ animation: 'slideIn 0.3s ease-out' }}
           >
             <div className="flex items-start gap-3 flex-1 w-full">
-              <Icon name={style.icon} size={20} className={`shrink-0 mt-0.5 ${style.iconColor}`} />
+              <Icon name={style.icon} className={`shrink-0 mt-0.5 ${style.iconColor}`} size={20}/>
               <p className="flex-1 text-fluid-sm font-semibold leading-snug">
                 {toast.message}
               </p>
@@ -56,7 +56,7 @@ export default function ToastContainer({ toasts, removeToast }) {
                 )}
                 <button onClick={() => removeToast(toast.id)}
                   className="absolute right-2 top-2 rounded-lg p-1.5 opacity-70 transition-opacity hover:opacity-100 focus:opacity-100 pointer-events-auto cursor-pointer border-none bg-transparent text-current">
-                  <Icon name="close" size={16} />
+                  <Icon name="close" size={16}/>
                 </button>
               </div>
             </div>

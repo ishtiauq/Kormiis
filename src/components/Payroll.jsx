@@ -377,7 +377,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
     doc.setTextColor(255, 255, 255)
     doc.setFontSize(11)
     doc.setFont('helvetica', 'bold')
-    doc.text('KORMIIS — PAYSLIP RECEIPT', pageW / 2, y + 9, { align: 'center' })
+    doc.text('KORMIIS â€” PAYSLIP RECEIPT', pageW / 2, y + 9, { align: 'center' })
     y += 22
 
     // Employee info
@@ -567,7 +567,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
       {/* Header and Month Selector */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
-          <Icon name="account_balance" size={20} className="text-foreground" />
+          <Icon name="account_balance" className="text-foreground" size={20}/>
           Payroll
         </h1>
       </div>
@@ -578,10 +578,10 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
         <div className="relative w-[140px] h-10">
           <button onClick={() => { setMonthOpen(!monthOpen); setYearOpen(false) }} className={`flex w-full h-10 items-center justify-between rounded-md border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${monthOpen ? 'ring-2 ring-ring ring-offset-2' : ''}`}>
             <div className="flex items-center gap-2 overflow-hidden">
-              <Icon name="calendar_month" size={16} className="h-4 w-4 shrink-0 text-muted-foreground" />
+              <Icon name="calendar_month" className="h-4 w-4 shrink-0 text-muted-foreground" size={16}/>
               <span className="break-words">{monthNames[currentMonth - 1]}</span>
             </div>
-            <Icon name="keyboard_arrow_down" size={16} className={`h-4 w-4 shrink-0 opacity-50 transition-transform ${monthOpen ? 'rotate-180' : ''}`} />
+            <Icon name="keyboard_arrow_down" className={`h-4 w-4 shrink-0 opacity-50 transition-transform ${monthOpen ? 'rotate-180' : ''}`} size={16}/>
           </button>
           {monthOpen && (
             <div className="absolute top-full left-0 right-0 mt-2 max-h-60 overflow-y-auto z-[100] rounded-md border bg-popover p-1 text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95">
@@ -598,7 +598,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
         <div className="relative w-24 h-10">
           <button onClick={() => { setYearOpen(!yearOpen); setMonthOpen(false) }} className={`flex w-full h-10 items-center justify-between rounded-md border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${yearOpen ? 'ring-2 ring-ring ring-offset-2' : ''}`}>
             <span className="break-words">{currentYear}</span>
-            <Icon name="keyboard_arrow_down" size={16} className={`h-4 w-4 shrink-0 opacity-50 transition-transform ${yearOpen ? 'rotate-180' : ''}`} />
+            <Icon name="keyboard_arrow_down" className={`h-4 w-4 shrink-0 opacity-50 transition-transform ${yearOpen ? 'rotate-180' : ''}`} size={16}/>
           </button>
           {yearOpen && (
             <div className="absolute top-full left-0 right-0 mt-2 max-h-60 overflow-y-auto z-[100] rounded-md border bg-popover p-1 text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95">
@@ -615,14 +615,14 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
 
       {!entries ? (
         <Card className="flex flex-col items-center justify-center p-12 text-center border-dashed border-2 bg-muted/20">
-          <Icon name="calendar_month" size={48} className="h-12 w-12 text-primary opacity-80 mb-4" />
+          <Icon name="calendar_month" className="h-12 w-12 text-primary opacity-80 mb-4" size={48}/>
           <h3 className="text-xl font-semibold mb-2">Payroll Not Initialized</h3>
           <p className="text-fluid-sm text-muted-foreground max-w-md mx-auto mb-6">
             The payroll sheet for {monthLabel} has not been created yet. 
             Initialize it to pull the active roster and carry over compensation parameters.
           </p>
           <Button onClick={handleInitializeMonth} size="lg">
-            <Icon name="add_circle" size={20} className="mr-2 h-5 w-5" /> Initialize Month Payroll
+            <Icon name="add_circle" className="mr-2 h-5 w-5" size={20}/> Initialize Month Payroll
           </Button>
         </Card>
       ) : (
@@ -632,7 +632,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium uppercase text-muted-foreground tracking-wider">Total Payout Budget</CardTitle>
-                <Icon name="account_balance" size={16} className="h-4 w-4 text-muted-foreground" />
+                <Icon name="account_balance" className="h-4 w-4 text-muted-foreground" size={16}/>
               </CardHeader>
               <CardContent>
                 <div className="text-fluid-display font-bold font-sans">{currency}{totalCost.toLocaleString()}</div>
@@ -657,7 +657,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
             </div>
             
             <div className="relative flex-1 min-w-[200px] max-w-[350px]">
-              <Icon name="search" size={16} className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Icon name="search" className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" size={16}/>
               <Input placeholder="Search employee or role..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-9" />
             </div>
 
@@ -668,7 +668,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
                   onClick={() => setStatusFilter(status)}
                   className={`inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${statusFilter === status ? 'bg-background text-foreground shadow-sm' : 'hover:bg-background/50 hover:text-foreground'}`}
                 >
-                  {statusFilter === status && <Icon name="check" size={14} className="mr-1.5 h-3.5 w-3.5" />}
+                  {statusFilter === status && <Icon name="check" className="mr-1.5 h-3.5 w-3.5" size={14}/>}
                   {status}
                 </button>
               ))}
@@ -679,7 +679,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
           {selectedRows.length > 0 && (
             <div className="sticky top-2 z-[50] p-3 px-4 bg-primary text-primary-foreground flex justify-between items-center rounded-lg shadow-lg animate-in slide-in-from-top-2">
               <div className="flex items-center gap-2 font-medium">
-                <Icon name="check_box" size={20} className="h-5 w-5" />
+                <Icon name="check_box" className="h-5 w-5" size={20}/>
                 <span>{selectedRows.length} employee{selectedRows.length > 1 ? 's' : ''} selected</span>
               </div>
               <div className="flex gap-2 items-center">
@@ -713,7 +713,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
                         <input type="checkbox" className="h-5 w-5 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer accent-primary mt-1" aria-label={`Select ${emp.name}`} checked={isSelected} onChange={() => toggleRowSelection(entry.employeeId)} />
                         <Avatar className="w-10 h-10 shrink-0 ring-1 ring-border">
                           {emp.avatar ? <AvatarImage src={emp.avatar} alt={emp.name} className="object-cover" /> : null}
-                          <AvatarFallback className="bg-primary/10 text-primary"><Icon name="person" size={20} /></AvatarFallback>
+                          <AvatarFallback className="bg-primary/10 text-primary"><Icon name="person" size={20}/></AvatarFallback>
                         </Avatar>
                         <div className="flex flex-col">
                           <span className="font-semibold text-base leading-tight">{emp.name}</span>
@@ -756,7 +756,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
                     {/* Footer Actions */}
                     <div className="flex items-center gap-2 pt-1">
                       <Button variant="outline" className="flex-1" onClick={() => openCompensationModal(entry)}>
-                        <Icon name="edit" size={16} className="mr-2 h-4 w-4 text-blue-500" /> Edit
+                        <Icon name="edit" className="mr-2 h-4 w-4 text-blue-500" size={16}/> Edit
                       </Button>
                       {!isPaid ? (
                         <Button className="flex-1" onClick={() => handleExecutePayment(entry)} disabled={isProcessing}>
@@ -764,7 +764,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
                         </Button>
                       ) : (
                         <Button variant="secondary" className="flex-1" onClick={() => generatePayslipReceipt(entry, entry.paymentDate)}>
-                          <Icon name="download" size={16} className="mr-2 h-4 w-4" /> Payslip
+                          <Icon name="download" className="mr-2 h-4 w-4" size={16}/> Payslip
                         </Button>
                       )}
                     </div>
@@ -781,7 +781,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Icon name="edit" size={20} className="h-5 w-5 text-blue-500" />
+              <Icon name="edit" className="h-5 w-5 text-blue-500" size={20}/>
               Manage Compensation
             </DialogTitle>
           </DialogHeader>
@@ -792,7 +792,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
               <div className="flex items-center gap-4 py-4 px-2 border-b border-border/50">
                 <Avatar className="w-10 h-10 shrink-0 ring-1 ring-border">
                   {selectedEmpLog.employee.avatar ? <AvatarImage src={selectedEmpLog.employee.avatar} alt={selectedEmpLog.employee.name} className="object-cover" /> : null}
-                  <AvatarFallback className="bg-primary/10 text-primary"><Icon name="person" size={20} /></AvatarFallback>
+                  <AvatarFallback className="bg-primary/10 text-primary"><Icon name="person" size={20}/></AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col">
                   <span className="font-semibold text-sm">{selectedEmpLog.employee.name}</span>
@@ -850,7 +850,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
                 <DialogFooter className="mt-4">
                   <Button type="button" variant="outline" onClick={() => { setIsDrawerOpen(false); setTimeout(() => setSelectedEmpLog(null), 300); }}>Cancel</Button>
                   <Button type="submit">
-                    <Icon name="check_box" size={16} className="mr-2 h-4 w-4" /> Apply Changes
+                    <Icon name="check_box" className="mr-2 h-4 w-4" size={16}/> Apply Changes
                   </Button>
                 </DialogFooter>
               </form>

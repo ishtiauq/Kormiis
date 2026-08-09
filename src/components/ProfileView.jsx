@@ -115,7 +115,7 @@ export default function ProfileView({ currentUser, pendingProfileEdits, setPendi
     <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[800px] mx-auto pb-10">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
-          <Icon name="person" size={20} className="text-foreground" />
+          <Icon name="person" className="text-foreground" size={20}/>
           Profile
         </h1>
         {!editMode && !hasPending && (
@@ -126,7 +126,7 @@ export default function ProfileView({ currentUser, pendingProfileEdits, setPendi
 
       {hasPending && (
         <div className="p-4 rounded-md flex gap-3 items-center bg-amber-500/10 border-l-4 border-l-amber-500 text-foreground">
-          <Icon name="error" size={20} className="h-5 w-5 text-amber-500" />
+          <Icon name="error" className="h-5 w-5 text-amber-500" size={20}/>
           <span className="text-sm font-medium">You have pending profile updates waiting for HR approval.</span>
         </div>
       )}
@@ -161,7 +161,7 @@ export default function ProfileView({ currentUser, pendingProfileEdits, setPendi
                   navigator.clipboard.writeText(currentUser.adminUid || currentUser.uid || currentUser.id);
                   addToast('Company ID copied to clipboard!', 'success');
                 }} aria-label="Copy Company ID">
-                  <Icon name="content_copy" size={16} />
+                  <Icon name="content_copy" size={16}/>
                 </Button>
                 <p className="text-fluid-xs text-muted-foreground font-normal ml-2">Share this with employees to log in from other devices.</p>
               </div>
@@ -269,7 +269,7 @@ export default function ProfileView({ currentUser, pendingProfileEdits, setPendi
                 <div key={device.deviceId} className="flex items-center justify-between p-4 rounded-xl border border-border bg-card">
                   <div className="flex items-center gap-4">
                     <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                      <Icon name={device.label.includes('iOS') || device.label.includes('Android') ? 'smartphone' : 'computer'} size={20} />
+                      <Icon name={device.label.includes('iOS') || device.label.includes('Android') ? 'smartphone' : 'computer'} size={20}/>
                     </div>
                     <div>
                       <h4 className="font-semibold text-sm flex items-center gap-2">

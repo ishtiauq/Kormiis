@@ -16,11 +16,11 @@ import { Select, SelectItem } from "@/components/ui/select"
 import { DatePicker } from "@/components/ui/date-picker"
 
 const categoryIcons = {
-  'Laptop': <Icon name="laptop_windows" size={16} className="w-4 h-4" />,
-  'Phone': <Icon name="mobile" size={16} className="w-4 h-4" />,
-  'Monitor': <Icon name="monitor" size={16} className="w-4 h-4" />,
-  'Peripherals': <Icon name="mouse" size={16} className="w-4 h-4" />,
-  'Access Card': <Icon name="key" size={16} className="w-4 h-4" />
+  'Laptop': <Icon name="laptop_windows" className="w-4 h-4" size={16}/>,
+  'Phone': <Icon name="mobile" className="w-4 h-4" size={16}/>,
+  'Monitor': <Icon name="monitor" className="w-4 h-4" size={16}/>,
+  'Peripherals': <Icon name="mouse" className="w-4 h-4" size={16}/>,
+  'Access Card': <Icon name="key" className="w-4 h-4" size={16}/>
 }
 
 function AssetInventory({ filteredAssets, stats, assets, search, setSearch, filterCategory, setFilterCategory, alerts, showAddModal, setShowAddModal, newAsset, setNewAsset, handleAddAsset, triggerFileInput, fileInputRef, handleImportCSV, addToast, assetCategories, onOpenCategoryManager }) {
@@ -58,7 +58,7 @@ function AssetInventory({ filteredAssets, stats, assets, search, setSearch, filt
           >
             <CardContent className="p-4 flex flex-col gap-1">
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-semibold uppercase tracking-wider">
-                <Icon name={m.icon} size={14} className="text-primary shrink-0" /> {m.label}
+                <Icon name={m.icon} className="text-primary shrink-0" size={14}/> {m.label}
               </div>
               <div className="text-fluid-display font-extrabold tabular-nums text-foreground">{m.count}</div>
             </CardContent>
@@ -69,16 +69,16 @@ function AssetInventory({ filteredAssets, stats, assets, search, setSearch, filt
       <Card className="shadow-xs border-border bg-card overflow-hidden">
         <div className="p-4 border-b border-border flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center justify-between bg-muted/20">
           <div className="relative flex-1 w-full sm:w-auto sm:min-w-[280px] sm:max-w-md">
-            <Icon name="search" size={16} className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Icon name="search" className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" size={16}/>
             <Input type="text" placeholder="Search by name or serial number..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9 bg-background border-input shadow-sm w-full" />
           </div>
           <div className="flex gap-3 flex-wrap">
             <Button variant="outline" onClick={triggerFileInput} className="shadow-sm flex-1 sm:flex-none">
-              <Icon name="upload" size={16} className="mr-2 h-4 w-4" /> Import CSV
+              <Icon name="upload" className="mr-2 h-4 w-4" size={16}/> Import CSV
             </Button>
             <input type="file" ref={fileInputRef} onChange={handleImportCSV} accept=".csv" className="hidden" />
             <Button onClick={() => setShowAddModal(true)} className="shadow-sm shadow-primary/20 flex-1 sm:flex-none">
-              <Icon name="add" size={16} className="mr-2 h-4 w-4" /> Add Asset
+              <Icon name="add" className="mr-2 h-4 w-4" size={16}/> Add Asset
             </Button>
           </div>
         </div>
@@ -92,12 +92,12 @@ function AssetInventory({ filteredAssets, stats, assets, search, setSearch, filt
               setExpanded(categories.reduce((acc, c) => ({ ...acc, [c.key]: !allOpen }), {}))
             }}
           >
-            <Icon name="category" size={18} className="text-primary" />
+            <Icon name="category" className="text-primary" size={18}/>
             All Assets
             <Badge variant="secondary" className="text-xs shrink-0">{filteredAssets.length}</Badge>
           </button>
           <Button variant="ghost" size="sm" onClick={onOpenCategoryManager} className="rounded-full h-8 px-3 text-xs flex items-center gap-1.5 text-muted-foreground hover:text-foreground">
-            <Icon name="tune" size={14} /> Manage Category
+            <Icon name="tune" size={14}/> Manage Category
           </Button>
         </div>
 
@@ -111,9 +111,9 @@ function AssetInventory({ filteredAssets, stats, assets, search, setSearch, filt
                   className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-muted/40 transition-colors"
                   onClick={() => toggleCategory(group.key)}
                 >
-                  <Icon name={isOpen ? 'expand_more' : 'chevron_right'} size={20} className="text-muted-foreground shrink-0 transition-transform" />
+                  <Icon name={isOpen ? 'expand_more' : 'chevron_right'} className="text-muted-foreground shrink-0 transition-transform" size={20}/>
                   <span className="p-1.5 bg-primary/10 rounded-md text-primary flex items-center justify-center">
-                    {categoryIcons[group.key] || <Icon name="monitor" size={16} />}
+                    {categoryIcons[group.key] || <Icon name="monitor" size={16}/>}
                   </span>
                   <span className="flex-1 font-semibold text-foreground truncate">{group.label}</span>
                   <Badge variant="secondary" className="text-xs shrink-0">{group.items.length}</Badge>
@@ -144,7 +144,7 @@ function AssetInventory({ filteredAssets, stats, assets, search, setSearch, filt
           })}
           {categoryGroups.length === 0 && (
             <div className="p-12 text-center text-muted-foreground flex flex-col items-center justify-center">
-              <Icon name="search" size={40} className="h-10 w-10 mb-3 opacity-20" />
+              <Icon name="search" className="h-10 w-10 mb-3 opacity-20" size={40}/>
               <p className="text-fluid font-medium text-foreground">No assets found</p>
               <p className="text-fluid-sm mt-1">Try adjusting your search query or filters.</p>
             </div>
@@ -184,7 +184,7 @@ function AssetCard({ asset, alert, onClick }) {
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <div className="font-bold text-foreground text-sm truncate">{asset.name}</div>
-            <div className="text-[11px] text-muted-foreground font-sans mt-0.5">{asset.id} • SN: {asset.serialNumber}</div>
+            <div className="text-[11px] text-muted-foreground font-sans mt-0.5">{asset.id} â€¢ SN: {asset.serialNumber}</div>
           </div>
           <Badge className={`shrink-0 border ${statusClass[asset.status] || 'bg-red-500/10 text-red-700 border-red-500/20 dark:text-red-400'}`}>
             {asset.status}
@@ -192,10 +192,10 @@ function AssetCard({ asset, alert, onClick }) {
         </div>
 
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          {categoryIcons[asset.category] || <Icon name="monitor" size={14} />}
+          {categoryIcons[asset.category] || <Icon name="monitor" size={14}/>}
           <span>{asset.category}</span>
-          <span className="opacity-50">•</span>
-          <span>Condition: {asset.condition || '—'}</span>
+          <span className="opacity-50">â€¢</span>
+          <span>Condition: {asset.condition || 'â€”'}</span>
         </div>
 
         <div className="flex items-center justify-between pt-2 border-t border-border/60">
@@ -205,9 +205,9 @@ function AssetCard({ asset, alert, onClick }) {
           </div>
           <div className="text-right">
             <div className="text-[11px] text-muted-foreground uppercase tracking-wider flex items-center justify-end gap-1">
-              Warranty {alert && <Icon name="warning" size={14} className="text-orange-500" />}
+              Warranty {alert && <Icon name="warning" className="text-orange-500" size={14}/>}
             </div>
-            <div className="font-medium text-sm text-foreground">{asset.warrantyExpiry || '—'}</div>
+            <div className="font-medium text-sm text-foreground">{asset.warrantyExpiry || 'â€”'}</div>
           </div>
         </div>
       </CardContent>
@@ -232,7 +232,7 @@ function MetricBreakdownModal({ metricKey, metrics, assets, onClose }) {
       <DialogContent className="sm:max-w-[720px] p-0 overflow-hidden">
         <div className="bg-muted/30 p-5 border-b border-border flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <Icon name={metric.icon} size={20} className="text-foreground" />
+            <Icon name={metric.icon} className="text-foreground" size={20}/>
             <DialogTitle className="text-lg">{metric.label}</DialogTitle>
             <DialogDescription className="text-sm ml-1">
               {list.length} {list.length === 1 ? 'asset' : 'assets'}
@@ -255,7 +255,7 @@ function MetricBreakdownModal({ metricKey, metrics, assets, onClose }) {
                   <div key={a.id} className="p-3 rounded-lg border border-border bg-card flex items-center justify-between gap-3">
                     <div className="min-w-0">
                       <div className="font-medium text-sm truncate">{a.name}</div>
-                      <div className="text-[11px] text-muted-foreground font-sans">{a.id} • {a.serialNumber}</div>
+                      <div className="text-[11px] text-muted-foreground font-sans">{a.id} â€¢ {a.serialNumber}</div>
                     </div>
                     <Badge variant="outline" className="shrink-0 text-xs">{a.category}</Badge>
                   </div>
@@ -285,7 +285,7 @@ function MetricBreakdownModal({ metricKey, metrics, assets, onClose }) {
                   {Object.entries(byCategory).sort((a, b) => b[1] - a[1]).map(([cat, n]) => (
                     <div key={cat} className="flex items-center justify-between text-sm">
                       <span className="flex items-center gap-1.5">
-                        {categoryIcons[cat] || <Icon name="monitor" size={14} className="text-muted-foreground" />} {cat}
+                        {categoryIcons[cat] || <Icon name="monitor" className="text-muted-foreground" size={14}/>} {cat}
                       </span>
                       <span className="font-semibold tabular-nums">{n}</span>
                     </div>
@@ -320,7 +320,7 @@ function DetailModal({ asset, onClose }) {
           <div className="flex items-start justify-between">
             <div>
               <DialogTitle className="text-2xl mb-1">{asset.name}</DialogTitle>
-              <DialogDescription className="text-sm">Asset ID: {asset.id} &nbsp;•&nbsp; SN: {asset.serialNumber}</DialogDescription>
+              <DialogDescription className="text-sm">Asset ID: {asset.id} &nbsp;â€¢&nbsp; SN: {asset.serialNumber}</DialogDescription>
             </div>
             <Badge className={asset.status === 'Available' ? 'bg-green-500' : asset.status === 'Assigned' ? 'bg-blue-500' : 'bg-orange-500'}>{asset.status}</Badge>
           </div>
@@ -328,7 +328,7 @@ function DetailModal({ asset, onClose }) {
         
         <div className="p-6">
           <div className="grid grid-cols-2 md:grid-cols-3 gap-y-6 gap-x-6">
-            <div><div className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1 font-semibold">Category</div><div className="flex items-center gap-1.5 text-sm">{categoryIcons[asset.category] || <Icon name="monitor" size={12} className="w-3 h-3"/>} {asset.category}</div></div>
+            <div><div className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1 font-semibold">Category</div><div className="flex items-center gap-1.5 text-sm">{categoryIcons[asset.category] || <Icon name="monitor" className="w-3 h-3" size={12}/>} {asset.category}</div></div>
             <div><div className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1 font-semibold">Condition</div><div className="font-medium text-sm">{asset.condition}</div></div>
             <div><div className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1 font-semibold">Purchase Date</div><div className="font-medium text-sm">{asset.purchaseDate}</div></div>
             
@@ -406,7 +406,7 @@ function AssetAssignments({ assets, employees, assignForm, setAssignForm, setAss
                   <TableCell>
                     {asset.status === 'Assigned' && emp ? (
                       <div className="flex items-center gap-3">
-                        {emp.avatar ? <img src={emp.avatar} alt="" className="w-8 h-8 rounded-full object-cover ring-2 ring-primary/20" /> : <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs ring-2 ring-primary/20"><Icon name="person" size={16} /></div>}
+                        {emp.avatar ? <img src={emp.avatar} alt="" className="w-8 h-8 rounded-full object-cover ring-2 ring-primary/20" /> : <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs ring-2 ring-primary/20"><Icon name="person" size={16}/></div>}
                         <div>
                           <div className="font-medium text-sm">{emp.name}</div>
                           <div className="text-[11px] text-muted-foreground">{emp.department}</div>
@@ -416,8 +416,8 @@ function AssetAssignments({ assets, employees, assignForm, setAssignForm, setAss
                       <Badge className="bg-green-500/10 text-green-700 border-green-500/20 hover:bg-green-500/20 dark:text-green-400">Available In Inventory</Badge>
                     )}
                   </TableCell>
-                  <TableCell className="text-sm">{asset.assignmentDate || <span className="text-muted-foreground/50">—</span>}</TableCell>
-                  <TableCell className="text-sm">{asset.condition || <span className="text-muted-foreground/50">—</span>}</TableCell>
+                  <TableCell className="text-sm">{asset.assignmentDate || <span className="text-muted-foreground/50">â€”</span>}</TableCell>
+                  <TableCell className="text-sm">{asset.condition || <span className="text-muted-foreground/50">â€”</span>}</TableCell>
                   <TableCell>
                     {asset.status === 'Available' ? (
                       <Button size="sm" onClick={() => { setAssignTarget(asset); setShowAssignModal(true) }} className="shadow-sm">
@@ -426,7 +426,7 @@ function AssetAssignments({ assets, employees, assignForm, setAssignForm, setAss
                     ) : (
                       <div className="flex gap-2">
                         <Button variant="outline" size="sm" onClick={() => generateAgreementPDF(asset, emp, asset.condition)}>
-                          <Icon name="edit_document" size={16} className="h-4 w-4 mr-2" /> Agreement
+                          <Icon name="edit_document" className="h-4 w-4 mr-2" size={16}/> Agreement
                         </Button>
                         <Button variant="outline" size="sm" className="text-orange-600 border-orange-200 hover:bg-orange-50 dark:hover:bg-orange-900/20" onClick={() => handleReturnAsset(asset.id)}>
                           Return
@@ -476,7 +476,7 @@ function AssignAssetModal({ showAssignModal, setShowAssignModal, assignTarget, a
           </div>
           
           <div className="p-3 bg-blue-500/10 text-blue-700 dark:text-blue-400 rounded-lg text-xs flex items-start gap-2 border border-blue-500/20 mt-2">
-            <Icon name="error" size={16} className="h-4 w-4 mt-0.5 shrink-0" />
+            <Icon name="error" className="h-4 w-4 mt-0.5 shrink-0" size={16}/>
             <p>An official Asset Assignment Agreement PDF will be auto-generated and downloaded upon assignment.</p>
           </div>
           
@@ -497,7 +497,7 @@ function AssetRequests({ assetRequests, employees, handleRequestAction }) {
         <Card className="shadow-xs border-border border-dashed bg-card/50">
           <CardContent className="p-16 flex flex-col items-center justify-center text-center">
             <div className="p-4 bg-muted rounded-full mb-4">
-               <Icon name="chat" size={40} className="h-10 w-10 text-muted-foreground opacity-50" />
+               <Icon name="chat" className="h-10 w-10 text-muted-foreground opacity-50" size={40}/>
             </div>
             <h3 className="text-lg font-semibold text-foreground">No Pending Requests</h3>
             <p className="text-fluid-sm text-muted-foreground mt-1 max-w-sm">There are currently no open asset requests from employees. When employees request new equipment, it will appear here.</p>
@@ -515,7 +515,7 @@ function AssetRequests({ assetRequests, employees, handleRequestAction }) {
                     <span className="text-muted-foreground text-sm">{req.type === 'maintenance' ? 'requested maintenance for' : 'requested a'}</span>
                     <span className="font-bold text-primary flex items-center gap-1">
                        {req.type === 'maintenance' ? (
-                         <><Icon name="build" size={16} /> {req.assetName || req.category}</>
+                         <><Icon name="build" size={16}/> {req.assetName || req.category}</>
                        ) : (
                          <>{categoryIcons[req.category]} {req.name || req.category}</>
                        )}
@@ -589,7 +589,7 @@ function AssetMaintenance({ assets, selectedAssetForMaint, setSelectedAssetForMa
             <Card className="shadow-xs border-border bg-gradient-to-br from-card to-muted/20">
               <CardContent className="p-6">
                 <div className="flex items-center gap-3 mb-6 pb-4 border-b border-border">
-                  <Icon name="trending_down" size={24} className="h-6 w-6 text-primary" />
+                  <Icon name="trending_down" className="h-6 w-6 text-primary" size={24}/>
                   <h3 className="text-lg font-bold">Depreciation & Value</h3>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -604,7 +604,7 @@ function AssetMaintenance({ assets, selectedAssetForMaint, setSelectedAssetForMa
             <Card className="shadow-xs border-border">
               <CardHeader className="pb-4 border-b border-border bg-muted/10">
                 <CardTitle className="text-base flex items-center gap-2">
-                  <Icon name="draw" size={20} className="h-5 w-5 text-orange-500" /> Log New Maintenance
+                  <Icon name="draw" className="h-5 w-5 text-orange-500" size={20}/> Log New Maintenance
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-6">
@@ -634,7 +634,7 @@ function AssetMaintenance({ assets, selectedAssetForMaint, setSelectedAssetForMa
                 {selectedAssetForMaint.maintenanceLogs?.length > 0 && (
                   <div className="mt-10">
                     <h4 className="text-sm font-semibold mb-4 uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-                      <Icon name="build" size={16} className="h-4 w-4" /> Repair History Log
+                      <Icon name="build" className="h-4 w-4" size={16}/> Repair History Log
                     </h4>
                     <div className="flex flex-col gap-3">
                       {selectedAssetForMaint.maintenanceLogs.map(log => (
@@ -645,7 +645,7 @@ function AssetMaintenance({ assets, selectedAssetForMaint, setSelectedAssetForMa
                           </div>
                           <div className="flex items-center gap-2 mb-2 text-xs text-muted-foreground font-sans">
                             <span>{log.date}</span>
-                            <span>•</span>
+                            <span>â€¢</span>
                             <span>{log.id}</span>
                           </div>
                           <div className="text-foreground">{log.issue}</div>
@@ -661,7 +661,7 @@ function AssetMaintenance({ assets, selectedAssetForMaint, setSelectedAssetForMa
           <Card className="shadow-xs border-border border-dashed bg-card/50 h-full min-h-[400px] flex items-center justify-center">
             <CardContent className="flex flex-col items-center text-center p-6">
               <div className="p-4 bg-muted rounded-full mb-4">
-                 <Icon name="build" size={40} className="h-10 w-10 text-muted-foreground opacity-50" />
+                 <Icon name="build" className="h-10 w-10 text-muted-foreground opacity-50" size={40}/>
               </div>
               <h3 className="text-lg font-semibold text-foreground">No Asset Selected</h3>
               <p className="text-fluid-sm text-muted-foreground mt-1 max-w-[250px]">Select an asset from the list on the left to view depreciation details and log maintenance.</p>
@@ -728,7 +728,7 @@ function AddAssetModal({ showAddModal, setShowAddModal, newAsset, setNewAsset, h
                     onChange={e => setNewAsset(p => ({...p, category: e.target.value}))}
                   />
                   <Button type="button" size="sm" onClick={handleAddCategory}>
-                    <Icon name="add" size={14} />
+                    <Icon name="add" size={14}/>
                   </Button>
                 </div>
               )}
@@ -1030,7 +1030,7 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
     <div className="animate-fade-in pb-10 flex flex-col gap-6 w-full max-w-full overflow-x-hidden">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
-          <Icon name="devices_other" size={20} className="text-foreground" />
+          <Icon name="devices_other" className="text-foreground" size={20}/>
           Assets
         </h1>
       </div>
@@ -1039,10 +1039,10 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
       <div className="bg-card p-2 rounded-xl border border-border/50 shadow-sm w-full max-w-full">
         <div role="tablist" aria-label="Asset management sections" className="menu-bar">
           {[
-            { id: 'inventory', label: 'Inventory', icon: <Icon name="inventory_2" size={16} /> },
-            { id: 'assignments', label: 'Assignments', icon: <Icon name="assignment_ind" size={16} /> },
-            { id: 'requests', label: 'Requests', icon: <Icon name="request_quote" size={16} /> },
-            { id: 'maintenance', label: 'Maintenance', icon: <Icon name="build" size={16} /> },
+            { id: 'inventory', label: 'Inventory', icon: <Icon name="inventory_2" size={16}/> },
+            { id: 'assignments', label: 'Assignments', icon: <Icon name="assignment_ind" size={16}/> },
+            { id: 'requests', label: 'Requests', icon: <Icon name="request_quote" size={16}/> },
+            { id: 'maintenance', label: 'Maintenance', icon: <Icon name="build" size={16}/> },
           ].map(view => (
             <Button
               key={view.id}
@@ -1066,7 +1066,7 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
 
       {alerts.length > 0 && activeView === 'inventory' && (
         <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-900 text-orange-800 dark:text-orange-200 p-4 rounded-xl flex items-center gap-3">
-          <Icon name="warning" size={20} className="h-5 w-5 shrink-0" />
+          <Icon name="warning" className="h-5 w-5 shrink-0" size={20}/>
           <span><strong>Alert:</strong> {alerts.length} asset(s) have warranties expiring within 30 days</span>
         </div>
       )}
@@ -1113,7 +1113,7 @@ function CategoryManagerModal({ assetCategories, assets, onClose, onEdit, onDele
         <DialogHeader className="flex flex-row items-center justify-between border-b border-border pb-4 mb-4 space-y-0">
           <DialogTitle>Manage Asset Categories</DialogTitle>
           <button className="rounded-full p-2 hover:bg-muted transition-colors" onClick={onClose}>
-            <Icon name="close" size={16} />
+            <Icon name="close" size={16}/>
           </button>
         </DialogHeader>
         <div className="flex flex-col gap-5">
@@ -1125,10 +1125,10 @@ function CategoryManagerModal({ assetCategories, assets, onClose, onEdit, onDele
                   <span className="flex-1 text-[0.9rem] font-medium text-foreground">{cat}</span>
                   <span className="text-[11px] text-muted-foreground">{assets.filter(a => a.category === cat).length} asset(s)</span>
                   <Button variant="ghost" size="icon-xs" aria-label="Edit category" onClick={() => openEdit(cat)}>
-                    <Icon name="edit" size={14} />
+                    <Icon name="edit" size={14}/>
                   </Button>
                   <Button variant="ghost" size="icon-xs" aria-label="Delete category" onClick={() => setManagerState({ editing: null, deleteConfirm: cat })}>
-                    <Icon name="delete" size={14} className="text-destructive" />
+                    <Icon name="delete" className="text-destructive" size={14}/>
                   </Button>
                 </div>
               ))}
@@ -1149,7 +1149,7 @@ function CategoryManagerModal({ assetCategories, assets, onClose, onEdit, onDele
                 <div className="flex gap-2 justify-end">
                   <Button variant="secondary" size="sm" onClick={() => setManagerState({ editing: null, deleteConfirm: null })}>Cancel</Button>
                   <Button variant="default" size="sm" className="flex items-center gap-1.5" onClick={submitEdit}>
-                    <Icon name="check" size={14} /> Save
+                    <Icon name="check" size={14}/> Save
                   </Button>
                 </div>
               </div>
@@ -1159,7 +1159,7 @@ function CategoryManagerModal({ assetCategories, assets, onClose, onEdit, onDele
           {managerState.deleteConfirm && (
             <div className="border-t border-border pt-4">
               <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 flex items-start gap-2">
-                <Icon name="warning" size={16} className="text-destructive mt-0.5 shrink-0" />
+                <Icon name="warning" className="text-destructive mt-0.5 shrink-0" size={16}/>
                 <p className="text-fluid-sm text-foreground">
                   Delete "<strong>{managerState.deleteConfirm}</strong>"? Assets in this category will be moved to <strong>Uncategorized</strong>.
                 </p>

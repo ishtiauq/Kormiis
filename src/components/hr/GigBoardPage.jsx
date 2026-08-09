@@ -304,19 +304,19 @@ export default function GigBoardPage({ adminUid, currentUser, addToast }) {
   }
 
   const tabsList = [
-    { id: 'browse', label: 'Browse Requests', icon: <Icon name="travel_explore" size={15} /> },
-    { id: 'myPosted', label: 'My Requests', icon: <Icon name="inventory_2" size={15} /> },
-    { id: 'myOffers', label: 'My Commitments', icon: <Icon name="assignment_turned_in" size={15} /> },
+    { id: 'browse', label: 'Browse Requests', icon: <Icon name="travel_explore" size={15}/> },
+    { id: 'myPosted', label: 'My Requests', icon: <Icon name="inventory_2" size={15}/> },
+    { id: 'myOffers', label: 'My Commitments', icon: <Icon name="assignment_turned_in" size={15}/> },
   ]
 
   return (
     <div className="animate-fade-in flex flex-col gap-5 max-w-[1200px] mx-auto w-full">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-1">
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient m-0">
-          <Icon name="handshake" size={22} className="text-foreground" /> Help Hub
+          <Icon name="handshake" className="text-foreground" size={22}/> Help Hub
         </h1>
         <Button onClick={openCreateModal} className="hidden sm:inline-flex rounded-full shadow-sm">
-          <Icon name="add" size={16} className="mr-1.5" /> Request Help
+          <Icon name="add" className="mr-1.5" size={16}/> Request Help
         </Button>
       </div>
 
@@ -345,7 +345,7 @@ export default function GigBoardPage({ adminUid, currentUser, addToast }) {
       ) : gigs.length === 0 ? (
         <Card>
           <CardContent className="p-10 text-center text-sm text-muted-foreground">
-            <Icon name="handshake" size={32} className="opacity-30 mx-auto mb-2" />
+            <Icon name="handshake" className="opacity-30 mx-auto mb-2" size={32}/>
             No active help requests in this view.
           </CardContent>
         </Card>
@@ -368,18 +368,18 @@ export default function GigBoardPage({ adminUid, currentUser, addToast }) {
                       {gig.status === 'open' ? (
                         isPosted ? (
                           <Badge variant="outline" className="px-3 py-1 text-xs font-bold text-rose-500 border-rose-500/30 bg-rose-500/10 flex items-center gap-1.5 rounded-full shrink-0">
-                            <Icon name="front_hand" size={13} />
+                            <Icon name="front_hand" size={13}/>
                             <span>Need help</span>
                             {expiryText && <span className="font-semibold opacity-80">({expiryText})</span>}
                           </Badge>
                         ) : (
                           gig.hasOffered ? (
                             <Badge variant="secondary" className="px-3 py-1 bg-amber-500/10 text-amber-600 border-amber-500/20 font-bold flex items-center gap-1 rounded-full shrink-0 text-xs">
-                              ✋ Help Offered
+                              âœ‹ Help Offered
                             </Badge>
                           ) : (
                             <Button size="sm" className="rounded-full px-3.5 h-8 text-xs font-bold shadow-sm flex items-center" onClick={() => offerHelp(gig)}>
-                              <Icon name="front_hand" size={14} className="mr-1" />
+                              <Icon name="front_hand" className="mr-1" size={14}/>
                               <span>Help</span>
                               {expiryText && <span className="font-medium opacity-90 ml-1.5 text-[11px]">({expiryText})</span>}
                             </Button>
@@ -398,14 +398,14 @@ export default function GigBoardPage({ adminUid, currentUser, addToast }) {
                             title="Edit Request"
                             className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
                           >
-                            <Icon name="edit" size={15} />
+                            <Icon name="edit" size={15}/>
                           </button>
                           <button
                             onClick={() => setDeleteTargetId(gig.id)}
                             title="Delete Request"
                             className="p-1 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
                           >
-                            <Icon name="delete" size={15} />
+                            <Icon name="delete" size={15}/>
                           </button>
                         </div>
                       )}
@@ -428,7 +428,7 @@ export default function GigBoardPage({ adminUid, currentUser, addToast }) {
                     <div className="p-2.5 rounded-xl bg-muted/30 border border-border/60 text-xs flex flex-col gap-1">
                       {isAccepted && (
                         <div className="flex items-center gap-2 text-sky-600 font-semibold">
-                          <Icon name="check_circle" size={16} />
+                          <Icon name="check_circle" size={16}/>
                           <img
                             src={gig.helper.avatar || "https://i.pravatar.cc/150?u=helper"}
                             alt={gig.helper.name || "Helper"}
@@ -440,7 +440,7 @@ export default function GigBoardPage({ adminUid, currentUser, addToast }) {
 
                       {isCompleted && (
                         <div className="flex items-center gap-2 text-emerald-600 font-semibold">
-                          <Icon name="task_alt" size={16} />
+                          <Icon name="task_alt" size={16}/>
                           <img
                             src={gig.helper.avatar || "https://i.pravatar.cc/150?u=helper"}
                             alt={gig.helper.name || "Helper"}
@@ -488,7 +488,7 @@ export default function GigBoardPage({ adminUid, currentUser, addToast }) {
                     {(isPosted || (gig.helper && gig.helper.id === myEmpId) || isAdmin) && isAccepted && (
                       <div>
                         <Button size="sm" variant="outline" className="rounded-full text-emerald-600 border-emerald-500/30 hover:bg-emerald-500/10" onClick={() => markComplete(gig)}>
-                          <Icon name="check" size={14} className="mr-1.5" /> Mark Complete
+                          <Icon name="check" className="mr-1.5" size={14}/> Mark Complete
                         </Button>
                       </div>
                     )}
@@ -526,7 +526,7 @@ export default function GigBoardPage({ adminUid, currentUser, addToast }) {
           <DialogHeader className="pb-2 border-b border-border/50">
             <div className="flex items-center gap-2.5">
               <div className="size-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                <Icon name={editingGigId ? "edit_note" : "handshake"} size={18} />
+                <Icon name={editingGigId ? "edit_note" : "handshake"} size={18}/>
               </div>
               <div>
                 <DialogTitle className="text-base font-bold">
@@ -589,10 +589,10 @@ export default function GigBoardPage({ adminUid, currentUser, addToast }) {
                   className="flex h-9 w-full items-center justify-between rounded-xl border border-input bg-background px-2.5 text-xs font-semibold text-foreground hover:bg-muted/40 transition-all cursor-pointer shadow-xs"
                 >
                   <span className="flex items-center gap-1.5">
-                    <Icon name="schedule" size={15} className="text-primary" />
+                    <Icon name="schedule" className="text-primary" size={15}/>
                     {time12Str}
                   </span>
-                  <Icon name="unfold_more" size={14} className="text-muted-foreground" />
+                  <Icon name="unfold_more" className="text-muted-foreground" size={14}/>
                 </button>
               </div>
             </div>
@@ -603,7 +603,7 @@ export default function GigBoardPage({ adminUid, currentUser, addToast }) {
                 Cancel
               </Button>
               <Button onClick={submitForm} className="rounded-full px-6 shadow-sm">
-                <Icon name={editingGigId ? "check" : "send"} size={15} className="mr-1.5" />
+                <Icon name={editingGigId ? "check" : "send"} className="mr-1.5" size={15}/>
                 {editingGigId ? 'Save Changes' : 'Post Request'}
               </Button>
             </div>
@@ -650,7 +650,7 @@ export default function GigBoardPage({ adminUid, currentUser, addToast }) {
         onClick={openCreateModal}
         aria-label="Request Help"
       >
-        <Icon name="add" size={24} />
+        <Icon name="add" size={24}/>
       </Button>
     </div>
   )

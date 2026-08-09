@@ -54,7 +54,18 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
               className="block h-9 w-auto max-w-[160px] object-contain shrink-0 drop-shadow-sm" 
             />
           </div>
-          <div className="flex items-center gap-1 shrink-0">
+          <div className="flex items-center gap-2 shrink-0">
+            {showThemeToggle && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleTheme}
+                title={`Theme: ${themeMode}`}
+                className="rounded-full size-10 sm:size-11 text-foreground hover:bg-muted shrink-0"
+              >
+                {themeMode === 'light' ? <Icon name="light_mode" size={20} /> : <Icon name="dark_mode" size={20} />}
+              </Button>
+            )}
             {onProfileClick && (
               <button
                 onClick={onProfileClick}

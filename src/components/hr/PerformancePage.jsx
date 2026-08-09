@@ -125,7 +125,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
     <div className="animate-fade-in flex flex-col gap-5 max-w-[1200px] mx-auto w-full">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient m-0">
-          <Icon name="insights" size={20} className="text-foreground" /> Performance Tracker
+          <Icon name="insights" className="text-foreground" size={20}/> Performance Tracker
         </h1>
         <div className="flex items-center gap-2">
           <div className="relative flex items-center h-9 min-w-[140px] rounded-xl border border-input bg-background text-sm shadow-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 transition-all cursor-pointer">
@@ -136,12 +136,12 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
               className="border-none shadow-none focus-visible:ring-0 bg-transparent rounded-none pl-3 pr-9 h-full w-full cursor-pointer relative z-10 [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer font-semibold tabular-nums" 
             />
             <div className="absolute right-2.5 text-muted-foreground flex items-center z-0">
-              <Icon name="calendar_month" size={16} />
+              <Icon name="calendar_month" size={16}/>
             </div>
           </div>
           {isAdmin && (
             <Button size="sm" variant="default" onClick={handleCalculate} disabled={calculating} className="rounded-full shadow-sm">
-              <Icon name="calculate" size={14} className="mr-1.5" /> {calculating ? 'Calculating...' : 'Calculate month'}
+              <Icon name="calculate" className="mr-1.5" size={14}/> {calculating ? 'Calculating...' : 'Calculate month'}
             </Button>
           )}
         </div>
@@ -153,12 +153,12 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
       <Card className="border border-border/80 shadow-sm rounded-2xl">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
           <div className="flex items-center gap-2">
-            <Icon name="rule" size={18} className="text-primary" />
+            <Icon name="rule" className="text-primary" size={18}/>
             <CardTitle className="text-base font-bold">Evaluation Criteria</CardTitle>
           </div>
           {isAdmin && (
             <Button size="sm" variant="ghost" className="h-8 text-xs font-semibold rounded-full text-primary hover:text-primary hover:bg-primary/10" onClick={openEditCriteria}>
-              <Icon name="edit" size={14} className="mr-1" /> Edit Criteria
+              <Icon name="edit" className="mr-1" size={14}/> Edit Criteria
             </Button>
           )}
         </CardHeader>
@@ -166,7 +166,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
           <div className="p-3 rounded-xl bg-muted/30 border border-border/60 flex flex-col justify-between">
             <div className="flex items-center justify-between gap-1">
               <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                <Icon name="check_circle" size={15} className="text-emerald-500" /> On-Time Attendance
+                <Icon name="check_circle" className="text-emerald-500" size={15}/> On-Time Attendance
               </span>
               <Badge variant="secondary" className="text-xs font-bold bg-emerald-500/10 text-emerald-600 border-emerald-500/20">
                 +{weights.on_time || 30} pts
@@ -178,7 +178,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
           <div className="p-3 rounded-xl bg-muted/30 border border-border/60 flex flex-col justify-between">
             <div className="flex items-center justify-between gap-1">
               <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                <Icon name="schedule" size={15} className="text-rose-500" /> Late Arrival Penalty
+                <Icon name="schedule" className="text-rose-500" size={15}/> Late Arrival Penalty
               </span>
               <Badge variant="secondary" className="text-xs font-bold bg-rose-500/10 text-rose-600 border-rose-500/20">
                 -{weights.late_penalty || 10} pts
@@ -190,7 +190,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
           <div className="p-3 rounded-xl bg-muted/30 border border-border/60 flex flex-col justify-between">
             <div className="flex items-center justify-between gap-1">
               <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                <Icon name="cancel" size={15} className="text-rose-500" /> Absence Penalty
+                <Icon name="cancel" className="text-rose-500" size={15}/> Absence Penalty
               </span>
               <Badge variant="secondary" className="text-xs font-bold bg-rose-500/10 text-rose-600 border-rose-500/20">
                 -{weights.absence_penalty || 20} pts
@@ -202,7 +202,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
           <div className="p-3 rounded-xl bg-muted/30 border border-border/60 flex flex-col justify-between">
             <div className="flex items-center justify-between gap-1">
               <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                <Icon name="more_time" size={15} className="text-amber-500" /> Overtime Deduction
+                <Icon name="more_time" className="text-amber-500" size={15}/> Overtime Deduction
               </span>
               <Badge variant="secondary" className="text-xs font-bold bg-amber-500/10 text-amber-600 border-amber-500/20">
                 -{weights.overtime_discourage || 10} pts
@@ -214,7 +214,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
           <div className="p-3 rounded-xl bg-muted/30 border border-border/60 flex flex-col justify-between">
             <div className="flex items-center justify-between gap-1">
               <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                <Icon name="beach_access" size={15} className="text-slate-500" /> Leave Utilization
+                <Icon name="beach_access" className="text-slate-500" size={15}/> Leave Utilization
               </span>
               <Badge variant="secondary" className="text-xs font-bold bg-slate-500/10 text-slate-600 border-slate-500/20">
                 +{weights.leave_utilization || 10} pts
@@ -226,7 +226,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
           <div className="p-3 rounded-xl bg-muted/30 border border-border/60 flex flex-col justify-between">
             <div className="flex items-center justify-between gap-1">
               <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                <Icon name="handshake" size={15} className="text-emerald-500" /> Help Hub Contributions
+                <Icon name="handshake" className="text-emerald-500" size={15}/> Help Hub Contributions
               </span>
               <Badge variant="secondary" className="text-xs font-bold bg-emerald-500/10 text-emerald-600 border-emerald-500/20">
                 +{weights.gig_contribution || 20} pts
@@ -239,7 +239,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
         {/* Grade Threshold Scale */}
         <div className="mx-6 mb-5 flex flex-col gap-2">
           <div className="text-xs font-bold text-foreground flex items-center gap-1.5 px-1">
-            <Icon name="military_tech" size={16} className="text-amber-500" />
+            <Icon name="military_tech" className="text-amber-500" size={16}/>
             <span>Performance Grade Scale</span>
           </div>
           <div className="bg-card p-2 rounded-xl border border-border/50 shadow-sm w-full max-w-full">
@@ -252,7 +252,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
                 className={`rounded-full px-4 justify-center ${selectedSortGrade !== 'A' ? 'text-muted-foreground hover:bg-muted hover:text-foreground' : ''}`}
                 onClick={() => isAdmin && setSelectedSortGrade(prev => prev === 'A' ? null : 'A')}
               >
-                Grade A (85 – 100 pts)
+                Grade A (85 â€“ 100 pts)
               </Button>
               <Button
                 role="tab"
@@ -262,7 +262,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
                 className={`rounded-full px-4 justify-center ${selectedSortGrade !== 'B' ? 'text-muted-foreground hover:bg-muted hover:text-foreground' : ''}`}
                 onClick={() => isAdmin && setSelectedSortGrade(prev => prev === 'B' ? null : 'B')}
               >
-                Grade B (70 – 84 pts)
+                Grade B (70 â€“ 84 pts)
               </Button>
               <Button
                 role="tab"
@@ -272,7 +272,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
                 className={`rounded-full px-4 justify-center ${selectedSortGrade !== 'C' ? 'text-muted-foreground hover:bg-muted hover:text-foreground' : ''}`}
                 onClick={() => isAdmin && setSelectedSortGrade(prev => prev === 'C' ? null : 'C')}
               >
-                Grade C (50 – 69 pts)
+                Grade C (50 â€“ 69 pts)
               </Button>
               <Button
                 role="tab"
@@ -282,7 +282,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
                 className={`rounded-full px-4 justify-center ${selectedSortGrade !== 'D' ? 'text-muted-foreground hover:bg-muted hover:text-foreground' : ''}`}
                 onClick={() => isAdmin && setSelectedSortGrade(prev => prev === 'D' ? null : 'D')}
               >
-                Grade D (0 – 49 pts)
+                Grade D (0 â€“ 49 pts)
               </Button>
             </div>
           </div>
@@ -297,7 +297,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
           ) : !myScore ? (
             <Card>
               <CardContent className="p-10 text-center text-sm text-muted-foreground">
-                <Icon name="analytics" size={32} className="opacity-30 mx-auto mb-2" />
+                <Icon name="analytics" className="opacity-30 mx-auto mb-2" size={32}/>
                 No performance score evaluated for {month} yet.
               </CardContent>
             </Card>
@@ -306,20 +306,20 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
               <Card className="border border-border/80 shadow-sm rounded-2xl">
                 <CardContent className="p-6 flex flex-wrap items-center justify-between gap-4">
                   <div>
-                    <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">My Performance Score • {month}</div>
+                    <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">My Performance Score â€¢ {month}</div>
                     <div className="text-fluid-display font-black tabular-nums text-foreground mt-1">
                       {myScore.totalScore ?? myScore.score ?? 0}<span className="text-fluid-sm text-muted-foreground font-semibold">/100</span>
                     </div>
                   </div>
                   <Badge variant="outline" className={`text-base px-4 py-1 font-bold ${gradeTone[myScore.grade] || ''}`}>
-                    Grade {myScore.grade || '—'}
+                    Grade {myScore.grade || 'â€”'}
                   </Badge>
                 </CardContent>
               </Card>
 
               {/* Evaluation Breakdown */}
               <Card className="border border-border/80 shadow-sm rounded-2xl">
-                <CardHeader><CardTitle className="text-base font-bold">Score Breakdown — {month}</CardTitle></CardHeader>
+                <CardHeader><CardTitle className="text-base font-bold">Score Breakdown â€” {month}</CardTitle></CardHeader>
                 <CardContent className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-0">
                   <div className="p-4 rounded-xl bg-muted/40 border border-border flex flex-col justify-between">
                     <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">On-Time Attendance</span>
@@ -372,7 +372,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
                 <div className="grid grid-cols-1 gap-4 mt-2">
                   <Card className="border border-border/80 shadow-sm rounded-2xl">
                     <CardContent className="p-5">
-                      <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Top Performers — {month}</div>
+                      <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Top Performers â€” {month}</div>
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         {topPerformers.map((p, i) => (
                           <div key={p.employeeId || p.id} className="flex items-center justify-between p-3 rounded-xl bg-muted/30 border border-border/60">
@@ -419,7 +419,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
                     ))}
                   </div>
                 ) : (
-                  <div className="text-sm text-muted-foreground">—</div>
+                  <div className="text-sm text-muted-foreground">â€”</div>
                 )}
               </CardContent>
             </Card>
@@ -427,7 +427,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
 
           <Card className="border border-border/80 shadow-sm rounded-2xl">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-              <CardTitle className="text-base font-bold">Employee Performance Tracker — {month}</CardTitle>
+              <CardTitle className="text-base font-bold">Employee Performance Tracker â€” {month}</CardTitle>
               <Badge variant="secondary">{scores.length} employees evaluated</Badge>
             </CardHeader>
             <CardContent className="p-0">
@@ -435,7 +435,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
                 <div className="p-10 text-center text-sm text-muted-foreground">Loading scores...</div>
               ) : scores.length === 0 ? (
                 <div className="p-10 text-center text-sm text-muted-foreground">
-                  <Icon name="insights" size={28} className="opacity-30 mx-auto mb-2" />
+                  <Icon name="insights" className="opacity-30 mx-auto mb-2" size={28}/>
                   No performance scores evaluated for this month yet. Click "Calculate month".
                 </div>
               ) : (
@@ -460,7 +460,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
                         <TableRow key={s.employeeId || s.id}>
                           <TableCell>
                             <div className="font-medium text-sm text-foreground">{s.employeeName}</div>
-                            <div className="text-xs text-muted-foreground">{s.department || '—'}</div>
+                            <div className="text-xs text-muted-foreground">{s.department || 'â€”'}</div>
                           </TableCell>
                           <TableCell className="text-center font-bold tabular-nums text-base">{s.totalScore || s.score}</TableCell>
                           <TableCell className="text-center">
@@ -484,7 +484,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
           <DialogHeader>
             <div className="flex items-center gap-2.5">
               <div className="size-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                <Icon name="tune" size={18} />
+                <Icon name="tune" size={18}/>
               </div>
               <div>
                 <DialogTitle className="text-base font-bold">Configure Evaluation Criteria</DialogTitle>
@@ -572,7 +572,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
                 Cancel
               </Button>
               <Button size="sm" className="rounded-full px-5 shadow-sm" onClick={handleSaveCriteria} disabled={savingCriteria}>
-                <Icon name="check" size={15} className="mr-1.5" />
+                <Icon name="check" className="mr-1.5" size={15}/>
                 {savingCriteria ? 'Saving...' : 'Save Criteria'}
               </Button>
             </div>

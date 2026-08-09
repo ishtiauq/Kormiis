@@ -245,23 +245,23 @@ export default function App() {
         </div>
       </main>
 
-      {/* Bottom Tab Bar (Mobile) — Floating Pill */}
+      {/* Bottom Tab Bar (Mobile) â€” Floating Pill */}
       {isMobile && (
         <div className={`fixed bottom-0 left-0 right-0 z-40 flex justify-center pointer-events-none px-4 pb-3 sm:pb-4 transition-all duration-300 ${isScrollingDown && !showMobileMenu ? 'translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
-          <nav className="bottom-bar bottom-bar-pill bg-card border border-border pointer-events-auto w-full max-w-[250px] flex items-center justify-around px-2 h-16 text-foreground shadow-lg shadow-black/5 transition-all duration-300" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
+          <nav className="bottom-bar bottom-bar-pill bg-foreground pointer-events-auto w-full max-w-[250px] flex items-center justify-around px-2 h-16 shadow-lg shadow-black/10 transition-all duration-300" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
             <MobileTabButton
               active={currentView === 'dashboard'}
               label="Home"
               onClick={() => { setCurrentView('dashboard'); setShowMobileMenu(false) }}
             >
-              <Icon name="home" size={22} />
+              <Icon name="home" size={22}/>
             </MobileTabButton>
             <MobileTabButton
               active={currentView === 'announcements'}
               label="Announcements"
               onClick={() => { setCurrentView('announcements'); setShowMobileMenu(false) }}
             >
-              <Icon name="rss_feed" size={22} />
+              <Icon name="rss_feed" size={22}/>
             </MobileTabButton>
             <MobileTabButton
               active={false}
@@ -274,14 +274,14 @@ export default function App() {
                 </span>
               ) : null}
             >
-              <Icon name="notifications_active" size={22} />
+              <Icon name="notifications_active" size={22}/>
             </MobileTabButton>
             <MobileTabButton
               active={showMobileMenu}
               label="Menu"
               onClick={() => setShowMobileMenu(!showMobileMenu)}
             >
-              <Icon name="menu" size={22} />
+              <Icon name="menu" size={22}/>
             </MobileTabButton>
           </nav>
         </div>
@@ -301,7 +301,7 @@ export default function App() {
         <div className="px-5 py-4 border-b border-border/50 bg-muted/20 rounded-t-2xl shrink-0 flex items-center justify-between">
           <h2 className="text-left text-lg font-bold text-foreground">Menu</h2>
           <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-muted-foreground" onClick={() => setShowMobileMenu(false)}>
-            <Icon name="cancel" size={18} />
+            <Icon name="cancel" size={18}/>
           </Button>
         </div>
         <div className="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-1.5 pb-24">
@@ -326,7 +326,7 @@ export default function App() {
             className="btn-shimmer w-full flex items-center justify-center gap-3 py-4 rounded-xl bg-[#dc2626] hover:bg-[#b91c1c] text-white transition-colors cursor-pointer border-none shadow-sm"
             onClick={() => { handleLogout(); setShowMobileMenu(false) }}
           >
-            <Icon name="logout" size={20} />
+            <Icon name="logout" size={20}/>
             <span className="font-semibold text-base">Logout</span>
           </button>
         </div>

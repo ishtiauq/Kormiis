@@ -111,7 +111,7 @@ function DropdownMenuItem({
                   : "dropdown-menu-checkbox-item-indicator"
               }>
               {isSelected ? (
-                <Icon name="check" size={16} />
+                <Icon name="check" size={16}/>
               ) : null}
             </span>
           ) : null}
@@ -147,7 +147,7 @@ function DropdownMenuSubTrigger({
       {composeRenderProps(children, (children) => (
         <>
           {children}
-          <Icon name="arrow_forward" size={16} className="ml-auto" />
+          <Icon name="arrow_forward" className="ml-auto" size={16}/>
         </>
       ))}
     </MenuItemPrimitive>

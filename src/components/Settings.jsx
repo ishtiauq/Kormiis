@@ -63,7 +63,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
 
   const [activeSessions] = useState([]) // Sessions will be implemented with real backend auth
 
-  const [currency, setCurrency] = useState(settings.currency || '৳')
+  const [currency, setCurrency] = useState(settings.currency || 'à§³')
   const [salaryStructure, setSalaryStructure] = useState(settings.salaryStructure || [])
   const [expensePolicies, setExpensePolicies] = useState(settings.expensePolicies || { Travel: 500, Meals: 50, 'Office Supplies': 100, Medical: 200, Other: 50 })
   const [leavePolicies, setLeavePolicies] = useState(settings.leavePolicies || { Annual: 14, Sick: 7, Casual: 3, Unpaid: 0 })
@@ -208,15 +208,15 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
   const handleRemoveLogo = () => { setLogo(''); setLogoX(0); setLogoY(0); setLogoZoom(1); setShowLogoModal(false) }
 
   const menuItems = [
-    { id: 'theme', icon: <Icon name="light_mode" size={20} />, label: 'Appearance & Theme' },
-    { id: 'payroll', icon: <Icon name="account_balance" size={20} />, label: 'Payroll Settings' },
-    { id: 'company', icon: <Icon name="apartment" size={20} />, label: 'Company Profile' },
-    { id: 'attendance', icon: <Icon name="pin_drop" size={20} />, label: 'Attendance & Leaves' },
-    { id: 'expenses', icon: <Icon name="wallet" size={20} />, label: 'Expense Policies' },
-    { id: 'rosters', icon: <Icon name="calendar_clock" size={20} />, label: 'Rosters & Shifts' },
-    { id: 'notifications', icon: <Icon name="notifications_active" size={20} />, label: 'Notifications' },
-    { id: 'audit', icon: <Icon name="list" size={20} />, label: 'Audit Logs' },
-    { id: 'security', icon: <Icon name="verified_user" size={20} />, label: 'Security' },
+    { id: 'theme', icon: <Icon name="light_mode" size={20}/>, label: 'Appearance & Theme' },
+    { id: 'payroll', icon: <Icon name="account_balance" size={20}/>, label: 'Payroll Settings' },
+    { id: 'company', icon: <Icon name="apartment" size={20}/>, label: 'Company Profile' },
+    { id: 'attendance', icon: <Icon name="pin_drop" size={20}/>, label: 'Attendance & Leaves' },
+    { id: 'expenses', icon: <Icon name="wallet" size={20}/>, label: 'Expense Policies' },
+    { id: 'rosters', icon: <Icon name="calendar_clock" size={20}/>, label: 'Rosters & Shifts' },
+    { id: 'notifications', icon: <Icon name="notifications_active" size={20}/>, label: 'Notifications' },
+    { id: 'audit', icon: <Icon name="list" size={20}/>, label: 'Audit Logs' },
+    { id: 'security', icon: <Icon name="verified_user" size={20}/>, label: 'Security' },
   ]
 
   const handleExportCSV = () => {
@@ -243,7 +243,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
-                {themeMode === 'dark' ? <Icon name="dark_mode" size={20} className="h-5 w-5 text-muted-foreground" /> : <Icon name="light_mode" size={20} className="h-5 w-5 text-muted-foreground" />}
+                {themeMode === 'dark' ? <Icon name="dark_mode" className="h-5 w-5 text-muted-foreground" size={20}/> : <Icon name="light_mode" className="h-5 w-5 text-muted-foreground" size={20}/>}
                 <CardTitle className="text-lg">Theme</CardTitle>
               </div>
               <CardDescription>Choose between light and dark mode for the entire application.</CardDescription>
@@ -254,13 +254,13 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                   onClick={() => { if (themeMode !== 'light') toggleTheme() }}
                   className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md transition-all cursor-pointer border-0 ${themeMode === 'light' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
                 >
-                  <Icon name="light_mode" size={16} /> Light
+                  <Icon name="light_mode" size={16}/> Light
                 </button>
                 <button
                   onClick={() => { if (themeMode !== 'dark') toggleTheme() }}
                   className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md transition-all cursor-pointer border-0 ${themeMode === 'dark' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
                 >
-                  <Icon name="dark_mode" size={16} /> Dark
+                  <Icon name="dark_mode" size={16}/> Dark
                 </button>
               </div>
               <p className="text-fluid-xs text-muted-foreground mt-3">Applies instantly across all portals.</p>
@@ -279,11 +279,11 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
               <div className="w-full max-w-[260px]">
                 <Select value={currency} onChange={setCurrency} placeholder="$ (USD)">
                   <SelectItem id="$">$ (USD)</SelectItem>
-                  <SelectItem id="৳">৳ (BDT)</SelectItem>
-                  <SelectItem id="€">€ (EUR)</SelectItem>
-                  <SelectItem id="£">£ (GBP)</SelectItem>
-                  <SelectItem id="₹">₹ (INR)</SelectItem>
-                  <SelectItem id="¥">¥ (JPY)</SelectItem>
+                  <SelectItem id="à§³">à§³ (BDT)</SelectItem>
+                  <SelectItem id="â‚¬">â‚¬ (EUR)</SelectItem>
+                  <SelectItem id="Â£">Â£ (GBP)</SelectItem>
+                  <SelectItem id="â‚¹">â‚¹ (INR)</SelectItem>
+                  <SelectItem id="Â¥">Â¥ (JPY)</SelectItem>
                 </Select>
               </div>
             </CardContent>
@@ -296,13 +296,13 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                 <CardDescription>Configure earning and deduction components for your payroll.</CardDescription>
               </div>
               <Button variant="outline" size="sm" onClick={handleAddComponent}>
-                <Icon name="add" size={16} className="mr-2 h-4 w-4" /> Add Component
+                <Icon name="add" className="mr-2 h-4 w-4" size={16}/> Add Component
               </Button>
             </CardHeader>
             <CardContent className="flex flex-col gap-6">
               {isOver100 && (
                 <div className="p-3 bg-red-100 text-red-900 border border-red-200 rounded-lg flex items-center gap-2 text-sm">
-                  <Icon name="info" size={16} className="h-4 w-4" /> Component total exceeds 100%. Please adjust before saving.
+                  <Icon name="info" className="h-4 w-4" size={16}/> Component total exceeds 100%. Please adjust before saving.
                 </div>
               )}
 
@@ -327,7 +327,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                       </div>
 
                       <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-red-500" onClick={() => setComponentToDelete(item.id)}>
-                        <Icon name="delete" size={16} className="h-4 w-4" />
+                        <Icon name="delete" className="h-4 w-4" size={16}/>
                       </Button>
                     </div>
                   ))
@@ -348,7 +348,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Icon name="apartment" size={20} className="h-5 w-5 text-muted-foreground" />
+              <Icon name="apartment" className="h-5 w-5 text-muted-foreground" size={20}/>
               <CardTitle className="text-lg">Company Profile Settings</CardTitle>
             </div>
             <CardDescription>Manage public details used to brand generated documents.</CardDescription>
@@ -360,10 +360,10 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                 <div role="button" tabIndex={0} onClick={() => { if (logo) setShowLogoModal(true); else triggerFileInput() }}
                   className="w-16 h-16 rounded-xl border-2 border-dashed flex items-center justify-center cursor-pointer overflow-hidden hover:bg-muted/50 transition-colors relative">
                   {logo ? <img src={logo} alt="" className="w-full h-full object-cover" style={{ transform: `scale(${logoZoom}) translate(${logoX}px, ${logoY}px)` }} />
-                    : <Icon name="upload" size={24} className="h-6 w-6 text-muted-foreground/50" />}
+                    : <Icon name="upload" className="h-6 w-6 text-muted-foreground/50" size={24}/>}
                 </div>
                 <Button variant="outline" size="sm" onClick={triggerFileInput}>
-                  <Icon name="upload" size={16} className="mr-2 h-4 w-4" /> Upload Logo
+                  <Icon name="upload" className="mr-2 h-4 w-4" size={16}/> Upload Logo
                 </Button>
                 <input type="file" ref={fileInputRef} onChange={handleLogoUpload} accept="image/*" className="hidden" />
               </div>
@@ -373,21 +373,21 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium text-muted-foreground uppercase tracking-wider text-[11px]">Legal Entity Name</label>
                 <div className="relative">
-                  <Icon name="apartment" size={16} className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Icon name="apartment" className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" size={16}/>
                   <Input value={companyName} onChange={e => setCompanyName(e.target.value)} placeholder="Kormiis Ltd." className="pl-9" />
                 </div>
               </div>
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium text-muted-foreground uppercase tracking-wider text-[11px]">HR Support Email</label>
                 <div className="relative">
-                  <Icon name="mail" size={16} className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Icon name="mail" className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" size={16}/>
                   <Input type="email" value={companyEmail} onChange={e => setCompanyEmail(e.target.value)} placeholder="hr@kormiis.io" className="pl-9" />
                 </div>
               </div>
               <div className="flex flex-col gap-2 md:col-span-2">
                 <label className="text-sm font-medium text-muted-foreground uppercase tracking-wider text-[11px]">Company Website URL</label>
                 <div className="relative">
-                  <Icon name="language" size={16} className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Icon name="language" className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" size={16}/>
                   <Input value={companyWebsite} onChange={e => setCompanyWebsite(e.target.value)} placeholder="www.kormiis.io" className="pl-9" />
                 </div>
               </div>
@@ -399,7 +399,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Icon name="notifications_active" size={20} className="h-5 w-5 text-muted-foreground" />
+              <Icon name="notifications_active" className="h-5 w-5 text-muted-foreground" size={20}/>
               <CardTitle className="text-lg">Notification Preferences</CardTitle>
             </div>
             <CardDescription>Enable alerts, sync logs alerts, or background notification parameters.</CardDescription>
@@ -425,7 +425,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
-                <Icon name="pin_drop" size={20} className="h-5 w-5 text-muted-foreground" />
+                <Icon name="pin_drop" className="h-5 w-5 text-muted-foreground" size={20}/>
                 <CardTitle className="text-lg">Office Location Settings</CardTitle>
               </div>
               <CardDescription>Set the central GPS coordinates and check-in radius for your office.</CardDescription>
@@ -451,7 +451,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                 
                 <form onSubmit={handleMapSearch} className="flex gap-2 mb-2">
                   <div className="relative flex-1">
-                    <Icon name="search" size={16} className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Icon name="search" className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" size={16}/>
                     <Input 
                       placeholder="Search for a city, building, or address..." 
                       className="pl-9"
@@ -460,7 +460,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                     />
                   </div>
                   <Button type="submit" disabled={isMapSearching} variant="secondary">
-                    {isMapSearching ? <Icon name="monitoring" size={16} className="h-4 w-4 animate-spin" /> : 'Search'}
+                    {isMapSearching ? <Icon name="monitoring" className="h-4 w-4 animate-spin" size={16}/> : 'Search'}
                   </Button>
                 </form>
 
@@ -484,7 +484,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
-                <Icon name="calendar_clock" size={20} className="h-5 w-5 text-muted-foreground" />
+                <Icon name="calendar_clock" className="h-5 w-5 text-muted-foreground" size={20}/>
                 <CardTitle className="text-lg">Leave Types & Balances</CardTitle>
               </div>
               <CardDescription>Determine what leaves the company provides and the default yearly allowance for each.</CardDescription>
@@ -521,7 +521,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                       className="text-destructive hover:text-destructive hover:bg-destructive/10" 
                       onClick={() => setLeaveTypeToDelete(type)}
                     >
-                      <Icon name="delete" size={16} className="h-4 w-4" />
+                      <Icon name="delete" className="h-4 w-4" size={16}/>
                     </Button>
                   </div>
                 ))}
@@ -531,7 +531,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                   className="w-full mt-2 border-dashed border-2 hover:border-primary hover:text-primary transition-colors bg-transparent"
                   onClick={() => setLeavePolicies({ ...leavePolicies, [`New Leave ${Date.now()}`]: 0 })}
                 >
-                  <Icon name="add" size={16} className="mr-2 h-4 w-4" /> Add Leave Type
+                  <Icon name="add" className="mr-2 h-4 w-4" size={16}/> Add Leave Type
                 </Button>
               </div>
             </CardContent>
@@ -542,7 +542,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Icon name="wallet" size={20} className="h-5 w-5 text-muted-foreground" />
+              <Icon name="wallet" className="h-5 w-5 text-muted-foreground" size={20}/>
               <CardTitle className="text-lg">Expense Policies</CardTitle>
             </div>
             <CardDescription>Set maximum reimbursement limits per category.</CardDescription>
@@ -564,11 +564,11 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
           <Card>
             <CardHeader className="flex flex-row justify-between items-center space-y-0">
               <div className="flex items-center gap-2">
-                <Icon name="calendar_clock" size={20} className="h-5 w-5 text-muted-foreground" />
+                <Icon name="calendar_clock" className="h-5 w-5 text-muted-foreground" size={20}/>
                 <CardTitle className="text-lg">Shift Templates</CardTitle>
               </div>
               <Button variant="outline" size="sm" onClick={() => setShiftTemplates(prev => [...prev, { id: `st-${Date.now()}`, name: 'New Shift', start: '09:00', end: '17:00', break: 60, color: '#333333' }])}>
-                <Icon name="add" size={16} className="mr-2 h-4 w-4" /> Add Shift
+                <Icon name="add" className="mr-2 h-4 w-4" size={16}/> Add Shift
               </Button>
             </CardHeader>
             <CardContent className="flex flex-col gap-4">
@@ -595,7 +595,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                     <input type="color" value={t.color} onChange={e => setShiftTemplates(prev => prev.map(x => x.id === t.id ? { ...x, color: e.target.value } : x))} className="h-10 w-full p-0 border-0 bg-transparent rounded cursor-pointer" />
                   </div>
                   <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-red-500 mb-0.5" onClick={() => setShiftTemplates(prev => prev.filter(x => x.id !== t.id))}>
-                    <Icon name="delete" size={16} className="h-4 w-4" />
+                    <Icon name="delete" className="h-4 w-4" size={16}/>
                   </Button>
                 </div>
               ))}
@@ -605,7 +605,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
-                <Icon name="monitoring" size={20} className="h-5 w-5 text-muted-foreground" />
+                <Icon name="monitoring" className="h-5 w-5 text-muted-foreground" size={20}/>
                 <CardTitle className="text-lg">Overtime Rules</CardTitle>
               </div>
             </CardHeader>
@@ -629,13 +629,13 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
           <CardHeader className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
             <div>
               <div className="flex items-center gap-2">
-                <Icon name="list" size={20} className="h-5 w-5 text-muted-foreground" />
+                <Icon name="list" className="h-5 w-5 text-muted-foreground" size={20}/>
                 <CardTitle className="text-lg">Audit Logs</CardTitle>
               </div>
               <CardDescription>Review all system actions for compliance and security.</CardDescription>
             </div>
             <Button variant="outline" size="sm" onClick={handleExportCSV}>
-              <Icon name="download" size={16} className="mr-2 h-4 w-4" /> Export CSV
+              <Icon name="download" className="mr-2 h-4 w-4" size={16}/> Export CSV
             </Button>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
@@ -703,7 +703,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Icon name="verified_user" size={20} className="h-5 w-5 text-muted-foreground" />
+              <Icon name="verified_user" className="h-5 w-5 text-muted-foreground" size={20}/>
               <CardTitle className="text-lg">Session Management</CardTitle>
             </div>
             <CardDescription>Review devices currently logged into your account.</CardDescription>
@@ -720,7 +720,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                       {sess.current && <Badge className="bg-green-500 hover:bg-green-600">This Device</Badge>}
                     </div>
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <span>{sess.location}</span><span>•</span><span>{sess.time}</span><span>•</span><span>{sess.ip}</span>
+                      <span>{sess.location}</span><span>â€¢</span><span>{sess.time}</span><span>â€¢</span><span>{sess.ip}</span>
                     </div>
                   </div>
                   {!sess.current && (
@@ -748,7 +748,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
     <div className="animate-fade-in flex flex-col gap-6 w-full pb-10">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
-          <Icon name="settings" size={20} className="text-foreground" />
+          <Icon name="settings" className="text-foreground" size={20}/>
           Settings
         </h1>
       </div>
@@ -774,7 +774,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                     <Badge variant={isActive ? 'default' : 'secondary'} className="ml-2">{item.badge}</Badge>
                   )}
                 </div>
-                <Icon name="keyboard_arrow_down" size={20} className={`h-5 w-5 text-muted-foreground transition-transform duration-300 ${isActive ? 'rotate-180' : ''}`} />
+                <Icon name="keyboard_arrow_down" className={`h-5 w-5 text-muted-foreground transition-transform duration-300 ${isActive ? 'rotate-180' : ''}`} size={20}/>
               </button>
               
               <div className={`grid transition-all duration-300 ease-in-out ${isActive ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
@@ -786,7 +786,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                       <div className="flex justify-end gap-3 pt-4 mt-2 border-t border-border/50">
                         <Button variant="ghost" onClick={() => setShowResetModal(true)}>Reset Defaults</Button>
                         <Button onClick={handleSave} disabled={isSaving || (item.id === 'payroll' && isOver100)}>
-                          {isSaving ? <Icon name="monitoring" size={16} className="mr-2 h-4 w-4 animate-spin" /> : <Icon name="save" size={16} className="mr-2 h-4 w-4" />}
+                          {isSaving ? <Icon name="monitoring" className="mr-2 h-4 w-4 animate-spin" size={16}/> : <Icon name="save" className="mr-2 h-4 w-4" size={16}/>}
                           {isSaving ? 'Saving...' : 'Save Settings'}
                         </Button>
                       </div>
@@ -812,7 +812,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
             <div role="img" aria-label="Logo preview" onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerUp} onPointerCancel={handlePointerUp} onPointerLeave={handlePointerUp}
               className="w-32 h-32 rounded-2xl bg-muted border border-border flex items-center justify-center overflow-hidden relative cursor-grab active:cursor-grabbing touch-none">
               {logo ? <img src={logo} alt="" draggable="false" className="w-full h-full object-cover pointer-events-none" style={{ transform: `scale(${logoZoom}) translate(${logoX}px, ${logoY}px)` }} />
-                : <Icon name="monitoring" size={32} className="h-8 w-8 text-muted-foreground/50" />}
+                : <Icon name="monitoring" className="h-8 w-8 text-muted-foreground/50" size={32}/>}
             </div>
             <div className="w-full flex items-center gap-3">
               <span className="text-xs font-medium text-muted-foreground">Zoom</span>
@@ -820,16 +820,16 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
             </div>
             <div className="flex gap-3 w-full">
               <Button variant="outline" className="flex-1" onClick={triggerFileInput}>
-                <Icon name="upload" size={16} className="mr-2 h-4 w-4" /> Replace
+                <Icon name="upload" className="mr-2 h-4 w-4" size={16}/> Replace
               </Button>
               <Button variant="outline" className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 border-red-200" onClick={handleRemoveLogo}>
-                <Icon name="delete" size={16} className="mr-2 h-4 w-4" /> Remove
+                <Icon name="delete" className="mr-2 h-4 w-4" size={16}/> Remove
               </Button>
             </div>
           </div>
           <DialogFooter>
             <Button className="w-full" onClick={() => setShowLogoModal(false)}>
-              <Icon name="check" size={16} className="mr-2 h-4 w-4" /> Done
+              <Icon name="check" className="mr-2 h-4 w-4" size={16}/> Done
             </Button>
           </DialogFooter>
         </DialogContent>

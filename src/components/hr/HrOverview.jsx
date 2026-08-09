@@ -9,7 +9,7 @@ const stat = (icon, label, value, tone, view, setCurrentView) => (
     className="flex flex-col items-start gap-1 p-3 rounded-lg bg-muted/40 border border-border/50 hover:bg-muted/70 hover:border-border transition-colors cursor-pointer text-left w-full"
   >
     <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${tone}`}>
-      <Icon name={icon} size={16} />
+      <Icon name={icon} size={16}/>
     </div>
     <span className="text-fluid-xl font-black tabular-nums text-foreground">{value}</span>
     <span className="text-[11px] font-semibold text-muted-foreground">{label}</span>
@@ -17,7 +17,7 @@ const stat = (icon, label, value, tone, view, setCurrentView) => (
 )
 
 export default function HrOverview({ adminUid, currentUser, setCurrentView, addToast }) {
-  const [counts, setCounts] = useState({ highRisk: '—', gigs: '—' })
+  const [counts, setCounts] = useState({ highRisk: 'â€”', gigs: 'â€”' })
 
   const load = useCallback(async () => {
     if (!adminUid) return
@@ -42,7 +42,7 @@ export default function HrOverview({ adminUid, currentUser, setCurrentView, addT
       <CardHeader className="flex-row items-center justify-between pb-3.5 space-y-0">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-primary/10 text-primary">
-            <Icon name="monitoring" size={18} />
+            <Icon name="monitoring" size={18}/>
           </div>
           <CardTitle className="text-base font-extrabold m-0">People Insights</CardTitle>
         </div>

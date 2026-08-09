@@ -278,21 +278,21 @@ export default function EmployeePortal({
   }
 
   const navItems = [
-    { id: 'dashboard', icon: <Icon name="home" size={18} />, label: 'Dashboard' },
-    { id: 'my-tasks', icon: <Icon name="check_box" size={18} />, label: 'Tasks' },
-    { id: 'events', icon: <Icon name="calendar_month" size={18} />, label: 'Events' },
-    { id: 'announcements', icon: <Icon name="rss_feed" size={18} />, label: 'Feed' },
-    { id: 'my-assets', icon: <Icon name="monitor" size={18} />, label: 'Assets' },
-    { id: 'attendance', icon: <Icon name="schedule" size={18} />, label: 'Attendance' },
-    ...(currentUser?.permissions?.includes('manage_attendance') ? [{ id: 'team_attendance', icon: <Icon name="check_circle" size={18} />, label: 'Team Attendance' }] : []),
-    { id: 'payslips', icon: <Icon name="account_balance" size={18} />, label: 'Payslips' },
-    { id: 'expenses', icon: <Icon name="wallet" size={18} />, label: 'Expenses' },
-    { id: 'documents', icon: <Icon name="folder_open" size={18} />, label: 'Documents' },
-    { id: 'notes', icon: <Icon name="sticky_note_2" size={18} />, label: 'Notes' },
-    { id: 'leave', icon: <Icon name="calendar_month" size={18} />, label: 'Leave' },
-    { id: 'gigs', icon: <Icon name="handshake" size={18} />, label: 'Help Hub' },
-    { id: 'performance', icon: <Icon name="insights" size={18} />, label: 'Performance' },
-    { id: 'profile', icon: <Icon name="person" size={18} />, label: 'Profile' }
+    { id: 'dashboard', icon: <Icon name="home" size={18}/>, label: 'Dashboard' },
+    { id: 'my-tasks', icon: <Icon name="check_box" size={18}/>, label: 'Tasks' },
+    { id: 'events', icon: <Icon name="calendar_month" size={18}/>, label: 'Events' },
+    { id: 'announcements', icon: <Icon name="rss_feed" size={18}/>, label: 'Feed' },
+    { id: 'my-assets', icon: <Icon name="monitor" size={18}/>, label: 'Assets' },
+    { id: 'attendance', icon: <Icon name="schedule" size={18}/>, label: 'Attendance' },
+    ...(currentUser?.permissions?.includes('manage_attendance') ? [{ id: 'team_attendance', icon: <Icon name="check_circle" size={18}/>, label: 'Team Attendance' }] : []),
+    { id: 'payslips', icon: <Icon name="account_balance" size={18}/>, label: 'Payslips' },
+    { id: 'expenses', icon: <Icon name="wallet" size={18}/>, label: 'Expenses' },
+    { id: 'documents', icon: <Icon name="folder_open" size={18}/>, label: 'Documents' },
+    { id: 'notes', icon: <Icon name="sticky_note_2" size={18}/>, label: 'Notes' },
+    { id: 'leave', icon: <Icon name="calendar_month" size={18}/>, label: 'Leave' },
+    { id: 'gigs', icon: <Icon name="handshake" size={18}/>, label: 'Help Hub' },
+    { id: 'performance', icon: <Icon name="insights" size={18}/>, label: 'Performance' },
+    { id: 'profile', icon: <Icon name="person" size={18}/>, label: 'Profile' }
   ]
 
   return (
@@ -359,14 +359,14 @@ export default function EmployeePortal({
             <div className="flex items-center justify-between">
               <DialogTitle>Mark Attendance</DialogTitle>
               <button onClick={() => setShowPunchModal(false)} className="size-8 flex items-center justify-center rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer" aria-label="Close">
-                <Icon name="close" size={16} />
+                <Icon name="close" size={16}/>
               </button>
             </div>
           </DialogHeader>
 
           <div className="flex flex-col items-center gap-2 py-3 text-center">
             <div className={`size-16 rounded-full flex items-center justify-center ${isPunchedIn ? 'bg-emerald-500/10 text-emerald-600' : 'bg-primary/10 text-primary'}`}>
-              {isPunchedIn ? <Icon name="login" size={28} /> : <Icon name="schedule" size={28} />}
+              {isPunchedIn ? <Icon name="login" size={28}/> : <Icon name="schedule" size={28}/>}
             </div>
             <div className="text-fluid-display font-black tabular-nums tracking-tight text-foreground" aria-live="polite">
               {punchClock.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
@@ -386,40 +386,40 @@ export default function EmployeePortal({
             {isPunchedOut ? (
               <div className="flex flex-col items-center gap-2 py-3">
                 <div className="size-10 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
-                  <Icon name="check_circle" size={20} />
+                  <Icon name="check_circle" size={20}/>
                 </div>
                 <p className="text-fluid-sm font-semibold text-foreground">Today's attendance completed</p>
-                <p className="text-fluid-xs text-muted-foreground">In: {punchLog.checkIn} • Out: {punchLog.checkOut} • {punchLog.hours}h</p>
+                <p className="text-fluid-xs text-muted-foreground">In: {punchLog.checkIn} â€¢ Out: {punchLog.checkOut} â€¢ {punchLog.hours}h</p>
               </div>
             ) : (
               <Button
                 onClick={handlePunchSubmit}
                 className={`w-full h-14 rounded-2xl text-base font-semibold flex items-center justify-center gap-2 ${!isPunchedIn ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-destructive/10 text-destructive hover:bg-destructive/20 border border-destructive/30'}`}
               >
-                {isPunchedIn ? <><Icon name="logout" size={18} /> Check Out</> : <><Icon name="login" size={18} /> Check In</>}
+                {isPunchedIn ? <><Icon name="logout" size={18}/> Check Out</> : <><Icon name="login" size={18}/> Check In</>}
               </Button>
             )}
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* Bottom Tab Bar (Mobile) — Floating Pill */}
+      {/* Bottom Tab Bar (Mobile) â€” Floating Pill */}
       {isMobile && (
         <div className={`fixed bottom-0 left-0 right-0 z-40 flex justify-center pointer-events-none px-4 pb-3 sm:pb-4 transition-all duration-300 ${isScrollingDown && !showMobileMenu ? 'translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
-          <nav className="bottom-bar bottom-bar-pill bg-card border border-border pointer-events-auto w-full max-w-[250px] flex items-center justify-around px-2 h-16 text-foreground shadow-lg shadow-black/5 transition-all duration-300" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
+          <nav className="bottom-bar bottom-bar-pill bg-foreground pointer-events-auto w-full max-w-[250px] flex items-center justify-around px-2 h-16 shadow-lg shadow-black/10 transition-all duration-300" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
             <MobileTabButton
               active={activeTab === 'dashboard'}
               label="Home"
               onClick={() => { setActiveTab('dashboard'); setShowMobileMenu(false) }}
             >
-              <Icon name="home" size={22} />
+              <Icon name="home" size={22}/>
             </MobileTabButton>
             <MobileTabButton
               active={activeTab === 'announcements'}
               label="Announcements"
               onClick={() => { setActiveTab('announcements'); setShowMobileMenu(false) }}
             >
-              <Icon name="rss_feed" size={22} />
+              <Icon name="rss_feed" size={22}/>
             </MobileTabButton>
             <MobileTabButton
               active={false}
@@ -432,14 +432,14 @@ export default function EmployeePortal({
                 </span>
               ) : null}
             >
-              <Icon name="notifications_active" size={22} />
+              <Icon name="notifications_active" size={22}/>
             </MobileTabButton>
             <MobileTabButton
               active={showMobileMenu}
               label="Menu"
               onClick={() => setShowMobileMenu(!showMobileMenu)}
             >
-              <Icon name="menu" size={22} />
+              <Icon name="menu" size={22}/>
             </MobileTabButton>
           </nav>
         </div>
@@ -458,7 +458,7 @@ export default function EmployeePortal({
         <div className="px-5 py-4 border-b border-border/50 bg-muted/20 rounded-t-2xl shrink-0 flex items-center justify-between">
           <h2 className="text-left text-lg font-bold text-foreground">Menu</h2>
           <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-muted-foreground" onClick={() => setShowMobileMenu(false)}>
-            <Icon name="cancel" size={18} />
+            <Icon name="cancel" size={18}/>
           </Button>
         </div>
         <div className="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-1.5 pb-24">
@@ -483,7 +483,7 @@ export default function EmployeePortal({
             className="btn-shimmer w-full flex items-center justify-center gap-3 py-4 rounded-xl bg-[#dc2626] hover:bg-[#b91c1c] text-white transition-colors cursor-pointer border-none shadow-sm"
             onClick={() => { handleLogout(); setShowMobileMenu(false) }}
           >
-            <Icon name="logout" size={20} />
+            <Icon name="logout" size={20}/>
             <span className="font-semibold text-base">Logout</span>
           </button>
         </div>
@@ -521,7 +521,7 @@ function DashboardView({ currentUser, attendance, setAttendance, addToast, expen
     <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[1200px] mx-auto">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
-          <Icon name="dashboard" size={20} className="text-foreground" />
+          <Icon name="dashboard" className="text-foreground" size={20}/>
           Dashboard
         </h1>
       </div>
@@ -533,7 +533,7 @@ function DashboardView({ currentUser, attendance, setAttendance, addToast, expen
           </div>
           <div className="flex flex-col gap-1 sm:gap-1.5">
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight m-0 text-foreground">Welcome back, {currentUser.name.split(' ')[0]}!</h1>
-            <p className="m-0 text-fluid font-medium text-muted-foreground">{currentUser.role} • {currentUser.department}</p>
+            <p className="m-0 text-fluid font-medium text-muted-foreground">{currentUser.role} â€¢ {currentUser.department}</p>
           </div>
         </CardContent>
       </Card>
@@ -581,7 +581,7 @@ function DashboardView({ currentUser, attendance, setAttendance, addToast, expen
         <Card className="hover:border-primary/50 transition-colors shadow-sm cursor-pointer" onClick={() => setActiveTab('my-tasks')}>
           <CardContent className="p-5 flex flex-col justify-center">
             <div className="flex items-center gap-2 mb-2 text-primary">
-              <Icon name="check_box" size={18} />
+              <Icon name="check_box" size={18}/>
               <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground m-0">Active Tasks</h3>
             </div>
             <div className="text-fluid-display font-black tabular-nums text-foreground">
@@ -593,7 +593,7 @@ function DashboardView({ currentUser, attendance, setAttendance, addToast, expen
         <Card className="hover:border-primary/50 transition-colors shadow-sm cursor-pointer" onClick={() => setActiveTab('events')}>
           <CardContent className="p-5 flex flex-col justify-center">
             <div className="flex items-center gap-2 mb-2 text-emerald-500">
-              <Icon name="calendar_month" size={18} />
+              <Icon name="calendar_month" size={18}/>
               <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground m-0">Next Event</h3>
             </div>
             <div className="text-fluid-xl font-bold truncate text-foreground mb-1">
@@ -608,7 +608,7 @@ function DashboardView({ currentUser, attendance, setAttendance, addToast, expen
         <Card className="hover:border-primary/50 transition-colors shadow-sm cursor-pointer" onClick={() => setActiveTab('leave')}>
           <CardContent className="p-5 flex flex-col justify-center">
             <div className="flex items-center gap-2 mb-2 text-blue-500">
-              <Icon name="calendar_month" size={18} />
+              <Icon name="calendar_month" size={18}/>
               <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground m-0">Available Leave</h3>
             </div>
             <div className="text-fluid-display font-black tabular-nums text-foreground">
@@ -620,7 +620,7 @@ function DashboardView({ currentUser, attendance, setAttendance, addToast, expen
         <Card className="hover:border-primary/50 transition-colors shadow-sm cursor-pointer" onClick={() => setActiveTab('my-assets')}>
           <CardContent className="p-5 flex flex-col justify-center">
             <div className="flex items-center gap-2 mb-2 text-amber-500">
-              <Icon name="monitor" size={18} />
+              <Icon name="monitor" size={18}/>
               <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground m-0">Reimbursements</h3>
             </div>
             <div className="text-fluid-display font-black tabular-nums text-foreground">
@@ -635,13 +635,13 @@ function DashboardView({ currentUser, attendance, setAttendance, addToast, expen
         <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
           <Card className="hover:border-primary/50 transition-colors shadow-sm cursor-pointer h-28 flex items-center justify-center group" onClick={() => setActiveTab('leave')}>
             <CardContent className="p-0 flex flex-col gap-3 justify-center items-center">
-              <Icon name="calendar_month" size={28} className="text-blue-500 transition-transform group-hover:scale-110" />
+              <Icon name="calendar_month" className="text-blue-500 transition-transform group-hover:scale-110" size={28}/>
               <span className="text-sm font-medium">Request Leave</span>
             </CardContent>
           </Card>
           <Card className="hover:border-primary/50 transition-colors shadow-sm cursor-pointer h-28 flex items-center justify-center group" onClick={() => setActiveTab('payslips')}>
             <CardContent className="p-0 flex flex-col gap-3 justify-center items-center">
-              <Icon name="download" size={28} className="text-green-500 transition-transform group-hover:scale-110" />
+              <Icon name="download" className="text-green-500 transition-transform group-hover:scale-110" size={28}/>
               <span className="text-sm font-medium">Download Payslip</span>
             </CardContent>
           </Card>
@@ -755,7 +755,7 @@ function AttendanceView({
     <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[1000px] mx-auto pb-10">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
-          <Icon name="schedule" size={20} className="text-foreground" />
+          <Icon name="schedule" className="text-foreground" size={20}/>
           Attendance
         </h1>
       </div>
@@ -771,7 +771,7 @@ function AttendanceView({
             className={`rounded-full px-4 justify-center ${activeSubTab !== 'history' ? 'text-muted-foreground hover:bg-muted hover:text-foreground' : ''}`}
             onClick={() => setActiveSubTab('history')}
           >
-            <Icon name="schedule" size={15} /> My Logs
+            <Icon name="schedule" size={15}/> My Logs
           </Button>
           <Button
             role="tab"
@@ -781,7 +781,7 @@ function AttendanceView({
             className={`rounded-full px-4 justify-center ${activeSubTab !== 'roster' ? 'text-muted-foreground hover:bg-muted hover:text-foreground' : ''}`}
             onClick={() => setActiveSubTab('roster')}
           >
-            <Icon name="swap_vert" size={15} /> My Schedule
+            <Icon name="swap_vert" size={15}/> My Schedule
           </Button>
           <Button
             role="tab"
@@ -791,7 +791,7 @@ function AttendanceView({
             className={`rounded-full px-4 justify-center ${activeSubTab !== 'swap' ? 'text-muted-foreground hover:bg-muted hover:text-foreground' : ''}`}
             onClick={() => setActiveSubTab('swap')}
           >
-            <Icon name="swap_horiz" size={15} /> Request Swap
+            <Icon name="swap_horiz" size={15}/> Request Swap
           </Button>
           <Button
             role="tab"
@@ -801,7 +801,7 @@ function AttendanceView({
             className={`rounded-full px-4 justify-center ${activeSubTab !== 'offday' ? 'text-muted-foreground hover:bg-muted hover:text-foreground' : ''}`}
             onClick={() => setActiveSubTab('offday')}
           >
-            <Icon name="event_busy" size={15} /> Change Offday
+            <Icon name="event_busy" size={15}/> Change Offday
           </Button>
           <Button
             role="tab"
@@ -811,7 +811,7 @@ function AttendanceView({
             className={`rounded-full px-4 justify-center ${activeSubTab !== 'overtime' ? 'text-muted-foreground hover:bg-muted hover:text-foreground' : ''}`}
             onClick={() => setActiveSubTab('overtime')}
           >
-            <Icon name="memory" size={15} /> Log Overtime
+            <Icon name="memory" size={15}/> Log Overtime
           </Button>
         </div>
       </div>
@@ -901,7 +901,7 @@ function AttendanceView({
           <div className="bg-muted/30 px-5 py-4 border-b border-border flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <span className="size-8 rounded-lg bg-muted text-foreground flex items-center justify-center shrink-0">
-                <Icon name="swap_horiz" size={16} />
+                <Icon name="swap_horiz" size={16}/>
               </span>
               <CardTitle className="text-base m-0 modal-title-solid">Request Shift Swap</CardTitle>
             </div>
@@ -935,7 +935,7 @@ function AttendanceView({
           </CardContent>
           <div className="px-5 py-4 border-t border-border bg-muted/10 flex justify-end">
             <Button type="submit" form="swap-form">
-              <Icon name="send" size={16} className="h-4 w-4 mr-2" /> Submit Request
+              <Icon name="send" className="h-4 w-4 mr-2" size={16}/> Submit Request
             </Button>
           </div>
         </Card>
@@ -946,7 +946,7 @@ function AttendanceView({
           <div className="bg-muted/30 px-5 py-4 border-b border-border flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <span className="size-8 rounded-lg bg-muted text-foreground flex items-center justify-center shrink-0">
-                <Icon name="event_busy" size={16} />
+                <Icon name="event_busy" size={16}/>
               </span>
               <CardTitle className="text-base m-0 modal-title-solid">Request Alternative Offday</CardTitle>
             </div>
@@ -987,7 +987,7 @@ function AttendanceView({
           </CardContent>
           <div className="px-5 py-4 border-t border-border bg-muted/10 flex justify-end">
             <Button type="submit" form="offday-form">
-              <Icon name="send" size={16} className="h-4 w-4 mr-2" /> Submit Request
+              <Icon name="send" className="h-4 w-4 mr-2" size={16}/> Submit Request
             </Button>
           </div>
         </Card>
@@ -999,7 +999,7 @@ function AttendanceView({
           <div className="bg-muted/30 px-5 py-4 border-b border-border flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <span className="size-8 rounded-lg bg-muted text-foreground flex items-center justify-center shrink-0">
-                <Icon name="memory" size={16} />
+                <Icon name="memory" size={16}/>
               </span>
               <CardTitle className="text-base m-0 modal-title-solid">Log Overtime</CardTitle>
             </div>
@@ -1030,7 +1030,7 @@ function AttendanceView({
           </CardContent>
           <div className="px-5 py-4 border-t border-border bg-muted/10 flex justify-end">
             <Button type="submit" form="overtime-form">
-              <Icon name="send" size={16} className="h-4 w-4 mr-2" /> Submit Overtime
+              <Icon name="send" className="h-4 w-4 mr-2" size={16}/> Submit Overtime
             </Button>
           </div>
         </Card>
@@ -1046,7 +1046,7 @@ function PayslipsView({ currentUser, payroll, addToast }) {
     <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[1000px] mx-auto pb-10">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
-          <Icon name="account_balance" size={20} className="text-foreground" />
+          <Icon name="account_balance" className="text-foreground" size={20}/>
           Payslips
         </h1>
       </div>
@@ -1079,7 +1079,7 @@ function PayslipsView({ currentUser, payroll, addToast }) {
                   <TableCell className="font-semibold text-green-600 dark:text-green-400">${slip.net}</TableCell>
                   <TableCell>
                     <Button variant="outline" size="sm" onClick={() => addToast('Downloading PDF...', 'info')}>
-                      <Icon name="download" size={16} className="h-4 w-4 mr-2" /> PDF
+                      <Icon name="download" className="h-4 w-4 mr-2" size={16}/> PDF
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -1132,7 +1132,7 @@ function LeaveView({ currentUser, attendance, setAttendance, addToast, addLog, s
     <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[1000px] mx-auto pb-10">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
-          <Icon name="calendar_month" size={20} className="text-foreground" />
+          <Icon name="calendar_month" className="text-foreground" size={20}/>
           Leave
         </h1>
       </div>
@@ -1153,7 +1153,7 @@ function LeaveView({ currentUser, attendance, setAttendance, addToast, addLog, s
         <div className="bg-muted/30 px-5 py-4 border-b border-border flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <span className="size-8 rounded-lg bg-muted text-foreground flex items-center justify-center shrink-0">
-              <Icon name="calendar_month" size={16} />
+              <Icon name="calendar_month" size={16}/>
             </span>
             <CardTitle className="text-base m-0 modal-title-solid">Apply for Leave</CardTitle>
           </div>
@@ -1193,7 +1193,7 @@ function LeaveView({ currentUser, attendance, setAttendance, addToast, addLog, s
               <label className="text-sm font-medium leading-none">Attach Receipt / Medical Certificate</label>
               <div className="flex items-center gap-3">
                 <Button variant="outline" type="button" className="relative cursor-pointer overflow-hidden group">
-                  <Icon name="upload" size={16} className="h-4 w-4 mr-2" /> 
+                  <Icon name="upload" className="h-4 w-4 mr-2" size={16}/> 
                   <span>{receiptName ? 'Change Document' : 'Upload File'}</span>
                   <input 
                     type="file" 
@@ -1224,7 +1224,7 @@ function LeaveView({ currentUser, attendance, setAttendance, addToast, addLog, s
         </CardContent>
         <div className="px-5 py-4 border-t border-border bg-muted/10 flex justify-end">
           <Button type="submit" form="apply-leave-form">
-            <Icon name="send" size={16} className="h-4 w-4 mr-2" /> Submit Request
+            <Icon name="send" className="h-4 w-4 mr-2" size={16}/> Submit Request
           </Button>
         </div>
       </Card>
@@ -1262,7 +1262,7 @@ function LeaveView({ currentUser, attendance, setAttendance, addToast, addLog, s
                         {l.receipt ? (
                           <Button variant="link" className="p-0 h-auto" asChild>
                             <a href={l.receipt} target="_blank" rel="noreferrer">
-                              <Icon name="description" size={14} className="h-3.5 w-3.5 mr-1" /> View
+                              <Icon name="description" className="h-3.5 w-3.5 mr-1" size={14}/> View
                             </a>
                           </Button>
                         ) : (
@@ -1396,7 +1396,7 @@ function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetR
     <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[900px] mx-auto pb-10">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
-          <Icon name="monitor" size={20} className="text-foreground" />
+          <Icon name="monitor" className="text-foreground" size={20}/>
           Assets
         </h1>
       </div>
@@ -1420,7 +1420,7 @@ function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetR
           {myAssets.length === 0 ? (
             <Card>
               <CardContent className="p-10 text-center text-muted-foreground flex flex-col items-center justify-center">
-                <Icon name="monitor" size={40} className="h-10 w-10 mb-3 opacity-20" />
+                <Icon name="monitor" className="h-10 w-10 mb-3 opacity-20" size={40}/>
                 No assets are currently assigned to you.
               </CardContent>
             </Card>
@@ -1430,7 +1430,7 @@ function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetR
                 <CardContent className="p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                   <div className="flex items-center gap-4">
                     <div className="h-12 w-12 rounded-xl flex items-center justify-center bg-primary/10">
-                      <Icon name="monitor" size={24} className="h-6 w-6 text-primary" />
+                      <Icon name="monitor" className="h-6 w-6 text-primary" size={24}/>
                     </div>
                     <div>
                       <div className="font-bold text-lg">{asset.name}</div>
@@ -1445,7 +1445,7 @@ function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetR
                   </div>
                   <div className="flex gap-2">
                     <Button variant="outline" className="text-amber-500 border-amber-500/20 hover:bg-amber-500/10 hover:text-amber-600" onClick={() => { setIssueAsset(asset); setShowIssueModal(true) }}>
-                      <Icon name="warning" size={16} className="h-4 w-4 mr-2" /> Report Issue
+                      <Icon name="warning" className="h-4 w-4 mr-2" size={16}/> Report Issue
                     </Button>
                     <Button variant="outline" onClick={() => handleRequestReturn(asset.id)}>
                       Request Return
@@ -1507,7 +1507,7 @@ function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetR
                     </Select>
                   </div>
                   <button type="button" className="shrink-0 bg-primary/10 hover:bg-primary text-primary hover:text-primary-foreground border-none group/add h-10 px-4 rounded-lg flex items-center transition-all duration-300 ease-out overflow-hidden" onClick={() => { setCatFormName(''); setShowCategoryModal(true) }}>
-                    <Icon name="add" size={18} className="transition-transform duration-300 group-hover/add:rotate-90 group-hover/add:scale-110" />
+                    <Icon name="add" className="transition-transform duration-300 group-hover/add:rotate-90 group-hover/add:scale-110" size={18}/>
                     <span className="w-0 overflow-hidden whitespace-nowrap text-sm font-bold opacity-0 transition-all duration-300 ease-out group-hover/add:w-auto group-hover/add:opacity-100 group-hover/add:ml-2">Add</span>
                   </button>
                 </div>
@@ -1545,7 +1545,7 @@ function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetR
           <CardContent>
             {myAssets.length === 0 ? (
               <div className="p-10 text-center text-muted-foreground flex flex-col items-center justify-center">
-                <Icon name="build" size={40} className="h-10 w-10 mb-3 opacity-20" />
+                <Icon name="build" className="h-10 w-10 mb-3 opacity-20" size={40}/>
                 No assets are currently assigned to you, so there is nothing to request maintenance for.
               </div>
             ) : (
@@ -1613,7 +1613,7 @@ function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetR
           <DialogHeader>
             <div className="flex flex-col items-center gap-3 pt-4 text-center">
               <div className="size-16 rounded-full bg-green-500/10 text-green-600 flex items-center justify-center">
-                <Icon name="check_circle" size={36} />
+                <Icon name="check_circle" size={36}/>
               </div>
               <DialogTitle className="text-xl">Request Submitted</DialogTitle>
               <DialogDescription className="text-sm max-w-[280px]">
@@ -1641,7 +1641,7 @@ function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetR
           <DialogHeader className="flex flex-row items-center justify-between border-b border-border pb-4 mb-4 space-y-0">
             <DialogTitle>Manage Categories</DialogTitle>
             <button className="rounded-full p-2 hover:bg-muted transition-colors" onClick={() => { setShowCategoryModal(false); setCatFormName('') }}>
-              <Icon name="close" size={16} />
+              <Icon name="close" size={16}/>
             </button>
           </DialogHeader>
           <div className="flex flex-col gap-5">
@@ -1653,7 +1653,7 @@ function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetR
                     <button type="button" className="flex-1 text-[0.9rem] font-medium text-foreground text-left" onClick={() => { setRequestForm(p => ({...p, category: cat})); setShowCategoryModal(false) }}>
                       {cat}
                     </button>
-                    {requestForm.category === cat && <Icon name="check" size={16} className="text-primary shrink-0" />}
+                    {requestForm.category === cat && <Icon name="check" className="text-primary shrink-0" size={16}/>}
                   </div>
                 ))}
               </div>
@@ -1677,7 +1677,7 @@ function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetR
                 />
                 <div className="flex gap-2 justify-end">
                   <Button variant="default" size="sm" className="flex items-center gap-1.5" onClick={handleSaveCategory}>
-                    <Icon name="add" size={14} /> Add
+                    <Icon name="add" size={14}/> Add
                   </Button>
                 </div>
               </div>

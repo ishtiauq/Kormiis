@@ -30,7 +30,7 @@ export function DatePicker({ label, value, onChange, className, required, ...pro
           )}
         </DateInput>
         <AriaButton className="pr-3 pl-2 h-full flex items-center justify-center outline-none text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
-          <Icon name="calendar_month" size={16} />
+          <Icon name="calendar_month" size={16}/>
         </AriaButton>
       </Group>
       <AriaPopover className="z-50 animate-in fade-in-0 zoom-in-95 origin-top rounded-2xl border border-border bg-popover text-popover-foreground shadow-2xl p-0 overflow-hidden" offset={8}>

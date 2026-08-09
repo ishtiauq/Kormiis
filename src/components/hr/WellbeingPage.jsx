@@ -63,12 +63,12 @@ export default function WellbeingPage({ adminUid, currentUser, addToast }) {
     <div className="animate-fade-in flex flex-col gap-5 max-w-[1200px] mx-auto w-full">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient m-0">
-          <Icon name="favorite" size={20} className="text-foreground" /> Well-being Alerts
+          <Icon name="favorite" className="text-foreground" size={20}/> Well-being Alerts
         </h1>
         <div className="flex items-center gap-2">
           <Input type="month" value={month} onChange={(e) => setMonth(e.target.value)} className="w-auto" />
           <Button variant="outline" size="sm" onClick={handleRunNow} disabled={running}>
-            <Icon name="refresh" size={14} className="mr-1.5" /> {running ? 'Running...' : 'Run analysis'}
+            <Icon name="refresh" className="mr-1.5" size={14}/> {running ? 'Running...' : 'Run analysis'}
           </Button>
         </div>
       </div>
@@ -79,7 +79,7 @@ export default function WellbeingPage({ adminUid, currentUser, addToast }) {
         <Card>
           <CardContent className="p-5">
             <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">High-risk employees</div>
-            <div className="text-fluid-display font-black tabular-nums text-destructive mt-1">{loading ? '—' : data?.highRiskCount ?? 0}</div>
+            <div className="text-fluid-display font-black tabular-nums text-destructive mt-1">{loading ? 'â€”' : data?.highRiskCount ?? 0}</div>
           </CardContent>
         </Card>
         <Card>
@@ -106,7 +106,7 @@ export default function WellbeingPage({ adminUid, currentUser, addToast }) {
             <div className="p-10 text-center text-sm text-muted-foreground">Loading...</div>
           ) : risks.length === 0 ? (
             <div className="p-10 text-center text-sm text-muted-foreground">
-              <Icon name="favorite_border" size={28} className="opacity-30 mx-auto mb-2" />
+              <Icon name="favorite_border" className="opacity-30 mx-auto mb-2" size={28}/>
               No employees exceeded the risk threshold for this month.
             </div>
           ) : (
@@ -128,7 +128,7 @@ export default function WellbeingPage({ adminUid, currentUser, addToast }) {
                     <TableRow key={r.id} className="cursor-pointer" onClick={() => setExpanded(expanded === r.id ? null : r.id)}>
                       <TableCell>
                         <div className="font-medium text-sm text-foreground">{r.employeeName}</div>
-                        <div className="text-xs text-muted-foreground">{r.department || '—'}</div>
+                        <div className="text-xs text-muted-foreground">{r.department || 'â€”'}</div>
                       </TableCell>
                       <TableCell className="text-center tabular-nums">{r.mondayFridaySickCount}</TableCell>
                       <TableCell className="text-center tabular-nums">{r.averageLateMinutes}</TableCell>
@@ -162,16 +162,16 @@ export default function WellbeingPage({ adminUid, currentUser, addToast }) {
       {expanded && (
         <Card>
           <CardHeader>
-            <CardTitle>Breakdown — {risks.find(r => r.id === expanded)?.employeeName}</CardTitle>
+            <CardTitle>Breakdown â€” {risks.find(r => r.id === expanded)?.employeeName}</CardTitle>
           </CardHeader>
           <CardContent>
             {(() => {
               const r = risks.find(x => x.id === expanded)
               if (!r) return null
               const breakdown = [
-                { label: 'Mon/Fri sick leave × 15', value: r.mondayFridaySickCount, points: r.mondayFridaySickCount * 15 },
-                { label: 'Avg late minutes × 2', value: r.averageLateMinutes, points: Math.round(r.averageLateMinutes * 2) },
-                { label: 'Unauthorized absences × 20', value: r.unauthorizedAbsenceCount, points: r.unauthorizedAbsenceCount * 20 },
+                { label: 'Mon/Fri sick leave Ã— 15', value: r.mondayFridaySickCount, points: r.mondayFridaySickCount * 15 },
+                { label: 'Avg late minutes Ã— 2', value: r.averageLateMinutes, points: Math.round(r.averageLateMinutes * 2) },
+                { label: 'Unauthorized absences Ã— 20', value: r.unauthorizedAbsenceCount, points: r.unauthorizedAbsenceCount * 20 },
                 { label: 'Login drop > 50%', value: r.loginDropFlag ? 'Yes' : 'No', points: r.loginDropFlag ? 30 : 0 },
               ]
               return (

@@ -162,7 +162,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
       // profile). The Firebase sign-in email can't be changed from the client
       // SDK, so an admin edit only updates the directory record here.
       if (newEmail && newEmail !== editingEmployee.email) {
-        addToast('Email updated in the directory. The sign-in email is unchanged — reset it in the Firebase console if needed.', 'warning')
+        addToast('Email updated in the directory. The sign-in email is unchanged â€” reset it in the Firebase console if needed.', 'warning')
       }
 
       // Update employee list
@@ -200,7 +200,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
         return
       }
 
-      // Invite the teammate by email — they sign in with their own Google account
+      // Invite the teammate by email â€” they sign in with their own Google account
       let uid = null
       const companyUid = adminUid || currentUser?.uid
       try {
@@ -464,7 +464,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
 
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient"><Icon name="group" size={20} className="text-foreground" />Employees</h1>
+        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient"><Icon name="group" className="text-foreground" size={20}/>Employees</h1>
       </div>
 
       {/* Pending Profile Updates Queue */}
@@ -472,7 +472,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
         <Card className="border-blue-200 bg-blue-50/50 dark:bg-blue-900/10 dark:border-blue-800">
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2 text-blue-700 dark:text-blue-400">
-              <Icon name="error" size={20} className="h-5 w-5" />
+              <Icon name="error" className="h-5 w-5" size={20}/>
               Pending Profile Update Requests ({pendingProfileEdits.length})
             </CardTitle>
           </CardHeader>
@@ -498,10 +498,10 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
                   </div>
                   <div className="flex gap-2 shrink-0">
                     <Button size="sm" onClick={() => handleApproveProfileEdit(editReq.id)}>
-                      <Icon name="check" size={14} className="mr-1 h-3.5 w-3.5" /> Approve
+                      <Icon name="check" className="mr-1 h-3.5 w-3.5" size={14}/> Approve
                     </Button>
                     <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700" onClick={() => handleRejectProfileEdit(editReq.id)}>
-                      <Icon name="close" size={14} className="mr-1 h-3.5 w-3.5" /> Reject
+                      <Icon name="close" className="mr-1 h-3.5 w-3.5" size={14}/> Reject
                     </Button>
                   </div>
                 </div>
@@ -514,16 +514,16 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
       {/* Selection Bar */}
       {selectedIds.size > 0 && (
         <div className="flex flex-wrap items-center gap-2 sm:gap-3 p-3 rounded-xl bg-primary/10 text-primary text-sm font-medium border border-primary/20">
-          <Icon name="check" size={16} className="h-4 w-4 shrink-0" />
+          <Icon name="check" className="h-4 w-4 shrink-0" size={16}/>
           <span className="flex-1">{selectedIds.size} selected</span>
           <Button size="sm" variant="destructive" className="h-8" onClick={handleBulkDelete}>
-            <Icon name="delete" size={14} className="mr-1 h-3.5 w-3.5" /> Delete ({selectedIds.size})
+            <Icon name="delete" className="mr-1 h-3.5 w-3.5" size={14}/> Delete ({selectedIds.size})
           </Button>
           <Button size="sm" variant="default" className="h-8" onClick={handleDownloadSelected}>
-            <Icon name="download" size={14} className="mr-1 h-3.5 w-3.5" /> Download CSV
+            <Icon name="download" className="mr-1 h-3.5 w-3.5" size={14}/> Download CSV
           </Button>
           <Button size="icon" variant="ghost" className="h-8 w-8 hover:bg-primary/20 hover:text-primary rounded-full" onClick={clearSelection}>
-            <Icon name="close" size={16} className="h-4 w-4" />
+            <Icon name="close" className="h-4 w-4" size={16}/>
           </Button>
         </div>
       )}
@@ -533,7 +533,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
         {/* Card header: search + actions */}
         <div className="p-4 border-b border-border flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center justify-between bg-muted/20">
           <div className="relative flex-1 w-full sm:w-auto sm:min-w-[280px] sm:max-w-md">
-            <Icon name="search" size={16} className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Icon name="search" className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" size={16}/>
             <Input type="text" placeholder="Search by name, role, email..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-9 bg-background border-input shadow-sm w-full" />
           </div>
           <div className="flex gap-3 items-center flex-wrap">
@@ -625,13 +625,13 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
               }}
             />
             <Button variant="outline" onClick={handleCopyInviteLink} className="shadow-sm flex-1 sm:flex-none">
-              <Icon name="link" size={16} className="mr-2 h-4 w-4 text-primary" /> Invite Link
+              <Icon name="link" className="mr-2 h-4 w-4 text-primary" size={16}/> Invite Link
             </Button>
             <Button variant="outline" onClick={() => document.getElementById('csv-file-input').click()} className="shadow-sm flex-1 sm:flex-none">
-              <Icon name="table_chart" size={16} className="mr-2 h-4 w-4" /> Import CSV
+              <Icon name="table_chart" className="mr-2 h-4 w-4" size={16}/> Import CSV
             </Button>
             <Button onClick={handleOpenAddForm} className="shadow-sm shadow-primary/20 flex-1 sm:flex-none">
-              <Icon name="add" size={16} className="mr-2 h-4 w-4" /> Add Employee
+              <Icon name="add" className="mr-2 h-4 w-4" size={16}/> Add Employee
             </Button>
           </div>
         </div>
@@ -645,18 +645,18 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
               setExpandedDepts(activeDepts.reduce((acc, d) => ({ ...acc, [d]: !allOpen }), {}))
             }}
           >
-            <Icon name="group" size={18} className="text-primary" />
+            <Icon name="group" className="text-primary" size={18}/>
             All Employees
             <Badge variant="secondary" className="text-xs shrink-0">{filteredEmployees.length}</Badge>
           </button>
           <Button variant="ghost" size="sm" onClick={() => setShowDeptManager(true)} className="rounded-full h-8 px-3 text-xs flex items-center gap-1.5 text-muted-foreground hover:text-foreground">
-            <Icon name="tune" size={14} /> Manage Department
+            <Icon name="tune" size={14}/> Manage Department
           </Button>
         </div>
 
         {filteredEmployees.length === 0 ? (
           <div className="text-center py-20 flex flex-col items-center">
-            <Icon name="group" size={64} className="h-16 w-16 mb-4 text-muted-foreground/50" />
+            <Icon name="group" className="h-16 w-16 mb-4 text-muted-foreground/50" size={64}/>
             <h3 className="text-xl font-medium text-foreground mb-4">No employees found</h3>
             <Button variant="outline" onClick={() => {setSearchTerm(''); setDeptFilter('All')}}>Clear Filters</Button>
           </div>
@@ -670,9 +670,9 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
                     className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-muted/40 transition-colors"
                     onClick={() => toggleDept(group.key)}
                   >
-                    <Icon name={isOpen ? 'expand_more' : 'chevron_right'} size={20} className="text-muted-foreground shrink-0 transition-transform" />
+                    <Icon name={isOpen ? 'expand_more' : 'chevron_right'} className="text-muted-foreground shrink-0 transition-transform" size={20}/>
                     <span className="p-1.5 bg-primary/10 rounded-md text-primary flex items-center justify-center">
-                      <Icon name="apartment" size={16} />
+                      <Icon name="apartment" size={16}/>
                     </span>
                     <span className="flex-1 font-semibold text-foreground truncate">{group.key}</span>
                     <Badge variant="secondary" className="text-xs shrink-0">{group.items.length}</Badge>
@@ -711,7 +711,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
                           <AvatarImage src={emp.avatar} alt={emp.name} style={{ transform: `translate(${emp.photoX || 0}px, ${emp.photoY || 0}px) scale(${emp.photoZoom || 1})`, transformOrigin: 'center' }} onError={() => setImageErrors(prev => ({...prev, [emp.id]: true}))} />
                         )}
                         <AvatarFallback className="bg-primary/10 text-primary">
-                          <Icon name="person" size={20} />
+                          <Icon name="person" size={20}/>
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col gap-0.5 min-w-0">
@@ -730,11 +730,11 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
                       
                       <div className="flex flex-col gap-2.5">
                         <div className="flex items-center text-sm text-muted-foreground">
-                          <Icon name="apartment" size={16} className="mr-2 h-4 w-4 shrink-0 text-muted-foreground/70" />
+                          <Icon name="apartment" className="mr-2 h-4 w-4 shrink-0 text-muted-foreground/70" size={16}/>
                           <span className="break-words">{emp.department}</span>
                         </div>
                         <div className="flex items-center text-sm text-muted-foreground">
-                          <Icon name="mail" size={16} className="mr-2 h-4 w-4 shrink-0 text-muted-foreground/70" />
+                          <Icon name="mail" className="mr-2 h-4 w-4 shrink-0 text-muted-foreground/70" size={16}/>
                           <span className="break-all">{emp.email}</span>
                         </div>
                       </div>
@@ -764,7 +764,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
                             setEditingEmployee(emp); setNewEmpId(emp.id); setNewName(emp.name); setNewRole(emp.role || 'Teammate'); setNewDesignation(emp.designation || emp.role || ''); setNewPermissions(emp.permissions || []); setNewDept(emp.department); setNewEmail(emp.email); setNewStatus(emp.status); setNewDob(emp.dob || ''); setNewJoiningDate(emp.joiningDate || ''); setNewCvFileName(emp.cvFileName || ''); setNewNidFileName(emp.nidFileName || ''); setNewAvatar(emp.avatar || ''); setPhotoX(emp.photoX || 0); setPhotoY(emp.photoY || 0); setPhotoZoom(emp.photoZoom || 1); setIsCustomDept(false); setCustomDept(''); setShowAddForm(true);
                           }}
                         >
-                          <Icon name="edit" size={14} className="mr-1.5 h-3.5 w-3.5" /> Edit
+                          <Icon name="edit" className="mr-1.5 h-3.5 w-3.5" size={14}/> Edit
                         </Button>
                         <Button 
                           variant="outline" 
@@ -778,14 +778,14 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
                             }); 
                           }}
                         >
-                          <Icon name="delete" size={14} className="mr-1.5 h-3.5 w-3.5" /> Delete
+                          <Icon name="delete" className="mr-1.5 h-3.5 w-3.5" size={14}/> Delete
                         </Button>
                       </div>
                       
                     </div>
                   </div>
 
-                  {/* Expand Toggle — always at the bottom of the card */}
+                  {/* Expand Toggle â€” always at the bottom of the card */}
                   <div className="flex justify-center mt-2">
                     <Button 
                       variant="ghost" 
@@ -796,7 +796,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
                         setExpandedCardId(prev => prev === emp.id ? null : emp.id);
                       }}
                     >
-                      <Icon name="keyboard_arrow_down" size={16} className={`h-4 w-4 text-muted-foreground transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
+                      <Icon name="keyboard_arrow_down" className={`h-4 w-4 text-muted-foreground transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} size={16}/>
                     </Button>
                   </div>
                 </CardContent>
@@ -823,7 +823,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
                 <Avatar className="h-24 w-24 mb-4 border-2 border-primary/20 shadow-sm text-2xl">
                   <AvatarImage src={viewingEmployee.avatar} alt={viewingEmployee.name} style={{ transform: `translate(${viewingEmployee.photoX || 0}px, ${viewingEmployee.photoY || 0}px) scale(${viewingEmployee.photoZoom || 1})`, transformOrigin: 'center' }} onError={() => setImageErrors(prev => ({...prev, [viewingEmployee.id]: true}))} />
                   <AvatarFallback className="bg-primary/10 text-primary">
-                    <Icon name="person" size={40} />
+                    <Icon name="person" size={40}/>
                   </AvatarFallback>
                 </Avatar>
                 <h3 className="text-xl font-bold text-foreground text-center">{viewingEmployee.name}</h3>
@@ -877,7 +877,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
                   setCustomDept('');
                   setShowAddForm(true);
                 }}>
-                  <Icon name="edit" size={16} className="mr-2 h-4 w-4" /> Edit Profile
+                  <Icon name="edit" className="mr-2 h-4 w-4" size={16}/> Edit Profile
                 </Button>
               </DialogFooter>
             </>
@@ -890,7 +890,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
         <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              {editingEmployee ? <Icon name="edit" size={20} className="h-5 w-5 text-primary" /> : <Icon name="person_add" size={20} className="h-5 w-5 text-primary" />}
+              {editingEmployee ? <Icon name="edit" className="h-5 w-5 text-primary" size={20}/> : <Icon name="person_add" className="h-5 w-5 text-primary" size={20}/>}
               {editingEmployee ? 'Edit Employee Profile' : 'New Employee Record'}
             </DialogTitle>
           </DialogHeader>
@@ -1093,7 +1093,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
               </div>
 
               <div className="flex flex-col gap-2 rounded-md bg-muted/50 px-3 py-2.5 text-xs text-muted-foreground">
-                The teammate signs in with their own Google account using this email — they are linked to your workspace automatically.
+                The teammate signs in with their own Google account using this email â€” they are linked to your workspace automatically.
               </div>
 
               <DatePicker label="Date of Birth" value={newDob} onChange={(e) => setNewDob(e.target.value)} />
@@ -1103,7 +1103,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium">Upload CV</label>
                 <Button type="button" variant="outline" className="w-full justify-start" onClick={() => document.getElementById('cv-file-input').click()}>
-                  <Icon name="table_chart" size={16} className="mr-2 h-4 w-4 text-muted-foreground" />
+                  <Icon name="table_chart" className="mr-2 h-4 w-4 text-muted-foreground" size={16}/>
                   {newCvFileName ? (newCvFileName.length > 15 ? newCvFileName.substring(0, 15) + '...' : newCvFileName) : 'Upload Document'}
                 </Button>
                 <input id="cv-file-input" type="file" accept=".pdf,.doc,.docx" className="hidden" onChange={(e) => e.target.files && setNewCvFileName(e.target.files[0].name)} />
@@ -1160,7 +1160,7 @@ function DepartmentManagerModal({ departments, employees, onClose, onEdit, onDel
         <DialogHeader className="flex flex-row items-center justify-between border-b border-border pb-4 mb-4 space-y-0">
           <DialogTitle>Manage Departments</DialogTitle>
           <button className="rounded-full p-2 hover:bg-muted transition-colors" onClick={onClose}>
-            <Icon name="close" size={16} />
+            <Icon name="close" size={16}/>
           </button>
         </DialogHeader>
         <div className="flex flex-col gap-5">
@@ -1172,10 +1172,10 @@ function DepartmentManagerModal({ departments, employees, onClose, onEdit, onDel
                   <span className="flex-1 text-[0.9rem] font-medium text-foreground">{dept}</span>
                   <span className="text-[11px] text-muted-foreground">{employees.filter(e => e.department === dept).length} employee(s)</span>
                   <Button variant="ghost" size="icon-xs" aria-label="Edit department" onClick={() => openEdit(dept)}>
-                    <Icon name="edit" size={14} />
+                    <Icon name="edit" size={14}/>
                   </Button>
                   <Button variant="ghost" size="icon-xs" aria-label="Delete department" onClick={() => setManagerState({ editing: null, deleteConfirm: dept })}>
-                    <Icon name="delete" size={14} className="text-destructive" />
+                    <Icon name="delete" className="text-destructive" size={14}/>
                   </Button>
                 </div>
               ))}
@@ -1196,7 +1196,7 @@ function DepartmentManagerModal({ departments, employees, onClose, onEdit, onDel
                 <div className="flex gap-2 justify-end">
                   <Button variant="secondary" size="sm" onClick={() => setManagerState({ editing: null, deleteConfirm: null })}>Cancel</Button>
                   <Button variant="default" size="sm" className="flex items-center gap-1.5" onClick={submitEdit}>
-                    <Icon name="check" size={14} /> Save
+                    <Icon name="check" size={14}/> Save
                   </Button>
                 </div>
               </div>
@@ -1206,7 +1206,7 @@ function DepartmentManagerModal({ departments, employees, onClose, onEdit, onDel
           {managerState.deleteConfirm && (
             <div className="border-t border-border pt-4">
               <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 flex items-start gap-2">
-                <Icon name="warning" size={16} className="text-destructive mt-0.5 shrink-0" />
+                <Icon name="warning" className="text-destructive mt-0.5 shrink-0" size={16}/>
                 <p className="text-fluid-sm text-foreground">
                   Delete "<strong>{managerState.deleteConfirm}</strong>"? Employees in this department will be moved to <strong>Uncategorized</strong>.
                 </p>

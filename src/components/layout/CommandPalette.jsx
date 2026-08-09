@@ -7,7 +7,7 @@ export default function CommandPalette({ showCommandPalette, setShowCommandPalet
         <div className="command-palette-overlay" role="dialog" aria-modal="true" aria-label="Command palette" onClick={(e) => { if (e.target === e.currentTarget) setShowCommandPalette(false) }}>
           <div className="command-palette">
             <div className="command-palette-search-wrapper p-3 sm:p-4">
-              <Icon name="search" size={18} style={{ color: 'var(--color-md-sys-on-surface-variant)' }} />
+              <Icon name="search" style={{ color: 'var(--color-md-sys-on-surface-variant)' }} size={18}/>
               <input
                 autoFocus
                 className="command-palette-input px-3 py-2 sm:px-4 sm:py-2.5"

@@ -19,7 +19,7 @@ const Select = React.forwardRef(({ className, label, error, placeholder, childre
             isPlaceholder ? <span className="text-muted-foreground font-normal text-xs sm:text-sm">{placeholder || 'Select...'}</span> : defaultChildren
           }
         </SelectValue>
-        <Icon name="keyboard_arrow_down" size={16} className="shrink-0 text-muted-foreground opacity-50" />
+        <Icon name="keyboard_arrow_down" className="shrink-0 text-muted-foreground opacity-50" size={16}/>
       </AriaButton>
       <AriaPopover className="z-50 w-[--trigger-width] rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md">
         <AriaListBox className="outline-none max-h-60 overflow-y-auto">

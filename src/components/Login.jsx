@@ -17,7 +17,7 @@ const MARKETING_PILLARS = [
   {
     icon: 'groups',
     title: 'Attendance that pays itself',
-    desc: 'One-tap clock-in flows straight into automated payroll — no re-typing, no errors.'
+    desc: 'One-tap clock-in flows straight into automated payroll â€” no re-typing, no errors.'
   },
   {
     icon: 'account_balance_wallet',
@@ -27,7 +27,7 @@ const MARKETING_PILLARS = [
   {
     icon: 'forum',
     title: 'Teamwork without the chaos',
-    desc: 'Announcements, events, tasks & documents — one home for the whole squad.'
+    desc: 'Announcements, events, tasks & documents â€” one home for the whole squad.'
   }
 ]
 
@@ -39,9 +39,9 @@ function MarketingSectionOne({ containerRef }) {
       iconName: "touch_app",
       content: (
         <ul className="flex flex-col gap-3 w-full">
-          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" size={16} className="text-primary shrink-0 mt-0.5" /> <span className="flex-1 break-words">Quick tap to clock in & out</span></li>
-          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" size={16} className="text-primary shrink-0 mt-0.5" /> <span className="flex-1 break-words">Live location and time tracking</span></li>
-          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" size={16} className="text-primary shrink-0 mt-0.5" /> <span className="flex-1 break-words">No manual entry for payroll</span></li>
+          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-primary shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">Quick tap to clock in & out</span></li>
+          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-primary shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">Live location and time tracking</span></li>
+          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-primary shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">No manual entry for payroll</span></li>
         </ul>
       )
     },
@@ -51,9 +51,9 @@ function MarketingSectionOne({ containerRef }) {
       iconName: "task_alt",
       content: (
         <ul className="flex flex-col gap-3 w-full">
-          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" size={16} className="text-primary shrink-0 mt-0.5" /> <span className="flex-1 break-words">Assign tasks to team members instantly</span></li>
-          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" size={16} className="text-primary shrink-0 mt-0.5" /> <span className="flex-1 break-words">Track who is doing what in real-time</span></li>
-          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" size={16} className="text-primary shrink-0 mt-0.5" /> <span className="flex-1 break-words">Set clear deadlines & get reminders</span></li>
+          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-primary shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">Assign tasks to team members instantly</span></li>
+          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-primary shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">Track who is doing what in real-time</span></li>
+          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-primary shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">Set clear deadlines & get reminders</span></li>
         </ul>
       )
     },
@@ -63,21 +63,21 @@ function MarketingSectionOne({ containerRef }) {
       iconName: "event_available",
       content: (
         <ul className="flex flex-col gap-3 w-full">
-          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" size={16} className="text-primary shrink-0 mt-0.5" /> <span className="flex-1 break-words">Request time off from your phone</span></li>
-          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" size={16} className="text-primary shrink-0 mt-0.5" /> <span className="flex-1 break-words">Managers can approve with one click</span></li>
-          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" size={16} className="text-primary shrink-0 mt-0.5" /> <span className="flex-1 break-words">Track your remaining leave balance</span></li>
+          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-primary shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">Request time off from your phone</span></li>
+          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-primary shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">Managers can approve with one click</span></li>
+          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-primary shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">Track your remaining leave balance</span></li>
         </ul>
       )
     },
     {
       title: "Works on any device",
-      subtitle: "Desktop, tablet, or mobile — Kormiis adapts to wherever you work.",
+      subtitle: "Desktop, tablet, or mobile â€” Kormiis adapts to wherever you work.",
       iconName: "devices",
       content: (
         <ul className="flex flex-col gap-3 w-full">
-          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" size={16} className="text-primary shrink-0 mt-0.5" /> <span className="flex-1 break-words">Perfect for remote and office teams</span></li>
-          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" size={16} className="text-primary shrink-0 mt-0.5" /> <span className="flex-1 break-words">Nothing to install, just open your browser</span></li>
-          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" size={16} className="text-primary shrink-0 mt-0.5" /> <span className="flex-1 break-words">Always synced across all your devices</span></li>
+          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-primary shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">Perfect for remote and office teams</span></li>
+          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-primary shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">Nothing to install, just open your browser</span></li>
+          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-primary shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">Always synced across all your devices</span></li>
         </ul>
       )
     },
@@ -87,9 +87,9 @@ function MarketingSectionOne({ containerRef }) {
       iconName: "cloud_done",
       content: (
         <ul className="flex flex-col gap-3 w-full">
-          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" size={16} className="text-primary shrink-0 mt-0.5" /> <span className="flex-1 break-words">Data is saved securely to the cloud</span></li>
-          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" size={16} className="text-primary shrink-0 mt-0.5" /> <span className="flex-1 break-words">You own your company data, not us</span></li>
-          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" size={16} className="text-primary shrink-0 mt-0.5" /> <span className="flex-1 break-words">Backed by bank-level cloud security</span></li>
+          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-primary shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">Data is saved securely to the cloud</span></li>
+          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-primary shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">You own your company data, not us</span></li>
+          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-primary shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">Backed by bank-level cloud security</span></li>
         </ul>
       )
     },
@@ -99,9 +99,9 @@ function MarketingSectionOne({ containerRef }) {
       iconName: "money_off",
       content: (
         <ul className="flex flex-col gap-3 w-full">
-          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" size={16} className="text-primary shrink-0 mt-0.5" /> <span className="flex-1 break-words">100% free for your entire team</span></li>
-          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" size={16} className="text-primary shrink-0 mt-0.5" /> <span className="flex-1 break-words">No sneaky per-user license fees</span></li>
-          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" size={16} className="text-primary shrink-0 mt-0.5" /> <span className="flex-1 break-words">Premium features without the premium price</span></li>
+          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-primary shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">100% free for your entire team</span></li>
+          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-primary shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">No sneaky per-user license fees</span></li>
+          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-primary shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">Premium features without the premium price</span></li>
         </ul>
       )
     }
@@ -115,7 +115,7 @@ function MarketingSectionOne({ containerRef }) {
             Why Choose <span className="text-[#FE4D01]">Kormiis?</span>
           </h2>
           <p className="text-fluid-xl text-muted-foreground font-medium max-w-3xl mx-auto">
-            Everything a growing team needs — without the enterprise price tag or the setup headache.
+            Everything a growing team needs â€” without the enterprise price tag or the setup headache.
           </p>
         </div>
 
@@ -129,7 +129,7 @@ function MarketingSectionOne({ containerRef }) {
               {/* Header */}
               <div className="flex items-center gap-4 pb-5 border-b border-border">
                 <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex shrink-0 items-center justify-center">
-                  <Icon name={card.iconName} size={24} />
+                  <Icon name={card.iconName} size={24}/>
                 </div>
                 <h3 className="text-lg sm:text-xl font-bold leading-tight break-words text-foreground">{card.title}</h3>
               </div>
@@ -239,19 +239,19 @@ function MarketingSectionTwo() {
   )
 }
 
-// FAQ content — each entry renders as its own split glass card
+// FAQ content â€” each entry renders as its own split glass card
 const FAQ_ITEMS = [
   {
     q: 'Can Kormiis read my company data?',
-    a: 'No — data is stored in your own secure cloud database with strict access controls; only you and your team decide access.',
+    a: 'No â€” data is stored in your own secure cloud database with strict access controls; only you and your team decide access.',
   },
   {
     q: "What's the catch if it's free?",
-    a: 'No catch — free for a limited time for growing teams; no subscriptions, no card.',
+    a: 'No catch â€” free for a limited time for growing teams; no subscriptions, no card.',
   },
   {
     q: 'Is Kormiis really free?',
-    a: 'Yes — creating a workspace is 100% free. No credit card, no trial clock, no hidden fees. You stay in full control of everything.',
+    a: 'Yes â€” creating a workspace is 100% free. No credit card, no trial clock, no hidden fees. You stay in full control of everything.',
   },
   {
     q: 'Where is my company data stored?',
@@ -259,7 +259,7 @@ const FAQ_ITEMS = [
   },
   {
     q: 'How do teammates sign in?',
-    a: 'Your HR admin adds teammates by work email. Each teammate signs in with their own Google account and is linked to the company automatically — no passwords to remember.',
+    a: 'Your HR admin adds teammates by work email. Each teammate signs in with their own Google account and is linked to the company automatically â€” no passwords to remember.',
   },
   {
     q: 'Can I use Kormiis on any device?',
@@ -271,7 +271,7 @@ const FAQ_ITEMS = [
   },
 ]
 
-// Final section: FAQ — each question is its own split glass card (no single modal)
+// Final section: FAQ â€” each question is its own split glass card (no single modal)
 function FaqSection() {
   const [open, setOpen] = useState(0)
   return (
@@ -296,9 +296,9 @@ function FaqSection() {
                   <span className="text-sm sm:text-base font-semibold text-foreground leading-snug">{item.q}</span>
                   <Icon
                     name="expand_more"
-                    size={20}
+                   
                     className={`shrink-0 text-primary transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
-                  />
+ size={20}/>
                 </button>
                 <div
                   className={`overflow-hidden transition-all duration-300 ${isOpen ? 'h-auto opacity-100' : 'h-0 opacity-0'}`}
@@ -452,7 +452,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
     return () => window.removeEventListener('resize', onResize)
   }, [])
 
-  // Cinematic Scroll Sequence — one full-viewport section per step:
+  // Cinematic Scroll Sequence â€” one full-viewport section per step:
   //   Section 1: Hero heading
   //   Sections 2-6: one subheading popup per section
   //   Section 7: Auth modal
@@ -465,7 +465,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
   const headingOpacity = useTransform(scrollYProgress, [0, 0.05, 0.11], [1, 1, 0])
   const headingY = useTransform(scrollYProgress, [0, 0.05, 0.11], [0, 0, -80])
 
-  // Scroll Indicator — fades out as you leave section 1, fades back in on return
+  // Scroll Indicator â€” fades out as you leave section 1, fades back in on return
   const scrollIndicatorRaw = useTransform(scrollYProgress, [0, 0.03, 0.12], [1, 1, 0])
   const scrollIndicatorOpacity = useSpring(scrollIndicatorRaw, { stiffness: 120, damping: 22, mass: 0.6 })
   
@@ -605,7 +605,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
     setLoadingMode(null)
   }
 
-  // Someone already linked to a Business Space clicked "Create" — offer to switch to Join.
+  // Someone already linked to a Business Space clicked "Create" â€” offer to switch to Join.
   const promptAlreadyInSpace = (user) => {
     setAlreadyUser(user)
     setShowAlreadyInSpace(true)
@@ -654,7 +654,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
       if (!user) {
         const result = await loginWithGoogle()
         if (result.mode === 'redirect') {
-          // Redirecting to Google — login continues in getGoogleRedirectResult on return
+          // Redirecting to Google â€” login continues in getGoogleRedirectResult on return
           sessionStorage.setItem('kormiis_login_mode', mode)
           return
         }
@@ -757,7 +757,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                     className="flex items-center gap-1.5 text-white font-semibold text-sm sm:text-base px-4 py-2.5 hover:bg-black/10 transition-colors group"
                     title="Install App"
                   >
-                    <Icon name="download" size={18} className="group-hover:scale-110 transition-transform" /> 
+                    <Icon name="download" className="group-hover:scale-110 transition-transform" size={18}/> 
                     <span className="hidden sm:inline">Install App</span>
                   </button>
                 </>
@@ -818,7 +818,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
               transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
               className="w-10 h-10 rounded-full bg-[#FE4D01] flex items-center justify-center text-white shadow-[0_0_15px_rgba(254,77,1,0.4)]"
             >
-              <Icon name="arrow_downward" size={24} />
+              <Icon name="arrow_downward" size={24}/>
             </motion.div>
           </motion.div>
         </section>
@@ -889,7 +889,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                   ]).map((item, i) => (
                     <div key={`col1-${i}`} className="flex items-center justify-start gap-2 lg:gap-4 p-2 sm:p-3 lg:p-5 bg-card border border-border rounded-lg lg:rounded-2xl shadow-sm w-[130px] sm:w-32 lg:w-64 shrink-0">
                       <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-md lg:rounded-xl bg-background border border-border flex items-center justify-center shadow-inner shrink-0">
-                        <Icon name={item.icon} size={20} className={`${item.color} scale-75 sm:scale-100`} />
+                        <Icon name={item.icon} className={`${item.color} scale-75 sm:scale-100`} size={20}/>
                       </div>
                       <span className="block font-bold text-foreground text-[11px] sm:text-xs lg:text-base whitespace-nowrap truncate">{item.label}</span>
                     </div>
@@ -908,7 +908,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                   ]).map((item, i) => (
                     <div key={`col2-${i}`} className="flex items-center justify-center sm:justify-start gap-2 lg:gap-4 p-2 sm:p-3 lg:p-5 bg-card border border-border rounded-lg lg:rounded-2xl shadow-sm w-12 sm:w-32 lg:w-64 shrink-0">
                       <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-md lg:rounded-xl bg-background border border-border flex items-center justify-center shadow-inner shrink-0">
-                        <Icon name={item.icon} size={20} className={`${item.color} scale-75 sm:scale-100`} />
+                        <Icon name={item.icon} className={`${item.color} scale-75 sm:scale-100`} size={20}/>
                       </div>
                       <span className="block font-bold text-foreground text-[11px] sm:text-xs lg:text-base whitespace-nowrap truncate">{item.label}</span>
                     </div>
@@ -938,7 +938,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
               <div className="grid grid-cols-2 border-b border-border">
                 <div className="p-6 sm:p-8 bg-red-500/5 text-center flex flex-col items-center justify-center">
                   <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 mb-4 shadow-sm">
-                    <Icon name="warning" size={24} />
+                    <Icon name="warning" size={24}/>
                   </div>
                   <h3 className="text-lg sm:text-2xl font-black text-foreground">The Old Way</h3>
                   <p className="text-fluid-sm text-muted-foreground mt-1 font-medium">Chaos & scattered tools</p>
@@ -947,7 +947,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                   <div className="absolute inset-0 bg-white/5 opacity-50"></div>
                   <div className="relative z-10 flex flex-col items-center">
                     <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center text-white mb-4 shadow-sm">
-                      <Icon name="check_circle" size={24} />
+                      <Icon name="check_circle" size={24}/>
                     </div>
                     <h3 className="text-lg sm:text-2xl font-black text-white">The Kormiis Way</h3>
                     <p className="text-fluid-sm text-white/80 mt-1 font-medium">Everything in one place</p>
@@ -960,11 +960,11 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                 {/* Row 1 */}
                 <div className="grid grid-cols-2 group">
                   <div className="p-5 sm:p-6 flex items-start gap-3 sm:gap-4 bg-red-500/5 group-hover:bg-red-500/10 transition-colors">
-                    <Icon name="close" size={20} className="text-red-500 shrink-0 mt-0.5" />
+                    <Icon name="close" className="text-red-500 shrink-0 mt-0.5" size={20}/>
                     <span className="text-sm sm:text-base font-medium opacity-80 leading-snug">Buddy punching & tracking attendance in WhatsApp</span>
                   </div>
                   <div className="p-5 sm:p-6 flex items-start gap-3 sm:gap-4 bg-[#FE4D01] group-hover:brightness-95 transition-all border-l border-[#FE4D01]/20 relative">
-                    <Icon name="check" size={20} className="text-white shrink-0 mt-0.5" />
+                    <Icon name="check" className="text-white shrink-0 mt-0.5" size={20}/>
                     <span className="text-sm sm:text-base font-medium text-white/95 leading-snug">One-tap smart attendance with live GPS locations</span>
                   </div>
                 </div>
@@ -972,11 +972,11 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                 {/* Row 2 */}
                 <div className="grid grid-cols-2 group">
                   <div className="p-5 sm:p-6 flex items-start gap-3 sm:gap-4 bg-red-500/5 group-hover:bg-red-500/10 transition-colors">
-                    <Icon name="close" size={20} className="text-red-500 shrink-0 mt-0.5" />
+                    <Icon name="close" className="text-red-500 shrink-0 mt-0.5" size={20}/>
                     <span className="text-sm sm:text-base font-medium opacity-80 leading-snug">Weekends wasted re-typing paper sheets into Excel</span>
                   </div>
                   <div className="p-5 sm:p-6 flex items-start gap-3 sm:gap-4 bg-[#FE4D01] group-hover:brightness-95 transition-all border-l border-[#FE4D01]/20 relative">
-                    <Icon name="check" size={20} className="text-white shrink-0 mt-0.5" />
+                    <Icon name="check" className="text-white shrink-0 mt-0.5" size={20}/>
                     <span className="text-sm sm:text-base font-medium text-white/95 leading-snug">Automated payroll math that exports instantly</span>
                   </div>
                 </div>
@@ -984,11 +984,11 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                 {/* Row 3 */}
                 <div className="grid grid-cols-2 group">
                   <div className="p-5 sm:p-6 flex items-start gap-3 sm:gap-4 bg-red-500/5 group-hover:bg-red-500/10 transition-colors">
-                    <Icon name="close" size={20} className="text-red-500 shrink-0 mt-0.5" />
+                    <Icon name="close" className="text-red-500 shrink-0 mt-0.5" size={20}/>
                     <span className="text-sm sm:text-base font-medium opacity-80 leading-snug">Leave requests in emails & lost expense receipts</span>
                   </div>
                   <div className="p-5 sm:p-6 flex items-start gap-3 sm:gap-4 bg-[#FE4D01] group-hover:brightness-95 transition-all border-l border-[#FE4D01]/20 relative">
-                    <Icon name="check" size={20} className="text-white shrink-0 mt-0.5" />
+                    <Icon name="check" className="text-white shrink-0 mt-0.5" size={20}/>
                     <span className="text-sm sm:text-base font-medium text-white/95 leading-snug">Everything secured directly in your company cloud</span>
                   </div>
                 </div>
@@ -996,11 +996,11 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                 {/* Row 4 */}
                 <div className="grid grid-cols-2 group">
                   <div className="p-5 sm:p-6 flex items-start gap-3 sm:gap-4 bg-red-500/5 group-hover:bg-red-500/10 transition-colors">
-                    <Icon name="close" size={20} className="text-red-500 shrink-0 mt-0.5" />
+                    <Icon name="close" className="text-red-500 shrink-0 mt-0.5" size={20}/>
                     <span className="text-sm sm:text-base font-medium opacity-80 leading-snug">Expensive $10/user monthly enterprise software fees</span>
                   </div>
                   <div className="p-5 sm:p-6 flex items-start gap-3 sm:gap-4 bg-[#FE4D01] group-hover:brightness-95 transition-all border-l border-[#FE4D01]/20 relative">
-                    <Icon name="star" size={20} className="text-white shrink-0 mt-0.5" />
+                    <Icon name="star" className="text-white shrink-0 mt-0.5" size={20}/>
                     <span className="text-sm sm:text-base font-bold text-white leading-snug">100% Free forever. No sneaky per-seat fees.</span>
                   </div>
                 </div>
@@ -1032,7 +1032,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
 
               <div className="relative z-10">
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FE4D01] text-white font-bold text-sm w-max mb-6 shadow-sm">
-                  <Icon name="security" size={18} />
+                  <Icon name="security" size={18}/>
                   100% Data Privacy
                 </div>
                 
@@ -1049,26 +1049,26 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                   <ul className="space-y-4">
                     <li className="flex items-start gap-4">
                       <div className="mt-1 w-7 h-7 rounded-full bg-green-500/20 border border-green-500/30 text-green-600 flex items-center justify-center shrink-0 shadow-sm">
-                        <Icon name="check" size={14} />
+                        <Icon name="check" size={14}/>
                       </div>
                       <span><strong className="text-white">Zero Lock-in:</strong> You have direct access to your data at all times. If you leave, your data stays with you.</span>
                     </li>
                     <li className="flex items-start gap-4">
                       <div className="mt-1 w-7 h-7 rounded-full bg-green-500/20 border border-green-500/30 text-green-600 flex items-center justify-center shrink-0 shadow-sm">
-                        <Icon name="check" size={14} />
+                        <Icon name="check" size={14}/>
                       </div>
                       <span><strong className="text-white">Bank-level Security:</strong> Secured by world-class cloud infrastructure and encryption.</span>
                     </li>
                     <li className="flex items-start gap-4">
                       <div className="mt-1 w-7 h-7 rounded-full bg-green-500/20 border border-green-500/30 text-green-600 flex items-center justify-center shrink-0 shadow-sm">
-                        <Icon name="check" size={14} />
+                        <Icon name="check" size={14}/>
                       </div>
-                      <span><strong className="text-white">Private by Design:</strong> Kormiis keeps data isolated and encrypted — only you and your team can access it.</span>
+                      <span><strong className="text-white">Private by Design:</strong> Kormiis keeps data isolated and encrypted â€” only you and your team can access it.</span>
                     </li>
                   </ul>
                   
                   <div className="pt-6 border-t border-border mt-8 flex items-center gap-3">
-                    <Icon name="info" size={20} className="text-primary shrink-0" />
+                    <Icon name="info" className="text-primary shrink-0" size={20}/>
                     <p className="text-fluid-sm opacity-90 leading-snug">
                       By logging in, your attendance, payroll, and tasks sync securely to the cloud automatically.
                     </p>
@@ -1192,7 +1192,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                       </div>
 
                       <p className="text-center text-fluid-sm text-muted-foreground mt-5 leading-relaxed">
-                        New here? Create a Business Space to set up your company. Your HR admin adds teammates by email — sign in with the same Google account to join your company workspace.
+                        New here? Create a Business Space to set up your company. Your HR admin adds teammates by email â€” sign in with the same Google account to join your company workspace.
                       </p>
                     </>
                   )}
@@ -1221,7 +1221,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
             </DialogDescription>
           </DialogHeader>
           <div className="p-3 rounded-xl bg-muted/40 border border-border text-xs text-muted-foreground flex items-start gap-2">
-            <Icon name="info" size={16} className="shrink-0 mt-0.5 text-muted-foreground" />
+            <Icon name="info" className="shrink-0 mt-0.5 text-muted-foreground" size={16}/>
             <span>You can only belong to one workspace at a time.</span>
           </div>
           <DialogFooter>
