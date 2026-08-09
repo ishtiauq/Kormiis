@@ -18,3 +18,4 @@ Whenever building new components or updating existing ones in this project, you 
 5. **No Placeholders/Mockups**: The UI should remain clean, without dummy text unless requested.
 6. **No Custom Colors**: Rely on semantic variables (`bg-primary`, `text-muted-foreground`, etc.). The global system neutralizes hardcoded Tailwind colors.
 7. **Subtle Shadows**: Use Shadcn's default tight shadow depth (`shadow-sm`) globally for cards and containers. Avoid large, diffuse drop-shadows. This is handled globally in `src/index.css`.
+8. **Fluid Typography**: The project uses Global Fluid Typography via `clamp()` for all headings (H1-H6) and paragraphs. Do not hardcode specific pixel or tailwind fixed text classes (like `text-2xl` or `text-4xl`) for main typography unless overriding specifically. Let the global `clamp()` handle responsive scaling.
