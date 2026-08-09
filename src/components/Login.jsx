@@ -415,7 +415,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
   }
 
   // Auto-typing hero word: Employee -> Team -> Squad -> Crew -> People -> loop
-  const ROTATING_WORDS = ['Employees', 'Team', 'Squad', 'Crew', 'People']
+  const ROTATING_WORDS = ['Kormiis', 'Employees', 'Team', 'Squad', 'Crew', 'People']
   const [typed, setTyped] = useState('')
   const [wordIndex, setWordIndex] = useState(0)
   const [isDeleting, setIsDeleting] = useState(false)
