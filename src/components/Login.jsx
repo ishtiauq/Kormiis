@@ -7,6 +7,8 @@ import kormiisMembershipLogo from '../Assets/Kormiis Logo Membership.svg'
 import heroCharacters from '../Assets/hero-characters.png'
 import { loginWithGoogle, getGoogleRedirectResult, createBusinessSpace, getCompanyForUser, getInviteByEmail, acceptInvite } from '../services/auth.js'
 import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { recordLoginActivity } from '../services/hr.js'
 import painStripIllustration from '../Assets/pain-strip.png'
 import threeStepsIllustration from '../Assets/three-steps.png'
@@ -463,6 +465,8 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
   const [loginMode, setLoginMode] = useState(null) // null | 'create' | 'join'
   const [pendingUser, setPendingUser] = useState(null) // Google user awaiting business space creation
   const [spaceName, setSpaceName] = useState('')
+  const [showAlreadyInSpace, setShowAlreadyInSpace] = useState(false)
+  const [alreadyUser, setAlreadyUser] = useState(null) // signed-in Google user who already belongs to a space
 
   const adminSession = (account) => ({
     id: account.id,
@@ -520,8 +524,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
 
     if (company?.companyUid && company.companyUid !== user.uid) {
       if (mode === 'create') {
-        setError('This Google account already belongs to a Business Space. Use "Join a Business Space" to sign in.')
-        setIsLoading(false)
+        promptAlreadyInSpace(user)
         return
       }
       completeTeammateLogin(company, user)
@@ -531,8 +534,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
     const invite = user.email ? await getInviteByEmail(user.email) : null
     if (invite?.companyUid) {
       if (mode === 'create') {
-        setError('This email already has an invitation. Use "Join a Business Space" to sign in.')
-        setIsLoading(false)
+        promptAlreadyInSpace(user)
         return
       }
       try {
@@ -546,6 +548,10 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
     }
 
     if (company) {
+      if (mode === 'create') {
+        promptAlreadyInSpace(user)
+        return
+      }
       completeAdminLogin(user, company.companyName)
       return
     }
@@ -558,6 +564,21 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
 
     setError('You are not part of the team yet. Ask your admin to add your email, or create your own Business Space.')
     setIsLoading(false)
+  }
+
+  // Someone already linked to a Business Space clicked "Create" — offer to switch to Join.
+  const promptAlreadyInSpace = (user) => {
+    setAlreadyUser(user)
+    setShowAlreadyInSpace(true)
+    setIsLoading(false)
+  }
+
+  const useJoinFromPopup = () => {
+    const user = alreadyUser
+    setShowAlreadyInSpace(false)
+    setAlreadyUser(null)
+    setError('')
+    if (user) finishGoogleLogin(user, 'join')
   }
 
   // --- Create a Business Space (workspace owner / admin) ---
@@ -1123,6 +1144,30 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
 
       {/* Footer */}
       <FooterSection themeMode={themeMode} logoSrc={kormiisLogo} />
+
+      {/* Already-in-a-Business-Space popup */}
+      <Dialog open={showAlreadyInSpace} onOpenChange={(open) => { if (!open) setShowAlreadyInSpace(false) }}>
+        <DialogContent className="max-w-[420px]">
+          <DialogHeader>
+            <DialogTitle>Already part of a Business Space</DialogTitle>
+            <DialogDescription>
+              This Google account is already linked to a Business Space. Use the "Join a Business Space" tab to sign in.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="p-3 rounded-xl bg-muted/40 border border-border text-xs text-muted-foreground flex items-start gap-2">
+            <Icon name="info" size={16} className="shrink-0 mt-0.5 text-muted-foreground" />
+            <span>You can only belong to one workspace at a time.</span>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" className="rounded-full" onClick={() => setShowAlreadyInSpace(false)}>
+              Cancel
+            </Button>
+            <Button className="rounded-full" onClick={useJoinFromPopup}>
+              Use Join a Business Space
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
