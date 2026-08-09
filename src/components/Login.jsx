@@ -5,7 +5,8 @@ import kormiisLogo from '../Assets/Kormiis Logo Final.svg'
 import kormiisLogoDark from '../Assets/Kormiis Logo Dark.svg'
 import kormiisMembershipLogo from '../Assets/Kormiis Logo Membership.svg'
 import heroCharacters from '../Assets/hero-characters.png'
-import { loginWithGoogle, getGoogleRedirectResult, checkAndCreateUserDoc, getCompanyForUser, getInviteByEmail, acceptInvite } from '../services/auth.js'
+import { loginWithGoogle, getGoogleRedirectResult, createBusinessSpace, getCompanyForUser, getInviteByEmail, acceptInvite } from '../services/auth.js'
+import { Input } from '@/components/ui/input'
 import { recordLoginActivity } from '../services/hr.js'
 import painStripIllustration from '../Assets/pain-strip.png'
 import threeStepsIllustration from '../Assets/three-steps.png'
@@ -458,6 +459,11 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
   // --- Error state ---
   const [error, setError] = useState('')
 
+  // --- Two-path login: create a Business Space vs join an existing one ---
+  const [loginMode, setLoginMode] = useState(null) // null | 'create' | 'join'
+  const [pendingUser, setPendingUser] = useState(null) // Google user awaiting business space creation
+  const [spaceName, setSpaceName] = useState('')
+
   const adminSession = (account) => ({
     id: account.id,
     uid: account.id,
@@ -472,12 +478,12 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
   })
 
   // --- Complete admin sign in & enter dashboard ---
-  const completeAdminLogin = (user) => {
+  const completeAdminLogin = (user, companyName) => {
     setIsLoading(true)
     recordLoginActivity(user?.uid, user?.uid)
     setTimeout(() => {
       setIsLoading(false)
-      onLogin(adminSession({ id: user?.uid || 'local', name: user?.displayName || 'System Admin', email: user?.email || 'admin@company.com', companyName: 'Kormiis Ltd.' }))
+      onLogin(adminSession({ id: user?.uid || 'local', name: user?.displayName || 'System Admin', email: user?.email || 'admin@company.com', companyName: companyName || 'Kormiis Ltd.' }))
     }, 300)
   }
 
@@ -500,21 +506,35 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
     onLogin(employeeUser)
   }
 
-  // Single sign-in flow for both the button and the redirect-return path:
-  //   1. Already linked teammate  -> enter as teammate
+  // Single sign-in flow for both the button and the redirect-return path.
+  // Path resolution:
+  //   1. Already linked teammate   -> enter as teammate
   //   2. Invited by email          -> auto-link + enter as teammate
-  //   3. Everything else           -> workspace owner (admin)
-  const finishGoogleLogin = async (user) => {
+  //   3. Existing workspace owner  -> enter as admin
+  //   4. New Google user:
+  //        create -> show Business Space creation form (becomes owner)
+  //        join   -> blocked: "not part of the team"
+  const finishGoogleLogin = async (user, mode) => {
     if (!user) return
     const company = await getCompanyForUser(user.uid)
 
     if (company?.companyUid && company.companyUid !== user.uid) {
+      if (mode === 'create') {
+        setError('This Google account already belongs to a Business Space. Use "Join a Business Space" to sign in.')
+        setIsLoading(false)
+        return
+      }
       completeTeammateLogin(company, user)
       return
     }
 
     const invite = user.email ? await getInviteByEmail(user.email) : null
     if (invite?.companyUid) {
+      if (mode === 'create') {
+        setError('This email already has an invitation. Use "Join a Business Space" to sign in.')
+        setIsLoading(false)
+        return
+      }
       try {
         await acceptInvite(user, invite)
         completeTeammateLogin(invite, user)
@@ -525,21 +545,53 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
       return
     }
 
-    await checkAndCreateUserDoc(user)
-    completeAdminLogin(user)
+    if (company) {
+      completeAdminLogin(user, company.companyName)
+      return
+    }
+
+    if (mode === 'create') {
+      setPendingUser(user)
+      setIsLoading(false)
+      return
+    }
+
+    setError('You are not part of the team yet. Ask your admin to add your email, or create your own Business Space.')
+    setIsLoading(false)
+  }
+
+  // --- Create a Business Space (workspace owner / admin) ---
+  const handleCreateBusinessSpace = async (e) => {
+    e.preventDefault()
+    if (!pendingUser) return
+    if (!spaceName.trim()) {
+      setError('Please enter a name for your Business Space.')
+      return
+    }
+    setIsLoading(true)
+    setError('')
+    try {
+      const created = await createBusinessSpace(pendingUser, { name: spaceName })
+      completeAdminLogin(pendingUser, created.companyName)
+    } catch (err) {
+      setError('Could not create your Business Space: ' + err.message)
+      setIsLoading(false)
+    }
   }
 
   // --- Google SSO (Firebase) ---
-  const handleFirebaseGoogleLogin = async () => {
+  const handleFirebaseGoogleLogin = async (mode) => {
     setError('')
     setIsLoading(true)
+    setLoginMode(mode)
     try {
-      const { user, mode } = await loginWithGoogle()
-      if (mode === 'redirect') {
+      const { user, mode: signinMode } = await loginWithGoogle()
+      if (signinMode === 'redirect') {
         // Redirecting to Google — login continues in getGoogleRedirectResult on return
+        sessionStorage.setItem('kormiis_login_mode', mode)
         return
       }
-      await finishGoogleLogin(user)
+      await finishGoogleLogin(user, mode)
     } catch (err) {
       setError('Google Login failed: ' + err.message)
       setIsLoading(false)
@@ -553,7 +605,9 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
       try {
         const user = await getGoogleRedirectResult()
         if (cancelled || !user) return
-        await finishGoogleLogin(user)
+        const mode = sessionStorage.getItem('kormiis_login_mode') || 'join'
+        sessionStorage.removeItem('kormiis_login_mode')
+        await finishGoogleLogin(user, mode)
       } catch (err) {
         if (!cancelled) {
           setError('Google Login failed: ' + err.message)
@@ -986,19 +1040,75 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                     </div>
                   )}
 
-                  <button
-                    type="button"
-                    onClick={handleFirebaseGoogleLogin}
-                    disabled={isLoading}
-                    className="w-full flex items-center justify-center gap-3 px-4 py-4 bg-card border border-input rounded-2xl text-sm font-semibold text-foreground hover:bg-muted/50 transition disabled:opacity-50 shadow-sm"
-                  >
-                    <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59a14.5 14.5 0 0 1 0-9.18l-7.98-6.19a24.01 24.01 0 0 0 0 21.56l7.98-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-                    {isLoading ? 'Signing in...' : 'Continue with Google'}
-                  </button>
+                  {loginMode === 'create' && pendingUser ? (
+                    <form onSubmit={handleCreateBusinessSpace} className="flex flex-col gap-3">
+                      <div>
+                        <label htmlFor="space-name" className="block text-xs font-semibold text-foreground mb-1.5">
+                          Business Space Name
+                        </label>
+                        <Input
+                          id="space-name"
+                          value={spaceName}
+                          onChange={(e) => setSpaceName(e.target.value)}
+                          placeholder="e.g. Kormiis Ltd."
+                          className="bg-card border-input"
+                          autoFocus
+                        />
+                        <p className="text-[11px] text-muted-foreground mt-1.5">
+                          This becomes your company profile. You'll be the workspace owner (admin).
+                        </p>
+                      </div>
+                      <button
+                        type="submit"
+                        disabled={isLoading}
+                        className="w-full flex items-center justify-center gap-3 px-4 py-4 bg-primary text-primary-foreground rounded-full text-sm font-semibold hover:opacity-90 transition disabled:opacity-50 shadow-sm"
+                      >
+                        {isLoading ? 'Creating...' : 'Create Business Space'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setLoginMode(null); setPendingUser(null); setSpaceName(''); setError('') }}
+                        disabled={isLoading}
+                        className="text-xs text-muted-foreground hover:text-foreground transition py-1"
+                      >
+                        Back
+                      </button>
+                    </form>
+                  ) : (
+                    <>
+                      <div className="flex flex-col gap-2.5">
+                        <button
+                          type="button"
+                          onClick={() => handleFirebaseGoogleLogin('create')}
+                          disabled={isLoading}
+                          className="w-full flex items-center justify-center gap-3 px-4 py-4 bg-primary text-primary-foreground rounded-full text-sm font-semibold hover:opacity-90 transition disabled:opacity-50 shadow-sm"
+                        >
+                          <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59a14.5 14.5 0 0 1 0-9.18l-7.98-6.19a24.01 24.01 0 0 0 0 21.56l7.98-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+                          {isLoading ? 'Signing in...' : 'Create a Business Space'}
+                        </button>
 
-                  <p className="text-center text-xs text-muted-foreground mt-5 leading-relaxed">
-                    Your HR admin adds you by email. Sign in with the same Google account to join your company workspace.
-                  </p>
+                        <div className="flex items-center gap-3 py-1">
+                          <div className="h-px flex-1 bg-border" />
+                          <span className="text-xs text-muted-foreground">or</span>
+                          <div className="h-px flex-1 bg-border" />
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => handleFirebaseGoogleLogin('join')}
+                          disabled={isLoading}
+                          className="w-full flex items-center justify-center gap-3 px-4 py-4 bg-card border border-input rounded-full text-sm font-semibold text-foreground hover:bg-muted/50 transition disabled:opacity-50 shadow-sm"
+                        >
+                          <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59a14.5 14.5 0 0 1 0-9.18l-7.98-6.19a24.01 24.01 0 0 0 0 21.56l7.98-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+                          {isLoading ? 'Signing in...' : 'Join a Business Space'}
+                        </button>
+                      </div>
+
+                      <p className="text-center text-xs text-muted-foreground mt-5 leading-relaxed">
+                        New here? Create a Business Space to set up your company. Your HR admin adds teammates by email — sign in with the same Google account to join your company workspace.
+                      </p>
+                    </>
+                  )}
                 </div>
               </div>
             </div>

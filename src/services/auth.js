@@ -1,34 +1,9 @@
 import { auth, db, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, createUserWithEmailAndPassword, signInWithEmailAndPassword, updatePassword, deleteUser, signOut, doc, setDoc, getDocFromServer, serverTimestamp, RecaptchaVerifier, signInWithPhoneNumber, EmailAuthProvider, reauthenticateWithCredential } from './firebase.js';
 
 /**
- * Ensures a user document exists in Firestore. 
- * If it's a new user, creates the document.
- */
-export const checkAndCreateUserDoc = async (user) => {
-  if (!db) return { isNewUser: true }; // Fallback if Firebase not configured
-  
-  const userRef = doc(db, 'users', user.uid);
-  const userSnap = await getDocFromServer(userRef);
-  
-  if (!userSnap.exists()) {
-    // New user, create initial document
-    await setDoc(userRef, {
-      uid: user.uid,
-      email: user.email,
-      fullName: user.displayName || '',
-      companyName: '', // To be filled in profile setup
-      createdAt: serverTimestamp(),
-    });
-    return { isNewUser: true, data: null };
-  }
-  
-  return { isNewUser: false, data: userSnap.data() };
-};
-
-/**
  * Returns the company + employee linkage for an authenticated user.
  * Reads users/{uid}; workspace owners have companyUid === uid, teammates
- * have it set at provisioning time.
+ * have it set at provisioning time. Returns null when no user doc exists.
  */
 export const getCompanyForUser = async (uid) => {
   if (!db || !uid) return null;
@@ -42,6 +17,7 @@ export const getCompanyForUser = async (uid) => {
       employeeId: data.employeeId || null,
       role: data.role || null,
       fullName: data.fullName || data.name || null,
+      companyName: data.companyName || null,
       department: data.department || null,
       avatar: data.avatar || null,
     };
@@ -49,6 +25,51 @@ export const getCompanyForUser = async (uid) => {
     console.error('Failed to read user doc:', error);
     return null;
   }
+};
+
+/**
+ * Creates a Business Space (company profile) for a brand-new workspace owner.
+ * Links the user to their own workspace (companyUid === uid), stores the
+ * company profile at companies/{uid}, and seeds the settings snapshot that
+ * the dashboard reads. This is the ONLY path that grants workspace-owner
+ * (admin) status — an unknown Google user is never auto-promoted.
+ */
+export const createBusinessSpace = async (user, { name }) => {
+  if (!db || !user) throw new Error('Firebase not configured');
+  const companyName = (name || '').trim();
+  if (!companyName) throw new Error('Business space name is required.');
+  const uid = user.uid;
+  const email = (user.email || '').trim().toLowerCase();
+
+  const userRef = doc(db, 'users', uid);
+  const userSnap = await getDocFromServer(userRef);
+  if (userSnap.exists() && userSnap.data().companyUid && userSnap.data().companyUid !== uid) {
+    throw new Error('This Google account already belongs to a Business Space.');
+  }
+
+  await setDoc(userRef, {
+    uid,
+    email,
+    fullName: user.displayName || '',
+    companyUid: uid,
+    role: 'Admin',
+    companyName,
+    createdAt: serverTimestamp(),
+  }, { merge: true });
+
+  await setDoc(doc(db, 'companies', uid), {
+    name: companyName,
+    ownerUid: uid,
+    createdAt: serverTimestamp(),
+  }, { merge: true });
+
+  // Seed the settings snapshot so the dashboard/company-profile loads instantly.
+  await setDoc(doc(db, 'companies', uid, 'snapshots', 'settings'), {
+    data: { company: { name: companyName, email: '', website: '', logo: '', logoX: 0, logoY: 0, logoZoom: 1 } },
+    lastUpdated: new Date(),
+  }, { merge: true });
+
+  return { companyUid: uid, companyName };
 };
 
 /**

@@ -23,6 +23,11 @@ service cloud.firestore {
         );
     }
 
+    // Company profile doc — the workspace owner (admin) reads/writes it.
+    match /companies/{adminUid} {
+      allow read, write: if isAdmin(adminUid);
+    }
+
     // Company data snapshots: admin + registered members can read/write.
     // This powers real-time sync across all devices.
     match /companies/{adminUid}/snapshots/{document=**} {
