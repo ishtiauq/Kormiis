@@ -11,12 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { recordLoginActivity } from '../services/hr.js'
-import painStripIllustration from '../Assets/pain-strip.png'
-import threeStepsIllustration from '../Assets/three-steps.png'
-import faqIllustration from '../Assets/faq-illustration.png'
-import card1Illustration from '../Assets/card-1.png'
-import card2Illustration from '../Assets/card-2.png'
-import card3Illustration from '../Assets/card-3.png'
+
 
 const MARKETING_PILLARS = [
   {
