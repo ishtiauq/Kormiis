@@ -293,18 +293,11 @@ export default function GigBoardPage({ adminUid, currentUser, addToast }) {
     })
   }
 
-  const tabBtn = (key, label, icon) => (
-    <button
-      onClick={() => setTab(key)}
-      className={`w-full justify-center px-2 sm:px-4 py-2 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-        tab === key
-          ? 'bg-primary text-primary-foreground shadow-sm'
-          : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-      }`}
-    >
-      <Icon name={icon} size={15} /> <span>{label}</span>
-    </button>
-  )
+  const tabsList = [
+    { id: 'browse', label: 'Browse Requests', icon: <Icon name="travel_explore" size={15} /> },
+    { id: 'myPosted', label: 'My Requests', icon: <Icon name="inventory_2" size={15} /> },
+    { id: 'myOffers', label: 'My Commitments', icon: <Icon name="assignment_turned_in" size={15} /> },
+  ]
 
   return (
     <div className="animate-fade-in flex flex-col gap-5 max-w-[1200px] mx-auto w-full">
@@ -319,11 +312,21 @@ export default function GigBoardPage({ adminUid, currentUser, addToast }) {
 
       <div className="border-t border-border border-headline my-4" />
 
-      <div className="w-full">
-        <div className="w-full grid grid-cols-3 gap-1 rounded-full bg-muted/40 border border-border p-1">
-          {tabBtn('browse', 'Browse Requests', 'travel_explore')}
-          {tabBtn('myPosted', 'My Requests', 'inventory_2')}
-          {tabBtn('myAssigned', 'Helping Out', 'assignment_turned_in')}
+      <div className="bg-card p-2 rounded-xl border border-border/50 shadow-sm w-full max-w-full">
+        <div role="tablist" aria-label="Help Hub sections" className="menu-bar">
+          {tabsList.map(t => (
+            <Button
+                key={t.id}
+                role="tab"
+                aria-selected={tab === t.id}
+                variant={tab === t.id ? 'default' : 'ghost'}
+                size="sm"
+                className={`rounded-full px-4 justify-center ${tab !== t.id ? 'text-muted-foreground hover:bg-muted hover:text-foreground' : ''}`}
+                onClick={() => setTab(t.id)}
+              >
+                {t.icon} {t.label}
+              </Button>
+          ))}
         </div>
       </div>
 

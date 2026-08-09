@@ -10,7 +10,7 @@ import { performanceApi, currentMonthKey, lastMonthKey } from '../../services/hr
 
 const gradeTone = {
   A: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20',
-  B: 'bg-sky-500/10 text-sky-600 border-sky-500/20',
+  B: 'bg-slate-500/10 text-slate-600 border-slate-500/20',
   C: 'bg-amber-500/10 text-amber-600 border-amber-500/20',
   D: 'bg-red-500/10 text-red-600 border-red-500/20',
 }
@@ -33,12 +33,14 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
   const [trends, setTrends] = useState([])
   const [loading, setLoading] = useState(false)
   const [calculating, setCalculating] = useState(false)
+  const [selectedSortGrade, setSelectedSortGrade] = useState(null)
 
   // Evaluation Criteria Weights State
   const [weights, setWeights] = useState(DEFAULT_WEIGHTS)
   const [criteriaModalOpen, setCriteriaModalOpen] = useState(false)
   const [editWeights, setEditWeights] = useState(DEFAULT_WEIGHTS)
   const [savingCriteria, setSavingCriteria] = useState(false)
+  const [weightError, setWeightError] = useState(null)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -92,10 +94,17 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
 
   const openEditCriteria = () => {
     setEditWeights({ ...weights })
+    setWeightError(null)
     setCriteriaModalOpen(true)
   }
 
   const handleSaveCriteria = async () => {
+    const total = Object.values(editWeights).reduce((acc, val) => acc + (Number(val) || 0), 0)
+    if (total !== 100) {
+      setWeightError(`Total weights must be exactly 100. Currently it is ${total}.`)
+      return
+    }
+    setWeightError(null)
     setSavingCriteria(true)
     try {
       await performanceApi.updateWeights({ weights: editWeights })
@@ -119,7 +128,17 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
           <Icon name="insights" size={20} className="text-foreground" /> Performance Tracker
         </h1>
         <div className="flex items-center gap-2">
-          <Input type="month" value={month} onChange={(e) => setMonth(e.target.value)} className="w-auto" />
+          <div className="relative flex items-center h-9 min-w-[140px] rounded-xl border border-input bg-background text-sm shadow-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 transition-all cursor-pointer">
+            <Input 
+              type="month" 
+              value={month} 
+              onChange={(e) => setMonth(e.target.value)} 
+              className="border-none shadow-none focus-visible:ring-0 bg-transparent rounded-none pl-3 pr-9 h-full w-full cursor-pointer relative z-10 [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer font-semibold tabular-nums" 
+            />
+            <div className="absolute right-2.5 text-muted-foreground flex items-center z-0">
+              <Icon name="calendar_month" size={16} />
+            </div>
+          </div>
           {isAdmin && (
             <Button size="sm" variant="default" onClick={handleCalculate} disabled={calculating} className="rounded-full shadow-sm">
               <Icon name="calculate" size={14} className="mr-1.5" /> {calculating ? 'Calculating...' : 'Calculate month'}
@@ -135,7 +154,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
           <div className="flex items-center gap-2">
             <Icon name="rule" size={18} className="text-primary" />
-            <CardTitle className="text-base font-bold">Evaluation Criteria & Weightage</CardTitle>
+            <CardTitle className="text-base font-bold">Evaluation Criteria</CardTitle>
           </div>
           {isAdmin && (
             <Button size="sm" variant="ghost" className="h-8 text-xs font-semibold rounded-full text-primary hover:text-primary hover:bg-primary/10" onClick={openEditCriteria}>
@@ -195,9 +214,9 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
           <div className="p-3 rounded-xl bg-muted/30 border border-border/60 flex flex-col justify-between">
             <div className="flex items-center justify-between gap-1">
               <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                <Icon name="beach_access" size={15} className="text-sky-500" /> Leave Utilization
+                <Icon name="beach_access" size={15} className="text-slate-500" /> Leave Utilization
               </span>
-              <Badge variant="secondary" className="text-xs font-bold bg-sky-500/10 text-sky-600 border-sky-500/20">
+              <Badge variant="secondary" className="text-xs font-bold bg-slate-500/10 text-slate-600 border-slate-500/20">
                 +{weights.leave_utilization || 10} pts
               </Badge>
             </div>
@@ -218,27 +237,53 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
         </CardContent>
 
         {/* Grade Threshold Scale */}
-        <div className="mx-6 mb-5 p-3.5 rounded-xl bg-muted/20 border border-border/50 flex flex-col gap-2.5">
-          <div className="text-xs font-bold text-foreground flex items-center gap-1.5">
+        <div className="mx-6 mb-5 flex flex-col gap-2">
+          <div className="text-xs font-bold text-foreground flex items-center gap-1.5 px-1">
             <Icon name="military_tech" size={16} className="text-amber-500" />
             <span>Performance Grade Scale</span>
           </div>
-          <div className="grid grid-cols-1 min-[500px]:grid-cols-2 lg:grid-cols-4 gap-2.5">
-            <div className="flex flex-wrap items-center justify-between gap-1 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs">
-              <span className="font-bold text-emerald-600">Grade A</span>
-              <span className="font-bold text-emerald-700 tabular-nums">85 – 100 pts</span>
-            </div>
-            <div className="flex flex-wrap items-center justify-between gap-1 p-3 rounded-xl bg-sky-500/10 border border-sky-500/20 text-xs">
-              <span className="font-bold text-sky-600">Grade B</span>
-              <span className="font-bold text-sky-700 tabular-nums">70 – 84 pts</span>
-            </div>
-            <div className="flex flex-wrap items-center justify-between gap-1 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs">
-              <span className="font-bold text-amber-600">Grade C</span>
-              <span className="font-bold text-amber-700 tabular-nums">50 – 69 pts</span>
-            </div>
-            <div className="flex flex-wrap items-center justify-between gap-1 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs">
-              <span className="font-bold text-rose-600">Grade D</span>
-              <span className="font-bold text-rose-700 tabular-nums">0 – 49 pts</span>
+          <div className="bg-card p-2 rounded-xl border border-border/50 shadow-sm w-full max-w-full">
+            <div role="tablist" className="menu-bar">
+              <Button
+                role="tab"
+                aria-selected={selectedSortGrade === 'A'}
+                variant={selectedSortGrade === 'A' ? 'default' : 'ghost'}
+                size="sm"
+                className={`rounded-full px-4 justify-center ${selectedSortGrade !== 'A' ? 'text-muted-foreground hover:bg-muted hover:text-foreground' : ''}`}
+                onClick={() => isAdmin && setSelectedSortGrade(prev => prev === 'A' ? null : 'A')}
+              >
+                Grade A (85 – 100 pts)
+              </Button>
+              <Button
+                role="tab"
+                aria-selected={selectedSortGrade === 'B'}
+                variant={selectedSortGrade === 'B' ? 'default' : 'ghost'}
+                size="sm"
+                className={`rounded-full px-4 justify-center ${selectedSortGrade !== 'B' ? 'text-muted-foreground hover:bg-muted hover:text-foreground' : ''}`}
+                onClick={() => isAdmin && setSelectedSortGrade(prev => prev === 'B' ? null : 'B')}
+              >
+                Grade B (70 – 84 pts)
+              </Button>
+              <Button
+                role="tab"
+                aria-selected={selectedSortGrade === 'C'}
+                variant={selectedSortGrade === 'C' ? 'default' : 'ghost'}
+                size="sm"
+                className={`rounded-full px-4 justify-center ${selectedSortGrade !== 'C' ? 'text-muted-foreground hover:bg-muted hover:text-foreground' : ''}`}
+                onClick={() => isAdmin && setSelectedSortGrade(prev => prev === 'C' ? null : 'C')}
+              >
+                Grade C (50 – 69 pts)
+              </Button>
+              <Button
+                role="tab"
+                aria-selected={selectedSortGrade === 'D'}
+                variant={selectedSortGrade === 'D' ? 'default' : 'ghost'}
+                size="sm"
+                className={`rounded-full px-4 justify-center ${selectedSortGrade !== 'D' ? 'text-muted-foreground hover:bg-muted hover:text-foreground' : ''}`}
+                onClick={() => isAdmin && setSelectedSortGrade(prev => prev === 'D' ? null : 'D')}
+              >
+                Grade D (0 – 49 pts)
+              </Button>
             </div>
           </div>
         </div>
@@ -405,7 +450,13 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {[...scores].sort((a, b) => (b.totalScore || b.score || 0) - (a.totalScore || a.score || 0)).map((s, i) => (
+                      {[...scores].sort((a, b) => {
+                        if (selectedSortGrade) {
+                          if (a.grade === selectedSortGrade && b.grade !== selectedSortGrade) return -1;
+                          if (b.grade === selectedSortGrade && a.grade !== selectedSortGrade) return 1;
+                        }
+                        return (b.totalScore || b.score || 0) - (a.totalScore || a.score || 0);
+                      }).map((s, i) => (
                         <TableRow key={s.employeeId || s.id}>
                           <TableCell>
                             <div className="font-medium text-sm text-foreground">{s.employeeName}</div>
@@ -506,6 +557,12 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
                 />
               </div>
             </div>
+
+            {weightError && (
+              <div className="text-xs font-semibold text-rose-500 bg-rose-500/10 p-2.5 rounded-xl border border-rose-500/20 mt-2">
+                {weightError}
+              </div>
+            )}
 
             <div className="flex items-center justify-end gap-2 pt-3 border-t border-border/50 mt-1">
               <Button variant="outline" size="sm" className="rounded-full text-xs" onClick={() => setCriteriaModalOpen(false)}>
