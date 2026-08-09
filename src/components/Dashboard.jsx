@@ -299,7 +299,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
         >
           <div className="flex items-center justify-between gap-1 sm:gap-2 xl:gap-3 py-2">
             <div className="flex flex-col items-center flex-1">
-              <span className="text-xl sm:text-2xl xl:text-3xl font-black text-emerald-600 dark:text-emerald-400 flex items-center gap-1 xl:gap-1.5">
+              <span className="text-fluid-2xl font-black text-emerald-600 dark:text-emerald-400 flex items-center gap-1 xl:gap-1.5">
                 <span className="pulse-dot pulse-dot-green m-0"></span>
                 {todayStats.present}
               </span>
@@ -307,7 +307,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
             </div>
             <div className="w-[1px] h-10 bg-border"></div>
             <div className="flex flex-col items-center flex-1">
-              <span className="text-xl sm:text-2xl xl:text-3xl font-black text-destructive flex items-center gap-1 xl:gap-1.5">
+              <span className="text-fluid-2xl font-black text-destructive flex items-center gap-1 xl:gap-1.5">
                 <span className="pulse-dot pulse-dot-red m-0"></span>
                 {todayStats.absent}
               </span>
@@ -315,7 +315,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
             </div>
             <div className="w-[1px] h-10 bg-border"></div>
             <div className="flex flex-col items-center flex-1">
-              <span className="text-xl sm:text-2xl xl:text-3xl font-black text-amber-500 flex items-center gap-1 xl:gap-1.5">
+              <span className="text-fluid-2xl font-black text-amber-500 flex items-center gap-1 xl:gap-1.5">
                 <span className="pulse-dot pulse-dot-orange m-0"></span>
                 {todayStats.onLeave}
               </span>
@@ -351,7 +351,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
         >
           <div className="flex flex-col h-full justify-between gap-4">
             <div className="flex flex-col gap-1">
-              <span className="text-3xl font-black text-foreground">{pendingTasksCount}</span>
+              <span className="text-fluid-display font-black text-foreground">{pendingTasksCount}</span>
               <span className="text-sm font-medium text-muted-foreground">Pending Tasks</span>
             </div>
             {tasks.filter(t => t.status !== 'Done').slice(0, 2).map((t, i) => (
@@ -539,7 +539,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
           {...wProps}
         >
           <div className="flex flex-col items-center gap-1.5">
-            <span className="text-3xl xl:text-4xl font-black tabular-nums text-foreground">{activeCount}</span>
+            <span className="text-fluid-display font-black tabular-nums text-foreground">{activeCount}</span>
             <Badge variant="success" className="gap-1 xl:gap-1.5 py-1 px-2 xl:px-3 text-[10px] xl:text-xs">
               <span className="sync-dot sync-blink w-1.5 h-1.5 xl:w-2 xl:h-2 rounded-full bg-status-success"></span>
               Active
@@ -547,7 +547,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
           </div>
           <div className="w-[1px] h-12 bg-border"></div>
           <div className="flex flex-col items-center gap-1.5">
-            <span className="text-3xl xl:text-4xl font-black tabular-nums text-foreground">{inactiveCount}</span>
+            <span className="text-fluid-display font-black tabular-nums text-foreground">{inactiveCount}</span>
             <Badge variant="destructive" className="gap-1 xl:gap-1.5 py-1 px-2 xl:px-3 text-[10px] xl:text-xs">
               <span className="sync-dot w-1.5 h-1.5 xl:w-2 xl:h-2 rounded-full bg-status-error"></span>
               Inactive

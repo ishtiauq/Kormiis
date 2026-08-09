@@ -56,7 +56,7 @@ const Wheel = ({ items, value, onChange, label }) => {
           <div 
             key={item} 
             className={`h-[44px] flex items-center justify-center snap-center text-xl font-black font-sans tabular-nums transition-all ${value === item ? 'text-primary scale-110' : 'text-muted-foreground/40 scale-90'}`}
-            style={{ fontFamily: "'Inter', sans-serif" }}
+            style={{ fontFamily: "var(--font-sans)" }}
           >
             {item}
           </div>
@@ -107,7 +107,7 @@ export function GlassTimePicker({ time, onTimeChange, isOpen, setIsOpen, label }
         </div>
         
         {/* Result display */}
-        <div className="flex justify-center items-center gap-2.5 mb-5 p-2 rounded-xl bg-muted/20 border border-border/40" style={{ fontFamily: "'Inter', sans-serif" }}>
+        <div className="flex justify-center items-center gap-2.5 mb-5 p-2 rounded-xl bg-muted/20 border border-border/40" style={{ fontFamily: "var(--font-sans)" }}>
           <span className="text-3xl font-black font-sans tracking-tight text-foreground">{h}:{m}</span>
           <span className="text-xl font-bold text-primary">{ampm}</span>
         </div>

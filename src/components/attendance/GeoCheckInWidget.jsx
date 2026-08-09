@@ -206,13 +206,13 @@ export default function GeoCheckInWidget({ currentUser, attendance, setAttendanc
           <div className="text-center flex flex-col sm:flex-row sm:flex-nowrap gap-2 w-full mt-1 sm:mt-2">
             <div className="bg-muted/30 py-3 rounded-lg border border-border flex flex-col items-center justify-center flex-1">
               <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Time Recorded</span>
-              <span className="text-foreground font-mono text-lg sm:text-xl font-bold">{successMsg?.time}</span>
+              <span className="text-foreground font-sans text-lg sm:text-xl font-bold">{successMsg?.time}</span>
             </div>
             
             {successMsg?.hoursWorked && (
               <div className="bg-primary/5 py-3 rounded-lg border border-primary/20 flex flex-col items-center justify-center flex-1">
                 <span className="text-xs text-primary/70 uppercase tracking-wider font-semibold mb-1">Total Hours Today</span>
-                <span className="text-primary font-mono text-lg sm:text-xl font-bold">{successMsg.hoursWorked} <span className="text-sm">hrs</span></span>
+                <span className="text-primary font-sans text-lg sm:text-xl font-bold">{successMsg.hoursWorked} <span className="text-sm">hrs</span></span>
               </div>
             )}
           </div>
@@ -234,12 +234,12 @@ export default function GeoCheckInWidget({ currentUser, attendance, setAttendanc
       
       <CardContent className="p-4 sm:p-5 flex flex-col gap-5">
         <div className="flex flex-col items-center gap-1 text-center">
-          <div className="text-2xl sm:text-3xl font-black tabular-nums tracking-tight font-mono headline-gradient" aria-live="polite">{timeStr}</div>
+          <div className="text-2xl sm:text-3xl font-black tabular-nums tracking-tight font-sans headline-gradient" aria-live="polite">{timeStr}</div>
           <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}</div>
           {elapsed && (
             <div className="mt-1 flex items-center gap-2 bg-primary/5 border border-primary/20 rounded-full px-4 py-2">
               <span className="text-xs uppercase tracking-wider font-semibold text-primary/70">Working time</span>
-              <span className="font-mono text-base font-bold text-primary">{elapsed}</span>
+              <span className="font-sans text-base font-bold text-primary">{elapsed}</span>
             </div>
           )}
         </div>

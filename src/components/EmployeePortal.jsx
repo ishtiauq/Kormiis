@@ -377,7 +377,7 @@ export default function EmployeePortal({
             {punchElapsed && (
               <div className="mt-1 flex items-center gap-2 bg-primary/5 border border-primary/20 rounded-full px-4 py-1.5">
                 <span className="text-[11px] uppercase tracking-wider font-semibold text-primary/70">Working time</span>
-                <span className="font-mono text-sm font-bold text-primary">{punchElapsed}</span>
+                <span className="font-sans text-sm font-bold text-primary">{punchElapsed}</span>
               </div>
             )}
           </div>

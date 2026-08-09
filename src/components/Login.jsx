@@ -114,7 +114,7 @@ function MarketingSectionOne({ containerRef }) {
           <h2 className="text-[clamp(2.5rem,6vw+0.5rem,6rem)] leading-[1.1] font-black tracking-tight mb-4 text-foreground">
             Why Choose <span className="text-[#FE4D01]">Kormiis?</span>
           </h2>
-          <p className="text-xl sm:text-2xl text-muted-foreground font-medium max-w-3xl mx-auto">
+          <p className="text-fluid-xl text-muted-foreground font-medium max-w-3xl mx-auto">
             Everything a growing team needs — without the enterprise price tag or the setup headache.
           </p>
         </div>
@@ -137,7 +137,7 @@ function MarketingSectionOne({ containerRef }) {
               {/* Subheading */}
               <div className="py-5 border-b border-border">
                 <div className="w-full bg-muted/40 p-4 rounded-xl border border-border/50">
-                  <p className="text-sm sm:text-base text-muted-foreground leading-relaxed break-words">{card.subtitle}</p>
+                  <p className="text-fluid text-muted-foreground leading-relaxed break-words">{card.subtitle}</p>
                 </div>
               </div>
 
@@ -179,7 +179,7 @@ function MarketingSectionTwo() {
           <h2 className="text-[clamp(2.5rem,6vw+0.5rem,6rem)] leading-[1.1] font-black tracking-tight mb-4 sm:mb-6">
             Is it really <span className="text-[#FE4D01]">FREE?</span>
           </h2>
-          <p className="text-lg sm:text-xl md:text-2xl text-white/80 font-medium max-w-2xl tracking-tight">
+          <p className="text-fluid-xl text-white/80 font-medium max-w-2xl tracking-tight">
             Yes. It's completely free for a limited time. No hidden conditions, no subscriptions, and absolutely no credit/debit card required.
           </p>
         </div>
@@ -224,12 +224,12 @@ function MarketingSectionTwo() {
           <div className="relative z-10 flex items-end justify-between w-full mt-10 sm:mt-12">
             <div className="flex flex-col items-start">
               <span className="text-[10px] sm:text-xs text-white/40 tracking-[0.2em] uppercase mb-1">Valid thru</span>
-              <span className="text-base sm:text-xl font-bold tracking-widest text-transparent bg-clip-text bg-gradient-to-b from-gray-300 via-gray-400 to-gray-600 font-mono drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] uppercase">LIMITED TIME</span>
+              <span className="text-base sm:text-xl font-bold tracking-widest text-transparent bg-clip-text bg-gradient-to-b from-gray-300 via-gray-400 to-gray-600 font-sans drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] uppercase">LIMITED TIME</span>
             </div>
             
             <div className="flex flex-col items-end">
               <span className="text-[10px] sm:text-xs text-white/40 tracking-[0.2em] uppercase mb-1">Tier</span>
-              <span className="text-base sm:text-xl font-bold tracking-widest text-transparent bg-clip-text bg-gradient-to-b from-gray-300 via-gray-400 to-gray-600 font-mono drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] uppercase">ENTERPRISE</span>
+              <span className="text-base sm:text-xl font-bold tracking-widest text-transparent bg-clip-text bg-gradient-to-b from-gray-300 via-gray-400 to-gray-600 font-sans drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] uppercase">ENTERPRISE</span>
             </div>
           </div>
         </motion.div>
@@ -303,7 +303,7 @@ function FaqSection() {
                 <div
                   className={`overflow-hidden transition-all duration-300 ${isOpen ? 'h-auto opacity-100' : 'h-0 opacity-0'}`}
                 >
-                  <p className="text-sm sm:text-base text-muted-foreground leading-relaxed px-5 pb-5">{item.a}</p>
+                  <p className="text-fluid text-muted-foreground leading-relaxed px-5 pb-5">{item.a}</p>
                 </div>
               </div>
             )
@@ -343,7 +343,7 @@ function FooterSection({ themeMode, logoSrc }) {
 
       {/* Copyright & Links */}
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 px-6 sm:px-10 lg:px-16">
-        <p className="text-sm text-muted-foreground">
+        <p className="text-fluid-sm text-muted-foreground">
           &copy; {currentYear} Kormiis. All rights reserved.
         </p>
         <div className="flex gap-6">
@@ -926,7 +926,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
             <h2 className="text-3xl sm:text-5xl font-black text-foreground tracking-tight">
               Say Goodbye to <span className="text-red-500">Manual Work</span>.
             </h2>
-            <p className="text-muted-foreground mt-4 text-lg sm:text-xl font-medium">
+            <p className="text-muted-foreground mt-4 text-fluid-lg font-medium">
               See why growing teams are making the switch to Kormiis.
             </p>
           </div>
@@ -941,7 +941,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                     <Icon name="warning" size={24} />
                   </div>
                   <h3 className="text-lg sm:text-2xl font-black text-foreground">The Old Way</h3>
-                  <p className="text-xs sm:text-sm text-muted-foreground mt-1 font-medium">Chaos & scattered tools</p>
+                  <p className="text-fluid-sm text-muted-foreground mt-1 font-medium">Chaos & scattered tools</p>
                 </div>
                 <div className="p-6 sm:p-8 bg-[#FE4D01] text-white text-center border-l border-[#FE4D01]/20 flex flex-col items-center justify-center relative overflow-hidden">
                   <div className="absolute inset-0 bg-white/5 opacity-50"></div>
@@ -950,7 +950,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                       <Icon name="check_circle" size={24} />
                     </div>
                     <h3 className="text-lg sm:text-2xl font-black text-white">The Kormiis Way</h3>
-                    <p className="text-xs sm:text-sm text-white/80 mt-1 font-medium">Everything in one place</p>
+                    <p className="text-fluid-sm text-white/80 mt-1 font-medium">Everything in one place</p>
                   </div>
                 </div>
               </div>
@@ -1069,7 +1069,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                   
                   <div className="pt-6 border-t border-border mt-8 flex items-center gap-3">
                     <Icon name="info" size={20} className="text-primary shrink-0" />
-                    <p className="text-sm opacity-90 leading-snug">
+                    <p className="text-fluid-sm opacity-90 leading-snug">
                       By logging in, your attendance, payroll, and tasks sync securely to the cloud automatically.
                     </p>
                   </div>
@@ -1191,7 +1191,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                         </button>
                       </div>
 
-                      <p className="text-center text-xs text-muted-foreground mt-5 leading-relaxed">
+                      <p className="text-center text-fluid-sm text-muted-foreground mt-5 leading-relaxed">
                         New here? Create a Business Space to set up your company. Your HR admin adds teammates by email — sign in with the same Google account to join your company workspace.
                       </p>
                     </>

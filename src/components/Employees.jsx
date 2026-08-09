@@ -836,7 +836,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
               <div className="grid gap-4 py-4 px-2">
                 <div className="grid grid-cols-3 items-center gap-4">
                   <span className="text-sm font-medium text-muted-foreground text-right">Employee ID</span>
-                  <span className="col-span-2 text-sm font-semibold font-mono">{viewingEmployee.id}</span>
+                  <span className="col-span-2 text-sm font-semibold font-sans">{viewingEmployee.id}</span>
                 </div>
                 <div className="grid grid-cols-3 items-center gap-4">
                   <span className="text-sm font-medium text-muted-foreground text-right">Department</span>
@@ -973,7 +973,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium">Employee ID</label>
-                <Input required value={newEmpId} onChange={(e) => setNewEmpId(e.target.value.trim().toUpperCase())} className="font-mono" />
+                <Input required value={newEmpId} onChange={(e) => setNewEmpId(e.target.value.trim().toUpperCase())} className="font-sans" />
               </div>
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium">Full Name</label>

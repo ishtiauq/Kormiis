@@ -635,7 +635,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
                 <Icon name="account_balance" size={16} className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold font-mono">{currency}{totalCost.toLocaleString()}</div>
+                <div className="text-2xl font-bold font-sans">{currency}{totalCost.toLocaleString()}</div>
               </CardContent>
             </Card>
 
@@ -644,7 +644,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
                 <CardTitle className="text-sm font-medium uppercase text-muted-foreground tracking-wider">Average Salary</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold font-mono">{currency}{averageSalary.toLocaleString()}</div>
+                <div className="text-2xl font-bold font-sans">{currency}{averageSalary.toLocaleString()}</div>
               </CardContent>
             </Card>
           </div>
@@ -729,27 +729,27 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
                     <div className="grid grid-cols-2 gap-3 bg-muted/30 p-3 rounded-lg text-sm border border-border/50">
                       <div className="flex flex-col">
                         <span className="text-muted-foreground text-xs font-medium">Gross Salary</span>
-                        <span className="font-mono font-medium">{currency}{entry.grossSalary.toLocaleString()}</span>
+                        <span className="font-sans font-medium">{currency}{entry.grossSalary.toLocaleString()}</span>
                       </div>
                       <div className="flex flex-col">
                         <span className="text-muted-foreground text-xs font-medium">Deductions</span>
-                        <span className="font-mono font-medium text-red-500 dark:text-red-400">-{currency}{entry.deductions.toLocaleString()}</span>
+                        <span className="font-sans font-medium text-red-500 dark:text-red-400">-{currency}{entry.deductions.toLocaleString()}</span>
                       </div>
                       {(entry.advance > 0 || entry.loan.total > 0) && (
                         <>
                           <div className="flex flex-col">
                             <span className="text-muted-foreground text-xs font-medium">Advance/Loan</span>
-                            <span className="font-mono font-medium text-yellow-600 dark:text-yellow-500">-{currency}{(entry.advance + loanDeduction).toLocaleString()}</span>
+                            <span className="font-sans font-medium text-yellow-600 dark:text-yellow-500">-{currency}{(entry.advance + loanDeduction).toLocaleString()}</span>
                           </div>
                           <div className="flex flex-col">
                             <span className="text-muted-foreground text-xs font-medium">Loan Rem.</span>
-                            <span className="font-mono text-muted-foreground">{currency}{entry.loan.remaining}</span>
+                            <span className="font-sans text-muted-foreground">{currency}{entry.loan.remaining}</span>
                           </div>
                         </>
                       )}
                       <div className="flex flex-col col-span-2 pt-2 mt-1 border-t border-border/50">
                         <span className="text-muted-foreground text-xs font-medium uppercase tracking-wider">Net Payout</span>
-                        <span className="font-mono font-bold text-primary text-lg">{currency}{netPay.toLocaleString()}</span>
+                        <span className="font-sans font-bold text-primary text-lg">{currency}{netPay.toLocaleString()}</span>
                       </div>
                     </div>
 

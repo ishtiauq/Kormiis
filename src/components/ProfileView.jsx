@@ -156,7 +156,7 @@ export default function ProfileView({ currentUser, pendingProfileEdits, setPendi
             <div className="sm:col-span-2">
               <label className="text-xs font-semibold text-muted-foreground uppercase">Company ID</label>
               <div className="font-medium text-lg flex items-center gap-2">
-                <span className="font-mono bg-muted px-2 py-0.5 rounded">{currentUser.adminUid || currentUser.uid || currentUser.id}</span>
+                <span className="font-sans bg-muted px-2 py-0.5 rounded">{currentUser.adminUid || currentUser.uid || currentUser.id}</span>
                 <Button variant="ghost" size="icon" className="size-8" onClick={() => {
                   navigator.clipboard.writeText(currentUser.adminUid || currentUser.uid || currentUser.id);
                   addToast('Company ID copied to clipboard!', 'success');

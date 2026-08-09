@@ -184,7 +184,7 @@ function AssetCard({ asset, alert, onClick }) {
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <div className="font-bold text-foreground text-sm truncate">{asset.name}</div>
-            <div className="text-[11px] text-muted-foreground font-mono mt-0.5">{asset.id} • SN: {asset.serialNumber}</div>
+            <div className="text-[11px] text-muted-foreground font-sans mt-0.5">{asset.id} • SN: {asset.serialNumber}</div>
           </div>
           <Badge className={`shrink-0 border ${statusClass[asset.status] || 'bg-red-500/10 text-red-700 border-red-500/20 dark:text-red-400'}`}>
             {asset.status}
@@ -255,7 +255,7 @@ function MetricBreakdownModal({ metricKey, metrics, assets, onClose }) {
                   <div key={a.id} className="p-3 rounded-lg border border-border bg-card flex items-center justify-between gap-3">
                     <div className="min-w-0">
                       <div className="font-medium text-sm truncate">{a.name}</div>
-                      <div className="text-[11px] text-muted-foreground font-mono">{a.id} • {a.serialNumber}</div>
+                      <div className="text-[11px] text-muted-foreground font-sans">{a.id} • {a.serialNumber}</div>
                     </div>
                     <Badge variant="outline" className="shrink-0 text-xs">{a.category}</Badge>
                   </div>
@@ -525,7 +525,7 @@ function AssetRequests({ assetRequests, employees, handleRequestAction }) {
                     </Badge>
                   </div>
                   <div className="text-sm text-muted-foreground bg-muted/30 p-3 rounded-lg border border-border/50 flex gap-3 items-start">
-                    <span className="text-2xl leading-none text-muted-foreground/30 font-serif">"</span>
+                    <span className="text-2xl leading-none text-muted-foreground/30 font-sans">"</span>
                     <div className="pt-1">{req.justification}</div>
                   </div>
                 </div>
@@ -643,7 +643,7 @@ function AssetMaintenance({ assets, selectedAssetForMaint, setSelectedAssetForMa
                             <span className="font-semibold text-base">{log.vendor}</span>
                             <Badge variant="outline" className="text-red-600 border-red-200 bg-red-50 dark:bg-red-950/30">${log.cost}</Badge>
                           </div>
-                          <div className="flex items-center gap-2 mb-2 text-xs text-muted-foreground font-mono">
+                          <div className="flex items-center gap-2 mb-2 text-xs text-muted-foreground font-sans">
                             <span>{log.date}</span>
                             <span>•</span>
                             <span>{log.id}</span>

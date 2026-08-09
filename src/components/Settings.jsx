@@ -337,7 +337,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
               {salaryStructure.length > 0 && (
                 <div className="flex justify-between items-center p-4 bg-muted/30 border border-border rounded-lg mt-2">
                   <span className="font-semibold text-sm">Net Earning Ratio</span>
-                  <span className={`font-bold text-lg font-mono ${netPayPercent >= 0 ? 'text-foreground' : 'text-red-500'}`}>{netPayPercent}%</span>
+                  <span className={`font-bold text-lg font-sans ${netPayPercent >= 0 ? 'text-foreground' : 'text-red-500'}`}>{netPayPercent}%</span>
                 </div>
               )}
             </CardContent>
@@ -680,7 +680,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                       return true
                     }).map(log => (
                       <TableRow key={log.id}>
-                        <TableCell className="font-mono text-xs">{formatDateTime(log.timestamp)}</TableCell>
+                        <TableCell className="font-sans text-xs">{formatDateTime(log.timestamp)}</TableCell>
                         <TableCell className="font-medium text-sm">{log.user}</TableCell>
                         <TableCell>
                           <Badge variant={log.action === 'CREATE' ? 'default' : log.action === 'UPDATE' ? 'secondary' : log.action === 'DELETE' ? 'destructive' : 'outline'} className={`${log.action==='CREATE'?'bg-green-500 hover:bg-green-600':log.action==='UPDATE'?'bg-blue-500 text-white hover:bg-blue-600':''}`}>
@@ -689,7 +689,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                         </TableCell>
                         <TableCell className="text-sm">{log.entity}</TableCell>
                         <TableCell className="text-xs text-muted-foreground max-w-[200px] break-words">{log.details}</TableCell>
-                        <TableCell className="font-mono text-xs text-muted-foreground">{log.ip}</TableCell>
+                        <TableCell className="font-sans text-xs text-muted-foreground">{log.ip}</TableCell>
                       </TableRow>
                     ))
                   )}

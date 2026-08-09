@@ -98,7 +98,7 @@ export default function TooltipPopover({ label, isCollapsed, isDarkMode, childre
             backdropFilter: 'blur(40px) saturate(250%)',
             WebkitBackdropFilter: 'blur(40px) saturate(250%)',
             border: `1px solid ${borderColor}`,
-            fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif",
+            fontFamily: "var(--font-sans)",
             color: textColor,
             boxShadow: shadow,
           }}>

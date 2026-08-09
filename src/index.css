@@ -604,7 +604,38 @@ button[role="tab"][aria-selected="true"] .msr {
   p, li, .text-fluid {
     font-size: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
   }
+
+  /* ────────────────────────────────────────────────────────────
+     FLUID UTILITY SCALE
+     Append one of these to any element to force the fluid scale.
+     They carry `!important` so they reliably beat Tailwind's fixed
+     text-xs / text-sm / text-2xl utilities (utilities layer runs
+     after base). Use them for MAIN typography — headings, body
+     copy, stat displays. Keep tiny UI chrome (badges, buttons,
+     table cells, icons) on Tailwind utilities.
+     ──────────────────────────────────────────────────────────── */
+  .text-fluid-xs {
+    font-size: clamp(0.6875rem, 0.65rem + 0.12vw, 0.8125rem) !important;
+  }
   .text-fluid-sm {
-    font-size: clamp(0.875rem, 0.8rem + 0.15vw, 1rem);
+    font-size: clamp(0.875rem, 0.8rem + 0.15vw, 1rem) !important;
+  }
+  .text-fluid {
+    font-size: clamp(1rem, 0.95rem + 0.25vw, 1.125rem) !important;
+  }
+  .text-fluid-lg {
+    font-size: clamp(1.125rem, 1rem + 0.4vw, 1.5rem) !important;
+  }
+  .text-fluid-xl {
+    font-size: clamp(1.375rem, 1.125rem + 0.9vw, 2rem) !important;
+  }
+  .text-fluid-2xl {
+    font-size: clamp(1.625rem, 1.25rem + 1.3vw, 2.5rem) !important;
+  }
+  .text-fluid-display {
+    font-size: clamp(1.875rem, 1.25rem + 2vw, 3.25rem) !important;
+  }
+  .text-fluid-display-xl {
+    font-size: clamp(2.5rem, 1.5rem + 3.5vw, 4.5rem) !important;
   }
 }
