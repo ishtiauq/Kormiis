@@ -198,6 +198,9 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
   }
 
   const pendingTasksCount = tasks.filter(t => t.status !== 'Done').length
+  const completedTasksCount = tasks.length - pendingTasksCount
+  const taskCompletionRate = tasks.length > 0 ? Math.round((completedTasksCount / tasks.length) * 100) : 0
+  const efficiencyScore = Math.round((taskCompletionRate + attendanceRate) / 2)
   const recentDocuments = documents.slice(0, 3)
   const availableAssetsCount = assets.filter(a => a.status === 'Available').length
 
@@ -335,6 +338,47 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
         {/* HR Automation — People Insights */}
         <HrOverview adminUid={currentUser?.uid} currentUser={currentUser} setCurrentView={setCurrentView} addToast={addToast} />
 
+        {/* PERFORMANCE TRACKER WIDGET */}
+        <DashboardWidget
+          id="perf-widget"
+          title="Performance Tracker"
+          icon={<Icon name="insights" size={18} />}
+          iconClass="bg-purple-500/10 text-purple-600 dark:text-purple-400"
+          {...wProps}
+        >
+          <div className="flex flex-col gap-5 justify-center h-full">
+            <div className="flex flex-col gap-2">
+              <div className="flex justify-between items-end">
+                <span className="text-sm font-semibold text-muted-foreground">Workforce Efficiency</span>
+                <span className="text-xl font-bold text-foreground">{efficiencyScore}%</span>
+              </div>
+              <div className="w-full bg-muted/50 rounded-full h-2.5 overflow-hidden">
+                <div className="bg-purple-500 h-2.5 rounded-full transition-all duration-500" style={{ width: `${efficiencyScore}%` }}></div>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <div className="flex justify-between items-end">
+                <span className="text-sm font-semibold text-muted-foreground">Task Completion</span>
+                <span className="text-xl font-bold text-foreground">{taskCompletionRate}%</span>
+              </div>
+              <div className="w-full bg-muted/50 rounded-full h-2.5 overflow-hidden">
+                <div className="bg-blue-500 h-2.5 rounded-full transition-all duration-500" style={{ width: `${taskCompletionRate}%` }}></div>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <div className="flex justify-between items-end">
+                <span className="text-sm font-semibold text-muted-foreground">Attendance Rate</span>
+                <span className="text-xl font-bold text-foreground">{attendanceRate}%</span>
+              </div>
+              <div className="w-full bg-muted/50 rounded-full h-2.5 overflow-hidden">
+                <div className="bg-emerald-500 h-2.5 rounded-full transition-all duration-500" style={{ width: `${attendanceRate}%` }}></div>
+              </div>
+            </div>
+          </div>
+        </DashboardWidget>
+
         {/* 8. TASKS WIDGET */}
       {canViewTasks && (
         <DashboardWidget
@@ -367,6 +411,44 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
           </div>
         </DashboardWidget>
       )}
+
+        {/* Widget 8 — Upcoming Milestones (Span 4) */}
+        {canViewEmployees && (
+          <DashboardWidget
+          id="w8"
+          title="Upcoming Milestones"
+          icon={<Icon name="workspace_premium" size={18} />}
+          iconClass="bg-amber-500/10 text-amber-500"
+          action={<Badge variant="secondary" className="px-3 py-1">30 Days</Badge>}
+          contentClass="flex flex-col justify-start pt-4"
+          {...wProps}
+        >
+          {upcomingMilestones.length === 0 ? (
+            <div className="flex-1 flex flex-col items-center justify-center text-center p-5">
+              <Icon name="redeem" size={34} className="text-muted-foreground/40 mb-2" />
+              <p className="m-0 text-fluid-xs font-medium text-muted-foreground max-w-[200px] leading-relaxed">No birthdays or work anniversaries in the next 30 days.</p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2.5">
+              {upcomingMilestones.map((milestone, i) => (
+                <div key={i} className="flex gap-4 p-4 border rounded-xl bg-card hover:shadow-md transition-shadow">
+                  <Avatar className="w-8 h-8 shrink-0">
+                    {milestone.avatar ? <AvatarImage src={milestone.avatar} alt={milestone.empName} className="object-cover" /> : null}
+                    <AvatarFallback className="bg-primary/10 text-primary"><Icon name="person" size={16} /></AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 flex flex-col gap-1">
+                    <p className="m-0 text-fluid-xs font-bold text-foreground break-words">{milestone.empName}</p>
+                    <p className="m-0 mt-0.5 text-[11px] font-medium text-muted-foreground">{milestone.label}</p>
+                  </div>
+                  <Badge variant="default" className="uppercase text-[10px]">
+                    {milestone.daysRemaining === 0 ? 'Today' : `${milestone.daysRemaining}d`}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          )}
+        </DashboardWidget>
+        )}
 
       {/* Attendance Details Dropdown (Full Width) */}
         {showAttDropdown && canViewAttendance && (
@@ -592,43 +674,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
         </DashboardWidget>
       )}
 
-        {/* Widget 8 — Upcoming Milestones (Span 4) */}
-        {canViewEmployees && (
-          <DashboardWidget
-          id="w8"
-          title="Upcoming Milestones"
-          icon={<Icon name="workspace_premium" size={18} />}
-          iconClass="bg-amber-500/10 text-amber-500"
-          action={<Badge variant="secondary" className="px-3 py-1">30 Days</Badge>}
-          contentClass="flex flex-col justify-start pt-4"
-          {...wProps}
-        >
-          {upcomingMilestones.length === 0 ? (
-            <div className="flex-1 flex flex-col items-center justify-center text-center p-5">
-              <Icon name="redeem" size={34} className="text-muted-foreground/40 mb-2" />
-              <p className="m-0 text-fluid-xs font-medium text-muted-foreground max-w-[200px] leading-relaxed">No birthdays or work anniversaries in the next 30 days.</p>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-2.5">
-              {upcomingMilestones.map((milestone, i) => (
-                <div key={i} className="flex gap-4 p-4 border rounded-xl bg-card hover:shadow-md transition-shadow">
-                  <Avatar className="w-8 h-8 shrink-0">
-                    {milestone.avatar ? <AvatarImage src={milestone.avatar} alt={milestone.empName} className="object-cover" /> : null}
-                    <AvatarFallback className="bg-primary/10 text-primary"><Icon name="person" size={16} /></AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 flex flex-col gap-1">
-                    <p className="m-0 text-fluid-xs font-bold text-foreground break-words">{milestone.empName}</p>
-                    <p className="m-0 mt-0.5 text-[11px] font-medium text-muted-foreground">{milestone.label}</p>
-                  </div>
-                  <Badge variant="default" className="uppercase text-[10px]">
-                    {milestone.daysRemaining === 0 ? 'Today' : `${milestone.daysRemaining}d`}
-                  </Badge>
-                </div>
-              ))}
-            </div>
-          )}
-        </DashboardWidget>
-        )}
+
 
       {/* SPACER for bottom padding */}
       <div className="h-8 col-span-full"></div>
