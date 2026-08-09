@@ -481,7 +481,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
       {/* --- EDIT CRITERIA WEIGHTS DIALOG (ADMIN ONLY) --- */}
       <Dialog open={criteriaModalOpen} onOpenChange={setCriteriaModalOpen}>
         <DialogContent className="sm:max-w-md rounded-2xl p-5 border border-border/80 bg-card text-card-foreground shadow-xl">
-          <DialogHeader className="pb-5 border-b border-border">
+          <DialogHeader>
             <div className="flex items-center gap-2.5">
               <div className="size-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
                 <Icon name="tune" size={18} />
@@ -495,7 +495,10 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
             </div>
           </DialogHeader>
 
-          <div className="flex flex-col pt-5">
+          {/* Explicit Separator for perfect spacing */}
+          <div className="w-full h-px bg-border shrink-0 my-5" />
+
+          <div className="flex flex-col">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 pb-5 border-b border-border">
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-semibold text-foreground">On-Time Attendance (Max Pts)</label>
