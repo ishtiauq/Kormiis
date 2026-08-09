@@ -481,7 +481,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
       {/* --- EDIT CRITERIA WEIGHTS DIALOG (ADMIN ONLY) --- */}
       <Dialog open={criteriaModalOpen} onOpenChange={setCriteriaModalOpen}>
         <DialogContent className="sm:max-w-md rounded-2xl p-5 border border-border/80 bg-card text-card-foreground shadow-xl">
-          <DialogHeader className="pb-2 border-b border-border/50">
+          <DialogHeader className="pb-5 border-b border-border">
             <div className="flex items-center gap-2.5">
               <div className="size-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
                 <Icon name="tune" size={18} />
@@ -495,9 +495,9 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
             </div>
           </DialogHeader>
 
-          <div className="flex flex-col gap-3 pt-3">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="flex flex-col gap-1">
+          <div className="flex flex-col pt-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 pb-5 border-b border-border">
+              <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-semibold text-foreground">On-Time Attendance (Max Pts)</label>
                 <Input
                   type="number"
@@ -507,7 +507,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
                 />
               </div>
 
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-semibold text-foreground">Late Penalty (Max Pts)</label>
                 <Input
                   type="number"
@@ -517,7 +517,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
                 />
               </div>
 
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-semibold text-foreground">Absence Penalty (Max Pts)</label>
                 <Input
                   type="number"
@@ -527,7 +527,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
                 />
               </div>
 
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-semibold text-foreground">Overtime Deduct (Max Pts)</label>
                 <Input
                   type="number"
@@ -537,7 +537,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
                 />
               </div>
 
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-semibold text-foreground">Leave Utilization (Max Pts)</label>
                 <Input
                   type="number"
@@ -547,7 +547,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
                 />
               </div>
 
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-semibold text-foreground">Help Hub Contributions (Pts)</label>
                 <Input
                   type="number"
@@ -559,12 +559,12 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
             </div>
 
             {weightError && (
-              <div className="text-xs font-semibold text-rose-500 bg-rose-500/10 p-2.5 rounded-xl border border-rose-500/20 mt-2">
+              <div className="text-xs font-semibold text-rose-500 bg-rose-500/10 p-2.5 rounded-xl border border-rose-500/20 mt-5">
                 {weightError}
               </div>
             )}
 
-            <div className="flex items-center justify-end gap-2 pt-3 border-t border-border/50 mt-1">
+            <div className="flex items-center justify-end gap-2 pt-5">
               <Button variant="outline" size="sm" className="rounded-full text-xs" onClick={() => setCriteriaModalOpen(false)}>
                 Cancel
               </Button>

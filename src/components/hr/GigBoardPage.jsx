@@ -186,14 +186,24 @@ export default function GigBoardPage({ adminUid, currentUser, addToast }) {
         completedAt: null,
       }
 
-      setGigs((prev) => [newGig, ...prev])
+      if (tab === 'myPosted') {
+        setGigs((prev) => [newGig, ...prev])
+      }
       setModalOpen(false)
       addToast('Help request posted successfully.', 'success')
 
       gigApi.createGig({ title, description, expiresAt })
-        .then(() => load())
+        .then(() => {
+          if (tab !== 'myPosted') {
+            setTab('myPosted')
+          } else {
+            load()
+          }
+        })
         .catch((e) => {
-          setGigs((prev) => prev.filter((g) => g.id !== tempId))
+          if (tab === 'myPosted') {
+            setGigs((prev) => prev.filter((g) => g.id !== tempId))
+          }
           addToast(e.message || 'Failed to post request.', 'error')
         })
     }
