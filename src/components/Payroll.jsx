@@ -617,7 +617,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
         <Card className="flex flex-col items-center justify-center p-12 text-center border-dashed border-2 bg-muted/20">
           <Icon name="calendar_month" size={48} className="h-12 w-12 text-primary opacity-80 mb-4" />
           <h3 className="text-xl font-semibold mb-2">Payroll Not Initialized</h3>
-          <p className="text-sm text-muted-foreground max-w-md mx-auto mb-6">
+          <p className="text-fluid-sm text-muted-foreground max-w-md mx-auto mb-6">
             The payroll sheet for {monthLabel} has not been created yet. 
             Initialize it to pull the active roster and carry over compensation parameters.
           </p>
@@ -635,7 +635,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
                 <Icon name="account_balance" size={16} className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold font-sans">{currency}{totalCost.toLocaleString()}</div>
+                <div className="text-fluid-display font-bold font-sans">{currency}{totalCost.toLocaleString()}</div>
               </CardContent>
             </Card>
 
@@ -644,7 +644,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
                 <CardTitle className="text-sm font-medium uppercase text-muted-foreground tracking-wider">Average Salary</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold font-sans">{currency}{averageSalary.toLocaleString()}</div>
+                <div className="text-fluid-display font-bold font-sans">{currency}{averageSalary.toLocaleString()}</div>
               </CardContent>
             </Card>
           </div>
@@ -749,7 +749,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
                       )}
                       <div className="flex flex-col col-span-2 pt-2 mt-1 border-t border-border/50">
                         <span className="text-muted-foreground text-xs font-medium uppercase tracking-wider">Net Payout</span>
-                        <span className="font-sans font-bold text-primary text-lg">{currency}{netPay.toLocaleString()}</span>
+                        <span className="font-sans font-bold text-primary text-fluid-lg">{currency}{netPay.toLocaleString()}</span>
                       </div>
                     </div>
 

@@ -368,7 +368,7 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
                 <Icon name="cloud" size={16} className="text-primary" />
                 Google Drive Storage
               </div>
-              <p className="text-xs text-muted-foreground mt-0.5">
+              <p className="text-fluid-xs text-muted-foreground mt-0.5">
                 {currentUser?.role === 'Admin' || currentUser?.isWorkspaceOwner
                   ? 'Connect your Google Drive to create a shared folder for all company documents.'
                   : 'Ask your HR admin to connect Google Drive to enable document uploads.'}
@@ -387,7 +387,7 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
       {driveConfig?.folderId && !(driveConnected || hasDriveToken()) && (
         <div className="mb-6 p-3.5 rounded-xl bg-muted/30 border border-border flex items-center gap-3">
           <Icon name="cloud" size={16} className="text-primary shrink-0" />
-          <p className="text-xs text-muted-foreground flex-1">Connect your Google Drive to upload documents. Downloads work without it.</p>
+          <p className="text-fluid-xs text-muted-foreground flex-1">Connect your Google Drive to upload documents. Downloads work without it.</p>
           <Button variant="secondary" size="sm" className="shrink-0" onClick={handleConnectDrive} disabled={isConnectingDrive}>
             {isConnectingDrive ? 'Connecting...' : 'Connect'}
           </Button>
@@ -511,8 +511,8 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
                         <div className="w-14 h-14 rounded-2xl inline-flex items-center justify-center mb-4 bg-primary/10 text-primary shadow-sm group-hover/drop:scale-110 group-hover/drop:rotate-3 transition-transform duration-300">
                           <Icon name="upload" size={28} />
                         </div>
-                        <p className="m-0 text-base text-foreground font-semibold mb-1 group-hover/drop:text-primary transition-colors">Click to browse or drop a file</p>
-                        <p className="m-0 text-xs text-muted-foreground font-medium">PDF, Images, Spreadsheets (Up to 10MB)</p>
+                        <p className="m-0 text-fluid text-foreground font-semibold mb-1 group-hover/drop:text-primary transition-colors">Click to browse or drop a file</p>
+                        <p className="m-0 text-fluid-xs text-muted-foreground font-medium">PDF, Images, Spreadsheets (Up to 10MB)</p>
                       </div>
                     )}
                   </div>

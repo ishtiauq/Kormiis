@@ -258,7 +258,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
           {...wProps}
         >
           {recentAnnouncements.length === 0 ? (
-            <p className="text-center my-auto text-xs text-muted-foreground">No active announcements</p>
+            <p className="text-center my-auto text-fluid-xs text-muted-foreground">No active announcements</p>
           ) : (
             recentAnnouncements.map((ann, idx) => (
               <div
@@ -270,7 +270,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
                   <Icon name="rss_feed" size={16} />
                 </div>
                 <div className="flex-1 min-w-0 pr-2">
-                  <p className="m-0 text-xs font-bold text-foreground break-words">{ann.title}</p>
+                  <p className="m-0 text-fluid-xs font-bold text-foreground break-words">{ann.title}</p>
                   <p className="m-0 mt-0.5 text-[11px] font-medium text-muted-foreground">
                     {getEmployeeName(ann.authorId)} &middot; {new Date(ann.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                   </p>
@@ -357,12 +357,12 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
             {tasks.filter(t => t.status !== 'Done').slice(0, 2).map((t, i) => (
               <div key={i} className="flex items-center gap-3 p-2 rounded-lg bg-muted/30 border border-border">
                 <div className="w-2 h-2 rounded-full bg-orange-500 shrink-0" />
-                <p className="text-sm font-medium text-foreground truncate flex-1">{t.title}</p>
+                <p className="text-fluid-sm font-medium text-foreground truncate flex-1">{t.title}</p>
                 <Badge variant="outline" className="text-[10px] shrink-0">{t.status}</Badge>
               </div>
             ))}
             {pendingTasksCount === 0 && (
-              <p className="text-sm text-muted-foreground">No pending tasks! Great job.</p>
+              <p className="text-fluid-sm text-muted-foreground">No pending tasks! Great job.</p>
             )}
           </div>
         </DashboardWidget>
@@ -395,7 +395,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
                 {attFilter === item.key && (
                   <div className="px-6 pb-4 pt-1 bg-muted/20">
                     {attendanceLists[item.key].length === 0 ? (
-                      <p className="my-1.5 text-xs text-muted-foreground">No personnel in this category</p>
+                      <p className="my-1.5 text-fluid-xs text-muted-foreground">No personnel in this category</p>
                     ) : (
                       attendanceLists[item.key].map((emp) => (
                         <div key={emp.id} className="flex items-center gap-3.5 py-2 border-b border-border/40 last:border-none">
@@ -431,7 +431,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
           {...wProps}
         >
           {upcomingEvents.length === 0 ? (
-            <p className="text-center my-auto text-xs text-muted-foreground">No upcoming events</p>
+            <p className="text-center my-auto text-fluid-xs text-muted-foreground">No upcoming events</p>
           ) : (
             upcomingEvents.map((evt, idx) => (
               <div
@@ -445,7 +445,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
                   <Icon name="calendar_month" size={16} style={{ color: evt.type === 'holiday' ? '#10b981' : evt.type === 'birthday' ? '#f59e0b' : '#3b82f6' }} />
                 </div>
                 <div className="flex-1 min-w-0 pr-2">
-                  <p className="m-0 text-xs font-bold text-foreground break-words">{evt.title}</p>
+                  <p className="m-0 text-fluid-xs font-bold text-foreground break-words">{evt.title}</p>
                   <p className="m-0 mt-0.5 text-[11px] font-medium text-muted-foreground break-words">
                     {formatDate(evt.date)}{evt.time ? ` at ${evt.time}` : ''}
                   </p>
@@ -484,7 +484,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
               </div>
             )) : (
               <div className="flex-1 flex items-center justify-center">
-                <p className="text-sm text-muted-foreground text-center">No documents found.</p>
+                <p className="text-fluid-sm text-muted-foreground text-center">No documents found.</p>
               </div>
             )}
           </div>
@@ -502,21 +502,21 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
           {...wProps}
         >
           {!currentPayrollMonth ? (
-            <p className="text-center my-auto text-xs text-muted-foreground">No payroll data found</p>
+            <p className="text-center my-auto text-fluid-xs text-muted-foreground">No payroll data found</p>
           ) : (
             <>
               <div className="grid grid-cols-2 gap-3 p-3.5 rounded-lg bg-muted/40 border border-border/50">
                 <div>
                   <span className="block text-xs font-medium text-muted-foreground">Paid</span>
-                  <span className="text-xl sm:text-2xl font-black tabular-nums text-emerald-600 dark:text-emerald-400 mt-0.5 block">{paidCount}</span>
+                  <span className="text-fluid-2xl font-black tabular-nums text-emerald-600 dark:text-emerald-400 mt-0.5 block">{paidCount}</span>
                 </div>
                 <div>
                   <span className="block text-xs font-medium text-muted-foreground">Pending</span>
-                  <span className="text-xl sm:text-2xl font-black tabular-nums text-amber-500 mt-0.5 block">{pendingCount}</span>
+                  <span className="text-fluid-2xl font-black tabular-nums text-amber-500 mt-0.5 block">{pendingCount}</span>
                 </div>
                 <div className="col-span-2 border-t border-border/50 pt-2 mt-1">
                   <span className="block text-xs font-medium text-muted-foreground">Total Payroll</span>
-                  <span className="text-xl sm:text-2xl font-black tabular-nums text-foreground mt-0.5 block">{settings?.currency || '$'}{totalPayrollCost.toLocaleString()}</span>
+                  <span className="text-fluid-2xl font-black tabular-nums text-foreground mt-0.5 block">{settings?.currency || '$'}{totalPayrollCost.toLocaleString()}</span>
                 </div>
               </div>
               <div className="mt-3 pt-3 flex justify-between items-center border-t border-border">
@@ -574,7 +574,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
             <div className="flex items-center justify-between p-3 rounded-xl bg-teal-500/5 border border-teal-500/10">
               <div className="flex flex-col">
                 <span className="text-xs font-semibold text-teal-600/80 uppercase tracking-wider mb-1">Total Assets</span>
-                <span className="text-2xl font-black text-foreground">{assets.length}</span>
+                  <span className="text-fluid-2xl font-black text-foreground">{assets.length}</span>
               </div>
             </div>
             
@@ -606,7 +606,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
           {upcomingMilestones.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center text-center p-5">
               <Icon name="redeem" size={34} className="text-muted-foreground/40 mb-2" />
-              <p className="m-0 text-xs font-medium text-muted-foreground max-w-[200px] leading-relaxed">No birthdays or work anniversaries in the next 30 days.</p>
+              <p className="m-0 text-fluid-xs font-medium text-muted-foreground max-w-[200px] leading-relaxed">No birthdays or work anniversaries in the next 30 days.</p>
             </div>
           ) : (
             <div className="flex flex-col gap-2.5">
@@ -617,7 +617,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
                     <AvatarFallback className="bg-primary/10 text-primary"><Icon name="person" size={16} /></AvatarFallback>
                   </Avatar>
                   <div className="flex-1 flex flex-col gap-1">
-                    <p className="m-0 text-xs font-bold text-foreground break-words">{milestone.empName}</p>
+                    <p className="m-0 text-fluid-xs font-bold text-foreground break-words">{milestone.empName}</p>
                     <p className="m-0 mt-0.5 text-[11px] font-medium text-muted-foreground">{milestone.label}</p>
                   </div>
                   <Badge variant="default" className="uppercase text-[10px]">

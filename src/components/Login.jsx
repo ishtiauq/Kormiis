@@ -200,7 +200,7 @@ function MarketingSectionTwo() {
 
           {/* Top section: 100% FREE & Logo */}
           <div className="relative z-10 flex items-center justify-between w-full mb-8 sm:mb-12">
-            <span className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-gray-100 via-gray-300 to-gray-500 drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] font-sans uppercase">
+            <span className="text-fluid-display-xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-gray-100 via-gray-300 to-gray-500 drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] font-sans uppercase">
               100% FREE
             </span>
             {/* Logo / Brand mark */}

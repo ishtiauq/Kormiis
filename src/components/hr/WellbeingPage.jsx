@@ -79,19 +79,19 @@ export default function WellbeingPage({ adminUid, currentUser, addToast }) {
         <Card>
           <CardContent className="p-5">
             <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">High-risk employees</div>
-            <div className="text-3xl font-black tabular-nums text-destructive mt-1">{loading ? '—' : data?.highRiskCount ?? 0}</div>
+            <div className="text-fluid-display font-black tabular-nums text-destructive mt-1">{loading ? '—' : data?.highRiskCount ?? 0}</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-5">
             <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Threshold</div>
-            <div className="text-3xl font-black tabular-nums text-foreground mt-1">{data?.threshold ?? 50}+</div>
+            <div className="text-fluid-display font-black tabular-nums text-foreground mt-1">{data?.threshold ?? 50}+</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-5">
             <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Month</div>
-            <div className="text-3xl font-black tabular-nums text-foreground mt-1">{data?.month || month}</div>
+            <div className="text-fluid-display font-black tabular-nums text-foreground mt-1">{data?.month || month}</div>
           </CardContent>
         </Card>
       </div>

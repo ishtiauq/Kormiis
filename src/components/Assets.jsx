@@ -60,7 +60,7 @@ function AssetInventory({ filteredAssets, stats, assets, search, setSearch, filt
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-semibold uppercase tracking-wider">
                 <Icon name={m.icon} size={14} className="text-primary shrink-0" /> {m.label}
               </div>
-              <div className="text-2xl font-extrabold tabular-nums text-foreground">{m.count}</div>
+              <div className="text-fluid-display font-extrabold tabular-nums text-foreground">{m.count}</div>
             </CardContent>
           </Card>
         ))}
@@ -145,8 +145,8 @@ function AssetInventory({ filteredAssets, stats, assets, search, setSearch, filt
           {categoryGroups.length === 0 && (
             <div className="p-12 text-center text-muted-foreground flex flex-col items-center justify-center">
               <Icon name="search" size={40} className="h-10 w-10 mb-3 opacity-20" />
-              <p className="text-base font-medium text-foreground">No assets found</p>
-              <p className="text-sm mt-1">Try adjusting your search query or filters.</p>
+              <p className="text-fluid font-medium text-foreground">No assets found</p>
+              <p className="text-fluid-sm mt-1">Try adjusting your search query or filters.</p>
             </div>
           )}
         </div>
@@ -270,11 +270,11 @@ function MetricBreakdownModal({ metricKey, metrics, assets, onClose }) {
             <div className="flex flex-col gap-3">
               <div className="flex items-center justify-between p-3 rounded-lg bg-muted/40">
                 <span className="text-sm text-muted-foreground">Total Count</span>
-                <span className="text-lg font-extrabold tabular-nums">{list.length}</span>
+                <span className="text-fluid-lg font-extrabold tabular-nums">{list.length}</span>
               </div>
               <div className="flex items-center justify-between p-3 rounded-lg bg-muted/40">
                 <span className="text-sm text-muted-foreground">Total Purchase Value</span>
-                <span className="text-lg font-extrabold tabular-nums">${totalValue.toLocaleString()}</span>
+                <span className="text-fluid-lg font-extrabold tabular-nums">${totalValue.toLocaleString()}</span>
               </div>
               <div className="p-3 rounded-lg bg-muted/40">
                 <span className="text-sm text-muted-foreground">By Category</span>
@@ -347,13 +347,13 @@ function DetailModal({ asset, onClose }) {
               <h3 className="text-[11px] text-muted-foreground uppercase tracking-wider mb-3 font-semibold">Maintenance History</h3>
               <div className="flex flex-col gap-2 max-h-[160px] overflow-y-auto pr-2">
                 {asset.maintenanceLogs.map(log => (
-                  <div key={log.id} className="p-3 bg-muted/40 rounded-lg border border-border text-sm flex flex-col gap-1">
+                  <div key={log.id} className="p-3 bg-muted/40 rounded-lg border border-border text-fluid-sm flex flex-col gap-1">
                     <div className="flex justify-between items-center">
                       <span className="font-semibold">{log.vendor}</span>
                       <span className="text-red-600 font-medium bg-red-500/10 px-1.5 py-0.5 rounded">${log.cost}</span>
                     </div>
                     <div className="text-[11px] text-muted-foreground">{log.date}</div>
-                    <div className="text-muted-foreground text-xs mt-1">{log.issue}</div>
+                    <div className="text-muted-foreground text-fluid-xs mt-1">{log.issue}</div>
                   </div>
                 ))}
               </div>
@@ -400,7 +400,7 @@ function AssetAssignments({ assets, employees, assignForm, setAssignForm, setAss
               return (
                 <TableRow key={asset.id} className="hover:bg-muted/30">
                   <TableCell>
-                    <div className="font-semibold text-sm">{asset.name}</div>
+                    <div className="font-semibold text-fluid-sm">{asset.name}</div>
                     <div className="text-xs text-muted-foreground uppercase tracking-wider">{asset.id}</div>
                   </TableCell>
                   <TableCell>
@@ -500,7 +500,7 @@ function AssetRequests({ assetRequests, employees, handleRequestAction }) {
                <Icon name="chat" size={40} className="h-10 w-10 text-muted-foreground opacity-50" />
             </div>
             <h3 className="text-lg font-semibold text-foreground">No Pending Requests</h3>
-            <p className="text-sm text-muted-foreground mt-1 max-w-sm">There are currently no open asset requests from employees. When employees request new equipment, it will appear here.</p>
+            <p className="text-fluid-sm text-muted-foreground mt-1 max-w-sm">There are currently no open asset requests from employees. When employees request new equipment, it will appear here.</p>
           </CardContent>
         </Card>
       ) : (
@@ -593,8 +593,8 @@ function AssetMaintenance({ assets, selectedAssetForMaint, setSelectedAssetForMa
                   <h3 className="text-lg font-bold">Depreciation & Value</h3>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                  <div><div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Purchase Price</div><div className="text-2xl font-bold text-foreground">${selectedAssetForMaint.purchasePrice}</div></div>
-                  <div><div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Book Value</div><div className="text-2xl font-bold text-green-600">${calculateBookValue(selectedAssetForMaint)}</div></div>
+                  <div><div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Purchase Price</div><div className="text-fluid-display font-bold text-foreground">${selectedAssetForMaint.purchasePrice}</div></div>
+                  <div><div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Book Value</div><div className="text-fluid-display font-bold text-green-600">${calculateBookValue(selectedAssetForMaint)}</div></div>
                   <div><div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Useful Life</div><div className="font-medium text-lg mt-1">{selectedAssetForMaint.usefulLife} <span className="text-sm text-muted-foreground">months</span></div></div>
                   <div><div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Condition</div><div className="font-medium text-lg mt-1">{selectedAssetForMaint.condition}</div></div>
                 </div>
@@ -664,7 +664,7 @@ function AssetMaintenance({ assets, selectedAssetForMaint, setSelectedAssetForMa
                  <Icon name="build" size={40} className="h-10 w-10 text-muted-foreground opacity-50" />
               </div>
               <h3 className="text-lg font-semibold text-foreground">No Asset Selected</h3>
-              <p className="text-sm text-muted-foreground mt-1 max-w-[250px]">Select an asset from the list on the left to view depreciation details and log maintenance.</p>
+              <p className="text-fluid-sm text-muted-foreground mt-1 max-w-[250px]">Select an asset from the list on the left to view depreciation details and log maintenance.</p>
             </CardContent>
           </Card>
         )}
@@ -1160,7 +1160,7 @@ function CategoryManagerModal({ assetCategories, assets, onClose, onEdit, onDele
             <div className="border-t border-border pt-4">
               <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 flex items-start gap-2">
                 <Icon name="warning" size={16} className="text-destructive mt-0.5 shrink-0" />
-                <p className="text-sm text-foreground">
+                <p className="text-fluid-sm text-foreground">
                   Delete "<strong>{managerState.deleteConfirm}</strong>"? Assets in this category will be moved to <strong>Uncategorized</strong>.
                 </p>
               </div>

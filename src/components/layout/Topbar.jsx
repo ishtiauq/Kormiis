@@ -191,7 +191,7 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
                     className={`p-3 px-4 rounded-xl transition-colors cursor-pointer my-1 border relative ${n.read ? 'bg-background hover:bg-muted/50 border-transparent opacity-70' : 'bg-primary/5 hover:bg-primary/10 border-primary/20 shadow-sm'}`}
                   >
                     {!n.read && <div className="absolute left-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-primary" />}
-                    <p className={`text-sm m-0 leading-relaxed text-foreground ${!n.read ? 'pl-2 font-semibold' : 'font-medium'}`}>{n.text}</p>
+                    <p className={`text-fluid-sm m-0 leading-relaxed text-foreground ${!n.read ? 'pl-2 font-semibold' : 'font-medium'}`}>{n.text}</p>
                     <span className={`text-[11px] block mt-1.5 text-muted-foreground ${!n.read ? 'pl-2' : ''}`}>{n.time}</span>
                   </div>
                 ))
@@ -281,7 +281,7 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
                     className={`p-3 px-4 rounded-xl transition-colors cursor-pointer my-1 border relative ${n.read ? 'bg-background hover:bg-muted/50 border-transparent opacity-70' : 'bg-primary/5 hover:bg-primary/10 border-primary/20 shadow-sm'}`}
                   >
                     {!n.read && <div className="absolute left-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-primary" />}
-                    <p className={`text-sm m-0 leading-relaxed text-foreground ${!n.read ? 'pl-2 font-semibold' : 'font-medium'}`}>{n.text}</p>
+                    <p className={`text-fluid-sm m-0 leading-relaxed text-foreground ${!n.read ? 'pl-2 font-semibold' : 'font-medium'}`}>{n.text}</p>
                     <span className={`text-[11px] block mt-1.5 text-muted-foreground ${!n.read ? 'pl-2' : ''}`}>{n.time}</span>
                   </div>
                 ))
@@ -326,7 +326,7 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
               </DialogTitle>
             </DialogHeader>
             <div className="px-6 py-2">
-              <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+              <p className="text-fluid-sm text-muted-foreground leading-relaxed mb-4">
                 We found {dataIntegrityIssues?.length || 0} discrepancies in your data. Clicking <strong>Auto-Repair</strong> will automatically clean up orphaned records, fix incorrect values, and rebuild your local cache to match the cloud database.
               </p>
               <div className="max-h-[250px] overflow-y-auto space-y-2 pr-2 mb-4">

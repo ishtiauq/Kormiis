@@ -640,7 +640,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                 
                 <CardContent className="pb-5">
                   <h3 className="text-lg font-semibold tracking-tight text-foreground mb-2">{post.title}</h3>
-                  <div className="whitespace-pre-wrap leading-relaxed text-sm text-foreground/90">
+                  <div className="whitespace-pre-wrap leading-relaxed text-fluid-sm text-foreground/90">
                     {post.content}
                   </div>
 
@@ -703,7 +703,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                   <div className="border-t border-border bg-muted/10 p-4">
                     <div className="flex flex-col gap-3 mb-4 max-h-[250px] overflow-y-auto pr-2">
                       {!(post.comments && post.comments.length > 0) ? (
-                        <p className="text-xs text-muted-foreground text-center py-2">No comments yet. Be the first!</p>
+                        <p className="text-fluid-xs text-muted-foreground text-center py-2">No comments yet. Be the first!</p>
                       ) : (
                         post.comments.map(comment => {
                           const commentAuthor = employees.find(e => e.id === comment.authorId)
@@ -735,7 +735,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                                     </div>
                                   </div>
                                 ) : (
-                                  <p className="text-xs text-foreground/90">{comment.text}</p>
+                                  <p className="text-fluid-xs text-foreground/90">{comment.text}</p>
                                 )}
                               </div>
                               <div className="flex items-center gap-3 mt-1 ml-1">

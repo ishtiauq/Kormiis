@@ -197,7 +197,7 @@ export default function Notes({ notes = [], setNotes, currentUser, addToast }) {
       </h3>}
       
       {note.type === 'text' && note.content && (
-        <p className="text-sm text-foreground/80 whitespace-pre-wrap line-clamp-6">{note.content}</p>
+        <p className="text-fluid-sm text-foreground/80 whitespace-pre-wrap line-clamp-6">{note.content}</p>
       )}
 
       {note.type === 'checklist' && note.items && note.items.length > 0 && (
@@ -325,14 +325,14 @@ export default function Notes({ notes = [], setNotes, currentUser, addToast }) {
                 <Input 
                   value={title} onChange={(e) => setTitle(e.target.value)} 
                   placeholder="Note Title" 
-                  className="text-xl font-bold border-none bg-transparent px-0 shadow-none focus-visible:ring-0 placeholder:text-muted-foreground/50 h-auto"
+                  className="text-fluid-xl font-bold border-none bg-transparent px-0 shadow-none focus-visible:ring-0 placeholder:text-muted-foreground/50 h-auto"
                 />
 
                 {type === 'text' ? (
                   <textarea 
                     value={content} onChange={(e) => setContent(e.target.value)}
                     placeholder="Write your note here..."
-                    className="w-full min-h-[150px] border-none bg-transparent px-0 shadow-none focus:outline-none resize-none text-base text-foreground placeholder:text-muted-foreground/50"
+                    className="w-full min-h-[150px] border-none bg-transparent px-0 shadow-none focus:outline-none resize-none text-fluid text-foreground placeholder:text-muted-foreground/50"
                   />
                 ) : (
                   <div className="flex flex-col gap-2">
@@ -484,7 +484,7 @@ export default function Notes({ notes = [], setNotes, currentUser, addToast }) {
                 )}
 
                 {viewingNote.type === 'text' && viewingNote.content && (
-                  <div className="text-base sm:text-lg text-foreground/90 whitespace-pre-wrap leading-relaxed">
+                  <div className="text-fluid text-foreground/90 whitespace-pre-wrap leading-relaxed">
                     {viewingNote.content}
                   </div>
                 )}
@@ -572,7 +572,7 @@ export default function Notes({ notes = [], setNotes, currentUser, addToast }) {
                 <Icon name="warning" size={28} />
               </div>
               <h3 className="text-xl font-bold text-foreground mb-2">Delete Note?</h3>
-              <p className="text-sm text-muted-foreground mb-6">Are you sure you want to delete this note? This action cannot be undone.</p>
+              <p className="text-fluid-sm text-muted-foreground mb-6">Are you sure you want to delete this note? This action cannot be undone.</p>
               
               <div className="flex items-center gap-3 w-full">
                 <Button variant="outline" onClick={() => setNoteToDelete(null)} className="flex-1 rounded-xl">Cancel</Button>

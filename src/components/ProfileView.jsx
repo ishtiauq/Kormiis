@@ -139,23 +139,23 @@ export default function ProfileView({ currentUser, pendingProfileEdits, setPendi
           <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-6 w-full">
             <div>
               <label className="text-xs font-semibold text-muted-foreground uppercase">Full Name</label>
-              <div className="font-medium text-lg">{currentUser.name}</div>
+              <div className="font-medium text-fluid-lg">{currentUser.name}</div>
             </div>
             <div>
               <label className="text-xs font-semibold text-muted-foreground uppercase">Employee ID</label>
-              <div className="font-medium text-lg">{currentUser.id || currentUser.employeeId || 'N/A'}</div>
+              <div className="font-medium text-fluid-lg">{currentUser.id || currentUser.employeeId || 'N/A'}</div>
             </div>
             <div>
               <label className="text-xs font-semibold text-muted-foreground uppercase">Department</label>
-              <div className="font-medium text-lg">{currentUser.department || 'Management'}</div>
+              <div className="font-medium text-fluid-lg">{currentUser.department || 'Management'}</div>
             </div>
             <div>
               <label className="text-xs font-semibold text-muted-foreground uppercase">Role</label>
-              <div className="font-medium text-lg">{currentUser.role}</div>
+              <div className="font-medium text-fluid-lg">{currentUser.role}</div>
             </div>
             <div className="sm:col-span-2">
               <label className="text-xs font-semibold text-muted-foreground uppercase">Company ID</label>
-              <div className="font-medium text-lg flex items-center gap-2">
+              <div className="font-medium text-fluid-lg flex items-center gap-2">
                 <span className="font-sans bg-muted px-2 py-0.5 rounded">{currentUser.adminUid || currentUser.uid || currentUser.id}</span>
                 <Button variant="ghost" size="icon" className="size-8" onClick={() => {
                   navigator.clipboard.writeText(currentUser.adminUid || currentUser.uid || currentUser.id);
@@ -163,7 +163,7 @@ export default function ProfileView({ currentUser, pendingProfileEdits, setPendi
                 }} aria-label="Copy Company ID">
                   <Icon name="content_copy" size={16} />
                 </Button>
-                <p className="text-xs text-muted-foreground font-normal ml-2">Share this with employees to log in from other devices.</p>
+                <p className="text-fluid-xs text-muted-foreground font-normal ml-2">Share this with employees to log in from other devices.</p>
               </div>
             </div>
           </div>
@@ -225,7 +225,7 @@ export default function ProfileView({ currentUser, pendingProfileEdits, setPendi
         <Card>
           <CardHeader>
             <CardTitle>Change Password</CardTitle>
-            <p className="text-sm text-muted-foreground">Update the password you use to sign in. Your sign-in email is managed by your HR administrator.</p>
+            <p className="text-fluid-sm text-muted-foreground">Update the password you use to sign in. Your sign-in email is managed by your HR administrator.</p>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleChangePassword} className="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -255,12 +255,12 @@ export default function ProfileView({ currentUser, pendingProfileEdits, setPendi
       <Card>
         <CardHeader>
           <CardTitle>Connected Devices</CardTitle>
-          <p className="text-sm text-muted-foreground">Manage devices that are currently logged into your account.</p>
+          <p className="text-fluid-sm text-muted-foreground">Manage devices that are currently logged into your account.</p>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-4">
             {userDevices.length === 0 && (
-              <p className="text-sm text-muted-foreground">No devices found.</p>
+              <p className="text-fluid-sm text-muted-foreground">No devices found.</p>
             )}
             {userDevices.map(device => {
               const currentDeviceId = localStorage.getItem('kormiis_device_id')
@@ -276,7 +276,7 @@ export default function ProfileView({ currentUser, pendingProfileEdits, setPendi
                         {device.label}
                         {isCurrent && <span className="text-[10px] uppercase font-bold bg-primary/20 text-primary px-2 py-0.5 rounded-full">Current</span>}
                       </h4>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-fluid-xs text-muted-foreground">
                         Last Active: {new Date(device.lastLogin).toLocaleString()}
                       </p>
                     </div>

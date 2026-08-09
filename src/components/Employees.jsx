@@ -827,7 +827,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
                   </AvatarFallback>
                 </Avatar>
                 <h3 className="text-xl font-bold text-foreground text-center">{viewingEmployee.name}</h3>
-                <p className="text-sm text-muted-foreground text-center mt-1">{viewingEmployee.designation || viewingEmployee.role}</p>
+                <p className="text-fluid-sm text-muted-foreground text-center mt-1">{viewingEmployee.designation || viewingEmployee.role}</p>
                 <Badge variant={viewingEmployee.status === 'Active' ? 'default' : 'secondary'} className="mt-3">
                   {viewingEmployee.status}
                 </Badge>
@@ -996,7 +996,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
               {newRole === 'Teammate' && (
                 <div className="flex flex-col gap-2 md:col-span-2 mt-2 bg-muted/30 p-4 rounded-xl border border-border">
                   <label className="text-sm font-bold text-foreground">Special Access Permissions</label>
-                  <p className="text-xs text-muted-foreground mb-3">Teammates can only see basic modules (Dashboard, Tasks, Calendar, Expenses). Select below to give them extra access to Admin modules.</p>
+                  <p className="text-fluid-xs text-muted-foreground mb-3">Teammates can only see basic modules (Dashboard, Tasks, Calendar, Expenses). Select below to give them extra access to Admin modules.</p>
                   <div className="flex flex-wrap gap-4">
                     <label className="flex items-center gap-2 text-sm cursor-pointer hover:text-primary transition-colors">
                       <input 
@@ -1207,7 +1207,7 @@ function DepartmentManagerModal({ departments, employees, onClose, onEdit, onDel
             <div className="border-t border-border pt-4">
               <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 flex items-start gap-2">
                 <Icon name="warning" size={16} className="text-destructive mt-0.5 shrink-0" />
-                <p className="text-sm text-foreground">
+                <p className="text-fluid-sm text-foreground">
                   Delete "<strong>{managerState.deleteConfirm}</strong>"? Employees in this department will be moved to <strong>Uncategorized</strong>.
                 </p>
               </div>

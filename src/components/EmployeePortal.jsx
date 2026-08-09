@@ -368,7 +368,7 @@ export default function EmployeePortal({
             <div className={`size-16 rounded-full flex items-center justify-center ${isPunchedIn ? 'bg-emerald-500/10 text-emerald-600' : 'bg-primary/10 text-primary'}`}>
               {isPunchedIn ? <Icon name="login" size={28} /> : <Icon name="schedule" size={28} />}
             </div>
-            <div className="text-3xl sm:text-4xl font-black tabular-nums tracking-tight text-foreground" aria-live="polite">
+            <div className="text-fluid-display font-black tabular-nums tracking-tight text-foreground" aria-live="polite">
               {punchClock.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
             </div>
             <div className="text-xs sm:text-sm font-medium text-muted-foreground">
@@ -388,8 +388,8 @@ export default function EmployeePortal({
                 <div className="size-10 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
                   <Icon name="check_circle" size={20} />
                 </div>
-                <p className="text-sm font-semibold text-foreground">Today's attendance completed</p>
-                <p className="text-xs text-muted-foreground">In: {punchLog.checkIn} • Out: {punchLog.checkOut} • {punchLog.hours}h</p>
+                <p className="text-fluid-sm font-semibold text-foreground">Today's attendance completed</p>
+                <p className="text-fluid-xs text-muted-foreground">In: {punchLog.checkIn} • Out: {punchLog.checkOut} • {punchLog.hours}h</p>
               </div>
             ) : (
               <Button
@@ -533,7 +533,7 @@ function DashboardView({ currentUser, attendance, setAttendance, addToast, expen
           </div>
           <div className="flex flex-col gap-1 sm:gap-1.5">
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight m-0 text-foreground">Welcome back, {currentUser.name.split(' ')[0]}!</h1>
-            <p className="m-0 text-sm sm:text-base font-medium text-muted-foreground">{currentUser.role} • {currentUser.department}</p>
+            <p className="m-0 text-fluid font-medium text-muted-foreground">{currentUser.role} • {currentUser.department}</p>
           </div>
         </CardContent>
       </Card>
@@ -566,7 +566,7 @@ function DashboardView({ currentUser, attendance, setAttendance, addToast, expen
                       <span className="font-semibold leading-tight line-clamp-2">{ann.title}</span>
                       <span className="text-xs text-muted-foreground whitespace-nowrap shrink-0">{formatDateShort(ann.date)}</span>
                     </div>
-                    <p className="text-sm text-muted-foreground m-0 break-words line-clamp-2">{ann.content}</p>
+                    <p className="text-fluid-sm text-muted-foreground m-0 break-words line-clamp-2">{ann.content}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -584,8 +584,8 @@ function DashboardView({ currentUser, attendance, setAttendance, addToast, expen
               <Icon name="check_box" size={18} />
               <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground m-0">Active Tasks</h3>
             </div>
-            <div className="text-3xl font-black tabular-nums text-foreground">
-              {myActiveTasks.length} <span className="text-sm font-semibold text-muted-foreground ml-1">tasks</span>
+            <div className="text-fluid-display font-black tabular-nums text-foreground">
+              {myActiveTasks.length} <span className="text-fluid-sm font-semibold text-muted-foreground ml-1">tasks</span>
             </div>
           </CardContent>
         </Card>
@@ -596,10 +596,10 @@ function DashboardView({ currentUser, attendance, setAttendance, addToast, expen
               <Icon name="calendar_month" size={18} />
               <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground m-0">Next Event</h3>
             </div>
-            <div className="text-xl font-bold truncate text-foreground mb-1">
+            <div className="text-fluid-xl font-bold truncate text-foreground mb-1">
               {nextEvent ? nextEvent.title : 'None Scheduled'}
             </div>
-            <div className="text-sm font-medium text-muted-foreground">
+            <div className="text-fluid-sm font-medium text-muted-foreground">
               {nextEvent ? formatDateShort(nextEvent.date) : 'Enjoy your time!'}
             </div>
           </CardContent>
@@ -611,8 +611,8 @@ function DashboardView({ currentUser, attendance, setAttendance, addToast, expen
               <Icon name="calendar_month" size={18} />
               <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground m-0">Available Leave</h3>
             </div>
-            <div className="text-3xl font-black tabular-nums text-foreground">
-              {currentBalances.annual.limit - currentBalances.annual.used + currentBalances.sick.limit - currentBalances.sick.used} <span className="text-sm font-semibold text-muted-foreground ml-1">days total</span>
+            <div className="text-fluid-display font-black tabular-nums text-foreground">
+              {currentBalances.annual.limit - currentBalances.annual.used + currentBalances.sick.limit - currentBalances.sick.used} <span className="text-fluid-sm font-semibold text-muted-foreground ml-1">days total</span>
             </div>
           </CardContent>
         </Card>
@@ -623,8 +623,8 @@ function DashboardView({ currentUser, attendance, setAttendance, addToast, expen
               <Icon name="monitor" size={18} />
               <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground m-0">Reimbursements</h3>
             </div>
-            <div className="text-3xl font-black tabular-nums text-foreground">
-              ${totalPending.toFixed(2)} <span className="text-sm font-semibold text-muted-foreground ml-1">pending</span>
+            <div className="text-fluid-display font-black tabular-nums text-foreground">
+              ${totalPending.toFixed(2)} <span className="text-fluid-sm font-semibold text-muted-foreground ml-1">pending</span>
             </div>
           </CardContent>
         </Card>
@@ -1143,7 +1143,7 @@ function LeaveView({ currentUser, attendance, setAttendance, addToast, addLog, s
        <Card key={lType} className="bg-muted/40 border-border/50 shadow-sm">
              <CardContent className="p-4 flex flex-col items-center justify-center">
                 <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">{lType}</div>
-                <div className="text-3xl font-black text-foreground tabular-nums">{days} <span className="text-sm text-muted-foreground">days</span></div>
+                <div className="text-fluid-display font-black text-foreground tabular-nums">{days} <span className="text-fluid-sm text-muted-foreground">days</span></div>
              </CardContent>
            </Card>
         ))}

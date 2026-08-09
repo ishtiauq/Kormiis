@@ -11,7 +11,7 @@ const stat = (icon, label, value, tone, view, setCurrentView) => (
     <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${tone}`}>
       <Icon name={icon} size={16} />
     </div>
-    <span className="text-xl font-black tabular-nums text-foreground">{value}</span>
+    <span className="text-fluid-xl font-black tabular-nums text-foreground">{value}</span>
     <span className="text-[11px] font-semibold text-muted-foreground">{label}</span>
   </button>
 )

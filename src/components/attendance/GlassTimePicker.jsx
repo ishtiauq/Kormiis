@@ -108,7 +108,7 @@ export function GlassTimePicker({ time, onTimeChange, isOpen, setIsOpen, label }
         
         {/* Result display */}
         <div className="flex justify-center items-center gap-2.5 mb-5 p-2 rounded-xl bg-muted/20 border border-border/40" style={{ fontFamily: "var(--font-sans)" }}>
-          <span className="text-3xl font-black font-sans tracking-tight text-foreground">{h}:{m}</span>
+          <span className="text-fluid-display font-black font-sans tracking-tight text-foreground">{h}:{m}</span>
           <span className="text-xl font-bold text-primary">{ampm}</span>
         </div>
 

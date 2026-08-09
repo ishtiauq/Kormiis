@@ -100,7 +100,7 @@ export default function Sidebar({
               opacity: !isCollapsed ? 1 : 0,
               maxWidth: !isCollapsed ? '200px' : 0,
             }}>
-              <p className="text-sm font-semibold m-0 text-sidebar-foreground whitespace-nowrap leading-tight">{user?.name || "Ishtiaq Rizve"}</p>
+              <p className="text-fluid-sm font-semibold m-0 text-sidebar-foreground whitespace-nowrap leading-tight">{user?.name || "Ishtiaq Rizve"}</p>
               <p className="text-[11px] font-medium m-0 text-sidebar-foreground/70 whitespace-nowrap">{user?.role || "Admin"}</p>
             </div>
           </button>

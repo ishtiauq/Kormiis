@@ -234,7 +234,7 @@ export default function GeoCheckInWidget({ currentUser, attendance, setAttendanc
       
       <CardContent className="p-4 sm:p-5 flex flex-col gap-5">
         <div className="flex flex-col items-center gap-1 text-center">
-          <div className="text-2xl sm:text-3xl font-black tabular-nums tracking-tight font-sans headline-gradient" aria-live="polite">{timeStr}</div>
+          <div className="text-fluid-display font-black tabular-nums tracking-tight font-sans headline-gradient" aria-live="polite">{timeStr}</div>
           <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}</div>
           {elapsed && (
             <div className="mt-1 flex items-center gap-2 bg-primary/5 border border-primary/20 rounded-full px-4 py-2">

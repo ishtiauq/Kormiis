@@ -44,7 +44,7 @@ export default function ToastContainer({ toasts, removeToast }) {
           >
             <div className="flex items-start gap-3 flex-1 w-full">
               <Icon name={style.icon} size={20} className={`shrink-0 mt-0.5 ${style.iconColor}`} />
-              <p className="flex-1 text-sm font-semibold leading-snug">
+              <p className="flex-1 text-fluid-sm font-semibold leading-snug">
                 {toast.message}
               </p>
               <div className="flex items-center gap-2 shrink-0">

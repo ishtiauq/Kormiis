@@ -363,7 +363,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
                       <div className="grid grid-cols-2 gap-3 bg-muted/20 p-3 rounded-lg text-sm border border-border/50">
                         <div className="flex flex-col">
                           <span className="text-muted-foreground text-[10px] uppercase font-bold tracking-wider">Amount</span>
-                          <span className={`font-sans text-lg font-bold ${isOverLimit ? 'text-destructive' : 'text-foreground'}`}>{exp.currency} {exp.amount.toLocaleString()}</span>
+                          <span className={`font-sans text-fluid-lg font-bold ${isOverLimit ? 'text-destructive' : 'text-foreground'}`}>{exp.currency} {exp.amount.toLocaleString()}</span>
                         </div>
                         <div className="flex flex-col">
                           <span className="text-muted-foreground text-[10px] uppercase font-bold tracking-wider">Date</span>
@@ -409,11 +409,11 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
             <Card>
               <CardContent className="p-6 flex flex-col justify-center">
                 <h3 className="text-sm mb-2 text-muted-foreground">Pending Liability</h3>
-                <div className="text-4xl font-bold flex items-center gap-2 text-amber-500">
+                <div className="text-fluid-display font-bold flex items-center gap-2 text-amber-500">
                   <Icon name="attach_money" size={32} />
                   {pendingLiability.toFixed(2)}
                 </div>
-                <p className="text-xs mt-2 text-muted-foreground">Total pending reimbursements (in USD)</p>
+                <p className="text-fluid-xs mt-2 text-muted-foreground">Total pending reimbursements (in USD)</p>
               </CardContent>
             </Card>
 
@@ -474,7 +474,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
                       <div className="flex justify-between items-end bg-muted/20 p-3 rounded-lg text-sm border border-border/50">
                         <div className="flex flex-col">
                           <span className="text-muted-foreground text-[10px] uppercase font-bold tracking-wider">{exp.category}</span>
-                          <span className="font-sans text-xl font-bold mt-0.5 text-foreground">{exp.currency} {exp.amount.toLocaleString()}</span>
+                          <span className="font-sans text-fluid-xl font-bold mt-0.5 text-foreground">{exp.currency} {exp.amount.toLocaleString()}</span>
                         </div>
                       </div>
 
@@ -532,7 +532,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
                       <div className="grid grid-cols-2 gap-3 bg-muted/20 p-3 rounded-lg text-sm border border-border/50">
                         <div className="flex flex-col">
                           <span className="text-muted-foreground text-[10px] uppercase font-bold tracking-wider">Amount</span>
-                          <span className="font-sans text-lg font-bold text-foreground">{exp.currency} {exp.amount.toLocaleString()}</span>
+                          <span className="font-sans text-fluid-lg font-bold text-foreground">{exp.currency} {exp.amount.toLocaleString()}</span>
                         </div>
                         <div className="flex flex-col">
                           <span className="text-muted-foreground text-[10px] uppercase font-bold tracking-wider">Date</span>
@@ -601,7 +601,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
                       <div className="grid grid-cols-2 gap-3 bg-muted/20 p-3 rounded-lg text-sm border border-border/50">
                         <div className="flex flex-col">
                           <span className="text-muted-foreground text-[10px] uppercase font-bold tracking-wider">{exp.category}</span>
-                          <span className="font-sans text-xl font-bold mt-0.5 text-foreground">{exp.currency} {exp.amount.toLocaleString()}</span>
+                          <span className="font-sans text-fluid-xl font-bold mt-0.5 text-foreground">{exp.currency} {exp.amount.toLocaleString()}</span>
                         </div>
                         <div className="flex flex-col">
                           <span className="text-muted-foreground text-[10px] uppercase font-bold tracking-wider">Date</span>

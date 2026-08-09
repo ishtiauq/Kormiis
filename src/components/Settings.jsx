@@ -263,7 +263,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                   <Icon name="dark_mode" size={16} /> Dark
                 </button>
               </div>
-              <p className="text-xs text-muted-foreground mt-3">Applies instantly across all portals.</p>
+              <p className="text-fluid-xs text-muted-foreground mt-3">Applies instantly across all portals.</p>
             </CardContent>
           </Card>
         </div>
@@ -337,7 +337,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
               {salaryStructure.length > 0 && (
                 <div className="flex justify-between items-center p-4 bg-muted/30 border border-border rounded-lg mt-2">
                   <span className="font-semibold text-sm">Net Earning Ratio</span>
-                  <span className={`font-bold text-lg font-sans ${netPayPercent >= 0 ? 'text-foreground' : 'text-red-500'}`}>{netPayPercent}%</span>
+                  <span className={`font-bold text-fluid-lg font-sans ${netPayPercent >= 0 ? 'text-foreground' : 'text-red-500'}`}>{netPayPercent}%</span>
                 </div>
               )}
             </CardContent>
@@ -476,7 +476,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                     />
                   </MapContainer>
                 </div>
-                <p className="text-xs text-muted-foreground mt-1 text-center">Click anywhere on the map to set your office location pin.</p>
+                <p className="text-fluid-xs text-muted-foreground mt-1 text-center">Click anywhere on the map to set your office location pin.</p>
               </div>
             </CardContent>
           </Card>
@@ -808,7 +808,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
             <DialogTitle>Edit Brand Logo</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col items-center gap-6 py-4">
-            <p className="text-sm text-muted-foreground text-center">Drag the image to reposition it, or use the slider below to zoom.</p>
+            <p className="text-fluid-sm text-muted-foreground text-center">Drag the image to reposition it, or use the slider below to zoom.</p>
             <div role="img" aria-label="Logo preview" onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerUp} onPointerCancel={handlePointerUp} onPointerLeave={handlePointerUp}
               className="w-32 h-32 rounded-2xl bg-muted border border-border flex items-center justify-center overflow-hidden relative cursor-grab active:cursor-grabbing touch-none">
               {logo ? <img src={logo} alt="" draggable="false" className="w-full h-full object-cover pointer-events-none" style={{ transform: `scale(${logoZoom}) translate(${logoX}px, ${logoY}px)` }} />

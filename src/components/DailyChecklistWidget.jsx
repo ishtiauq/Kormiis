@@ -35,8 +35,8 @@ export default function DailyChecklistWidget({ notes = [], setNotes, ownerId = '
         {!checklistNote ? (
           <div className="flex-1 flex flex-col items-center justify-center text-center py-6">
             <Icon name="fact_check" size={48} className="text-muted-foreground/30 mb-3" />
-            <p className="text-sm text-muted-foreground font-medium mb-1">No Daily Checklist</p>
-            <p className="text-xs text-muted-foreground/70 max-w-[200px]">Create a Checklist Note and mark it as 'Daily Checklist' to see it here.</p>
+            <p className="text-fluid-sm text-muted-foreground font-medium mb-1">No Daily Checklist</p>
+            <p className="text-fluid-xs text-muted-foreground/70 max-w-[200px]">Create a Checklist Note and mark it as 'Daily Checklist' to see it here.</p>
           </div>
         ) : checklistNote.items?.length === 0 ? (
           <div className="flex-1 flex items-center justify-center text-sm text-muted-foreground">

@@ -307,8 +307,8 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
                 <CardContent className="p-6 flex flex-wrap items-center justify-between gap-4">
                   <div>
                     <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">My Performance Score • {month}</div>
-                    <div className="text-4xl font-black tabular-nums text-foreground mt-1">
-                      {myScore.totalScore ?? myScore.score ?? 0}<span className="text-base text-muted-foreground font-semibold">/100</span>
+                    <div className="text-fluid-display font-black tabular-nums text-foreground mt-1">
+                      {myScore.totalScore ?? myScore.score ?? 0}<span className="text-fluid-sm text-muted-foreground font-semibold">/100</span>
                     </div>
                   </div>
                   <Badge variant="outline" className={`text-base px-4 py-1 font-bold ${gradeTone[myScore.grade] || ''}`}>
@@ -323,27 +323,27 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
                 <CardContent className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-0">
                   <div className="p-4 rounded-xl bg-muted/40 border border-border flex flex-col justify-between">
                     <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">On-Time Attendance</span>
-                    <span className="text-2xl font-black text-emerald-600 mt-2">+{myScore.onTimePoints ?? 0} pts</span>
+                    <span className="text-fluid-2xl font-black text-emerald-600 mt-2">+{myScore.onTimePoints ?? 0} pts</span>
                   </div>
                   <div className="p-4 rounded-xl bg-muted/40 border border-border flex flex-col justify-between">
                     <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Late Penalty</span>
-                    <span className="text-2xl font-black text-rose-600 mt-2">-{myScore.latePenalty ?? 0} pts</span>
+                    <span className="text-fluid-2xl font-black text-rose-600 mt-2">-{myScore.latePenalty ?? 0} pts</span>
                   </div>
                   <div className="p-4 rounded-xl bg-muted/40 border border-border flex flex-col justify-between">
                     <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Absence Penalty</span>
-                    <span className="text-2xl font-black text-rose-600 mt-2">-{myScore.absencePenalty ?? 0} pts</span>
+                    <span className="text-fluid-2xl font-black text-rose-600 mt-2">-{myScore.absencePenalty ?? 0} pts</span>
                   </div>
                   <div className="p-4 rounded-xl bg-muted/40 border border-border flex flex-col justify-between">
                     <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Overtime Deduction</span>
-                    <span className="text-2xl font-black text-amber-600 mt-2">-{myScore.overtimeDeduct ?? 0} pts</span>
+                    <span className="text-fluid-2xl font-black text-amber-600 mt-2">-{myScore.overtimeDeduct ?? 0} pts</span>
                   </div>
                   <div className="p-4 rounded-xl bg-muted/40 border border-border flex flex-col justify-between">
                     <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Leave Utilization</span>
-                    <span className="text-2xl font-black text-emerald-600 mt-2">+{myScore.leaveUtilizationPoints ?? 0} pts</span>
+                    <span className="text-fluid-2xl font-black text-emerald-600 mt-2">+{myScore.leaveUtilizationPoints ?? 0} pts</span>
                   </div>
                   <div className="p-4 rounded-xl bg-muted/40 border border-border flex flex-col justify-between">
                     <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Help Hub Contributions</span>
-                    <span className="text-2xl font-black text-emerald-600 mt-2">+{myScore.gigPoints ?? 0} pts</span>
+                    <span className="text-fluid-2xl font-black text-emerald-600 mt-2">+{myScore.gigPoints ?? 0} pts</span>
                   </div>
                 </CardContent>
               </Card>

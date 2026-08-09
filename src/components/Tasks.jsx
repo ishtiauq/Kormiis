@@ -288,7 +288,7 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
               </div>
               
               <h4 className="font-semibold text-sm sm:text-base mb-1.5 sm:mb-2 leading-tight">{task.title}</h4>
-              <p className="text-xs sm:text-sm text-muted-foreground break-words mb-3 sm:mb-4 flex-1">{task.description}</p>
+              <p className="text-fluid-sm text-muted-foreground break-words mb-3 sm:mb-4 flex-1">{task.description}</p>
               
               <div className="mb-3 sm:mb-4 flex items-center gap-2">
                 <span className="text-xs font-medium text-muted-foreground shrink-0">Status:</span>
@@ -345,7 +345,7 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
           <div className="col-span-full flex flex-col items-center justify-center py-20 text-center border-2 border-dashed border-border rounded-xl">
             <Icon name="check_box" size={48} className="h-12 w-12 text-muted-foreground/30 mb-3" />
             <h3 className="text-lg font-medium text-foreground">No tasks found</h3>
-            <p className="text-sm text-muted-foreground">There are no tasks in '{activeStatusTab}' status.</p>
+            <p className="text-fluid-sm text-muted-foreground">There are no tasks in '{activeStatusTab}' status.</p>
           </div>
         )}
       </div>
@@ -516,7 +516,7 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
                               <span className="text-sm font-semibold">{author?.name || 'Unknown'}</span>
                               <span className="text-xs text-muted-foreground">{new Date(update.timestamp).toLocaleString()}</span>
                             </div>
-                            <p className="text-sm">{update.text}</p>
+                            <p className="text-fluid-sm">{update.text}</p>
                           </div>
                         </div>
                       )

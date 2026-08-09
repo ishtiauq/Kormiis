@@ -260,7 +260,7 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
                           )}
                         </div>
                         {ev.description && (
-                          <p className="text-xs m-0 mt-1.5 text-muted-foreground">{ev.description}</p>
+                          <p className="text-fluid-xs m-0 mt-1.5 text-muted-foreground">{ev.description}</p>
                         )}
                       </div>
                       {!ev.isAuto && (currentUser?.role === 'Admin' || currentUser?.permissions?.includes('approve_leaves')) && (
