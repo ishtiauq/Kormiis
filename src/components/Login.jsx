@@ -468,6 +468,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
   const [spaceName, setSpaceName] = useState('')
   const [showAlreadyInSpace, setShowAlreadyInSpace] = useState(false)
   const [alreadyUser, setAlreadyUser] = useState(null) // signed-in Google user who already belongs to a space
+  const [loadingMode, setLoadingMode] = useState(null) // which login button is signing in ('create' | 'join')
 
   const adminSession = (account) => ({
     id: account.id,
@@ -488,6 +489,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
     recordLoginActivity(user?.uid, user?.uid)
     setTimeout(() => {
       setIsLoading(false)
+      setLoadingMode(null)
       onLogin(adminSession({ id: user?.uid || 'local', name: user?.displayName || 'System Admin', email: user?.email || 'admin@company.com', companyName: companyName || 'Kormiis Ltd.' }))
     }, 300)
   }
@@ -508,6 +510,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
       token: ''
     }
     recordLoginActivity(company.companyUid, user.uid)
+    setLoadingMode(null)
     onLogin(employeeUser)
   }
 
@@ -544,6 +547,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
       } catch (err) {
         setError('Could not join your company: ' + err.message)
         setIsLoading(false)
+        setLoadingMode(null)
       }
       return
     }
@@ -560,11 +564,13 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
     if (mode === 'create') {
       setPendingUser(user)
       setIsLoading(false)
+      setLoadingMode(null)
       return
     }
 
     setError('You are not part of the team yet. Ask your admin to add your email, or create your own Business Space.')
     setIsLoading(false)
+    setLoadingMode(null)
   }
 
   // Someone already linked to a Business Space clicked "Create" — offer to switch to Join.
@@ -572,6 +578,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
     setAlreadyUser(user)
     setShowAlreadyInSpace(true)
     setIsLoading(false)
+    setLoadingMode(null)
   }
 
   const useJoinFromPopup = () => {
@@ -598,6 +605,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
     } catch (err) {
       setError('Could not create your Business Space: ' + err.message)
       setIsLoading(false)
+      setLoadingMode(null)
     }
   }
 
@@ -605,6 +613,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
   const handleFirebaseGoogleLogin = async (mode) => {
     setError('')
     setIsLoading(true)
+    setLoadingMode(mode)
     setLoginMode(mode)
     try {
       // Fast path: Firebase already has a signed-in Google session (persisted
@@ -623,6 +632,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
     } catch (err) {
       setError('Google Login failed: ' + err.message)
       setIsLoading(false)
+      setLoadingMode(null)
     }
   }
 
@@ -640,6 +650,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
         if (!cancelled) {
           setError('Google Login failed: ' + err.message)
           setIsLoading(false)
+          setLoadingMode(null)
         }
       }
     }
@@ -1112,7 +1123,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                           className="w-full flex items-center justify-center gap-3 px-4 py-4 bg-card border border-input rounded-full text-sm font-semibold text-foreground hover:bg-muted/50 transition disabled:opacity-50 shadow-sm"
                         >
                           <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59a14.5 14.5 0 0 1 0-9.18l-7.98-6.19a24.01 24.01 0 0 0 0 21.56l7.98-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-                          {isLoading ? 'Signing in...' : 'Create your business space'}
+                          {loadingMode === 'create' ? 'Signing in...' : 'Create your business space'}
                         </button>
 
                         <div className="flex items-center gap-3 py-1">
@@ -1128,7 +1139,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                           className="w-full flex items-center justify-center gap-3 px-4 py-4 bg-card border border-input rounded-full text-sm font-semibold text-foreground hover:bg-muted/50 transition disabled:opacity-50 shadow-sm"
                         >
                           <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59a14.5 14.5 0 0 1 0-9.18l-7.98-6.19a24.01 24.01 0 0 0 0 21.56l7.98-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-                          {isLoading ? 'Signing in...' : 'Join your business space'}
+                          {loadingMode === 'join' ? 'Signing in...' : 'Join your business space'}
                         </button>
                       </div>
 
