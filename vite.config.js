@@ -10,7 +10,7 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['logo.svg', 'pwa-192x192.jpg', 'pwa-512x512.jpg', 'screenshot-desktop.jpg', 'screenshot-mobile.jpg'],
+      includeAssets: ['Kormiis Monogram Logo.svg', 'Kormiis Monogram 192.png', 'Kormiis Monogram 512.png', 'screenshot-desktop.jpg', 'screenshot-mobile.jpg'],
       devOptions: {
         enabled: true
       },
@@ -24,21 +24,21 @@ export default defineConfig({
         theme_color: '#F8F9FA',
         icons: [
           {
-            src: 'logo.svg',
+            src: 'Kormiis Monogram Logo.svg',
             sizes: '192x192 512x512',
             type: 'image/svg+xml',
             purpose: 'any maskable'
           },
           {
-            src: 'pwa-192x192.jpg',
+            src: 'Kormiis Monogram 192.png',
             sizes: '192x192',
-            type: 'image/jpeg',
+            type: 'image/png',
             purpose: 'any maskable'
           },
           {
-            src: 'pwa-512x512.jpg',
+            src: 'Kormiis Monogram 512.png',
             sizes: '512x512',
-            type: 'image/jpeg',
+            type: 'image/png',
             purpose: 'any maskable'
           }
         ],
