@@ -744,22 +744,30 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
           <motion.div 
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-2 sm:gap-4"
+            className="flex items-center"
           >
-            {deferredPrompt && (
+            <div className="flex items-stretch bg-[#FE4D01] rounded-full shadow-sm overflow-hidden hover:shadow-md transition-shadow">
               <button 
-                onClick={handleInstallClick} 
-                className="flex items-center gap-1.5 text-foreground font-semibold text-sm sm:text-base hover:opacity-70 transition-opacity bg-primary/10 text-primary px-3 sm:px-4 py-2 rounded-full"
+                onClick={scrollToAuth} 
+                className="text-white font-bold text-sm sm:text-base px-5 sm:px-6 py-2.5 hover:bg-black/10 transition-colors flex items-center justify-center"
               >
-                <Icon name="download" size={16} /> <span className="hidden sm:inline">Install App</span><span className="sm:hidden">Install</span>
+                Start for free
               </button>
-            )}
-            <button onClick={scrollToAuth} className="text-foreground font-semibold text-sm sm:text-base hover:opacity-70 transition-opacity bg-transparent px-3 py-2">
-              Log in
-            </button>
-            <button onClick={scrollToAuth} className="bg-[#FE4D01] text-white font-bold text-sm sm:text-base px-5 sm:px-6 py-2.5 rounded-full hover:bg-[#FE4D01]/90 transition-colors shadow-sm">
-              Start for free
-            </button>
+              
+              {deferredPrompt && (
+                <>
+                  <div className="w-px bg-white/20 my-1.5" />
+                  <button 
+                    onClick={handleInstallClick} 
+                    className="flex items-center gap-1.5 text-white font-semibold text-sm sm:text-base px-4 py-2.5 hover:bg-black/10 transition-colors group"
+                    title="Install App"
+                  >
+                    <Icon name="download" size={18} className="group-hover:scale-110 transition-transform" /> 
+                    <span className="hidden sm:inline">Install App</span>
+                  </button>
+                </>
+              )}
+            </div>
           </motion.div>
         </div>
       </header>
