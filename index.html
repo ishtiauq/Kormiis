@@ -22,6 +22,15 @@
         };
       }
     </script>
+    <script>
+      // Capture PWA install prompt as early as possible
+      window.deferredPWAInstallPrompt = null;
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        window.deferredPWAInstallPrompt = e;
+        window.dispatchEvent(new Event('pwa-installable'));
+      });
+    </script>
     <title>Kormiis - Free Google Drive HRM</title>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
   </head>

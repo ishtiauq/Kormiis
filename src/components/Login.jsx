@@ -363,6 +363,49 @@ function FooterSection({ themeMode, logoSrc }) {
 export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode }) {
   const [isLoading, setIsLoading] = useState(false)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+  
+  // PWA Install Prompt State
+  const [deferredPrompt, setDeferredPrompt] = useState(null)
+
+  useEffect(() => {
+    // Check if the event already fired before React mounted
+    if (window.deferredPWAInstallPrompt) {
+      setDeferredPrompt(window.deferredPWAInstallPrompt)
+    }
+
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault()
+      window.deferredPWAInstallPrompt = e
+      setDeferredPrompt(e)
+    }
+
+    const handleCustomEvent = () => {
+      if (window.deferredPWAInstallPrompt) {
+        setDeferredPrompt(window.deferredPWAInstallPrompt)
+      }
+    }
+    
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+    window.addEventListener('pwa-installable', handleCustomEvent)
+    
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+      window.removeEventListener('pwa-installable', handleCustomEvent)
+    }
+  }, [])
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) {
+      alert("App installation is not available right now. You might have already installed it, or your browser may not support it.");
+      return;
+    }
+    deferredPrompt.prompt()
+    const { outcome } = await deferredPrompt.userChoice
+    if (outcome === 'accepted') {
+      setDeferredPrompt(null)
+      window.deferredPWAInstallPrompt = null
+    }
+  }
 
   const scrollToAuth = () => {
     const el = document.getElementById('auth-section');
@@ -703,7 +746,15 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
             animate={{ opacity: 1, x: 0 }}
             className="flex items-center gap-2 sm:gap-4"
           >
-            <button onClick={scrollToAuth} className="text-black font-semibold text-sm sm:text-base hover:opacity-70 transition-opacity bg-transparent px-3 py-2">
+            {deferredPrompt && (
+              <button 
+                onClick={handleInstallClick} 
+                className="flex items-center gap-1.5 text-foreground font-semibold text-sm sm:text-base hover:opacity-70 transition-opacity bg-primary/10 text-primary px-3 sm:px-4 py-2 rounded-full"
+              >
+                <Icon name="download" size={16} /> <span className="hidden sm:inline">Install App</span><span className="sm:hidden">Install</span>
+              </button>
+            )}
+            <button onClick={scrollToAuth} className="text-foreground font-semibold text-sm sm:text-base hover:opacity-70 transition-opacity bg-transparent px-3 py-2">
               Log in
             </button>
             <button onClick={scrollToAuth} className="bg-[#FE4D01] text-white font-bold text-sm sm:text-base px-5 sm:px-6 py-2.5 rounded-full hover:bg-[#FE4D01]/90 transition-colors shadow-sm">
