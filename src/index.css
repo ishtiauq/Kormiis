@@ -466,55 +466,7 @@ button[role="tab"][aria-selected="true"] .msr {
     font-size: clamp(1.75rem, 6.5vw, 2.75rem);
     line-height: 1.05;
   }
-}
-
-/* ==============================================================
-   LOGIN CINEMATIC PAGE — TABLET / IPAD ADAPTATION
-   Enlarges the auth card on tablet-sized screens.
-   ============================================================== */
-@media (min-width: 768px) and (max-width: 1400px) {
-  .login-auth-card {
-    max-width: 350px;
   }
-  .login-auth-card-inner {
-    padding: 3rem 1.75rem 1.75rem;
-  }
-}
-
-
-
-
-
-/* ==============================================================
-   LOGIN CINEMATIC PAGE - INVISIBLE MODAL BOX
-   Wraps the auth card + lanyard ribbon as one unit and scales the
-   whole thing to fit every viewport (no internal scrollbar). The
-   box is always centered; the ribbon keeps a fixed vertical length.
-   ============================================================== */
-.login-modal-box {
-  width: 350px;
-  --modal-fit: min(1, calc(100dvh / 800px), calc(100vw / 350px));
-  transform: scale(var(--modal-fit));
-  transform-origin: center;
-}
-
-/* ==============================================================
-   LOGIN CINEMATIC PAGE - AUTH CARD GLASS EFFECT
-   Provides a near-white liquid glass aesthetic as requested
-   ============================================================== */
-#login-auth-glass-card {
-  --foreground: hsl(210 20% 10%);
-  --muted-foreground: hsl(215 16% 47%);
-  color: var(--foreground) !important;
-  background: hsl(var(--card)) !important;
-  border: 1px solid rgba(0, 0, 0, 0.1) !important;
-}
-.dark #login-auth-glass-card {
-  --foreground: hsl(210 20% 10%);
-  --muted-foreground: hsl(215 16% 47%);
-  color: var(--foreground) !important;
-  background: hsl(var(--card)) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
 /* Toast solid styling */
@@ -529,27 +481,6 @@ button[role="tab"][aria-selected="true"] .msr {
 .dark .toast {
   background: hsl(var(--card)) !important;
   border: 1px solid var(--border) !important;
-}
-
-/* ==============================================================
-   LOGIN CINEMATIC PAGE - AUTH CARD FLUID TYPOGRAPHY
-   clamp() keeps an ideal, readable type scale on every screen.
-   Unlayered rules beat Tailwind's text utilities, so the fixed
-   text-xs / text-sm / text-2xl on the card is replaced fluidly.
-   ============================================================== */
-.login-auth-card h2 {
-  font-size: clamp(1.375rem, 1.25rem + 0.5vw, 1.625rem);
-  line-height: 1.2;
-}
-.login-auth-card label {
-  font-size: clamp(0.6875rem, 0.66rem + 0.15vw, 0.75rem);
-}
-.login-auth-card input {
-  font-size: clamp(0.875rem, 0.82rem + 0.3vw, 1rem);
-}
-.login-auth-card button,
-.login-auth-card p {
-  font-size: clamp(0.8125rem, 0.78rem + 0.25vw, 0.9375rem);
 }
 
 /* ==============================================================
