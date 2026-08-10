@@ -12,7 +12,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['logo.svg', 'Kormiis Monogram Logo 192.png', 'Kormiis Monogram Logo 512.png', 'screenshot-desktop.jpg', 'screenshot-mobile.jpg'],
       devOptions: {
-        enabled: true
+        enabled: false
       },
       workbox: {
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
