@@ -173,30 +173,24 @@ html, body, #root {
     @apply bg-white/10 dark:bg-white/5 backdrop-blur-2xl backdrop-saturate-[1.8] shadow-[inset_0_1px_1px_rgba(255,255,255,0.35),0_4px_12px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.15),0_4px_12px_rgba(0,0,0,0.2)];
   }
 
-  /* Full-width (edge-to-edge) mobile top bar — background matches the app background */
+  /* Dark Liquid Glass — for modals that need white text over any backdrop */
+  .glass-apple-dark {
+    background: rgba(12, 14, 18, 0.6) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(1.8) !important;
+    backdrop-filter: blur(28px) saturate(1.8) !important;
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.15), 0 16px 48px rgba(0, 0, 0, 0.35) !important;
+    color: #ffffff !important;
+  }
+
+  /* Full-width (edge-to-edge) mobile top bar — liquid glass over scrolling content */
   .topbar.topbar-bar {
     border-radius: 0 !important;
     border: none !important;
-    background: var(--background) !important;
-    box-shadow: none !important;
   }
 
   /* Floating pill-shaped bottom bar */
   .bottom-bar.bottom-bar-pill {
     border-radius: 9999px !important;
-  }
-
-  /* Pill-shaped solid tab menu bar */
-  .glass-panel.glass-pill {
-    border-radius: 9999px !important;
-  }
-
-  /* Keep the focus glow inside the pill for inputs nested in a glass pill */
-  .glass-panel.glass-pill input:focus,
-  .glass-panel.glass-pill select:focus,
-  .glass-panel.glass-pill textarea:focus {
-    box-shadow: none !important;
-    border-color: transparent !important;
   }
 
   /* Menu bar — equal-width tabs/buttons sized to the widest item, responsive on all screens */
@@ -450,15 +444,6 @@ button[role="tab"][aria-selected="true"] .msr {
 }
 
 /* ==============================================================
-   LOGIN CINEMATIC PAGE — SUBDIALOG FLUID TYPE
-   Subheading scales smoothly on every screen (~half the headline).
-   ============================================================== */
-.login-sub-dialog-text {
-  font-size: clamp(1.5rem, 1rem + 1.9vw, 2.5rem);
-  line-height: 1.25;
-}
-
-/* ==============================================================
    LOGIN CINEMATIC PAGE — MOBILE SINGLE-LINE HEADLINE
    On phones the full headline ("When EMPLOYEES Win, Business
    Follows.") stays on ONE line no matter the screen width, by
@@ -477,18 +462,9 @@ button[role="tab"][aria-selected="true"] .msr {
    fully inside the viewport on small phones / landscape phones.
    ============================================================== */
 @media (max-height: 640px) {
-  .login-hero-stage { margin-top: -32px; }
   .login-hero-title {
     font-size: clamp(1.75rem, 6.5vw, 2.75rem);
     line-height: 1.05;
-  }
-  .login-sub-dialog {
-    padding-top: 0.75rem;
-    padding-bottom: 0.75rem;
-  }
-  .login-sub-dialog-text {
-    font-size: clamp(0.875rem, 3.25vw, 1.375rem);
-    line-height: 1.3;
   }
 }
 

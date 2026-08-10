@@ -108,41 +108,41 @@ function MarketingSectionOne({ containerRef }) {
   ]
 
   return (
-    <section className="relative w-full py-16 lg:py-32 snap-start flex flex-col items-center">
+    <section className="relative w-full py-12 lg:py-24 snap-start flex flex-col items-center">
       <div className="max-w-full mx-auto w-full flex flex-col items-center justify-center px-4 sm:px-8 shrink-0">
-        <div className="w-full text-center mb-12 sm:mb-20">
+        <div className="w-full text-center mb-10 sm:mb-16">
           <h2 className="text-[clamp(2.5rem,6vw+0.5rem,6rem)] leading-[1.1] font-black tracking-tight mb-4 text-foreground">
             Why Choose <span className="text-[#FE4D01]">Kormiis?</span>
           </h2>
           <p className="text-fluid-xl text-muted-foreground font-medium max-w-3xl mx-auto">
-            Everything a growing team needs â€” without the enterprise price tag or the setup headache.
+            Everything a growing team needs — without the enterprise price tag or the setup headache.
           </p>
         </div>
 
         {/* Uniform Grid (Desktop & Mobile) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 w-full max-w-full pb-32">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 w-full max-w-6xl pb-24">
           {cards.map((card, i) => (
             <div 
               key={i} 
-              className="w-full p-5 sm:p-6 lg:p-8 rounded-2xl bg-card border border-border shadow-sm flex flex-col hover:shadow-md transition-shadow overflow-hidden"
+              className="w-full p-4 sm:p-5 rounded-2xl bg-card border border-border shadow-sm flex flex-col hover:shadow-md transition-shadow overflow-hidden"
             >
               {/* Header */}
-              <div className="flex items-center gap-4 pb-5 border-b border-border">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex shrink-0 items-center justify-center">
-                  <Icon name={card.iconName} size={24}/>
+              <div className="flex items-center gap-3 pb-4 border-b border-border">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex shrink-0 items-center justify-center">
+                  <Icon name={card.iconName} size={20}/>
                 </div>
-                <h3 className="text-lg sm:text-xl font-bold leading-tight break-words text-foreground">{card.title}</h3>
+                <h3 className="text-sm sm:text-base font-bold leading-tight break-words text-foreground">{card.title}</h3>
               </div>
               
               {/* Subheading */}
-              <div className="py-5 border-b border-border">
-                <div className="w-full bg-muted/40 p-4 rounded-xl border border-border/50">
-                  <p className="text-fluid text-muted-foreground leading-relaxed break-words">{card.subtitle}</p>
+              <div className="py-4 border-b border-border">
+                <div className="w-full bg-muted/40 p-3 rounded-xl border border-border/50">
+                  <p className="text-sm text-muted-foreground leading-relaxed break-words">{card.subtitle}</p>
                 </div>
               </div>
 
               {/* Bullet Points */}
-              <div className="w-full flex-1 min-w-0 pt-5">
+              <div className="w-full flex-1 min-w-0 pt-4 [&_ul]:gap-2 [&_li]:gap-2 [&_li]:text-xs sm:[&_li]:text-sm">
                 {card.content}
               </div>
             </div>
@@ -905,7 +905,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
 
       {/* Auth Modal (Triggered by Start for free) */}
       <Dialog open={isAuthModalOpen} onOpenChange={setIsAuthModalOpen}>
-        <DialogContent className="glass-apple border-none p-8 sm:p-10 rounded-[28px] sm:max-w-[420px] overflow-hidden">
+        <DialogContent className="glass-apple-dark border-none p-8 sm:p-10 rounded-[28px] sm:max-w-[420px] overflow-hidden">
           {/* Subtle Glows inside Modal */}
           <div className="absolute -top-10 -left-10 w-40 h-40 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute -bottom-12 -right-12 w-44 h-44 bg-secondary/20 rounded-full blur-3xl pointer-events-none" />
