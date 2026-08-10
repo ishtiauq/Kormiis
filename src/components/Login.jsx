@@ -647,30 +647,23 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
           <motion.div 
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="flex items-center"
+            className="flex items-center gap-2 sm:gap-3"
           >
-            <div className="flex items-stretch bg-white/10 dark:bg-white/5 backdrop-blur-2xl backdrop-saturate-[1.8] border border-white/20 dark:border-white/10 rounded-full overflow-hidden shadow-[inset_0_1px_1px_rgba(255,255,255,0.3),0_4px_12px_rgba(0,0,0,0.05)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.1),0_4px_12px_rgba(0,0,0,0.2)] hover:bg-white/20 dark:hover:bg-white/10 transition-all duration-300">
+            {deferredPrompt && (
               <button 
-                onClick={scrollToAuth} 
-                className="text-foreground font-bold text-sm sm:text-base px-5 sm:px-6 py-2.5 hover:bg-foreground/5 transition-colors flex items-center justify-center"
+                onClick={handleInstallClick} 
+                className="flex items-center justify-center w-10 h-10 text-foreground hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors group"
+                title="Install App"
               >
-                Start for free
+                <Icon name="download" className="group-hover:scale-110 transition-transform" size={18}/> 
               </button>
-              
-              {deferredPrompt && (
-                <>
-                  <div className="w-px bg-foreground/10 my-1.5" />
-                  <button 
-                    onClick={handleInstallClick} 
-                    className="flex items-center gap-1.5 text-foreground font-semibold text-sm sm:text-base px-4 py-2.5 hover:bg-foreground/5 transition-colors group"
-                    title="Install App"
-                  >
-                    <Icon name="download" className="group-hover:scale-110 transition-transform" size={18}/> 
-                    <span className="hidden sm:inline">Install App</span>
-                  </button>
-                </>
-              )}
-            </div>
+            )}
+            <button 
+              onClick={scrollToAuth} 
+              className="bg-primary text-primary-foreground font-bold text-sm sm:text-base px-5 sm:px-6 py-2.5 rounded-full flex items-center justify-center"
+            >
+              Start for free
+            </button>
           </motion.div>
         </div>
       </header>
