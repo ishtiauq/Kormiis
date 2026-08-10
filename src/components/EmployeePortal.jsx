@@ -406,7 +406,7 @@ export default function EmployeePortal({
       {/* Bottom Tab Bar (Mobile) Ã¢â‚¬â€ Floating Pill */}
       {isMobile && (
         <div className={`fixed bottom-0 left-0 right-0 z-40 flex justify-center pointer-events-none px-4 pb-3 sm:pb-4 transition-all duration-300 ${isScrollingDown && !showMobileMenu ? 'translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
-          <nav className="bottom-bar bottom-bar-pill pointer-events-auto w-full max-w-[250px] flex items-center justify-around px-2 h-16 transition-all duration-300 rounded-full bg-white/20 dark:bg-white/5 backdrop-blur-2xl border border-white/40 dark:border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.5),0_8px_32px_rgba(0,0,0,0.12)] text-foreground" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
+          <nav className="bottom-bar bottom-bar-pill pointer-events-auto w-full max-w-[250px] flex items-center justify-around px-2 h-16 transition-all duration-300 rounded-full bg-white/40 dark:bg-white/5 backdrop-blur-2xl border border-white/40 dark:border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.5),0_8px_32px_rgba(0,0,0,0.12)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.5),0_8px_32px_rgba(0,0,0,0.5)] text-foreground" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
             <MobileTabButton
               active={activeTab === 'dashboard'}
               label="Home"
