@@ -630,7 +630,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
       />
 
       <header
-        className="fixed top-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[1400px] z-50 pointer-events-none transition-all duration-300 rounded-full bg-white/10 dark:bg-white/5 backdrop-blur-2xl backdrop-saturate-[1.8] border border-white/20 dark:border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.3),0_4px_12px_rgba(0,0,0,0.05)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.1),0_4px_12px_rgba(0,0,0,0.2)]"
+        className="fixed top-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[1400px] z-50 pointer-events-none transition-all duration-300 rounded-full glass-apple"
       >
         <div className="px-4 sm:px-6 h-16 flex items-center justify-between pointer-events-auto relative z-10">
           <motion.div 
@@ -660,7 +660,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
             )}
             <button 
               onClick={scrollToAuth} 
-              className="bg-primary text-primary-foreground font-bold text-sm sm:text-base px-5 sm:px-6 py-2.5 rounded-full flex items-center justify-center"
+              className="glass-apple !shadow-[inset_0_0_6px_1px_rgba(150,150,150,0.4)] dark:!shadow-[inset_0_0_6px_1px_rgba(150,150,150,0.2)] text-foreground font-bold text-sm sm:text-base px-5 sm:px-6 py-2.5 rounded-full flex items-center justify-center transition-colors hover:bg-white/20 dark:hover:bg-white/10"
             >
               Start for free
             </button>
