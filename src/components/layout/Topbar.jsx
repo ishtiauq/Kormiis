@@ -46,7 +46,7 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
     <>
       {/* Mobile: Liquid Glass Top Bar */}
       {isMobile ? (
-        <header aria-label="Top bar" className="topbar topbar-bar w-full h-14 px-4 flex items-center justify-between text-foreground transition-all duration-300">
+        <header aria-label="Top bar" className="topbar topbar-bar w-full h-14 px-4 flex items-center justify-between bg-white/20 dark:bg-white/5 backdrop-blur-2xl border-b border-white/40 dark:border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.5),0_8px_32px_rgba(0,0,0,0.12)] text-foreground transition-all duration-300">
           <div className="flex items-center shrink-0">
             <img 
               src={isDarkMode ? kormiisLogoDark : kormiisLogo} 
@@ -83,7 +83,7 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
           </div>
         </header>
       ) : (
-        <header aria-label="Top bar" className="topbar w-[98%] min-[400px]:w-[94%] sm:w-[85%] max-w-3xl mx-auto h-14 sm:h-16 px-2 min-[400px]:px-4 flex items-center justify-between rounded-full bg-background text-foreground border border-border shadow-sm transition-all duration-300">
+        <header aria-label="Top bar" className="topbar w-[98%] min-[400px]:w-[94%] sm:w-[85%] max-w-3xl mx-auto h-14 sm:h-16 px-2 min-[400px]:px-4 flex items-center justify-between rounded-full bg-white/20 dark:bg-white/5 backdrop-blur-2xl border border-white/40 dark:border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.5),0_8px_32px_rgba(0,0,0,0.12)] text-foreground transition-all duration-300">
           
           {/* Left Section: Brand Pill */}
           <div className="flex items-center gap-1 min-[400px]:gap-3 sm:gap-4 shrink-0">
