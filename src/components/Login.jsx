@@ -629,12 +629,10 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
         }}
       />
 
-      {/* Transparent Navbar */}
       <header
-        className="fixed top-0 w-full z-50 pointer-events-none bg-transparent"
-        style={{ transform: !showTopbar ? 'translateY(-100%)' : 'translateY(0%)', transition: 'transform 300ms ease' }}
+        className="fixed top-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[1400px] z-50 pointer-events-none transition-all duration-300 rounded-full bg-white/20 dark:bg-white/5 backdrop-blur-2xl border border-white/40 dark:border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.5),0_8px_32px_rgba(0,0,0,0.12)]"
       >
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between pointer-events-auto relative z-10">
+        <div className="px-4 sm:px-6 h-16 flex items-center justify-between pointer-events-auto relative z-10">
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -651,20 +649,20 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
             animate={{ opacity: 1, x: 0 }}
             className="flex items-center"
           >
-            <div className="flex items-stretch bg-[#FE4D01] rounded-full shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+            <div className="flex items-stretch bg-white/20 dark:bg-white/5 backdrop-blur-2xl border border-white/40 dark:border-white/10 rounded-full overflow-hidden shadow-[inset_0_1px_1px_rgba(255,255,255,0.5),0_8px_32px_rgba(0,0,0,0.12)] hover:bg-white/30 dark:hover:bg-white/10 transition-all duration-300">
               <button 
                 onClick={scrollToAuth} 
-                className="text-white font-bold text-sm sm:text-base px-5 sm:px-6 py-2.5 hover:bg-black/10 transition-colors flex items-center justify-center"
+                className="text-foreground font-bold text-sm sm:text-base px-5 sm:px-6 py-2.5 hover:bg-foreground/5 transition-colors flex items-center justify-center"
               >
                 Start for free
               </button>
               
               {deferredPrompt && (
                 <>
-                  <div className="w-px bg-white/20 my-1.5" />
+                  <div className="w-px bg-foreground/10 my-1.5" />
                   <button 
                     onClick={handleInstallClick} 
-                    className="flex items-center gap-1.5 text-white font-semibold text-sm sm:text-base px-4 py-2.5 hover:bg-black/10 transition-colors group"
+                    className="flex items-center gap-1.5 text-foreground font-semibold text-sm sm:text-base px-4 py-2.5 hover:bg-foreground/5 transition-colors group"
                     title="Install App"
                   >
                     <Icon name="download" className="group-hover:scale-110 transition-transform" size={18}/> 
