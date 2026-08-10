@@ -917,7 +917,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
 
 
       {/* Section 7: Auth Modal */}
-      <section id="auth-section" className="relative min-h-dvh w-full bg-black flex items-center justify-center px-4 sm:px-8 lg:px-16 py-12 lg:py-0 snap-start overflow-hidden">
+      <section id="auth-section" className="relative min-h-dvh w-full bg-background flex items-center justify-center px-4 sm:px-8 lg:px-16 py-12 lg:py-0 snap-start overflow-hidden">
         <div className="max-w-[1400px] mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Left Grid: Cloud & Privacy Info */}
           <motion.div 
