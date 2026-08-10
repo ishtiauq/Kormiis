@@ -153,91 +153,6 @@ function MarketingSectionOne({ containerRef }) {
   )
 }
 
-function MarketingSectionTwo() {
-  const mouseX = useMotionValue(0)
-  const mouseY = useMotionValue(0)
-
-  // Hardcore tilt: flip signs so hovering left pushes left side back, and increase angle
-  const rotateX = useTransform(mouseY, [-300, 300], [25, -25])
-  const rotateY = useTransform(mouseX, [-300, 300], [25, -25])
-
-  function handleMouseMove(e) {
-    const rect = e.currentTarget.getBoundingClientRect()
-    mouseX.set(e.clientX - rect.left - rect.width / 2)
-    mouseY.set(e.clientY - rect.top - rect.height / 2)
-  }
-
-  function handleMouseLeave() {
-    mouseX.set(0)
-    mouseY.set(0)
-  }
-
-  return (
-    <section className="w-full bg-black">
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16 items-center">
-        <div className="flex flex-col items-start text-left">
-          <h2 className="text-[clamp(2.5rem,6vw+0.5rem,6rem)] leading-[1.1] font-black tracking-tight mb-4 sm:mb-6">
-            Is it really <span className="text-[#FE4D01]">FREE?</span>
-          </h2>
-          <p className="text-fluid-xl text-white/80 font-medium max-w-2xl tracking-tight">
-            Yes. It's completely free for a limited time. No hidden conditions, no subscriptions, and absolutely no credit/debit card required.
-          </p>
-        </div>
-        
-        {/* Perspective wrapper for 3D pop */}
-        <div style={{ perspective: "1000px" }} className="w-full h-full relative">
-          {/* Subtle Orange Glow Behind the Card */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-5xl h-[120%] max-h-[600px] bg-primary/40 rounded-[100%] blur-[80px] pointer-events-none" />
-          
-          <motion.div 
-            onMouseMove={handleMouseMove}
-            onMouseLeave={handleMouseLeave}
-            style={{ rotateX, rotateY, borderColor: 'rgba(255,255,255,0.1)', transformStyle: "preserve-3d" }}
-            className="relative w-full max-w-4xl mx-auto flex flex-col justify-between overflow-hidden rounded-[2.5rem] bg-zinc-900 border border-zinc-800 text-zinc-50 transition-shadow duration-700 p-8 sm:p-14 aspect-auto md:aspect-[1.65/1] outline-none ring-0"
-          >
-
-          <div className="absolute inset-0 bg-gradient-to-br from-white/15 via-transparent to-black/50 opacity-40 pointer-events-none" />
-
-          {/* Top section: 100% FREE & Logo */}
-          <div className="relative z-10 flex items-center justify-between w-full mb-8 sm:mb-12">
-            <span className="text-fluid-display-xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-gray-100 via-gray-300 to-gray-500 drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] font-sans uppercase">
-              100% FREE
-            </span>
-            {/* Logo / Brand mark */}
-            <div className="flex items-center opacity-90">
-              <img src={kormiisMembershipLogo} alt="Kormiis Logo" className="h-5 sm:h-7 w-auto object-contain drop-shadow-md" />
-            </div>
-          </div>
-
-          {/* Middle section: Main Text */}
-          <div className="relative z-10 flex-1 flex flex-col justify-center">
-            <div className="max-w-2xl w-full flex flex-col">
-              <h2 className="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-[0.1em] font-sans uppercase mb-6 sm:mb-8">
-                <span className="text-transparent bg-clip-text bg-gradient-to-b from-gray-300 via-gray-400 to-gray-600 drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)] block w-full">
-                  MEMBERSHIP
-                </span>
-              </h2>
-            </div>
-          </div>
-
-          {/* Bottom section: Card Details */}
-          <div className="relative z-10 flex items-end justify-between w-full mt-10 sm:mt-12">
-            <div className="flex flex-col items-start">
-              <span className="text-[10px] sm:text-xs text-white/40 tracking-[0.2em] uppercase mb-1">Valid thru</span>
-              <span className="text-base sm:text-xl font-bold tracking-widest text-transparent bg-clip-text bg-gradient-to-b from-gray-300 via-gray-400 to-gray-600 font-sans drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] uppercase">LIMITED TIME</span>
-            </div>
-            
-            <div className="flex flex-col items-end">
-              <span className="text-[10px] sm:text-xs text-white/40 tracking-[0.2em] uppercase mb-1">Tier</span>
-              <span className="text-base sm:text-xl font-bold tracking-widest text-transparent bg-clip-text bg-gradient-to-b from-gray-300 via-gray-400 to-gray-600 font-sans drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] uppercase">ENTERPRISE</span>
-            </div>
-          </div>
-        </motion.div>
-        </div>
-      </div>
-    </section>
-  )
-}
 
 // FAQ content â€” each entry renders as its own split glass card
 const FAQ_ITEMS = [
@@ -319,11 +234,6 @@ function MarketingStackedSections({ containerRef }) {
     <div className="relative w-full z-0">
       <MarketingSectionOne containerRef={containerRef} />
 
-      <div className="relative z-10 w-full min-h-dvh flex flex-col items-center justify-center snap-start bg-black text-white overflow-hidden">
-        <div className="w-full h-full flex items-center justify-center">
-          <MarketingSectionTwo />
-        </div>
-      </div>
     </div>
   )
 }
@@ -333,9 +243,9 @@ function FooterSection({ themeMode, logoSrc }) {
   return (
     <footer className="w-full bg-background pt-12 pb-6 mt-auto shrink-0 snap-start overflow-hidden">
       {/* Top Logo Section - Full Screen Width */}
-      <div className="w-full flex justify-center pb-8 border-b border-border mb-8 px-[10px]">
+      <div className="w-full flex justify-center pb-8 mb-8 px-[10px]">
         <img 
-          src={themeMode === 'dark' ? kormiisLogoDark : logoSrc} 
+          src={kormiisLogo} 
           alt="Kormiis Logo" 
           className="block w-full h-auto object-contain" 
         />
@@ -358,6 +268,7 @@ function FooterSection({ themeMode, logoSrc }) {
 export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode }) {
   const [isLoading, setIsLoading] = useState(false)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
   
   // PWA Install Prompt State
   const [deferredPrompt, setDeferredPrompt] = useState(null)
@@ -402,12 +313,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
     }
   }
 
-  const scrollToAuth = () => {
-    const el = document.getElementById('auth-section');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
-    }
-  }
+
 
   // Auto-typing hero word: Employee -> Team -> Squad -> Crew -> People -> loop
   const ROTATING_WORDS = ['Kormiis', 'Employees', 'Team', 'Squad', 'Crew', 'People']
@@ -695,7 +601,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
   return (
     <div 
       ref={containerRef}
-      className="h-dvh bg-background text-foreground relative overflow-y-auto overflow-x-hidden font-sans scroll-smooth snap-y snap-mandatory transition-colors duration-[1500ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
+      className="force-light-mode h-dvh bg-background text-foreground relative overflow-y-auto overflow-x-hidden font-sans scroll-smooth snap-y snap-mandatory transition-colors duration-[1500ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
     >
       
       {/* Dynamic Warping Ambient Background */}
@@ -710,28 +616,19 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
         />
       </div>
 
-      {/* Dark Mode Subtle Grid Background */}
-      <div 
-        className={`fixed inset-0 pointer-events-none transition-opacity duration-700 ease-in-out z-0 ${themeMode === 'dark' ? 'opacity-100' : 'opacity-0'}`}
-        style={{
-          backgroundImage: 'linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px)',
-          backgroundSize: '40px 40px'
-        }}
-      />
 
-      {/* Transparent Navbar */}
+
       <header
-        className="fixed top-0 w-full z-50 pointer-events-none bg-transparent"
-        style={{ transform: !showTopbar ? 'translateY(-100%)' : 'translateY(0%)', transition: 'transform 300ms ease' }}
+        className="fixed top-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[1400px] z-50 pointer-events-none transition-all duration-300 rounded-full glass-apple"
       >
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between pointer-events-auto relative z-10">
+        <div className="px-4 sm:px-6 h-16 flex items-center justify-between pointer-events-auto relative z-10">
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             className="flex items-center gap-3"
           >
             <img 
-              src={themeMode === 'dark' ? kormiisLogoDark : kormiisLogo} 
+              src={kormiisLogo} 
               alt="Kormiis Logo" 
               className="block h-7 sm:h-9 w-auto max-w-[130px] sm:max-w-[160px] object-contain shrink-0 drop-shadow-sm" 
             />
@@ -739,30 +636,23 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
           <motion.div 
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="flex items-center"
+            className="flex items-center gap-2 sm:gap-3"
           >
-            <div className="flex items-stretch bg-[#FE4D01] rounded-full shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+            {deferredPrompt && (
               <button 
-                onClick={scrollToAuth} 
-                className="text-white font-bold text-sm sm:text-base px-5 sm:px-6 py-2.5 hover:bg-black/10 transition-colors flex items-center justify-center"
+                onClick={handleInstallClick} 
+                className="flex items-center justify-center w-10 h-10 text-foreground hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors group"
+                title="Install App"
               >
-                Start for free
+                <Icon name="download" className="group-hover:scale-110 transition-transform" size={18}/> 
               </button>
-              
-              {deferredPrompt && (
-                <>
-                  <div className="w-px bg-white/20 my-1.5" />
-                  <button 
-                    onClick={handleInstallClick} 
-                    className="flex items-center gap-1.5 text-white font-semibold text-sm sm:text-base px-4 py-2.5 hover:bg-black/10 transition-colors group"
-                    title="Install App"
-                  >
-                    <Icon name="download" className="group-hover:scale-110 transition-transform" size={18}/> 
-                    <span className="hidden sm:inline">Install App</span>
-                  </button>
-                </>
-              )}
-            </div>
+            )}
+            <button 
+              onClick={() => setIsAuthModalOpen(true)} 
+              className="glass-apple text-foreground font-bold text-sm sm:text-base px-5 sm:px-6 py-2.5 rounded-full flex items-center justify-center transition-colors hover:bg-white/20 dark:hover:bg-white/10"
+            >
+              Start for free
+            </button>
           </motion.div>
         </div>
       </header>
@@ -1013,197 +903,97 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
         <MarketingStackedSections containerRef={containerRef} />
       </div>
 
+      {/* Auth Modal (Triggered by Start for free) */}
+      <Dialog open={isAuthModalOpen} onOpenChange={setIsAuthModalOpen}>
+        <DialogContent className="glass-apple border-none p-8 sm:p-10 rounded-[28px] sm:max-w-[420px] overflow-hidden">
+          {/* Subtle Glows inside Modal */}
+          <div className="absolute -top-10 -left-10 w-40 h-40 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-12 -right-12 w-44 h-44 bg-secondary/20 rounded-full blur-3xl pointer-events-none" />
 
+          <DialogHeader className="mb-6 relative z-10">
+            <DialogTitle className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight text-center">
+              Sign in to Kormiis
+            </DialogTitle>
+          </DialogHeader>
 
-      {/* Section 7: Auth Modal */}
-      <section id="auth-section" className="relative min-h-dvh w-full bg-black flex items-center justify-center px-4 sm:px-8 lg:px-16 py-12 lg:py-0 snap-start overflow-hidden">
-        <div className="max-w-[1400px] mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          {/* Left Grid: Cloud & Privacy Info */}
-          <motion.div 
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="flex flex-col text-left z-20 pt-8 lg:pt-0 w-full max-w-[600px] mx-auto lg:mx-0"
-          >
-            <div className="bg-transparent rounded-[2rem] relative overflow-hidden p-8 sm:p-10 lg:p-12">
-              {/* Decorative Background Elements */}
-              <div className="absolute -top-20 -right-20 w-64 h-64 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
-              <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-green-500/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="flex flex-col gap-6 relative z-10">
+            {error && (
+              <div className="p-4 text-sm font-medium bg-red-500/20 border border-red-500/30 text-red-100 rounded-xl flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
+                {error}
+              </div>
+            )}
 
-              <div className="relative z-10">
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FE4D01] text-white font-bold text-sm w-max mb-6 shadow-sm">
-                  <Icon name="security" size={18}/>
-                  100% Data Privacy
-                </div>
-                
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight mb-6">
-                  Your Data, <br className="hidden lg:block"/>
-                  Your <span className="text-primary">Cloud</span>.
-                </h2>
-                
-                <div className="space-y-6 text-white/80 text-base sm:text-lg font-medium">
-                  <p>
-                    We believe your company data belongs to you. That's why Kormiis stores it in your own secure cloud database.
+            {loginMode === 'create' && pendingUser ? (
+              <form onSubmit={handleCreateBusinessSpace} className="flex flex-col gap-4">
+                <div>
+                  <label htmlFor="space-name" className="block text-sm font-semibold text-white mb-1.5">
+                    Business Space Name
+                  </label>
+                  <Input
+                    id="space-name"
+                    value={spaceName}
+                    onChange={(e) => setSpaceName(e.target.value)}
+                    placeholder="e.g. Kormiis Ltd."
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/40 shadow-sm h-12 rounded-xl"
+                    autoFocus
+                  />
+                  <p className="text-[12px] text-white/60 mt-2 leading-relaxed">
+                    This becomes your company profile. You'll be the workspace owner (admin).
                   </p>
-                  
-                  <ul className="space-y-4">
-                    <li className="flex items-start gap-4">
-                      <div className="mt-1 w-7 h-7 rounded-full bg-green-500/20 border border-green-500/30 text-green-600 flex items-center justify-center shrink-0 shadow-sm">
-                        <Icon name="check" size={14}/>
-                      </div>
-                      <span><strong className="text-white">Zero Lock-in:</strong> You have direct access to your data at all times. If you leave, your data stays with you.</span>
-                    </li>
-                    <li className="flex items-start gap-4">
-                      <div className="mt-1 w-7 h-7 rounded-full bg-green-500/20 border border-green-500/30 text-green-600 flex items-center justify-center shrink-0 shadow-sm">
-                        <Icon name="check" size={14}/>
-                      </div>
-                      <span><strong className="text-white">Bank-level Security:</strong> Secured by world-class cloud infrastructure and encryption.</span>
-                    </li>
-                    <li className="flex items-start gap-4">
-                      <div className="mt-1 w-7 h-7 rounded-full bg-green-500/20 border border-green-500/30 text-green-600 flex items-center justify-center shrink-0 shadow-sm">
-                        <Icon name="check" size={14}/>
-                      </div>
-                      <span><strong className="text-white">Private by Design:</strong> Kormiis keeps data isolated and encrypted â€” only you and your team can access it.</span>
-                    </li>
-                  </ul>
-                  
-                  <div className="pt-6 border-t border-border mt-8 flex items-center gap-3">
-                    <Icon name="info" className="text-primary shrink-0" size={20}/>
-                    <p className="text-fluid-sm opacity-90 leading-snug">
-                      By logging in, your attendance, payroll, and tasks sync securely to the cloud automatically.
-                    </p>
-                  </div>
                 </div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Right Grid: Login Modal */}
-          <div className="flex items-center justify-center relative z-10 w-full pt-12 lg:pt-0">
-            <div className="login-modal-box relative w-full flex justify-center">
-                <motion.div
-                  className="login-auth-card relative w-full max-w-[350px] mx-auto shrink-0"
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full flex items-center justify-center gap-3 px-4 py-3.5 bg-primary text-primary-foreground rounded-full text-sm font-bold hover:opacity-90 transition disabled:opacity-50 shadow-sm"
                 >
-                {/* 1. Lanyard Back (Behind Card) */}
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full pointer-events-none z-0">
-                  <div className="absolute bottom-[calc(100%-23px)] left-1/2 -translate-x-1/2 w-[300px] h-[150px] sm:h-[200px] overflow-hidden [mask-image:linear-gradient(to_bottom,transparent_0%,transparent_30%,black_60%,black_100%)] sm:[mask-image:linear-gradient(to_bottom,transparent_0%,transparent_30%,black_70%,black_100%)]">
-                    {/* Back strap (Left) */}
-                    <div className="absolute -bottom-[20px] left-[139px] w-[32px] h-[600px] bg-[#CC3E01] origin-bottom -rotate-[14deg]" />
-                  </div>
+                  {isLoading ? 'Creating...' : 'Create Business Space'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setLoginMode(null); setPendingUser(null); setSpaceName(''); setError('') }}
+                  disabled={isLoading}
+                  className="text-xs text-white/60 hover:text-white transition py-2 font-medium"
+                >
+                  Back to options
+                </button>
+              </form>
+            ) : (
+              <div className="flex flex-col gap-3.5">
+                <button
+                  type="button"
+                  onClick={() => handleFirebaseGoogleLogin('create')}
+                  disabled={isLoading}
+                  className="w-full flex items-center justify-center gap-3 px-4 py-3.5 bg-white/10 border border-white/20 rounded-full text-sm font-bold text-white hover:bg-white/20 transition disabled:opacity-50 shadow-sm"
+                >
+                  <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59a14.5 14.5 0 0 1 0-9.18l-7.98-6.19a24.01 24.01 0 0 0 0 21.56l7.98-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+                  {loadingMode === 'create' ? 'Signing in...' : 'Create your business space'}
+                </button>
+
+                <div className="flex items-center gap-3 py-2">
+                  <div className="h-px flex-1 bg-white/20" />
+                  <span className="text-[11px] text-white/50 font-bold uppercase tracking-wider">or</span>
+                  <div className="h-px flex-1 bg-white/20" />
                 </div>
 
-                {/* 2. Lanyard Front (In front of Card) */}
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full pointer-events-none z-20">
-                  {/* Slot Hole Base (Matches page background to simulate a real hole) */}
-                  <div className="absolute top-[22px] left-1/2 -translate-x-1/2 w-[56px] h-[12px] rounded-full bg-black" />
+                <button
+                  type="button"
+                  onClick={() => handleFirebaseGoogleLogin('join')}
+                  disabled={isLoading}
+                  className="w-full flex items-center justify-center gap-3 px-4 py-3.5 bg-white/10 border border-white/20 rounded-full text-sm font-bold text-white hover:bg-white/20 transition disabled:opacity-50 shadow-sm"
+                >
+                  <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59a14.5 14.5 0 0 1 0-9.18l-7.98-6.19a24.01 24.01 0 0 0 0 21.56l7.98-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+                  {loadingMode === 'join' ? 'Signing in...' : 'Join your business space'}
+                </button>
 
-                  {/* Slot Hole Inner Shadow (Moved BEFORE Front Strap so Front Strap covers its top border) */}
-                  <div className="absolute top-[22px] left-1/2 -translate-x-1/2 w-[56px] h-[12px] rounded-full border border-border/50 shadow-[inset_0_4px_6px_rgba(0,0,0,0.4)] dark:shadow-[inset_0_4px_8px_rgba(0,0,0,0.9)] pointer-events-none" />
-
-                  {/* Front strap (Right) - Pushed 1px down to overlap the hole lip and eliminate the gap */}
-                  <div className="absolute bottom-[calc(100%-23px)] left-1/2 -translate-x-1/2 w-[300px] h-[150px] sm:h-[200px] overflow-hidden [mask-image:linear-gradient(to_bottom,transparent_0%,transparent_30%,black_60%,black_100%)] sm:[mask-image:linear-gradient(to_bottom,transparent_0%,transparent_30%,black_70%,black_100%)]">
-                    <div className="absolute -bottom-[20px] right-[138px] w-[32px] h-[600px] bg-[#FE4D01] origin-bottom rotate-[12deg] shadow-[-6px_0_15px_rgba(0,0,0,0.4)]" />
-                  </div>
-                </div>
-
-                 {/* Card Container */}
-                <div className="bg-background rounded-2xl sm:rounded-[28px] relative z-10 overflow-hidden pt-12 pb-2">
-              
-              {/* Top Glow Effect */}
-              <div className="absolute -top-10 -left-10 w-40 h-40 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
-              <div className="absolute -bottom-12 -right-12 w-44 h-44 bg-secondary/20 rounded-full blur-3xl pointer-events-none" />
-
-              <div className="login-auth-card-inner relative z-10 p-5 pt-10 sm:p-6 sm:pt-11">
-                {/* Title & Subtitle */}
-                <h2 className="text-2xl font-extrabold text-foreground tracking-tight">
-                  Sign in to Kormiis
-                </h2>
-
-                <div className="mt-6">
-                  {error && (
-                    <div className="p-4 mb-5 text-sm font-medium bg-red-500/10 border border-red-500/30 text-red-500 rounded-xl flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
-                      {error}
-                    </div>
-                  )}
-
-                  {loginMode === 'create' && pendingUser ? (
-                    <form onSubmit={handleCreateBusinessSpace} className="flex flex-col gap-3">
-                      <div>
-                        <label htmlFor="space-name" className="block text-xs font-semibold text-foreground mb-1.5">
-                          Business Space Name
-                        </label>
-                        <Input
-                          id="space-name"
-                          value={spaceName}
-                          onChange={(e) => setSpaceName(e.target.value)}
-                          placeholder="e.g. Kormiis Ltd."
-                          className="bg-card border-input"
-                          autoFocus
-                        />
-                        <p className="text-[11px] text-muted-foreground mt-1.5">
-                          This becomes your company profile. You'll be the workspace owner (admin).
-                        </p>
-                      </div>
-                      <button
-                        type="submit"
-                        disabled={isLoading}
-                        className="w-full flex items-center justify-center gap-3 px-4 py-4 bg-primary text-primary-foreground rounded-full text-sm font-semibold hover:opacity-90 transition disabled:opacity-50 shadow-sm"
-                      >
-                        {isLoading ? 'Creating...' : 'Create Business Space'}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => { setLoginMode(null); setPendingUser(null); setSpaceName(''); setError('') }}
-                        disabled={isLoading}
-                        className="text-xs text-muted-foreground hover:text-foreground transition py-1"
-                      >
-                        Back
-                      </button>
-                    </form>
-                  ) : (
-                    <>
-                      <div className="flex flex-col gap-2.5">
-                        <button
-                          type="button"
-                          onClick={() => handleFirebaseGoogleLogin('create')}
-                          disabled={isLoading}
-                          className="w-full flex items-center justify-center gap-3 px-4 py-4 bg-card border border-input rounded-full text-sm font-semibold text-foreground hover:bg-muted/50 transition disabled:opacity-50 shadow-sm"
-                        >
-                          <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59a14.5 14.5 0 0 1 0-9.18l-7.98-6.19a24.01 24.01 0 0 0 0 21.56l7.98-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-                          {loadingMode === 'create' ? 'Signing in...' : 'Create your business space'}
-                        </button>
-
-                        <div className="flex items-center gap-3 py-1">
-                          <div className="h-px flex-1 bg-border" />
-                          <span className="text-xs text-muted-foreground">or</span>
-                          <div className="h-px flex-1 bg-border" />
-                        </div>
-
-                        <button
-                          type="button"
-                          onClick={() => handleFirebaseGoogleLogin('join')}
-                          disabled={isLoading}
-                          className="w-full flex items-center justify-center gap-3 px-4 py-4 bg-card border border-input rounded-full text-sm font-semibold text-foreground hover:bg-muted/50 transition disabled:opacity-50 shadow-sm"
-                        >
-                          <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59a14.5 14.5 0 0 1 0-9.18l-7.98-6.19a24.01 24.01 0 0 0 0 21.56l7.98-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-                          {loadingMode === 'join' ? 'Signing in...' : 'Join your business space'}
-                        </button>
-                      </div>
-
-                      <p className="text-center text-fluid-sm text-muted-foreground mt-5 leading-relaxed">
-                        New here? Create a Business Space to set up your company. Your HR admin adds teammates by email â€” sign in with the same Google account to join your company workspace.
-                      </p>
-                    </>
-                  )}
-                </div>
+                <p className="text-center text-balance text-[13px] text-white/50 mt-4 leading-relaxed">
+                  New? Create a Business Space for your company. Teammates join via email invite and sign in with their Google account.
+                </p>
               </div>
-            </div>
-            </motion.div>
-            </div>
+            )}
           </div>
-        </div>
-      </section>
+        </DialogContent>
+      </Dialog>
 
       {/* Section 8: FAQ */}
       <FaqSection />

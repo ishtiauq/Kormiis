@@ -10,7 +10,7 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['Kormiis Monogram Logo.svg', 'Kormiis Monogram 192.png', 'Kormiis Monogram 512.png', 'screenshot-desktop.jpg', 'screenshot-mobile.jpg'],
+      includeAssets: ['logo.svg', 'Kormiis Monogram Logo 192.png', 'Kormiis Monogram Logo 512.png', 'screenshot-desktop.jpg', 'screenshot-mobile.jpg'],
       devOptions: {
         enabled: true
       },
@@ -20,23 +20,23 @@ export default defineConfig({
       manifest: {
         name: 'Kormiis',
         short_name: 'Kormiis',
-        description: 'Kormiis - Free Google Drive HRM',
+        description: 'Kormiis',
         theme_color: '#F8F9FA',
         icons: [
           {
-            src: 'Kormiis Monogram Logo.svg',
+            src: 'logo.svg',
             sizes: '192x192 512x512',
             type: 'image/svg+xml',
             purpose: 'any maskable'
           },
           {
-            src: 'Kormiis Monogram 192.png',
+            src: 'Kormiis Monogram Logo 192.png',
             sizes: '192x192',
             type: 'image/png',
             purpose: 'any maskable'
           },
           {
-            src: 'Kormiis Monogram 512.png',
+            src: 'Kormiis Monogram Logo 512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any maskable'

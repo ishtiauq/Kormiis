@@ -6,7 +6,7 @@ export default function MobileTabButton({ active, label, onClick, children, badg
       title={label}
       aria-selected={active}
       onClick={onClick}
-      className={`relative flex items-center justify-center border-0 cursor-pointer size-10 sm:size-11 rounded-full transition-all bg-transparent outline-none select-none tap-highlight-transparent ${active ? 'text-background' : 'text-background/60 hover:text-background'} ${className}`}
+      className={`relative flex items-center justify-center border-0 cursor-pointer size-10 sm:size-11 rounded-full transition-all outline-none select-none tap-highlight-transparent ${active ? 'text-foreground font-semibold bg-foreground/10' : 'text-foreground/70 bg-transparent hover:text-foreground hover:bg-foreground/5'} ${className}`}
     >
       {children}
       {badge}
