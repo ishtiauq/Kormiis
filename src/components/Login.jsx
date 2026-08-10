@@ -153,91 +153,6 @@ function MarketingSectionOne({ containerRef }) {
   )
 }
 
-function MarketingSectionTwo() {
-  const mouseX = useMotionValue(0)
-  const mouseY = useMotionValue(0)
-
-  // Hardcore tilt: flip signs so hovering left pushes left side back, and increase angle
-  const rotateX = useTransform(mouseY, [-300, 300], [25, -25])
-  const rotateY = useTransform(mouseX, [-300, 300], [25, -25])
-
-  function handleMouseMove(e) {
-    const rect = e.currentTarget.getBoundingClientRect()
-    mouseX.set(e.clientX - rect.left - rect.width / 2)
-    mouseY.set(e.clientY - rect.top - rect.height / 2)
-  }
-
-  function handleMouseLeave() {
-    mouseX.set(0)
-    mouseY.set(0)
-  }
-
-  return (
-    <section className="w-full bg-black">
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16 items-center">
-        <div className="flex flex-col items-start text-left">
-          <h2 className="text-[clamp(2.5rem,6vw+0.5rem,6rem)] leading-[1.1] font-black tracking-tight mb-4 sm:mb-6">
-            Is it really <span className="text-[#FE4D01]">FREE?</span>
-          </h2>
-          <p className="text-fluid-xl text-white/80 font-medium max-w-2xl tracking-tight">
-            Yes. It's completely free for a limited time. No hidden conditions, no subscriptions, and absolutely no credit/debit card required.
-          </p>
-        </div>
-        
-        {/* Perspective wrapper for 3D pop */}
-        <div style={{ perspective: "1000px" }} className="w-full h-full relative">
-          {/* Subtle Orange Glow Behind the Card */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-5xl h-[120%] max-h-[600px] bg-primary/40 rounded-[100%] blur-[80px] pointer-events-none" />
-          
-          <motion.div 
-            onMouseMove={handleMouseMove}
-            onMouseLeave={handleMouseLeave}
-            style={{ rotateX, rotateY, borderColor: 'rgba(255,255,255,0.1)', transformStyle: "preserve-3d" }}
-            className="relative w-full max-w-4xl mx-auto flex flex-col justify-between overflow-hidden rounded-[2.5rem] bg-zinc-900 border border-zinc-800 text-zinc-50 transition-shadow duration-700 p-8 sm:p-14 aspect-auto md:aspect-[1.65/1] outline-none ring-0"
-          >
-
-          <div className="absolute inset-0 bg-gradient-to-br from-white/15 via-transparent to-black/50 opacity-40 pointer-events-none" />
-
-          {/* Top section: 100% FREE & Logo */}
-          <div className="relative z-10 flex items-center justify-between w-full mb-8 sm:mb-12">
-            <span className="text-fluid-display-xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-gray-100 via-gray-300 to-gray-500 drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] font-sans uppercase">
-              100% FREE
-            </span>
-            {/* Logo / Brand mark */}
-            <div className="flex items-center opacity-90">
-              <img src={kormiisMembershipLogo} alt="Kormiis Logo" className="h-5 sm:h-7 w-auto object-contain drop-shadow-md" />
-            </div>
-          </div>
-
-          {/* Middle section: Main Text */}
-          <div className="relative z-10 flex-1 flex flex-col justify-center">
-            <div className="max-w-2xl w-full flex flex-col">
-              <h2 className="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-[0.1em] font-sans uppercase mb-6 sm:mb-8">
-                <span className="text-transparent bg-clip-text bg-gradient-to-b from-gray-300 via-gray-400 to-gray-600 drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)] block w-full">
-                  MEMBERSHIP
-                </span>
-              </h2>
-            </div>
-          </div>
-
-          {/* Bottom section: Card Details */}
-          <div className="relative z-10 flex items-end justify-between w-full mt-10 sm:mt-12">
-            <div className="flex flex-col items-start">
-              <span className="text-[10px] sm:text-xs text-white/40 tracking-[0.2em] uppercase mb-1">Valid thru</span>
-              <span className="text-base sm:text-xl font-bold tracking-widest text-transparent bg-clip-text bg-gradient-to-b from-gray-300 via-gray-400 to-gray-600 font-sans drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] uppercase">LIMITED TIME</span>
-            </div>
-            
-            <div className="flex flex-col items-end">
-              <span className="text-[10px] sm:text-xs text-white/40 tracking-[0.2em] uppercase mb-1">Tier</span>
-              <span className="text-base sm:text-xl font-bold tracking-widest text-transparent bg-clip-text bg-gradient-to-b from-gray-300 via-gray-400 to-gray-600 font-sans drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] uppercase">ENTERPRISE</span>
-            </div>
-          </div>
-        </motion.div>
-        </div>
-      </div>
-    </section>
-  )
-}
 
 // FAQ content â€” each entry renders as its own split glass card
 const FAQ_ITEMS = [
@@ -319,11 +234,6 @@ function MarketingStackedSections({ containerRef }) {
     <div className="relative w-full z-0">
       <MarketingSectionOne containerRef={containerRef} />
 
-      <div className="relative z-10 w-full min-h-dvh flex flex-col items-center justify-center snap-start bg-black text-white overflow-hidden">
-        <div className="w-full h-full flex items-center justify-center">
-          <MarketingSectionTwo />
-        </div>
-      </div>
     </div>
   )
 }
@@ -1191,8 +1101,8 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                         </button>
                       </div>
 
-                      <p className="text-center text-fluid-sm text-muted-foreground mt-5 leading-relaxed">
-                        New here? Create a Business Space to set up your company. Your HR admin adds teammates by email â€” sign in with the same Google account to join your company workspace.
+                      <p className="text-center text-balance text-fluid-sm text-muted-foreground mt-5 leading-relaxed">
+                        New? Create a Business Space for your company. Teammates join via email invite and sign in with their Google account.
                       </p>
                     </>
                   )}
