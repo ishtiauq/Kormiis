@@ -1,5 +1,6 @@
 import { useState, useRef, useMemo, useEffect } from 'react'
 import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
 import Icon from "@/components/ui/Icon.jsx"
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -561,6 +562,49 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
     addLog('Ledger Updated', `${applyGlobally ? 'Globally updated' : 'Updated'} compensation for ${selectedEmpLog.employee.name}`, 'success')
   }
 
+  const handleDownloadPayrollPDF = () => {
+    if (!entries) return
+    const doc = new jsPDF()
+    
+    doc.setFontSize(18)
+    doc.text('Kormiis - Payroll Detailed Sheet', 14, 22)
+    
+    doc.setFontSize(11)
+    doc.setTextColor(100)
+    doc.text(`Pay Period: ${monthLabel}`, 14, 30)
+
+    const tableColumn = ["Employee", "Role", "Basic", "Allowances", "Deductions", "Net Salary", "Status"]
+    const tableRows = []
+
+    entries.forEach(entry => {
+      const loanDeduction = (entry.status === 'Paid' ? 0 : Math.min(entry.loan?.remaining || 0, entry.loan?.installment || 0))
+      const net = (entry.baseSalary || 0) + (entry.allowance || 0) - (entry.deductions || 0) - (entry.advance || 0) - loanDeduction
+      const totalDeductions = (entry.deductions || 0) + (entry.advance || 0) + loanDeduction
+      
+      const rowData = [
+        entry.employee.name,
+        entry.employee.role || '-',
+        `${currency}${entry.baseSalary.toFixed(2)}`,
+        `${currency}${entry.allowance.toFixed(2)}`,
+        `${currency}${totalDeductions.toFixed(2)}`,
+        `${currency}${net.toFixed(2)}`,
+        entry.status
+      ]
+      tableRows.push(rowData)
+    })
+
+    autoTable(doc, {
+      startY: 35,
+      head: [tableColumn],
+      body: tableRows,
+      theme: 'striped',
+      headStyles: { fillColor: [254, 53, 1] }, 
+      styles: { fontSize: 9, cellPadding: 3 },
+    })
+
+    doc.save(`Payroll_Sheet_${monthLabel.replace(' ', '_')}.pdf`)
+  }
+
   return (
     <div className="animate-fade-in flex flex-col gap-6 w-full pb-10">
       
@@ -573,16 +617,21 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
       </div>
       <div className="border-t border-border border-headline mb-2" />
       
-      <div ref={pickerRef} className="flex gap-2 items-center justify-end">
-        {/* Month dropdown */}
-        <div className="relative w-[140px] h-10">
-          <button onClick={() => { setMonthOpen(!monthOpen); setYearOpen(false) }} className={`flex w-full h-10 items-center justify-between rounded-md border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${monthOpen ? 'ring-2 ring-ring ring-offset-2' : ''}`}>
-            <div className="flex items-center gap-2 overflow-hidden">
-              <Icon name="calendar_month" className="h-4 w-4 shrink-0 text-muted-foreground" size={16}/>
-              <span className="break-words">{monthNames[currentMonth - 1]}</span>
-            </div>
-            <Icon name="keyboard_arrow_down" className={`h-4 w-4 shrink-0 opacity-50 transition-transform ${monthOpen ? 'rotate-180' : ''}`} size={16}/>
-          </button>
+      <div ref={pickerRef} className="flex flex-wrap gap-2 items-center justify-between">
+        <Button variant="outline" size="sm" onClick={handleDownloadPayrollPDF} disabled={!entries} className="rounded-full text-xs font-semibold hover:text-primary hover:border-primary/50 transition-colors shadow-sm">
+          <Icon name="picture_as_pdf" size={16} className="mr-1.5" /> Download Sheet PDF
+        </Button>
+
+        <div className="flex gap-2 items-center">
+          {/* Month dropdown */}
+          <div className="relative w-[140px] h-10">
+            <button onClick={() => { setMonthOpen(!monthOpen); setYearOpen(false) }} className={`flex w-full h-10 items-center justify-between rounded-md border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${monthOpen ? 'ring-2 ring-ring ring-offset-2' : ''}`}>
+              <div className="flex items-center gap-2 overflow-hidden">
+                <Icon name="calendar_month" className="h-4 w-4 shrink-0 text-muted-foreground" size={16}/>
+                <span className="break-words">{monthNames[currentMonth - 1]}</span>
+              </div>
+              <Icon name="keyboard_arrow_down" className={`h-4 w-4 shrink-0 opacity-50 transition-transform ${monthOpen ? 'rotate-180' : ''}`} size={16}/>
+            </button>
           {monthOpen && (
             <div className="absolute top-full left-0 right-0 mt-2 max-h-60 overflow-y-auto z-[100] rounded-md border bg-popover p-1 text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95">
               {monthNames.map((name, i) => (
@@ -610,6 +659,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
               ))}
             </div>
           )}
+        </div>
         </div>
       </div>
 

@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { GlassTimePicker } from './GlassTimePicker.jsx'
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog"
+import { exportDailyAttendancePDF, exportMonthlyAttendancePDF } from '../../utils/pdfExport.js'
 
 const z = (v) => v < 10 ? `0${v}` : `${v}`
 
@@ -79,6 +80,14 @@ export default function DailyLogs({ employees, attendance, setAttendance, addToa
                 </div>
               </div>
             )}
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => exportDailyAttendancePDF(employees, logs, selectedDate)} className="rounded-full text-xs font-semibold hover:text-primary hover:border-primary/50 transition-colors shadow-sm">
+              <Icon name="picture_as_pdf" size={16} className="mr-1.5" /> Daily PDF
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => exportMonthlyAttendancePDF(employees, attendance, calMonth, calYear)} className="rounded-full text-xs font-semibold hover:text-primary hover:border-primary/50 transition-colors shadow-sm">
+              <Icon name="picture_as_pdf" size={16} className="mr-1.5" /> Monthly PDF
+            </Button>
           </div>
         </div>
 
