@@ -633,7 +633,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
 
 
       <header
-        className="fixed top-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[1400px] z-50 pointer-events-none transition-all duration-300 rounded-full glass-apple"
+        className="fixed top-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[1400px] z-50 pointer-events-none transition-all duration-300 rounded-full glass-kormiis"
       >
         <div className="px-4 sm:px-6 h-16 flex items-center justify-between pointer-events-auto relative z-10">
           <motion.div 
@@ -663,7 +663,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
             )}
             <button 
               onClick={() => setIsAuthModalOpen(true)} 
-              className="glass-apple text-foreground font-bold text-sm sm:text-base px-5 sm:px-6 py-2.5 rounded-full flex items-center justify-center transition-colors hover:bg-white/20 dark:hover:bg-white/10"
+              className="glass-kormiis text-foreground font-bold text-sm sm:text-base px-5 sm:px-6 py-2.5 rounded-full flex items-center justify-center transition-colors hover:bg-white/20 dark:hover:bg-white/10"
             >
               Start for free
             </button>
@@ -919,7 +919,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
 
       {/* Auth Modal (Triggered by Start for free) */}
       <Dialog open={isAuthModalOpen} onOpenChange={setIsAuthModalOpen}>
-        <DialogContent overlayClassName="bg-transparent" className="glass-apple-modal border-none p-8 sm:p-10 rounded-[28px] sm:max-w-[420px] overflow-hidden">
+        <DialogContent className="p-8 sm:p-10 sm:max-w-[420px]">
           {/* Subtle Glows inside Modal */}
           <div className="absolute -top-10 -left-10 w-40 h-40 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute -bottom-12 -right-12 w-44 h-44 bg-secondary/10 rounded-full blur-3xl pointer-events-none" />
