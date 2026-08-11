@@ -33,8 +33,8 @@ export function DatePicker({ label, value, onChange, className, required, ...pro
           <Icon name="calendar_month" size={16}/>
         </AriaButton>
       </Group>
-      <AriaPopover className="z-50 animate-in fade-in-0 zoom-in-95 origin-top rounded-2xl border border-border bg-popover text-popover-foreground shadow-2xl p-0 overflow-hidden" offset={8}>
-        <Dialog className="outline-none flex flex-col rounded-2xl p-4 bg-popover text-popover-foreground border-none">
+      <AriaPopover className="z-50 animate-in fade-in-0 zoom-in-95 origin-top rounded-2xl border-none glass-kormiis-modal text-popover-foreground shadow-2xl p-0 overflow-hidden" offset={8}>
+        <Dialog className="outline-none flex flex-col rounded-2xl p-4 bg-transparent text-popover-foreground border-none">
           <Calendar />
         </Dialog>
       </AriaPopover>

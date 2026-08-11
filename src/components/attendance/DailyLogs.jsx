@@ -50,7 +50,7 @@ export default function DailyLogs({ employees, attendance, setAttendance, addToa
             </span>
             {showDatePicker && (
               <div onClick={e => e.stopPropagation()}
-                className="absolute top-full left-0 z-50 w-[280px] p-4 mt-2 rounded-xl border border-border bg-popover text-popover-foreground shadow-2xl">
+                className="absolute top-full left-0 z-50 w-[280px] p-4 mt-2 rounded-2xl border-none glass-kormiis-modal text-popover-foreground shadow-2xl">
                 <div className="flex justify-between items-center mb-3">
                   <Button variant="ghost" size="icon" className="size-8" onClick={() => { if (calMonth === 0) { setCalMonth(11); setCalYear(y => y - 1) } else setCalMonth(m => m - 1) }} aria-label="Previous month">
                     <Icon name="chevron_left" size={16}/>
