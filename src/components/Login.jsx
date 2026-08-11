@@ -650,23 +650,28 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
           <motion.div 
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-2 sm:gap-3"
+            className="flex items-stretch bg-primary text-primary-foreground rounded-full shadow-sm overflow-hidden"
           >
+            <button 
+              onClick={() => setIsAuthModalOpen(true)} 
+              className="font-bold text-sm sm:text-base px-5 sm:px-6 py-2.5 flex items-center justify-center transition-colors hover:bg-white/20"
+            >
+              Start for free
+            </button>
+            {deferredPrompt && (
+              <div className="flex items-center justify-center">
+                <div className="w-px h-6 bg-white/30" />
+              </div>
+            )}
             {deferredPrompt && (
               <button 
                 onClick={handleInstallClick} 
-                className="flex items-center justify-center w-10 h-10 text-foreground hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors group"
+                className="flex items-center justify-center px-3 sm:px-4 transition-colors hover:bg-white/20 group"
                 title="Install App"
               >
                 <Icon name="download" className="group-hover:scale-110 transition-transform" size={18}/> 
               </button>
             )}
-            <button 
-              onClick={() => setIsAuthModalOpen(true)} 
-              className="glass-kormiis text-foreground font-bold text-sm sm:text-base px-5 sm:px-6 py-2.5 rounded-full flex items-center justify-center transition-colors hover:bg-white/20 dark:hover:bg-white/10"
-            >
-              Start for free
-            </button>
           </motion.div>
         </div>
       </header>
