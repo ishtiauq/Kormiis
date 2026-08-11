@@ -17,7 +17,7 @@ const stat = (icon, label, value, tone, view, setCurrentView) => (
 )
 
 export default function HrOverview({ adminUid, currentUser, setCurrentView, addToast }) {
-  const [counts, setCounts] = useState({ highRisk: 'â€”', gigs: 'â€”' })
+  const [counts, setCounts] = useState({ highRisk: '-', gigs: '-' })
 
   const load = useCallback(async () => {
     if (!adminUid) return

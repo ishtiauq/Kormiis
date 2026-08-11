@@ -53,7 +53,7 @@ export default function RosterPlanner({ employees, roster, setRoster, shiftTempl
                 <Icon name="chevron_left" size={15}/>
               </Button>
               <span className="text-xs font-semibold px-2 whitespace-nowrap text-foreground">
-                {formatDateShort(weekDates[0])} â€” {formatDateShort(weekDates[6])}
+                {formatDateShort(weekDates[0])} - {formatDateShort(weekDates[6])}
               </span>
               <Button variant="ghost" size="icon" className="size-7" onClick={goNext} aria-label="Next week">
                 <Icon name="chevron_right" size={15}/>

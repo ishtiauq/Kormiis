@@ -81,7 +81,7 @@ export default function ClockWidget({ employees, attendance, setAttendance, addT
         </div>
 
         <div className="flex items-center gap-2.5 flex-wrap">
-          <Select value={clockEmpId} onChange={setClockEmpId} placeholder="â€” Select employee â€”">
+          <Select value={clockEmpId} onChange={setClockEmpId} placeholder="- Select employee -">
             {employees.map(emp => (
               <SelectItem key={emp.id} id={emp.id}>{emp.name}</SelectItem>
             ))}

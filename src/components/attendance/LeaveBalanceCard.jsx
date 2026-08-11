@@ -82,9 +82,9 @@ export default function LeaveBalanceCard({ employees, balances, leaves = [], set
                                     {empLeaves.slice().reverse().map(l => (
                                       <TableRow key={l.id}>
                                         <TableCell><span className="text-xs text-foreground">{l.leaveType}</span></TableCell>
-                                        <TableCell><span className="text-xs text-muted-foreground">{formatDateShort(l.startDate)} â€” {formatDateShort(l.endDate)}</span></TableCell>
-                                        <TableCell><span className="text-sm font-semibold text-foreground">{l.days || 'â€”'}</span></TableCell>
-                                        <TableCell><span className="text-xs text-muted-foreground block max-w-[200px] break-words">{l.reason || 'â€”'}</span></TableCell>
+                                        <TableCell><span className="text-xs text-muted-foreground">{formatDateShort(l.startDate)} - {formatDateShort(l.endDate)}</span></TableCell>
+                                        <TableCell><span className="text-sm font-semibold text-foreground">{l.days || '-'}</span></TableCell>
+                                        <TableCell><span className="text-xs text-muted-foreground block max-w-[200px] break-words">{l.reason || '-'}</span></TableCell>
                                         <TableCell><Badge variant="outline" className={STATUS_STYLE[l.status] || STATUS_STYLE.Pending}>{l.status}</Badge></TableCell>
                                       </TableRow>
                                     ))}

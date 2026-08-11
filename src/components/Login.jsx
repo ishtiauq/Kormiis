@@ -17,7 +17,7 @@ const MARKETING_PILLARS = [
   {
     icon: 'groups',
     title: 'Attendance that pays itself',
-    desc: 'One-tap clock-in flows straight into automated payroll â€” no re-typing, no errors.'
+    desc: 'One-tap clock-in flows straight into automated payroll - no re-typing, no errors.'
   },
   {
     icon: 'account_balance_wallet',
@@ -27,7 +27,7 @@ const MARKETING_PILLARS = [
   {
     icon: 'forum',
     title: 'Teamwork without the chaos',
-    desc: 'Announcements, events, tasks & documents â€” one home for the whole squad.'
+    desc: 'Announcements, events, tasks & documents - one home for the whole squad.'
   }
 ]
 
@@ -39,9 +39,9 @@ function MarketingSectionOne({ containerRef }) {
       iconName: "touch_app",
       content: (
         <ul className="flex flex-col gap-3 w-full">
-          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-primary shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">Quick tap to clock in & out</span></li>
-          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-primary shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">Live location and time tracking</span></li>
-          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-primary shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">No manual entry for payroll</span></li>
+          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-foreground shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">Quick tap to clock in & out</span></li>
+          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-foreground shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">Live location and time tracking</span></li>
+          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-foreground shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">No manual entry for payroll</span></li>
         </ul>
       )
     },
@@ -51,9 +51,9 @@ function MarketingSectionOne({ containerRef }) {
       iconName: "task_alt",
       content: (
         <ul className="flex flex-col gap-3 w-full">
-          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-primary shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">Assign tasks to team members instantly</span></li>
-          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-primary shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">Track who is doing what in real-time</span></li>
-          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-primary shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">Set clear deadlines & get reminders</span></li>
+          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-foreground shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">Assign tasks to team members instantly</span></li>
+          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-foreground shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">Track who is doing what in real-time</span></li>
+          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-foreground shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">Set clear deadlines & get reminders</span></li>
         </ul>
       )
     },
@@ -63,21 +63,21 @@ function MarketingSectionOne({ containerRef }) {
       iconName: "event_available",
       content: (
         <ul className="flex flex-col gap-3 w-full">
-          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-primary shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">Request time off from your phone</span></li>
-          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-primary shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">Managers can approve with one click</span></li>
-          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-primary shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">Track your remaining leave balance</span></li>
+          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-foreground shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">Request time off from your phone</span></li>
+          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-foreground shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">Managers can approve with one click</span></li>
+          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-foreground shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">Track your remaining leave balance</span></li>
         </ul>
       )
     },
     {
       title: "Works on any device",
-      subtitle: "Desktop, tablet, or mobile â€” Kormiis adapts to wherever you work.",
+      subtitle: "Desktop, tablet, or mobile - Kormiis adapts to wherever you work.",
       iconName: "devices",
       content: (
         <ul className="flex flex-col gap-3 w-full">
-          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-primary shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">Perfect for remote and office teams</span></li>
-          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-primary shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">Nothing to install, just open your browser</span></li>
-          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-primary shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">Always synced across all your devices</span></li>
+          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-foreground shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">Perfect for remote and office teams</span></li>
+          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-foreground shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">Nothing to install, just open your browser</span></li>
+          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-foreground shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">Always synced across all your devices</span></li>
         </ul>
       )
     },
@@ -87,9 +87,9 @@ function MarketingSectionOne({ containerRef }) {
       iconName: "cloud_done",
       content: (
         <ul className="flex flex-col gap-3 w-full">
-          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-primary shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">Data is saved securely to the cloud</span></li>
-          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-primary shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">You own your company data, not us</span></li>
-          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-primary shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">Backed by bank-level cloud security</span></li>
+          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-foreground shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">Data is saved securely to the cloud</span></li>
+          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-foreground shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">You own your company data, not us</span></li>
+          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-foreground shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">Backed by bank-level cloud security</span></li>
         </ul>
       )
     },
@@ -99,9 +99,9 @@ function MarketingSectionOne({ containerRef }) {
       iconName: "money_off",
       content: (
         <ul className="flex flex-col gap-3 w-full">
-          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-primary shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">100% free for your entire team</span></li>
-          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-primary shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">No sneaky per-user license fees</span></li>
-          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-primary shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">Premium features without the premium price</span></li>
+          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-foreground shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">100% free for your entire team</span></li>
+          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-foreground shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">No sneaky per-user license fees</span></li>
+          <li className="flex items-start gap-2.5 text-sm text-muted-foreground"><Icon name="check_circle" className="text-foreground shrink-0 mt-0.5" size={16}/> <span className="flex-1 break-words">Premium features without the premium price</span></li>
         </ul>
       )
     }
@@ -120,29 +120,29 @@ function MarketingSectionOne({ containerRef }) {
         </div>
 
         {/* Uniform Grid (Desktop & Mobile) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 w-full max-w-6xl pb-24">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 w-full max-w-6xl pb-24 mx-auto">
           {cards.map((card, i) => (
             <div 
               key={i} 
               className="w-full p-4 sm:p-5 rounded-2xl bg-card border border-border shadow-sm flex flex-col hover:shadow-md transition-shadow overflow-hidden"
             >
               {/* Header */}
-              <div className="flex items-center gap-3 pb-4 border-b border-border">
+              <div className="flex items-center gap-3 pb-2 border-b border-border">
                 <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex shrink-0 items-center justify-center">
                   <Icon name={card.iconName} size={20}/>
                 </div>
-                <h3 className="text-sm sm:text-base font-bold leading-tight break-words text-foreground">{card.title}</h3>
+                <div className="text-fluid-sm font-bold leading-tight break-words text-foreground">{card.title}</div>
               </div>
               
               {/* Subheading */}
-              <div className="py-4 border-b border-border">
+              <div className="py-3 border-b border-border">
                 <div className="w-full bg-muted/40 p-3 rounded-xl border border-border/50">
                   <p className="text-sm text-muted-foreground leading-relaxed break-words">{card.subtitle}</p>
                 </div>
               </div>
 
               {/* Bullet Points */}
-              <div className="w-full flex-1 min-w-0 pt-4 [&_ul]:gap-2 [&_li]:gap-2 [&_li]:text-xs sm:[&_li]:text-sm">
+              <div className="w-full flex-1 min-w-0 pt-3 [&_ul]:gap-2 [&_li]:gap-2 [&_li]:text-xs sm:[&_li]:text-sm">
                 {card.content}
               </div>
             </div>
@@ -154,19 +154,19 @@ function MarketingSectionOne({ containerRef }) {
 }
 
 
-// FAQ content â€” each entry renders as its own split glass card
+// FAQ content - each entry renders as its own split glass card
 const FAQ_ITEMS = [
   {
     q: 'Can Kormiis read my company data?',
-    a: 'No â€” data is stored in your own secure cloud database with strict access controls; only you and your team decide access.',
+    a: 'No - data is stored in your own secure cloud database with strict access controls; only you and your team decide access.',
   },
   {
     q: "What's the catch if it's free?",
-    a: 'No catch â€” free for a limited time for growing teams; no subscriptions, no card.',
+    a: 'No catch - free for a limited time for growing teams; no subscriptions, no card.',
   },
   {
     q: 'Is Kormiis really free?',
-    a: 'Yes â€” creating a workspace is 100% free. No credit card, no trial clock, no hidden fees. You stay in full control of everything.',
+    a: 'Yes - creating a workspace is 100% free. No credit card, no trial clock, no hidden fees. You stay in full control of everything.',
   },
   {
     q: 'Where is my company data stored?',
@@ -174,7 +174,7 @@ const FAQ_ITEMS = [
   },
   {
     q: 'How do teammates sign in?',
-    a: 'Your HR admin adds teammates by work email. Each teammate signs in with their own Google account and is linked to the company automatically â€” no passwords to remember.',
+    a: 'Your HR admin adds teammates by work email. Each teammate signs in with their own Google account and is linked to the company automatically - no passwords to remember.',
   },
   {
     q: 'Can I use Kormiis on any device?',
@@ -186,7 +186,7 @@ const FAQ_ITEMS = [
   },
 ]
 
-// Final section: FAQ â€” each question is its own split glass card (no single modal)
+// Final section: FAQ - each question is its own split glass card (no single modal)
 function FaqSection() {
   const [open, setOpen] = useState(0)
   return (
@@ -358,7 +358,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
     return () => window.removeEventListener('resize', onResize)
   }, [])
 
-  // Cinematic Scroll Sequence â€” one full-viewport section per step:
+  // Cinematic Scroll Sequence - one full-viewport section per step:
   //   Section 1: Hero heading
   //   Sections 2-6: one subheading popup per section
   //   Section 7: Auth modal
@@ -371,7 +371,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
   const headingOpacity = useTransform(scrollYProgress, [0, 0.05, 0.11], [1, 1, 0])
   const headingY = useTransform(scrollYProgress, [0, 0.05, 0.11], [0, 0, -80])
 
-  // Scroll Indicator â€” fades out as you leave section 1, fades back in on return
+  // Scroll Indicator - fades out as you leave section 1, fades back in on return
   const scrollIndicatorRaw = useTransform(scrollYProgress, [0, 0.03, 0.12], [1, 1, 0])
   const scrollIndicatorOpacity = useSpring(scrollIndicatorRaw, { stiffness: 120, damping: 22, mass: 0.6 })
   
@@ -525,7 +525,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
     setLoadingMode(null)
   }
 
-  // Someone already linked to a Business Space clicked "Create" â€” offer to switch to Join.
+  // Someone already linked to a Business Space clicked "Create" - offer to switch to Join.
   const promptAlreadyInSpace = (user) => {
     setAlreadyUser(user)
     setShowAlreadyInSpace(true)
@@ -574,7 +574,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
       if (!user) {
         const result = await loginWithGoogle()
         if (result.mode === 'redirect') {
-          // Redirecting to Google â€” login continues in getGoogleRedirectResult on return
+          // Redirecting to Google - login continues in getGoogleRedirectResult on return
           sessionStorage.setItem('kormiis_login_mode', mode)
           return
         }

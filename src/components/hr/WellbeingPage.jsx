@@ -169,9 +169,9 @@ export default function WellbeingPage({ adminUid, currentUser, addToast }) {
               const r = risks.find(x => x.id === expanded)
               if (!r) return null
               const breakdown = [
-                { label: 'Mon/Fri sick leave Ãƒâ€” 15', value: r.mondayFridaySickCount, points: r.mondayFridaySickCount * 15 },
-                { label: 'Avg late minutes Ãƒâ€” 2', value: r.averageLateMinutes, points: Math.round(r.averageLateMinutes * 2) },
-                { label: 'Unauthorized absences Ãƒâ€” 20', value: r.unauthorizedAbsenceCount, points: r.unauthorizedAbsenceCount * 20 },
+                { label: 'Mon/Fri sick leave x 15', value: r.mondayFridaySickCount, points: r.mondayFridaySickCount * 15 },
+                { label: 'Avg late minutes x 2', value: r.averageLateMinutes, points: Math.round(r.averageLateMinutes * 2) },
+                { label: 'Unauthorized absences x 20', value: r.unauthorizedAbsenceCount, points: r.unauthorizedAbsenceCount * 20 },
                 { label: 'Login drop > 50%', value: r.loginDropFlag ? 'Yes' : 'No', points: r.loginDropFlag ? 30 : 0 },
               ]
               return (
