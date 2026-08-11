@@ -14,7 +14,7 @@ const DialogOverlay = React.forwardRef(({ className, ...props }, ref) => (
   <AriaModalOverlay
     ref={ref}
     className={cn(
-      "fixed inset-0 z-50 bg-transparent transition-all duration-200 data-[entering]:animate-in data-[entering]:fade-in-0 data-[exiting]:animate-out data-[exiting]:fade-out-0 flex items-center justify-center p-4",
+      "fixed inset-0 z-50 bg-transparent transition-[opacity] duration-200 data-[entering]:animate-in data-[entering]:fade-in-0 data-[exiting]:animate-out data-[exiting]:fade-out-0 flex items-center justify-center p-4",
       className
     )}
     isDismissable={true}
@@ -28,7 +28,7 @@ const DialogContent = React.forwardRef(({ className, overlayClassName, children,
     <AriaModal
       ref={ref}
       className={cn(
-        "w-full max-w-lg max-h-[95vh] flex flex-col overflow-hidden rounded-[28px] border-none glass-kormiis-modal text-popover-foreground transition-all duration-200 data-[entering]:animate-in data-[entering]:zoom-in-95 data-[exiting]:animate-out data-[exiting]:zoom-out-95 p-0",
+        "w-full max-w-lg max-h-[95vh] flex flex-col overflow-hidden rounded-[28px] border-none glass-kormiis-modal text-popover-foreground transition-[transform,opacity] duration-200 will-change-transform data-[entering]:animate-in data-[entering]:zoom-in-95 data-[exiting]:animate-out data-[exiting]:zoom-out-95 p-0",
         className
       )}
       {...props}
