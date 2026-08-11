@@ -54,17 +54,15 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
               className="block h-9 w-auto max-w-[160px] object-contain shrink-0 drop-shadow-sm" 
             />
           </div>
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-0.5 shrink-0">
             {showThemeToggle && (
-              <Button
-                variant="ghost"
-                size="icon"
+              <button
                 onClick={toggleTheme}
                 title={`Theme: ${themeMode}`}
-                className="rounded-full size-10 sm:size-11 text-foreground hover:bg-muted shrink-0"
+                className="rounded-full size-10 sm:size-11 text-foreground !bg-transparent hover:opacity-80 transition-opacity shrink-0 flex items-center justify-center cursor-pointer"
               >
                 {themeMode === 'light' ? <Icon name="light_mode" size={20} /> : <Icon name="dark_mode" size={20} />}
-              </Button>
+              </button>
             )}
             {onProfileClick && (
               <button
@@ -99,7 +97,7 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
           </div>
 
           {/* Right Section: Live Status Badge + Theme Toggle + Notification Trigger */}
-          <div className="flex items-center gap-0.5 min-[400px]:gap-2 sm:gap-3 shrink-0">
+          <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
             
             {/* Flat Live / Offline Status Badge with Shimmer */}
             {isOnline ? (
@@ -119,25 +117,21 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
 
             {/* Theme Toggle Button */}
             {showThemeToggle && (
-              <Button
-                variant="ghost"
-                size="icon"
+              <button
                 onClick={toggleTheme}
                 title={`Theme: ${themeMode}`}
-                className="rounded-full size-8 min-[400px]:size-9 sm:size-10 text-foreground hover:bg-muted shrink-0"
+                className="rounded-full size-8 min-[400px]:size-9 sm:size-10 text-foreground !bg-transparent hover:opacity-80 transition-opacity shrink-0 flex items-center justify-center cursor-pointer"
               >
                 {themeMode === 'light' ? <Icon name="light_mode" size={20} /> : <Icon name="dark_mode" size={20} />}
-              </Button>
+              </button>
             )}
 
             {/* Notifications Button (Desktop) */}
             <div className="relative">
-              <Button
+              <button
                 ref={buttonRef}
-                variant="ghost"
-                size="icon"
                 onClick={() => { setShowNotifications(prev => !prev); markNotificationsRead() }}
-                className="rounded-full size-8 min-[400px]:size-9 sm:size-10 text-foreground hover:bg-muted relative shrink-0"
+                className="rounded-full size-8 min-[400px]:size-9 sm:size-10 text-foreground !bg-transparent hover:opacity-80 transition-opacity relative shrink-0 flex items-center justify-center cursor-pointer"
                 id="notification-trigger"
               >
                 <Icon name="notifications_active" size={20} />
@@ -147,7 +141,7 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
                     <span className="relative inline-flex rounded-full size-3 bg-destructive"></span>
                   </span>
                 )}
-              </Button>
+              </button>
             </div>
 
           </div>
