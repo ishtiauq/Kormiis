@@ -375,7 +375,7 @@ export default function GigBoardPage({ adminUid, currentUser, addToast }) {
                         ) : (
                           gig.hasOffered ? (
                             <Badge variant="secondary" className="px-3 py-1 bg-amber-500/10 text-amber-600 border-amber-500/20 font-bold flex items-center gap-1 rounded-full shrink-0 text-xs">
-                              Ã¢Å“â€¹ Help Offered
+                              ✋ Help Offered
                             </Badge>
                           ) : (
                             <Button size="sm" className="rounded-full px-3.5 h-8 text-xs font-bold shadow-sm flex items-center" onClick={() => offerHelp(gig)}>

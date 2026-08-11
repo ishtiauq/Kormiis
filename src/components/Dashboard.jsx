@@ -248,7 +248,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
       {/* Unified Responsive & Adaptive Dashboard Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3 gap-5 lg:gap-6 items-stretch">
         
-        {/* Widget 4 Ã¢â‚¬â€ Announcements (Span 6) */}
+        {/* Widget 4 — Announcements (Span 6) */}
         {canViewAnnouncements && (
           <DashboardWidget
           id="w4"
@@ -289,7 +289,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
         </DashboardWidget>
         )}
 
-        {/* Widget 2 Ã¢â‚¬â€ Today's Attendance (Span 4) */}
+        {/* Widget 2 — Today's Attendance (Span 4) */}
         {canViewAttendance && (
           <DashboardWidget
           id="w2"
@@ -332,10 +332,10 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
         </DashboardWidget>
         )}
 
-        {/* Widget 4 Ã¢â‚¬â€ Daily Checklist */}
+        {/* Widget 4 — Daily Checklist */}
         <DailyChecklistWidget notes={notes} setNotes={setNotes} ownerId={currentUser?.id || currentUser?.uid || ''} cardClass="" />
 
-        {/* HR Automation Ã¢â‚¬â€ People Insights */}
+        {/* HR Automation — People Insights */}
         <HrOverview adminUid={currentUser?.uid} currentUser={currentUser} setCurrentView={setCurrentView} addToast={addToast} />
 
         {/* PERFORMANCE TRACKER WIDGET */}
@@ -412,7 +412,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
         </DashboardWidget>
       )}
 
-        {/* Widget 8 Ã¢â‚¬â€ Upcoming Milestones (Span 4) */}
+        {/* Widget 8 — Upcoming Milestones (Span 4) */}
         {canViewEmployees && (
           <DashboardWidget
           id="w8"
@@ -500,7 +500,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
           </Card>
         )}
 
-      {/* Widget 6 Ã¢â‚¬â€ Upcoming Events */}
+      {/* Widget 6 — Upcoming Events */}
         {canViewCalendar && (
           <DashboardWidget
           id="w6"
@@ -573,7 +573,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
         </DashboardWidget>
       )}
 
-        {/* Widget 5 Ã¢â‚¬â€ Payroll Summary */}
+        {/* Widget 5 — Payroll Summary */}
         {canViewPayroll && (
           <DashboardWidget
           id="w5"
@@ -610,7 +610,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
         </DashboardWidget>
         )}
 
-        {/* Widget 1 Ã¢â‚¬â€ Employee Directory */}
+        {/* Widget 1 — Employee Directory */}
         {canViewEmployees && (
           <DashboardWidget
           id="w1"

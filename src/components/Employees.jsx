@@ -162,7 +162,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
       // profile). The Firebase sign-in email can't be changed from the client
       // SDK, so an admin edit only updates the directory record here.
       if (newEmail && newEmail !== editingEmployee.email) {
-        addToast('Email updated in the directory. The sign-in email is unchanged Ã¢â‚¬â€ reset it in the Firebase console if needed.', 'warning')
+        addToast('Email updated in the directory. The sign-in email is unchanged — reset it in the Firebase console if needed.', 'warning')
       }
 
       // Update employee list
@@ -200,7 +200,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
         return
       }
 
-      // Invite the teammate by email Ã¢â‚¬â€ they sign in with their own Google account
+      // Invite the teammate by email — they sign in with their own Google account
       let uid = null
       const companyUid = adminUid || currentUser?.uid
       try {
@@ -785,7 +785,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
                     </div>
                   </div>
 
-                  {/* Expand Toggle Ã¢â‚¬â€ always at the bottom of the card */}
+                  {/* Expand Toggle — always at the bottom of the card */}
                   <div className="flex justify-center mt-2">
                     <Button 
                       variant="ghost" 
@@ -1092,10 +1092,6 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
                 <Input type="email" required value={newEmail} onChange={(e) => setNewEmail(e.target.value)} />
               </div>
 
-              <div className="flex flex-col gap-2 rounded-md bg-muted/50 px-3 py-2.5 text-xs text-muted-foreground">
-                The teammate signs in with their own Google account using this email Ã¢â‚¬â€ they are linked to your workspace automatically.
-              </div>
-
               <DatePicker label="Date of Birth" value={newDob} onChange={(e) => setNewDob(e.target.value)} />
 
               <DatePicker label="Joining Date" value={newJoiningDate} onChange={(e) => setNewJoiningDate(e.target.value)} />
@@ -1116,10 +1112,15 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
               </Select>
             </div>
 
-            <DialogFooter className="mt-4 border-t pt-4">
-              <Button type="button" variant="outline" onClick={handleCloseForm}>Cancel</Button>
-              <Button type="submit">{editingEmployee ? 'Save Changes' : 'Create Record'}</Button>
-            </DialogFooter>
+            <div className="mt-4 border-t pt-4">
+              <div className="w-full bg-muted/50 px-3 py-2.5 rounded-md text-[11px] text-muted-foreground text-left leading-relaxed mb-4">
+                The teammate signs in with their own Google account using this email — they are linked to your workspace automatically.
+              </div>
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={handleCloseForm}>Cancel</Button>
+                <Button type="submit">{editingEmployee ? 'Save Changes' : 'Create Record'}</Button>
+              </DialogFooter>
+            </div>
           </form>
         </DialogContent>
       </Dialog>

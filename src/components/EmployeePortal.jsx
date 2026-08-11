@@ -389,7 +389,7 @@ export default function EmployeePortal({
                   <Icon name="check_circle" size={20}/>
                 </div>
                 <p className="text-fluid-sm font-semibold text-foreground">Today's attendance completed</p>
-                <p className="text-fluid-xs text-muted-foreground">In: {punchLog.checkIn} Ã¢â‚¬Â¢ Out: {punchLog.checkOut} Ã¢â‚¬Â¢ {punchLog.hours}h</p>
+                <p className="text-fluid-xs text-muted-foreground">In: {punchLog.checkIn} • Out: {punchLog.checkOut} • {punchLog.hours}h</p>
               </div>
             ) : (
               <Button
@@ -533,7 +533,7 @@ function DashboardView({ currentUser, attendance, setAttendance, addToast, expen
           </div>
           <div className="flex flex-col gap-1 sm:gap-1.5">
             <h1 className="text-fluid-xl font-extrabold tracking-tight m-0 text-foreground">Welcome back, {currentUser.name.split(' ')[0]}!</h1>
-            <p className="m-0 text-fluid font-medium text-muted-foreground">{currentUser.role} Ã¢â‚¬Â¢ {currentUser.department}</p>
+            <p className="m-0 text-fluid font-medium text-muted-foreground">{currentUser.role} • {currentUser.department}</p>
           </div>
         </CardContent>
       </Card>

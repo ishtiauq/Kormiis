@@ -66,6 +66,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
   const [scrollTop, setScrollTop] = useState(0)
 
   const currency = settings?.currency || '$'
+  const pdfCurrency = { '৳': 'BDT', '€': 'EUR', '£': 'GBP', '₹': 'INR', '¥': 'JPY', '$': 'USD' }[currency] || currency
   const structure = settings?.salaryStructure || [
     { id: 'basic', name: 'Basic Salary', percentage: 50, type: 'earning' },
     { id: 'hra', name: 'House Rent Allowance (HRA)', percentage: 25, type: 'earning' },
@@ -378,7 +379,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
     doc.setTextColor(255, 255, 255)
     doc.setFontSize(11)
     doc.setFont('helvetica', 'bold')
-    doc.text('KORMIIS Ã¢â‚¬â€ PAYSLIP RECEIPT', pageW / 2, y + 9, { align: 'center' })
+    doc.text('KORMIIS — PAYSLIP RECEIPT', pageW / 2, y + 9, { align: 'center' })
     y += 22
 
     // Employee info
@@ -415,12 +416,12 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
       const amt = grossVal * (s.percentage / 100)
       earningsTotal += amt
       doc.text(s.name, margin + 4, y)
-      doc.text(`${currency}${amt.toFixed(2)}`, pageW - margin, y, { align: 'right' })
+      doc.text(`${pdfCurrency} ${amt.toFixed(2)}`, pageW - margin, y, { align: 'right' })
       y += 4.5
     })
     doc.setFont('helvetica', 'bold')
     doc.text('Total Earnings', margin + 4, y)
-    doc.text(`${currency}${earningsTotal.toFixed(2)}`, pageW - margin, y, { align: 'right' })
+    doc.text(`${pdfCurrency} ${earningsTotal.toFixed(2)}`, pageW - margin, y, { align: 'right' })
     y += 7
 
     // Deductions table
@@ -434,43 +435,45 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
       const amt = grossVal * (s.percentage / 100)
       deductionsTotal += amt
       doc.text(s.name, margin + 4, y)
-      doc.text(`-${currency}${amt.toFixed(2)}`, pageW - margin, y, { align: 'right' })
+      doc.text(`-${pdfCurrency} ${amt.toFixed(2)}`, pageW - margin, y, { align: 'right' })
       y += 4.5
     })
     if (entry.advance > 0) {
       deductionsTotal += entry.advance
       doc.text('Salary Advance Settlement', margin + 4, y)
-      doc.text(`-${currency}${entry.advance.toFixed(2)}`, pageW - margin, y, { align: 'right' })
+      doc.text(`-${pdfCurrency} ${entry.advance.toFixed(2)}`, pageW - margin, y, { align: 'right' })
       y += 4.5
     }
     if (loanDeduction > 0) {
       deductionsTotal += loanDeduction
       doc.text('Company Loan Installment', margin + 4, y)
-      doc.text(`-${currency}${loanDeduction.toFixed(2)}`, pageW - margin, y, { align: 'right' })
+      doc.text(`-${pdfCurrency} ${loanDeduction.toFixed(2)}`, pageW - margin, y, { align: 'right' })
       y += 4.5
     }
     doc.setFont('helvetica', 'bold')
     doc.text('Total Deductions', margin + 4, y)
-    doc.text(`-${currency}${deductionsTotal.toFixed(2)}`, pageW - margin, y, { align: 'right' })
-    y += 8
-
-    // Separator
-    doc.setDrawColor(200, 200, 200)
-    doc.line(margin, y, pageW - margin, y)
-    y += 6
-
-    // Net payout
-    doc.setFont('helvetica', 'bold')
-    doc.setFontSize(11)
-    doc.text('NET PAYOUT', margin, y)
-    doc.text(`${currency}${net.toFixed(2)}`, pageW - margin, y, { align: 'right' })
+    doc.text(`-${pdfCurrency} ${deductionsTotal.toFixed(2)}`, pageW - margin, y, { align: 'right' })
     y += 7
 
-    doc.setFont('helvetica', 'normal')
+    // Net Salary
+    doc.setFontSize(10)
+    doc.text('NET SALARY', margin, y)
+    const pdfNet = earningsTotal - deductionsTotal
+    doc.text(`${pdfCurrency} ${pdfNet.toFixed(2)}`, pageW - margin, y, { align: 'right' })
+    y += 12
+
+    // Notes
+    doc.setFont('helvetica', 'italic')
     doc.setFontSize(8)
     doc.setTextColor(100, 100, 100)
-    doc.text('Payment Method: Direct Deposit', margin, y); y += 4
-    doc.text('Status: PAID / SUCCESSFUL', margin, y); y += 8
+    doc.text('This is an auto-generated HR document.', margin, y); y += 4
+    if (entry.status === 'Paid') {
+      doc.text(`Status: PAID on ${payDate}`, margin, y); y += 4
+    }
+    if (entry.loan?.remaining > 0) {
+      doc.text(`Loan remaining balance: ${pdfCurrency} ${(entry.loan.remaining - loanDeduction).toFixed(2)}`, margin, y)
+    }
+    y += 8
 
     // Footer
     doc.setDrawColor(200, 200, 200)
@@ -584,10 +587,10 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
       const rowData = [
         entry.employee.name,
         entry.employee.role || '-',
-        `${currency}${entry.baseSalary.toFixed(2)}`,
-        `${currency}${entry.allowance.toFixed(2)}`,
-        `${currency}${totalDeductions.toFixed(2)}`,
-        `${currency}${net.toFixed(2)}`,
+        `${pdfCurrency} ${entry.baseSalary.toFixed(2)}`,
+        `${pdfCurrency} ${entry.allowance.toFixed(2)}`,
+        `${pdfCurrency} ${totalDeductions.toFixed(2)}`,
+        `${pdfCurrency} ${net.toFixed(2)}`,
         entry.status
       ]
       tableRows.push(rowData)
