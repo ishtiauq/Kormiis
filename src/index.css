@@ -170,26 +170,26 @@ html, body, #root {
 @layer components {
   /* Apple-style True Liquid Glass */
   .glass-apple {
-    @apply bg-white/10 dark:bg-white/5 backdrop-blur-2xl backdrop-saturate-[1.8] shadow-[inset_0_1px_1px_rgba(255,255,255,0.35),0_4px_12px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.15),0_4px_12px_rgba(0,0,0,0.2)];
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(40px) saturate(1.8) !important;
+    -webkit-backdrop-filter: blur(40px) saturate(1.8) !important;
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.35), 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  }
+  .dark .glass-apple {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.15), 0 4px 12px rgba(0, 0, 0, 0.2) !important;
   }
 
-  /* Dark Liquid Glass — for modals that need white text over any backdrop */
-  .glass-apple-dark {
-    background: rgba(12, 14, 18, 0.6) !important;
-    -webkit-backdrop-filter: blur(28px) saturate(1.8) !important;
-    backdrop-filter: blur(28px) saturate(1.8) !important;
-    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.15), 0 16px 48px rgba(0, 0, 0, 0.35) !important;
-    color: #ffffff !important;
+  /* Glass Apple for Modals (More opacity, larger drop shadow, same inner border) */
+  .glass-apple-modal {
+    background-color: rgba(255, 255, 255, 0.2) !important;
+    backdrop-filter: blur(40px) saturate(1.8) !important;
+    -webkit-backdrop-filter: blur(40px) saturate(1.8) !important;
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.35), 0 16px 48px rgba(0, 0, 0, 0.25) !important;
   }
-
-  /* White Liquid Glass — frosted white modals over the landing page */
-  .glass-apple-white {
-    background: rgba(255, 255, 255, 0.78) !important;
-    -webkit-backdrop-filter: blur(28px) saturate(1.8) !important;
-    backdrop-filter: blur(28px) saturate(1.8) !important;
-    border: 1px solid rgba(255, 255, 255, 0.7) !important;
-    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.9), 0 16px 48px rgba(0, 0, 0, 0.14) !important;
-    color: #141414 !important;
+  .dark .glass-apple-modal {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.15), 0 16px 48px rgba(0, 0, 0, 0.4) !important;
   }
 
   /* Full-width (edge-to-edge) mobile top bar — liquid glass over scrolling content */

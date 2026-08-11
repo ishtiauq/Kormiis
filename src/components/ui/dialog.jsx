@@ -33,7 +33,6 @@ const DialogContent = React.forwardRef(({ className, overlayClassName, children,
       )}
       {...props}
     >
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-500 via-rose-500 to-primary z-10" />
       <AriaDialog className="outline-none focus:outline-none flex flex-col w-full h-full p-6 sm:p-8 overflow-y-auto">
         {children}
       </AriaDialog>

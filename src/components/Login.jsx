@@ -919,7 +919,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
 
       {/* Auth Modal (Triggered by Start for free) */}
       <Dialog open={isAuthModalOpen} onOpenChange={setIsAuthModalOpen}>
-        <DialogContent overlayClassName="bg-transparent" className="glass-apple-white border-none p-8 sm:p-10 rounded-[28px] sm:max-w-[420px] overflow-hidden">
+        <DialogContent overlayClassName="bg-transparent" className="glass-apple-modal border-none p-8 sm:p-10 rounded-[28px] sm:max-w-[420px] overflow-hidden">
           {/* Subtle Glows inside Modal */}
           <div className="absolute -top-10 -left-10 w-40 h-40 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute -bottom-12 -right-12 w-44 h-44 bg-secondary/10 rounded-full blur-3xl pointer-events-none" />
