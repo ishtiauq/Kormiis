@@ -21,7 +21,10 @@ const Select = React.forwardRef(({ className, label, error, placeholder, childre
         </SelectValue>
         <Icon name="keyboard_arrow_down" className="shrink-0 text-muted-foreground opacity-50" size={16}/>
       </AriaButton>
-      <AriaPopover className="z-50 w-[--trigger-width] rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md">
+      <AriaPopover 
+        UNSTABLE_portalContainer={typeof window !== 'undefined' ? document.body : undefined}
+        className="z-[9999] w-[--trigger-width] rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md"
+      >
         <AriaListBox className="outline-none max-h-60 overflow-y-auto">
           {children}
         </AriaListBox>

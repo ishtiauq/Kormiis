@@ -570,13 +570,13 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
     const doc = new jsPDF()
     
     doc.setFontSize(18)
-    doc.text('Kormiis - Payroll Detailed Sheet', 14, 22)
+    doc.text('Payroll Sheet', 14, 22)
     
     doc.setFontSize(11)
     doc.setTextColor(100)
     doc.text(`Pay Period: ${monthLabel}`, 14, 30)
 
-    const tableColumn = ["Employee", "Role", "Basic", "Allowances", "Deductions", "Net Salary", "Status"]
+    const tableColumn = ["Employee", "Job Title", "Basic", "Allowances", "Deductions", "Net Salary", "Status"]
     const tableRows = []
 
     entries.forEach(entry => {
@@ -586,7 +586,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
       
       const rowData = [
         entry.employee.name,
-        entry.employee.role || '-',
+        entry.employee.designation || entry.employee.role || '-',
         `${pdfCurrency} ${entry.baseSalary.toFixed(2)}`,
         `${pdfCurrency} ${entry.allowance.toFixed(2)}`,
         `${pdfCurrency} ${totalDeductions.toFixed(2)}`,
@@ -603,6 +603,38 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
       theme: 'striped',
       headStyles: { fillColor: [254, 53, 1] }, 
       styles: { fontSize: 9, cellPadding: 3 },
+      didDrawPage: (data) => {
+        if (settings?.company?.logo) {
+          try {
+            const pageW = doc.internal.pageSize.getWidth()
+            const pageH = doc.internal.pageSize.getHeight()
+            
+            let format = 'PNG'
+            if (settings.company.logo.startsWith('data:image/jpeg')) format = 'JPEG'
+            else if (settings.company.logo.startsWith('data:image/webp')) format = 'WEBP'
+            
+            let imgW = 35
+            let imgH = 15
+            try {
+              const props = doc.getImageProperties(settings.company.logo)
+              if (props && props.width && props.height) {
+                const maxW = 35; const maxH = 15;
+                imgW = props.width; imgH = props.height;
+                if (imgW > maxW) { imgH = (imgH * maxW) / imgW; imgW = maxW; }
+                if (imgH > maxH) { imgW = (imgW * maxH) / imgH; imgH = maxH; }
+              }
+            } catch (err) {
+              console.warn("Could not get image properties, using default dimensions")
+            }
+            
+            const x = (pageW - imgW) / 2
+            const y = pageH - 8 - imgH
+            doc.addImage(settings.company.logo, format, x, y, imgW, imgH)
+          } catch (e) {
+            console.error("Failed to add logo:", e)
+          }
+        }
+      }
     })
 
     doc.save(`Payroll_Sheet_${monthLabel.replace(' ', '_')}.pdf`)

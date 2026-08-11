@@ -37,9 +37,9 @@ export default function DailyLogs({ employees, attendance, setAttendance, addToa
   }
 
   return (
-    <Card className="border-border/50 shadow-sm rounded-2xl overflow-hidden bg-card">
+    <Card className="border-border/50 shadow-sm rounded-2xl overflow-visible bg-card">
       <CardContent className="p-0">
-        <div className="bg-muted/30 border-b border-border p-4 sm:p-5 flex justify-between items-center flex-wrap gap-4">
+        <div className="bg-muted/30 border-b border-border p-4 sm:p-5 flex justify-between items-center flex-wrap gap-4 rounded-t-2xl">
           <div className="flex items-center gap-3 relative">
             <Button variant="outline" className="rounded-full bg-background shadow-sm h-10 px-5 border-border/50 hover:border-primary/50" onClick={(e) => { e.stopPropagation(); setShowDatePicker(v => !v); setCalYear(selYear); setCalMonth(selMonth) }}>
               {new Date(selectedDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
@@ -91,7 +91,7 @@ export default function DailyLogs({ employees, attendance, setAttendance, addToa
           </div>
         </div>
 
-        <div className="flex flex-col max-h-[550px] overflow-y-auto no-scrollbar">
+        <div className="flex flex-col">
           {employees.map((emp, idx) => {
             const log = logs[emp.id] || { status: 'Absent', checkIn: '--', checkOut: '--', hours: '0.0' }
             const ps = PILL_STYLES[log.status] || PILL_STYLES.Absent
