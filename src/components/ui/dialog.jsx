@@ -23,8 +23,8 @@ const DialogOverlay = React.forwardRef(({ className, ...props }, ref) => (
 ))
 DialogOverlay.displayName = "DialogOverlay"
 
-const DialogContent = React.forwardRef(({ className, children, ...props }, ref) => (
-  <DialogOverlay>
+const DialogContent = React.forwardRef(({ className, overlayClassName, children, ...props }, ref) => (
+  <DialogOverlay className={overlayClassName}>
     <AriaModal
       ref={ref}
       className={cn(

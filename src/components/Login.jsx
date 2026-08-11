@@ -385,8 +385,22 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
   const orb2Y = useTransform(scrollYProgress, [0, 0.15, 0.55], ["0%", "0%", "-60%"])
 
   // Scroll-based Theme Switching
+  // The landing page is always light: temporarily strip the dark class (and any
+  // dark data-theme) so every section AND the portaled sign-in modal render
+  // light, then restore the user's stored webapp theme on unmount.
   useEffect(() => {
-    setThemeMode('light') // Force light mode on initial load
+    const root = document.documentElement
+    const hadDark = root.classList.contains('dark')
+    root.classList.remove('dark')
+    root.setAttribute('data-theme', 'light')
+    return () => {
+      if (hadDark) {
+        root.classList.add('dark')
+        root.setAttribute('data-theme', 'dark')
+      } else {
+        root.setAttribute('data-theme', 'light')
+      }
+    }
   }, [])
 
 
@@ -905,20 +919,20 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
 
       {/* Auth Modal (Triggered by Start for free) */}
       <Dialog open={isAuthModalOpen} onOpenChange={setIsAuthModalOpen}>
-        <DialogContent className="glass-apple-dark border-none p-8 sm:p-10 rounded-[28px] sm:max-w-[420px] overflow-hidden">
+        <DialogContent overlayClassName="bg-transparent" className="glass-apple-white border-none p-8 sm:p-10 rounded-[28px] sm:max-w-[420px] overflow-hidden">
           {/* Subtle Glows inside Modal */}
-          <div className="absolute -top-10 -left-10 w-40 h-40 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-12 -right-12 w-44 h-44 bg-secondary/20 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -top-10 -left-10 w-40 h-40 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-12 -right-12 w-44 h-44 bg-secondary/10 rounded-full blur-3xl pointer-events-none" />
 
           <DialogHeader className="mb-6 relative z-10">
-            <DialogTitle className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight text-center">
+            <DialogTitle className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight text-center">
               Sign in to Kormiis
             </DialogTitle>
           </DialogHeader>
 
           <div className="flex flex-col gap-6 relative z-10">
             {error && (
-              <div className="p-4 text-sm font-medium bg-red-500/20 border border-red-500/30 text-red-100 rounded-xl flex items-center gap-2">
+              <div className="p-4 text-sm font-medium bg-red-500/10 border border-red-500/20 text-red-700 rounded-xl flex items-center gap-2 backdrop-blur-md">
                 <div className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
                 {error}
               </div>
@@ -927,7 +941,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
             {loginMode === 'create' && pendingUser ? (
               <form onSubmit={handleCreateBusinessSpace} className="flex flex-col gap-4">
                 <div>
-                  <label htmlFor="space-name" className="block text-sm font-semibold text-white mb-1.5">
+                  <label htmlFor="space-name" className="block text-sm font-semibold text-foreground mb-1.5">
                     Business Space Name
                   </label>
                   <Input
@@ -935,10 +949,10 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                     value={spaceName}
                     onChange={(e) => setSpaceName(e.target.value)}
                     placeholder="e.g. Kormiis Ltd."
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/40 shadow-sm h-12 rounded-xl"
+                    className="bg-white/50 border-white/40 text-foreground placeholder:text-foreground/40 shadow-sm h-12 rounded-xl backdrop-blur-md"
                     autoFocus
                   />
-                  <p className="text-[12px] text-white/60 mt-2 leading-relaxed">
+                  <p className="text-[12px] text-muted-foreground mt-2 leading-relaxed">
                     This becomes your company profile. You'll be the workspace owner (admin).
                   </p>
                 </div>
@@ -953,7 +967,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                   type="button"
                   onClick={() => { setLoginMode(null); setPendingUser(null); setSpaceName(''); setError('') }}
                   disabled={isLoading}
-                  className="text-xs text-white/60 hover:text-white transition py-2 font-medium"
+                  className="text-xs text-muted-foreground hover:text-foreground transition py-2 font-medium"
                 >
                   Back to options
                 </button>
@@ -964,29 +978,29 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                   type="button"
                   onClick={() => handleFirebaseGoogleLogin('create')}
                   disabled={isLoading}
-                  className="w-full flex items-center justify-center gap-3 px-4 py-3.5 bg-white/10 border border-white/20 rounded-full text-sm font-bold text-white hover:bg-white/20 transition disabled:opacity-50 shadow-sm"
+                  className="w-full flex items-center justify-center gap-3 px-4 py-3.5 bg-white/50 border border-white/40 rounded-full text-sm font-bold text-foreground hover:bg-white/70 transition disabled:opacity-50 shadow-sm backdrop-blur-md"
                 >
                   <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59a14.5 14.5 0 0 1 0-9.18l-7.98-6.19a24.01 24.01 0 0 0 0 21.56l7.98-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
                   {loadingMode === 'create' ? 'Signing in...' : 'Create your business space'}
                 </button>
 
                 <div className="flex items-center gap-3 py-2">
-                  <div className="h-px flex-1 bg-white/20" />
-                  <span className="text-[11px] text-white/50 font-bold uppercase tracking-wider">or</span>
-                  <div className="h-px flex-1 bg-white/20" />
+                  <div className="h-px flex-1 bg-foreground/10" />
+                  <span className="text-[11px] text-foreground/50 font-bold uppercase tracking-wider">or</span>
+                  <div className="h-px flex-1 bg-foreground/10" />
                 </div>
 
                 <button
                   type="button"
                   onClick={() => handleFirebaseGoogleLogin('join')}
                   disabled={isLoading}
-                  className="w-full flex items-center justify-center gap-3 px-4 py-3.5 bg-white/10 border border-white/20 rounded-full text-sm font-bold text-white hover:bg-white/20 transition disabled:opacity-50 shadow-sm"
+                  className="w-full flex items-center justify-center gap-3 px-4 py-3.5 bg-white/50 border border-white/40 rounded-full text-sm font-bold text-foreground hover:bg-white/70 transition disabled:opacity-50 shadow-sm backdrop-blur-md"
                 >
                   <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59a14.5 14.5 0 0 1 0-9.18l-7.98-6.19a24.01 24.01 0 0 0 0 21.56l7.98-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
                   {loadingMode === 'join' ? 'Signing in...' : 'Join your business space'}
                 </button>
 
-                <p className="text-center text-balance text-[13px] text-white/50 mt-4 leading-relaxed">
+                <p className="text-center text-balance text-[13px] text-foreground/50 mt-4 leading-relaxed">
                   New? Create a Business Space for your company. Teammates join via email invite and sign in with their Google account.
                 </p>
               </div>

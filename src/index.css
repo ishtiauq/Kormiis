@@ -182,6 +182,16 @@ html, body, #root {
     color: #ffffff !important;
   }
 
+  /* White Liquid Glass — frosted white modals over the landing page */
+  .glass-apple-white {
+    background: rgba(255, 255, 255, 0.78) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(1.8) !important;
+    backdrop-filter: blur(28px) saturate(1.8) !important;
+    border: 1px solid rgba(255, 255, 255, 0.7) !important;
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.9), 0 16px 48px rgba(0, 0, 0, 0.14) !important;
+    color: #141414 !important;
+  }
+
   /* Full-width (edge-to-edge) mobile top bar — liquid glass over scrolling content */
   .topbar.topbar-bar {
     border-radius: 0 !important;
