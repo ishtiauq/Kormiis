@@ -416,6 +416,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
 
   // --- Two-path login: create a Business Space vs join an existing one ---
   const [loginMode, setLoginMode] = useState(null) // null | 'create' | 'join'
+  const [authTab, setAuthTab] = useState('up') // 'up' (Sign up) | 'in' (Sign in)
   const [pendingUser, setPendingUser] = useState(null) // Google user awaiting business space creation
   const [spaceName, setSpaceName] = useState('')
   const [showAlreadyInSpace, setShowAlreadyInSpace] = useState(false)
@@ -531,6 +532,15 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
     setShowAlreadyInSpace(true)
     setIsLoading(false)
     setLoadingMode(null)
+  }
+
+  // Switch between the Sign in / Sign up tabs and reset the create form state.
+  const switchAuthTab = (tab) => {
+    setAuthTab(tab)
+    setLoginMode(null)
+    setPendingUser(null)
+    setSpaceName('')
+    setError('')
   }
 
   const useJoinFromPopup = () => {
@@ -653,7 +663,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
             className="flex items-stretch bg-primary text-primary-foreground rounded-full shadow-sm overflow-hidden"
           >
             <button 
-              onClick={() => setIsAuthModalOpen(true)} 
+              onClick={() => { setAuthTab('up'); setIsAuthModalOpen(true) }} 
               className="font-bold text-sm sm:text-base px-5 sm:px-6 py-2.5 flex items-center justify-center transition-colors hover:bg-white/20"
             >
               Start for free
@@ -940,6 +950,25 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
             </div>
           </DialogHeader>
 
+          <div className="relative z-10 flex items-center gap-1 p-1 rounded-full bg-muted/60 border border-border/60 mb-6">
+            <button
+              type="button"
+              onClick={() => switchAuthTab('in')}
+              aria-selected={authTab === 'in'}
+              className={`flex-1 rounded-full px-4 py-2 text-sm font-semibold transition-all ${authTab === 'in' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+            >
+              Sign in
+            </button>
+            <button
+              type="button"
+              onClick={() => switchAuthTab('up')}
+              aria-selected={authTab === 'up'}
+              className={`flex-1 rounded-full px-4 py-2 text-sm font-semibold transition-all ${authTab === 'up' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+            >
+              Sign up
+            </button>
+          </div>
+
           <div className="flex flex-col gap-6 relative z-10">
             {error && (
               <div className="p-4 text-sm font-medium bg-red-500/10 border border-red-500/20 text-red-700 rounded-xl flex items-center gap-2 backdrop-blur-md">
@@ -982,7 +1011,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                   Back to options
                 </button>
               </form>
-            ) : (
+            ) : authTab === 'in' ? (
               <div className="flex flex-col gap-3.5">
                 <button
                   type="button"
@@ -994,6 +1023,12 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                   <span className="whitespace-nowrap">{loadingMode === 'join' ? 'Signing in...' : 'Join your business space'}</span>
                 </button>
 
+                <p className="text-center text-balance text-[13px] text-[#000000] mt-4 leading-relaxed">
+                  Already invited? Sign in to your company's Business Space with the Google account your admin added by email.
+                </p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3.5">
                 <button
                   type="button"
                   onClick={() => handleFirebaseGoogleLogin('create')}
