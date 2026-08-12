@@ -206,6 +206,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
       try {
         const result = await provisionEmployeeAccount({
           email: newEmail,
+          password: newPassword,
           name: newName,
           role: newRole,
           companyUid,
@@ -1088,9 +1089,16 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
               </div>
 
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium">Email Address</label>
-                <Input type="email" required value={newEmail} onChange={(e) => setNewEmail(e.target.value)} />
+                <label className="text-sm font-medium">Email or Phone Number</label>
+                <Input type="text" required value={newEmail} onChange={(e) => setNewEmail(e.target.value)} />
               </div>
+
+              {!editingEmployee && (
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-medium">Temporary Password</label>
+                  <Input type="password" required value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
+                </div>
+              )}
 
               <DatePicker label="Date of Birth" value={newDob} onChange={(e) => setNewDob(e.target.value)} />
 
@@ -1114,7 +1122,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
 
             <div className="mt-4 border-t pt-4">
               <div className="w-full bg-muted/50 px-3 py-2.5 rounded-md text-[11px] text-muted-foreground text-left leading-relaxed mb-4">
-                The teammate signs in with their own Google account using this email — they are linked to your workspace automatically.
+                The teammate signs in with this identifier and password, or their Google account.
               </div>
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={handleCloseForm}>Cancel</Button>

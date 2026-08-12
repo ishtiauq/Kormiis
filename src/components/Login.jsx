@@ -5,7 +5,7 @@ import kormiisLogo from '../Assets/Kormiis Logo Final.svg'
 import kormiisLogoDark from '../Assets/Kormiis Logo Dark.svg'
 import kormiisMembershipLogo from '../Assets/Kormiis Logo Membership.svg'
 import heroCharacters from '../Assets/hero-characters.png'
-import { loginWithGoogle, getGoogleRedirectResult, createBusinessSpace, getCompanyForUser, getInviteByEmail, acceptInvite } from '../services/auth.js'
+import { loginWithGoogle, getGoogleRedirectResult, createBusinessSpace, getCompanyForUser, getInviteByEmail, acceptInvite, loginWithEmail, registerWithEmail } from '../services/auth.js'
 import { auth } from '../services/firebase.js'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -422,6 +422,8 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
   const [showAlreadyInSpace, setShowAlreadyInSpace] = useState(false)
   const [alreadyUser, setAlreadyUser] = useState(null) // signed-in Google user who already belongs to a space
   const [loadingMode, setLoadingMode] = useState(null) // which login button is signing in ('create' | 'join')
+  const [emailOrPhone, setEmailOrPhone] = useState('')
+  const [password, setPassword] = useState('')
 
   const adminSession = (account) => ({
     id: account.id,
@@ -540,6 +542,8 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
     setLoginMode(null)
     setPendingUser(null)
     setSpaceName('')
+    setEmailOrPhone('')
+    setPassword('')
     setError('')
   }
 
@@ -554,7 +558,6 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
   // --- Create a Business Space (workspace owner / admin) ---
   const handleCreateBusinessSpace = async (e) => {
     e.preventDefault()
-    if (!pendingUser) return
     if (!spaceName.trim()) {
       setError('Please enter a name for your Business Space.')
       return
@@ -562,12 +565,41 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
     setIsLoading(true)
     setError('')
     try {
-      const created = await createBusinessSpace(pendingUser, { name: spaceName })
-      completeAdminLogin(pendingUser, created.companyName)
+      let activeUser = pendingUser;
+      if (!activeUser) {
+        if (!emailOrPhone || !password) {
+           setError('Please provide Email/Phone and Password.');
+           setIsLoading(false);
+           return;
+        }
+        activeUser = await registerWithEmail(emailOrPhone, password);
+      }
+      const created = await createBusinessSpace(activeUser, { name: spaceName })
+      completeAdminLogin(activeUser, created.companyName)
     } catch (err) {
       setError('Could not create your Business Space: ' + err.message)
       setIsLoading(false)
       setLoadingMode(null)
+    }
+  }
+
+  // --- Email/Phone Sign in (teammate or admin) ---
+  const handleEmailSignIn = async (e) => {
+    e.preventDefault();
+    if (!emailOrPhone || !password) {
+      setError('Please provide Email/Phone and Password.');
+      return;
+    }
+    setIsLoading(true);
+    setLoadingMode('join');
+    setError('');
+    try {
+      const user = await loginWithEmail(emailOrPhone, password);
+      await finishGoogleLogin(user, 'join');
+    } catch (err) {
+      setError('Login failed: ' + err.message);
+      setIsLoading(false);
+      setLoadingMode(null);
     }
   }
 
@@ -1013,6 +1045,36 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
               </form>
             ) : authTab === 'in' ? (
               <div className="flex flex-col gap-3.5">
+                <form onSubmit={handleEmailSignIn} className="flex flex-col gap-3 w-full">
+                  <Input
+                    type="text"
+                    placeholder="Email or Phone Number"
+                    value={emailOrPhone}
+                    onChange={(e) => setEmailOrPhone(e.target.value)}
+                    className="bg-white/50 border-border/40 text-foreground placeholder:text-muted-foreground shadow-sm h-12 rounded-xl backdrop-blur-md"
+                  />
+                  <Input
+                    type="password"
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="bg-white/50 border-border/40 text-foreground placeholder:text-muted-foreground shadow-sm h-12 rounded-xl backdrop-blur-md"
+                  />
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full flex items-center justify-center gap-3 px-4 py-3.5 bg-primary rounded-full text-sm font-bold text-primary-foreground hover:opacity-90 transition disabled:opacity-50 shadow-sm mt-1"
+                  >
+                    <span className="whitespace-nowrap">{loadingMode === 'join' ? 'Signing in...' : 'Sign in'}</span>
+                  </button>
+                </form>
+
+                <div className="flex items-center gap-3 my-2 opacity-50">
+                  <div className="flex-1 h-px bg-border" />
+                  <span className="text-xs font-semibold text-muted-foreground">OR</span>
+                  <div className="flex-1 h-px bg-border" />
+                </div>
+
                 <button
                   type="button"
                   onClick={() => handleFirebaseGoogleLogin('join')}
@@ -1020,15 +1082,48 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                   className="w-full flex items-center justify-center gap-3 px-4 py-3.5 bg-white/50 rounded-full text-sm font-bold text-foreground hover:bg-white/70 transition disabled:opacity-50 shadow-sm backdrop-blur-md"
                 >
                   <svg width="20" height="20" viewBox="0 0 48 48" className="shrink-0"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59a14.5 14.5 0 0 1 0-9.18l-7.98-6.19a24.01 24.01 0 0 0 0 21.56l7.98-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-                  <span className="whitespace-nowrap">{loadingMode === 'join' ? 'Signing in...' : 'Join your business space'}</span>
+                  <span className="whitespace-nowrap">Continue with Google</span>
                 </button>
-
-                <p className="text-center text-balance text-[13px] text-[#000000] mt-4 leading-relaxed">
-                  Already invited? Sign in to your company's Business Space with the Google account your admin added by email.
-                </p>
               </div>
             ) : (
               <div className="flex flex-col gap-3.5">
+                <form onSubmit={(e) => { e.preventDefault(); setLoginMode('create'); setPendingUser(null); handleCreateBusinessSpace(e); }} className="flex flex-col gap-3 w-full">
+                  <Input
+                    type="text"
+                    placeholder="Email or Phone Number"
+                    value={emailOrPhone}
+                    onChange={(e) => setEmailOrPhone(e.target.value)}
+                    className="bg-white/50 border-border/40 text-foreground placeholder:text-muted-foreground shadow-sm h-12 rounded-xl backdrop-blur-md"
+                  />
+                  <Input
+                    type="password"
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="bg-white/50 border-border/40 text-foreground placeholder:text-muted-foreground shadow-sm h-12 rounded-xl backdrop-blur-md"
+                  />
+                  <Input
+                    type="text"
+                    placeholder="Business Space Name"
+                    value={spaceName}
+                    onChange={(e) => setSpaceName(e.target.value)}
+                    className="bg-white/50 border-border/40 text-foreground placeholder:text-muted-foreground shadow-sm h-12 rounded-xl backdrop-blur-md"
+                  />
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full flex items-center justify-center gap-3 px-4 py-3.5 bg-primary rounded-full text-sm font-bold text-primary-foreground hover:opacity-90 transition disabled:opacity-50 shadow-sm mt-1"
+                  >
+                    <span className="whitespace-nowrap">{loadingMode === 'create' ? 'Creating...' : 'Create Business Space'}</span>
+                  </button>
+                </form>
+
+                <div className="flex items-center gap-3 my-2 opacity-50">
+                  <div className="flex-1 h-px bg-border" />
+                  <span className="text-xs font-semibold text-muted-foreground">OR</span>
+                  <div className="flex-1 h-px bg-border" />
+                </div>
+
                 <button
                   type="button"
                   onClick={() => handleFirebaseGoogleLogin('create')}
@@ -1036,12 +1131,8 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                   className="w-full flex items-center justify-center gap-3 px-4 py-3.5 bg-white rounded-full text-sm font-bold text-black hover:bg-gray-50 transition disabled:opacity-50 shadow-sm"
                 >
                   <svg width="20" height="20" viewBox="0 0 48 48" className="shrink-0"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59a14.5 14.5 0 0 1 0-9.18l-7.98-6.19a24.01 24.01 0 0 0 0 21.56l7.98-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-                  <span className="whitespace-nowrap">{loadingMode === 'create' ? 'Signing in...' : 'Create your business space'}</span>
+                  <span className="whitespace-nowrap">Continue with Google</span>
                 </button>
-
-                <p className="text-center text-balance text-[13px] text-[#000000] mt-4 leading-relaxed">
-                  New? Create a Business Space for your company. Teammates join via email invite and sign in with their Google account.
-                </p>
               </div>
             )}
           </div>
