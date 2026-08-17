@@ -126,17 +126,34 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
     }
   }
 
-  // Set dark theme on landing page
+  // Set dark theme and ensure natural scrolling on landing page
   useEffect(() => {
     const root = document.documentElement
     const hadDark = root.classList.contains('dark')
     root.classList.add('dark')
     root.setAttribute('data-theme', 'dark')
+
+    const prevHtmlOverflow = document.documentElement.style.overflow
+    const prevBodyOverflow = document.body.style.overflow
+    const prevHtmlHeight = document.documentElement.style.height
+    const prevBodyHeight = document.body.style.height
+
+    document.documentElement.style.overflowY = 'auto'
+    document.documentElement.style.overflowX = 'hidden'
+    document.documentElement.style.height = 'auto'
+    document.body.style.overflowY = 'auto'
+    document.body.style.overflowX = 'hidden'
+    document.body.style.height = 'auto'
+
     return () => {
       if (!hadDark) {
         root.classList.remove('dark')
         root.setAttribute('data-theme', 'light')
       }
+      document.documentElement.style.overflow = prevHtmlOverflow
+      document.body.style.overflow = prevBodyOverflow
+      document.documentElement.style.height = prevHtmlHeight
+      document.body.style.height = prevBodyHeight
     }
   }, [])
 
@@ -371,21 +388,21 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
       />
 
       {/* 2. Main Hero & Login Section */}
-      <main className="flex-1 flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16 max-w-6xl mx-auto w-full">
+      <main className="flex-1 flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 py-6 sm:py-10 lg:py-14 max-w-6xl xl:max-w-7xl mx-auto w-full">
         
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-center w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-10 lg:gap-10 xl:gap-14 items-center w-full">
           
           {/* Left Column: Manage your team Headline directly above image */}
-          <div className="lg:col-span-7 flex flex-col justify-center">
+          <div className="lg:col-span-7 flex flex-col justify-center w-full">
             
             {/* Top Pill Badge */}
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-xs font-medium text-[#bbbbbb] mb-3.5 w-fit">
+            <div className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-[11px] sm:text-xs font-medium text-[#bbbbbb] mb-3 sm:mb-3.5 w-fit">
               <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
               <span>Smart Workforce & Operations</span>
             </div>
 
             {/* Bold Headline directly above image with typing animation */}
-            <div className="mb-4 sm:mb-6">
+            <div className="mb-3 sm:mb-5">
               <h1 className="text-fluid-xl font-black tracking-tight text-white leading-tight">
                 Manage your{' '}
                 <span className="text-primary relative inline-block">
@@ -398,12 +415,12 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                 </span>{' '}
                 with Ease
               </h1>
-              <p className="text-xs sm:text-sm md:text-base text-[#bbbbbb] mt-2.5 leading-relaxed max-w-xl">
+              <p className="text-xs sm:text-sm md:text-base text-[#bbbbbb] mt-2 sm:mt-2.5 leading-relaxed max-w-xl">
                 The modern all-in-one workspace for live attendance, automated payroll, shift schedules, and daily squad operations.
               </p>
 
               {/* Feature Micro-Chips */}
-              <div className="flex flex-wrap items-center gap-3 mt-4 text-xs text-[#888888]">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-3 sm:mt-4 text-[11px] sm:text-xs text-[#888888]">
                 <div className="flex items-center gap-1.5">
                   <Icon name="check_circle" size={14} className="text-primary" />
                   <span>Real-time GPS Punch Clock</span>
@@ -420,18 +437,18 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
             </div>
 
             {/* Clean Image with NO background container */}
-            <div className="w-full flex items-center justify-center pt-2">
+            <div className="w-full flex items-center justify-center pt-1 sm:pt-2">
               <img 
                 src="/Hero%20Assets.png" 
                 alt="Manage your Team with Ease" 
-                className="w-full h-auto max-h-[460px] object-contain drop-shadow-2xl"
+                className="w-auto max-w-full h-auto max-h-[240px] sm:max-h-[340px] md:max-h-[400px] lg:max-h-[480px] object-contain drop-shadow-2xl"
               />
             </div>
           </div>
 
           {/* Right Column: Login Modal / Card */}
           <div ref={loginCardRef} className="lg:col-span-5 w-full flex justify-center">
-            <div className="w-full max-w-[420px] bg-[#09090b] border border-white/10 rounded-2xl p-6 sm:p-8 shadow-2xl transition-all">
+            <div className="w-full max-w-[420px] bg-[#09090b] border border-white/10 rounded-2xl p-5 sm:p-7 md:p-8 shadow-2xl transition-all mx-auto">
               
               {/* Card Brand Header */}
               <div className="flex flex-col items-center justify-center gap-1.5 mb-5 text-center">
@@ -670,13 +687,16 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                     Terms of Service
                   </button>{' '}
                   and{' '}
-                  <button 
-                    type="button" 
-                    onClick={() => setLegalModal('privacy')}
-                    className="underline hover:text-white transition-colors"
-                  >
-                    Privacy Policy
-                  </button>.
+                  <span className="whitespace-nowrap">
+                    <button 
+                      type="button" 
+                      onClick={() => setLegalModal('privacy')}
+                      className="underline hover:text-white transition-colors"
+                    >
+                      Privacy Policy
+                    </button>
+                    .
+                  </span>
                 </p>
               </div>
 
