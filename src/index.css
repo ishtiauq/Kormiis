@@ -73,20 +73,20 @@
 
 .dark {
   --background: #141414;
-  --foreground: hsl(210 40% 98%);
+  --foreground: hsl(0 0% 96%);
   --card: hsl(0 0% 0%);
-  --card-foreground: hsl(210 40% 98%);
+  --card-foreground: hsl(0 0% 96%);
   --popover: hsl(0 0% 0%);
-  --popover-foreground: hsl(210 40% 98%);
+  --popover-foreground: hsl(0 0% 96%);
   --primary: hsl(12 99% 50%);
   --primary-foreground: hsl(0 0% 100%);
-  --secondary: hsl(217.2 32.6% 17.5%);
-  --secondary-foreground: hsl(210 40% 98%);
+  --secondary: hsl(0 0% 16%);
+  --secondary-foreground: hsl(0 0% 96%);
   --muted: #141414;
-  --muted-foreground: hsl(215 20.2% 65.1%);
-  --accent: hsl(217.2 32.6% 17.5%);
-  --accent-foreground: hsl(210 40% 98%);
-  --destructive: hsl(210 10% 30%);
+  --muted-foreground: #bbbbbb;
+  --accent: hsl(0 0% 16%);
+  --accent-foreground: hsl(0 0% 96%);
+  --destructive: hsl(0 60% 40%);
   --destructive-foreground: hsl(0 0% 100%);
   --border: #141414;
   --input: #141414;
@@ -106,7 +106,7 @@
   --popover: #09090b !important;
   --popover-foreground: #ffffff !important;
   --muted: #18181b !important;
-  --muted-foreground: #a1a1aa !important;
+  --muted-foreground: #bbbbbb !important;
   --border: #27272a !important;
   --input: #18181b !important;
 }
