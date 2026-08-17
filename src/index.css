@@ -98,6 +98,19 @@
   --sidebar-border: var(--border);
 }
 
+.force-dark-mode {
+  --background: #000000 !important;
+  --foreground: #ffffff !important;
+  --card: #09090b !important;
+  --card-foreground: #ffffff !important;
+  --popover: #09090b !important;
+  --popover-foreground: #ffffff !important;
+  --muted: #18181b !important;
+  --muted-foreground: #a1a1aa !important;
+  --border: #27272a !important;
+  --input: #18181b !important;
+}
+
 .force-light-mode {
   --background: hsl(225 20% 96.1%) !important;
   --foreground: hsl(0 0% 0%) !important;
