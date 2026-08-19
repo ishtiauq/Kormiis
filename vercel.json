@@ -1,0 +1,55 @@
+{
+  "rewrites": [
+    {
+      "source": "/((?!.*\\.(?:svg|png|webp|jpg|jpeg|gif|ico|css|js|woff2|json|webmanifest)$).*)",
+      "destination": "/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/index.html",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/sw.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/workbox-(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/manifest.webmanifest",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    }
+  ]
+}
