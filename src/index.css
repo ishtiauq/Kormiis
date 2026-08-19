@@ -231,38 +231,37 @@ html.dark .glass-kormiis,
 }
 
 .glass-kormiis-modal {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.88) 0%, rgba(246, 248, 252, 0.76) 100%) !important;
-  backdrop-filter: blur(36px) saturate(190%) !important;
-  -webkit-backdrop-filter: blur(36px) saturate(190%) !important;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.78) 0%, rgba(246, 248, 252, 0.68) 100%) !important;
+  backdrop-filter: blur(40px) saturate(190%) brightness(108%) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(190%) brightness(108%) !important;
   border: 1px solid rgba(255, 255, 255, 0.75) !important;
   box-shadow: 
-    0 24px 60px -12px rgba(0, 0, 0, 0.16),
-    0 8px 24px -4px rgba(0, 0, 0, 0.06),
+    0 28px 64px -12px rgba(0, 0, 0, 0.22),
+    0 10px 24px -4px rgba(0, 0, 0, 0.08),
     inset 0 1px 2px 0 rgba(255, 255, 255, 1) !important;
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
-  transition: backdrop-filter 0.4s ease, -webkit-backdrop-filter 0.4s ease;
-
-  &[data-entering],
-  &[data-exiting] {
-    -webkit-backdrop-filter: none !important;
-    backdrop-filter: none !important;
-  }
+  will-change: backdrop-filter, transform;
+  isolation: isolate;
 }
 
 .dark .glass-kormiis-modal,
 html.dark .glass-kormiis-modal,
-[data-theme="dark"] .glass-kormiis-modal {
-  background: linear-gradient(135deg, rgba(28, 28, 36, 0.90) 0%, rgba(14, 14, 20, 0.86) 100%) !important;
-  backdrop-filter: blur(36px) saturate(190%) !important;
-  -webkit-backdrop-filter: blur(36px) saturate(190%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+[data-theme="dark"] .glass-kormiis-modal,
+.force-dark-mode .glass-kormiis-modal {
+  background: linear-gradient(135deg, rgba(32, 32, 42, 0.82) 0%, rgba(16, 16, 24, 0.78) 100%) !important;
+  backdrop-filter: blur(40px) saturate(190%) brightness(105%) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(190%) brightness(105%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
   box-shadow: 
-    0 32px 72px -16px rgba(0, 0, 0, 0.85),
-    0 12px 28px -4px rgba(0, 0, 0, 0.6),
-    inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.28) !important;
+    0 32px 80px -16px rgba(0, 0, 0, 0.95),
+    0 14px 32px -4px rgba(0, 0, 0, 0.7),
+    inset 0 1.5px 1.5px 0 rgba(255, 255, 255, 0.30),
+    inset 0 -1px 1px 0 rgba(0, 0, 0, 0.4) !important;
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
+  will-change: backdrop-filter, transform;
+  isolation: isolate;
 }
 
 /* Apple Liquid Glass Controls */

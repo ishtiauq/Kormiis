@@ -15,7 +15,7 @@ const AlertDialogOverlay = React.forwardRef(({ className, ...props }, ref) => (
   <AriaModalOverlay
     ref={ref}
     className={cn(
-      "fixed inset-0 z-50 bg-black/60 backdrop-blur-xs transition-all duration-200 data-[entering]:animate-in data-[entering]:fade-in-0 data-[exiting]:animate-out data-[exiting]:fade-out-0 flex items-center justify-center p-4",
+      "fixed inset-0 z-50 bg-black/80 backdrop-blur-md transition-all duration-200 data-[entering]:animate-in data-[entering]:fade-in-0 data-[exiting]:animate-out data-[exiting]:fade-out-0 flex items-center justify-center p-4",
       className
     )}
     {...props}
@@ -28,7 +28,7 @@ const AlertDialogContent = React.forwardRef(({ className, children, ...props }, 
     <AriaModal
       ref={ref}
       className={cn(
-        "w-full max-w-md flex flex-col overflow-hidden rounded-[28px] border-none glass-kormiis-modal text-card-foreground transition-all duration-200 data-[entering]:animate-in data-[entering]:zoom-in-95 data-[exiting]:animate-out data-[exiting]:zoom-out-95 p-0 relative",
+        "w-full max-w-md flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#0e0e12] text-card-foreground shadow-2xl transition-all duration-200 data-[entering]:animate-in data-[entering]:zoom-in-95 data-[exiting]:animate-out data-[exiting]:zoom-out-95 p-0 relative",
         className
       )}
       {...props}

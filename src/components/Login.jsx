@@ -739,7 +739,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
 
       {/* Authentication & Workspace Access Dialog Modal */}
       <Dialog open={authModalOpen} onOpenChange={setAuthModalOpen}>
-        <DialogContent className="max-w-md w-full bg-[#09090b] border border-white/10 rounded-2xl p-5 sm:p-7 md:p-8 shadow-2xl text-white">
+        <DialogContent className="max-w-md w-full glass-kormiis-modal rounded-[28px] p-5 sm:p-7 md:p-8 shadow-2xl text-white">
           <DialogHeader className="sr-only">
             <DialogTitle>Workspace Access</DialogTitle>
             <DialogDescription>Sign in or create a business space for your squad.</DialogDescription>
@@ -747,19 +747,19 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
 
           {/* Card Brand Header */}
           <div className="flex flex-col items-center justify-center gap-1.5 mb-5 text-center">
-            <img src={kormiisWhiteLogo} alt="Kormiis" className="h-7 sm:h-8 object-contain" />
-            <p className="text-xs text-[#bbbbbb] font-medium">
+            <img src={kormiisWhiteLogo} alt="Kormiis" className="h-7 sm:h-8 object-contain drop-shadow-md" />
+            <p className="text-xs text-white/70 font-medium">
               Free for your whole squad. No credit card required.
             </p>
           </div>
 
           {/* Segmented Tab Switcher */}
-          <div className="flex items-center p-1 rounded-full bg-[#141416] border border-white/10 mb-5">
+          <div className="flex items-center p-1 rounded-full bg-white/[0.08] border border-white/12 mb-5 backdrop-blur-md">
             <button
               type="button"
               onClick={() => switchAuthTab('in')}
               className={`flex-1 rounded-full py-2 text-xs font-bold transition-all cursor-pointer ${
-                authTab === 'in' ? 'bg-[#27272a] text-white shadow-sm' : 'text-[#bbbbbb] hover:text-white'
+                authTab === 'in' ? 'bg-white/20 text-white shadow-sm border border-white/20' : 'text-white/70 hover:text-white'
               }`}
             >
               Sign in
@@ -768,7 +768,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
               type="button"
               onClick={() => switchAuthTab('up')}
               className={`flex-1 rounded-full py-2 text-xs font-bold transition-all cursor-pointer ${
-                authTab === 'up' ? 'bg-[#27272a] text-white shadow-sm' : 'text-[#bbbbbb] hover:text-white'
+                authTab === 'up' ? 'bg-white/20 text-white shadow-sm border border-white/20' : 'text-white/70 hover:text-white'
               }`}
             >
               Sign up
@@ -795,17 +795,17 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                     Business Space Name
                   </label>
                   <div className="relative flex items-center">
-                    <Icon name="corporate_fare" size={18} className="absolute left-3.5 text-[#888888] pointer-events-none" />
+                    <Icon name="corporate_fare" size={18} className="absolute left-3.5 text-white/50 pointer-events-none" />
                     <Input
                       id="space-name"
                       value={spaceName}
                       onChange={(e) => setSpaceName(e.target.value)}
                       placeholder="e.g. Acme Studio"
-                      className="h-11 rounded-xl text-xs sm:text-sm pl-10 bg-[#141416] border-white/10 text-white placeholder:text-[#666666] focus:border-primary/60 focus:ring-1 focus:ring-primary/40 transition-colors"
+                      className="h-11 rounded-xl text-xs sm:text-sm pl-10 bg-black/40 border-white/15 text-white placeholder:text-white/40 focus:border-primary/80 focus:bg-black/60 transition-colors backdrop-blur-sm"
                       autoFocus
                     />
                   </div>
-                  <p className="text-[11px] text-[#bbbbbb] mt-1.5 leading-relaxed">
+                  <p className="text-[11px] text-white/60 mt-1.5 leading-relaxed">
                     This becomes your company profile. You'll be the workspace owner (admin).
                   </p>
                 </div>
@@ -827,7 +827,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                   type="button"
                   onClick={() => { setLoginMode(null); setPendingUser(null); setSpaceName(''); setError('') }}
                   disabled={isLoading}
-                  className="text-xs text-[#bbbbbb] hover:text-white transition py-1 font-medium text-center cursor-pointer"
+                  className="text-xs text-white/70 hover:text-white transition py-1 font-medium text-center cursor-pointer"
                 >
                   ← Back to options
                 </button>
@@ -836,28 +836,28 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
               <div className="flex flex-col gap-3">
                 <form onSubmit={handleEmailSignIn} className="flex flex-col gap-2.5 w-full">
                   <div className="relative flex items-center">
-                    <Icon name="mail" size={18} className="absolute left-3.5 text-[#888888] pointer-events-none" />
+                    <Icon name="mail" size={18} className="absolute left-3.5 text-white/50 pointer-events-none" />
                     <Input
                       type="text"
                       placeholder="Work Email or Phone"
                       value={emailOrPhone}
                       onChange={(e) => setEmailOrPhone(e.target.value)}
-                      className="h-11 rounded-xl text-xs sm:text-sm pl-10 bg-[#141416] border-white/10 text-white placeholder:text-[#666666] focus:border-primary/60 focus:ring-1 focus:ring-primary/40 transition-colors"
+                      className="h-11 rounded-xl text-xs sm:text-sm pl-10 bg-black/40 border-white/15 text-white placeholder:text-white/40 focus:border-primary/80 focus:bg-black/60 transition-colors backdrop-blur-sm"
                     />
                   </div>
                   <div className="relative flex items-center">
-                    <Icon name="lock" size={18} className="absolute left-3.5 text-[#888888] pointer-events-none" />
+                    <Icon name="lock" size={18} className="absolute left-3.5 text-white/50 pointer-events-none" />
                     <Input
                       type={showPassword ? "text" : "password"}
                       placeholder="Password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="h-11 rounded-xl text-xs sm:text-sm pl-10 pr-10 bg-[#141416] border-white/10 text-white placeholder:text-[#666666] focus:border-primary/60 focus:ring-1 focus:ring-primary/40 transition-colors"
+                      className="h-11 rounded-xl text-xs sm:text-sm pl-10 pr-10 bg-black/40 border-white/15 text-white placeholder:text-white/40 focus:border-primary/80 focus:bg-black/60 transition-colors backdrop-blur-sm"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 text-[#888888] hover:text-white p-1 transition-colors cursor-pointer"
+                      className="absolute right-3 text-white/50 hover:text-white p-1 transition-colors cursor-pointer"
                       title={showPassword ? "Hide password" : "Show password"}
                     >
                       <Icon name={showPassword ? "visibility_off" : "visibility"} size={18} />
@@ -881,7 +881,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
 
                 <div className="flex items-center gap-3 my-0.5 opacity-40">
                   <div className="flex-1 h-px bg-white/20" />
-                  <span className="text-[10px] font-bold text-[#bbbbbb] tracking-wider">OR</span>
+                  <span className="text-[10px] font-bold text-white/70 tracking-wider">OR</span>
                   <div className="flex-1 h-px bg-white/20" />
                 </div>
 
@@ -889,7 +889,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                   type="button"
                   onClick={() => handleFirebaseGoogleLogin('join')}
                   disabled={isLoading}
-                  className="w-full flex items-center justify-center gap-2.5 py-2.5 bg-[#141416] border border-white/10 rounded-full text-xs sm:text-sm font-bold text-white hover:bg-[#1f1f23] active:scale-[0.99] transition disabled:opacity-50 shadow-sm cursor-pointer"
+                  className="w-full flex items-center justify-center gap-2.5 py-2.5 bg-white/[0.08] hover:bg-white/[0.14] border border-white/12 rounded-full text-xs sm:text-sm font-bold text-white active:scale-[0.99] transition disabled:opacity-50 shadow-sm cursor-pointer backdrop-blur-md"
                 >
                   <svg width="18" height="18" viewBox="0 0 48 48" className="shrink-0"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59a14.5 14.5 0 0 1 0-9.18l-7.98-6.19a24.01 24.01 0 0 0 0 21.56l7.98-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
                   <span>Continue with Google</span>
@@ -899,41 +899,41 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
               <div className="flex flex-col gap-3">
                 <form onSubmit={(e) => { e.preventDefault(); setLoginMode('create'); setPendingUser(null); handleCreateBusinessSpace(e) }} className="flex flex-col gap-2.5 w-full">
                   <div className="relative flex items-center">
-                    <Icon name="mail" size={18} className="absolute left-3.5 text-[#888888] pointer-events-none" />
+                    <Icon name="mail" size={18} className="absolute left-3.5 text-white/50 pointer-events-none" />
                     <Input
                       type="text"
                       placeholder="Work Email"
                       value={emailOrPhone}
                       onChange={(e) => setEmailOrPhone(e.target.value)}
-                      className="h-11 rounded-xl text-xs sm:text-sm pl-10 bg-[#141416] border-white/10 text-white placeholder:text-[#666666] focus:border-primary/60 focus:ring-1 focus:ring-primary/40 transition-colors"
+                      className="h-11 rounded-xl text-xs sm:text-sm pl-10 bg-black/40 border-white/15 text-white placeholder:text-white/40 focus:border-primary/80 focus:bg-black/60 transition-colors backdrop-blur-sm"
                     />
                   </div>
                   <div className="relative flex items-center">
-                    <Icon name="lock" size={18} className="absolute left-3.5 text-[#888888] pointer-events-none" />
+                    <Icon name="lock" size={18} className="absolute left-3.5 text-white/50 pointer-events-none" />
                     <Input
                       type={showPassword ? "text" : "password"}
                       placeholder="Create Password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="h-11 rounded-xl text-xs sm:text-sm pl-10 pr-10 bg-[#141416] border-white/10 text-white placeholder:text-[#666666] focus:border-primary/60 focus:ring-1 focus:ring-primary/40 transition-colors"
+                      className="h-11 rounded-xl text-xs sm:text-sm pl-10 pr-10 bg-black/40 border-white/15 text-white placeholder:text-white/40 focus:border-primary/80 focus:bg-black/60 transition-colors backdrop-blur-sm"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 text-[#888888] hover:text-white p-1 transition-colors cursor-pointer"
+                      className="absolute right-3 text-white/50 hover:text-white p-1 transition-colors cursor-pointer"
                       title={showPassword ? "Hide password" : "Show password"}
                     >
                       <Icon name={showPassword ? "visibility_off" : "visibility"} size={18} />
                     </button>
                   </div>
                   <div className="relative flex items-center">
-                    <Icon name="corporate_fare" size={18} className="absolute left-3.5 text-[#888888] pointer-events-none" />
+                    <Icon name="corporate_fare" size={18} className="absolute left-3.5 text-white/50 pointer-events-none" />
                     <Input
                       type="text"
                       placeholder="Company / Business Name"
                       value={spaceName}
                       onChange={(e) => setSpaceName(e.target.value)}
-                      className="h-11 rounded-xl text-xs sm:text-sm pl-10 bg-[#141416] border-white/10 text-white placeholder:text-[#666666] focus:border-primary/60 focus:ring-1 focus:ring-primary/40 transition-colors"
+                      className="h-11 rounded-xl text-xs sm:text-sm pl-10 bg-black/40 border-white/15 text-white placeholder:text-white/40 focus:border-primary/80 focus:bg-black/60 transition-colors backdrop-blur-sm"
                     />
                   </div>
                   <button
@@ -954,7 +954,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
 
                 <div className="flex items-center gap-3 my-0.5 opacity-40">
                   <div className="flex-1 h-px bg-white/20" />
-                  <span className="text-[10px] font-bold text-[#bbbbbb] tracking-wider">OR</span>
+                  <span className="text-[10px] font-bold text-white/70 tracking-wider">OR</span>
                   <div className="flex-1 h-px bg-white/20" />
                 </div>
 
@@ -962,7 +962,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                   type="button"
                   onClick={() => handleFirebaseGoogleLogin('create')}
                   disabled={isLoading}
-                  className="w-full flex items-center justify-center gap-2.5 py-2.5 bg-[#141416] border border-white/10 rounded-full text-xs sm:text-sm font-bold text-white hover:bg-[#1f1f23] active:scale-[0.99] transition disabled:opacity-50 shadow-sm cursor-pointer"
+                  className="w-full flex items-center justify-center gap-2.5 py-2.5 bg-white/[0.08] hover:bg-white/[0.14] border border-white/12 rounded-full text-xs sm:text-sm font-bold text-white active:scale-[0.99] transition disabled:opacity-50 shadow-sm cursor-pointer backdrop-blur-md"
                 >
                   <svg width="18" height="18" viewBox="0 0 48 48" className="shrink-0"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59a14.5 14.5 0 0 1 0-9.18l-7.98-6.19a24.01 24.01 0 0 0 0 21.56l7.98-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
                   <span>Sign up with Google</span>
