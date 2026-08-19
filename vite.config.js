@@ -10,12 +10,15 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
+      injectRegister: false,
       includeAssets: ['logo.svg', 'Kormiis Monogram Logo 192.png', 'Kormiis Monogram Logo 512.png', 'screenshot-desktop.jpg', 'screenshot-mobile.jpg'],
       devOptions: {
         enabled: false
       },
       workbox: {
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
+        skipWaiting: true,
+        clientsClaim: true,
       },
       manifest: {
         name: 'Kormiis',
