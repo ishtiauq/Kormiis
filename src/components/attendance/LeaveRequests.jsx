@@ -54,9 +54,9 @@ export default function LeaveRequests({ employees, attendance, setAttendance, ad
                     <TableRow key={l.id}>
                       <TableCell><span className="text-sm text-foreground">{emp?.name || l.employeeId}</span></TableCell>
                       <TableCell><span className="text-sm text-foreground">{l.leaveType}</span></TableCell>
-                      <TableCell><span className="text-xs text-muted-foreground">{formatDateShort(l.startDate)} â€” {formatDateShort(l.endDate)}</span></TableCell>
-                      <TableCell className="text-center"><span className="text-sm font-semibold text-foreground">{l.days || 'â€”'}</span></TableCell>
-                      <TableCell><span className="text-xs text-muted-foreground block max-w-[200px] break-words">{l.reason || 'â€”'}</span></TableCell>
+                      <TableCell><span className="text-xs text-muted-foreground">{formatDateShort(l.startDate)} - {formatDateShort(l.endDate)}</span></TableCell>
+                      <TableCell className="text-center"><span className="text-sm font-semibold text-foreground">{l.days || '-'}</span></TableCell>
+                      <TableCell><span className="text-xs text-muted-foreground block max-w-[200px] break-words">{l.reason || '-'}</span></TableCell>
                       <TableCell className="text-right">
                         <div className="flex gap-2 justify-end">
                           <Button size="sm" variant="default" onClick={() => setPendingAction({ id: l.id, action: 'approve', empName: emp?.name || l.employeeId })}>

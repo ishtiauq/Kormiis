@@ -1,5 +1,6 @@
 import { useState, useRef, useMemo, useEffect } from 'react'
 import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
 import Icon from "@/components/ui/Icon.jsx"
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -65,6 +66,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
   const [scrollTop, setScrollTop] = useState(0)
 
   const currency = settings?.currency || '$'
+  const pdfCurrency = { '৳': 'BDT', '€': 'EUR', '£': 'GBP', '₹': 'INR', '¥': 'JPY', '$': 'USD' }[currency] || currency
   const structure = settings?.salaryStructure || [
     { id: 'basic', name: 'Basic Salary', percentage: 50, type: 'earning' },
     { id: 'hra', name: 'House Rent Allowance (HRA)', percentage: 25, type: 'earning' },
@@ -377,7 +379,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
     doc.setTextColor(255, 255, 255)
     doc.setFontSize(11)
     doc.setFont('helvetica', 'bold')
-    doc.text('KORMIIS Ã¢â‚¬â€ PAYSLIP RECEIPT', pageW / 2, y + 9, { align: 'center' })
+    doc.text('KORMIIS — PAYSLIP RECEIPT', pageW / 2, y + 9, { align: 'center' })
     y += 22
 
     // Employee info
@@ -414,12 +416,12 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
       const amt = grossVal * (s.percentage / 100)
       earningsTotal += amt
       doc.text(s.name, margin + 4, y)
-      doc.text(`${currency}${amt.toFixed(2)}`, pageW - margin, y, { align: 'right' })
+      doc.text(`${pdfCurrency} ${amt.toFixed(2)}`, pageW - margin, y, { align: 'right' })
       y += 4.5
     })
     doc.setFont('helvetica', 'bold')
     doc.text('Total Earnings', margin + 4, y)
-    doc.text(`${currency}${earningsTotal.toFixed(2)}`, pageW - margin, y, { align: 'right' })
+    doc.text(`${pdfCurrency} ${earningsTotal.toFixed(2)}`, pageW - margin, y, { align: 'right' })
     y += 7
 
     // Deductions table
@@ -433,43 +435,45 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
       const amt = grossVal * (s.percentage / 100)
       deductionsTotal += amt
       doc.text(s.name, margin + 4, y)
-      doc.text(`-${currency}${amt.toFixed(2)}`, pageW - margin, y, { align: 'right' })
+      doc.text(`-${pdfCurrency} ${amt.toFixed(2)}`, pageW - margin, y, { align: 'right' })
       y += 4.5
     })
     if (entry.advance > 0) {
       deductionsTotal += entry.advance
       doc.text('Salary Advance Settlement', margin + 4, y)
-      doc.text(`-${currency}${entry.advance.toFixed(2)}`, pageW - margin, y, { align: 'right' })
+      doc.text(`-${pdfCurrency} ${entry.advance.toFixed(2)}`, pageW - margin, y, { align: 'right' })
       y += 4.5
     }
     if (loanDeduction > 0) {
       deductionsTotal += loanDeduction
       doc.text('Company Loan Installment', margin + 4, y)
-      doc.text(`-${currency}${loanDeduction.toFixed(2)}`, pageW - margin, y, { align: 'right' })
+      doc.text(`-${pdfCurrency} ${loanDeduction.toFixed(2)}`, pageW - margin, y, { align: 'right' })
       y += 4.5
     }
     doc.setFont('helvetica', 'bold')
     doc.text('Total Deductions', margin + 4, y)
-    doc.text(`-${currency}${deductionsTotal.toFixed(2)}`, pageW - margin, y, { align: 'right' })
-    y += 8
-
-    // Separator
-    doc.setDrawColor(200, 200, 200)
-    doc.line(margin, y, pageW - margin, y)
-    y += 6
-
-    // Net payout
-    doc.setFont('helvetica', 'bold')
-    doc.setFontSize(11)
-    doc.text('NET PAYOUT', margin, y)
-    doc.text(`${currency}${net.toFixed(2)}`, pageW - margin, y, { align: 'right' })
+    doc.text(`-${pdfCurrency} ${deductionsTotal.toFixed(2)}`, pageW - margin, y, { align: 'right' })
     y += 7
 
-    doc.setFont('helvetica', 'normal')
+    // Net Salary
+    doc.setFontSize(10)
+    doc.text('NET SALARY', margin, y)
+    const pdfNet = earningsTotal - deductionsTotal
+    doc.text(`${pdfCurrency} ${pdfNet.toFixed(2)}`, pageW - margin, y, { align: 'right' })
+    y += 12
+
+    // Notes
+    doc.setFont('helvetica', 'italic')
     doc.setFontSize(8)
     doc.setTextColor(100, 100, 100)
-    doc.text('Payment Method: Direct Deposit', margin, y); y += 4
-    doc.text('Status: PAID / SUCCESSFUL', margin, y); y += 8
+    doc.text('This is an auto-generated HR document.', margin, y); y += 4
+    if (entry.status === 'Paid') {
+      doc.text(`Status: PAID on ${payDate}`, margin, y); y += 4
+    }
+    if (entry.loan?.remaining > 0) {
+      doc.text(`Loan remaining balance: ${pdfCurrency} ${(entry.loan.remaining - loanDeduction).toFixed(2)}`, margin, y)
+    }
+    y += 8
 
     // Footer
     doc.setDrawColor(200, 200, 200)
@@ -561,6 +565,81 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
     addLog('Ledger Updated', `${applyGlobally ? 'Globally updated' : 'Updated'} compensation for ${selectedEmpLog.employee.name}`, 'success')
   }
 
+  const handleDownloadPayrollPDF = () => {
+    if (!entries) return
+    const doc = new jsPDF()
+    
+    doc.setFontSize(18)
+    doc.text('Payroll Sheet', 14, 22)
+    
+    doc.setFontSize(11)
+    doc.setTextColor(100)
+    doc.text(`Pay Period: ${monthLabel}`, 14, 30)
+
+    const tableColumn = ["Employee", "Job Title", "Basic", "Allowances", "Deductions", "Net Salary", "Status"]
+    const tableRows = []
+
+    entries.forEach(entry => {
+      const loanDeduction = (entry.status === 'Paid' ? 0 : Math.min(entry.loan?.remaining || 0, entry.loan?.installment || 0))
+      const net = (entry.baseSalary || 0) + (entry.allowance || 0) - (entry.deductions || 0) - (entry.advance || 0) - loanDeduction
+      const totalDeductions = (entry.deductions || 0) + (entry.advance || 0) + loanDeduction
+      
+      const rowData = [
+        entry.employee.name,
+        entry.employee.designation || entry.employee.role || '-',
+        `${pdfCurrency} ${entry.baseSalary.toFixed(2)}`,
+        `${pdfCurrency} ${entry.allowance.toFixed(2)}`,
+        `${pdfCurrency} ${totalDeductions.toFixed(2)}`,
+        `${pdfCurrency} ${net.toFixed(2)}`,
+        entry.status
+      ]
+      tableRows.push(rowData)
+    })
+
+    autoTable(doc, {
+      startY: 35,
+      head: [tableColumn],
+      body: tableRows,
+      theme: 'striped',
+      headStyles: { fillColor: [254, 53, 1] }, 
+      styles: { fontSize: 9, cellPadding: 3 },
+      didDrawPage: (data) => {
+        if (settings?.company?.logo) {
+          try {
+            const pageW = doc.internal.pageSize.getWidth()
+            const pageH = doc.internal.pageSize.getHeight()
+            
+            let format = 'PNG'
+            if (settings.company.logo.startsWith('data:image/jpeg')) format = 'JPEG'
+            else if (settings.company.logo.startsWith('data:image/webp')) format = 'WEBP'
+            
+            let imgW = 35
+            let imgH = 15
+            try {
+              const props = doc.getImageProperties(settings.company.logo)
+              if (props && props.width && props.height) {
+                const maxW = 35; const maxH = 15;
+                imgW = props.width; imgH = props.height;
+                if (imgW > maxW) { imgH = (imgH * maxW) / imgW; imgW = maxW; }
+                if (imgH > maxH) { imgW = (imgW * maxH) / imgH; imgH = maxH; }
+              }
+            } catch (err) {
+              console.warn("Could not get image properties, using default dimensions")
+            }
+            
+            const x = (pageW - imgW) / 2
+            const y = pageH - 8 - imgH
+            doc.addImage(settings.company.logo, format, x, y, imgW, imgH)
+          } catch (e) {
+            console.error("Failed to add logo:", e)
+          }
+        }
+      }
+    })
+
+    doc.save(`Payroll_Sheet_${monthLabel.replace(' ', '_')}.pdf`)
+  }
+
   return (
     <div className="animate-fade-in flex flex-col gap-6 w-full pb-10">
       
@@ -573,16 +652,21 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
       </div>
       <div className="border-t border-border border-headline mb-2" />
       
-      <div ref={pickerRef} className="flex gap-2 items-center justify-end">
-        {/* Month dropdown */}
-        <div className="relative w-[140px] h-10">
-          <button onClick={() => { setMonthOpen(!monthOpen); setYearOpen(false) }} className={`flex w-full h-10 items-center justify-between rounded-md border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${monthOpen ? 'ring-2 ring-ring ring-offset-2' : ''}`}>
-            <div className="flex items-center gap-2 overflow-hidden">
-              <Icon name="calendar_month" className="h-4 w-4 shrink-0 text-muted-foreground" size={16}/>
-              <span className="break-words">{monthNames[currentMonth - 1]}</span>
-            </div>
-            <Icon name="keyboard_arrow_down" className={`h-4 w-4 shrink-0 opacity-50 transition-transform ${monthOpen ? 'rotate-180' : ''}`} size={16}/>
-          </button>
+      <div ref={pickerRef} className="flex flex-wrap gap-2 items-center justify-between">
+        <Button variant="outline" size="sm" onClick={handleDownloadPayrollPDF} disabled={!entries} className="rounded-full text-xs font-semibold hover:text-primary hover:border-primary/50 transition-colors shadow-sm">
+          <Icon name="picture_as_pdf" size={16} className="mr-1.5" /> Download Sheet PDF
+        </Button>
+
+        <div className="flex gap-2 items-center">
+          {/* Month dropdown */}
+          <div className="relative w-[140px] h-10">
+            <button onClick={() => { setMonthOpen(!monthOpen); setYearOpen(false) }} className={`flex w-full h-10 items-center justify-between rounded-md border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${monthOpen ? 'ring-2 ring-ring ring-offset-2' : ''}`}>
+              <div className="flex items-center gap-2 overflow-hidden">
+                <Icon name="calendar_month" className="h-4 w-4 shrink-0 text-muted-foreground" size={16}/>
+                <span className="break-words">{monthNames[currentMonth - 1]}</span>
+              </div>
+              <Icon name="keyboard_arrow_down" className={`h-4 w-4 shrink-0 opacity-50 transition-transform ${monthOpen ? 'rotate-180' : ''}`} size={16}/>
+            </button>
           {monthOpen && (
             <div className="absolute top-full left-0 right-0 mt-2 max-h-60 overflow-y-auto z-[100] rounded-md border bg-popover p-1 text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95">
               {monthNames.map((name, i) => (
@@ -610,6 +694,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
               ))}
             </div>
           )}
+        </div>
         </div>
       </div>
 

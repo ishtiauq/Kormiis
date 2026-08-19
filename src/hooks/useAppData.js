@@ -686,7 +686,13 @@ export default function useAppData({ user, addToast }) {
     overtimeClaims, setOvertimeClaims,
     announcements, setAnnouncements: handleSetAnnouncements,
     assets, setAssets, assetRequests, setAssetRequests, assetCategories, setAssetCategories,
-    settings, syncLogs,
+    settings: (() => {
+      if (!settings) return settings;
+      const mojibakeMap = { 'Ã Â§Â³': '৳', 'Ã¢â€šÂ¬': '€', 'Ã‚Â£': '£', 'Ã¢â€šÂ¹': '₹', 'Ã‚Â¥': '¥' }
+      if (mojibakeMap[settings.currency]) return { ...settings, currency: mojibakeMap[settings.currency] }
+      return settings;
+    })(), 
+    syncLogs,
 
     /* Functions */
     handleSetEmployees, handleSetPayroll, handleSetSettings, handleSetTasks, handleSetNotes,

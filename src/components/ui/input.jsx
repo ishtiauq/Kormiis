@@ -7,7 +7,7 @@ const Input = React.forwardRef(({ className, type, ...props }, ref) => {
     <input
       type={type}
       className={cn(
-        "flex h-9 w-full rounded-lg border border-input bg-transparent px-3 py-1 text-xs sm:text-sm font-medium shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 text-foreground",
+        "flex h-11 w-full rounded-xl border border-input bg-transparent px-4 py-2.5 text-xs sm:text-sm font-medium shadow-xs transition-all file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 text-foreground",
         className
       )}
       ref={ref}
@@ -19,10 +19,10 @@ Input.displayName = "Input"
 
 const TextField = ({ className, label, error, ...props }) => {
   return (
-    <AriaTextField className={cn("flex flex-col gap-1.5", className)} {...props}>
-      {label && <AriaLabel className="text-xs font-bold text-foreground">{label}</AriaLabel>}
-      <AriaInput className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 py-1 text-xs sm:text-sm font-medium shadow-xs transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-foreground disabled:opacity-50" />
-      {error && <AriaFieldError className="text-[11px] font-semibold text-destructive">{error}</AriaFieldError>}
+    <AriaTextField className={cn("flex flex-col gap-2", className)} {...props}>
+      {label && <AriaLabel className="text-xs font-semibold text-foreground tracking-wide">{label}</AriaLabel>}
+      <AriaInput className="flex h-11 w-full rounded-xl border border-input bg-transparent px-4 py-2.5 text-xs sm:text-sm font-medium shadow-xs transition-all placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-foreground disabled:opacity-50" />
+      {error && <AriaFieldError className="text-[11px] font-semibold text-destructive mt-0.5">{error}</AriaFieldError>}
     </AriaTextField>
   )
 }

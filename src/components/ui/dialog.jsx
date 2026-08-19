@@ -14,7 +14,7 @@ const DialogOverlay = React.forwardRef(({ className, ...props }, ref) => (
   <AriaModalOverlay
     ref={ref}
     className={cn(
-      "fixed inset-0 z-50 bg-black/50 transition-all duration-200 data-[entering]:animate-in data-[entering]:fade-in-0 data-[exiting]:animate-out data-[exiting]:fade-out-0 flex items-center justify-center p-4",
+      "fixed inset-0 z-50 bg-transparent flex items-center justify-center p-4",
       className
     )}
     isDismissable={true}
@@ -23,17 +23,16 @@ const DialogOverlay = React.forwardRef(({ className, ...props }, ref) => (
 ))
 DialogOverlay.displayName = "DialogOverlay"
 
-const DialogContent = React.forwardRef(({ className, children, ...props }, ref) => (
-  <DialogOverlay>
+const DialogContent = React.forwardRef(({ className, overlayClassName, children, ...props }, ref) => (
+  <DialogOverlay className={overlayClassName}>
     <AriaModal
       ref={ref}
       className={cn(
-        "w-full max-w-lg max-h-[95vh] flex flex-col overflow-hidden rounded-2xl border border-border bg-background text-popover-foreground shadow-2xl transition-all duration-200 data-[entering]:animate-in data-[entering]:zoom-in-95 data-[exiting]:animate-out data-[exiting]:zoom-out-95 p-0",
+        "w-full max-w-lg max-h-[95vh] flex flex-col overflow-hidden rounded-[28px] glass-kormiis-modal text-foreground shadow-2xl p-0",
         className
       )}
       {...props}
     >
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-500 via-rose-500 to-primary z-10" />
       <AriaDialog className="outline-none focus:outline-none flex flex-col w-full h-full p-6 sm:p-8 overflow-y-auto">
         {children}
       </AriaDialog>
@@ -43,12 +42,12 @@ const DialogContent = React.forwardRef(({ className, children, ...props }, ref) 
 DialogContent.displayName = "DialogContent"
 
 const DialogHeader = ({ className, ...props }) => (
-  <div className={cn("flex flex-col space-y-1.5 text-left pb-4 shrink-0", className)} {...props} />
+  <div className={cn("flex flex-col space-y-2 text-left pb-4 shrink-0 border-b border-border/80 dark:border-white/12", className)} {...props} />
 )
 DialogHeader.displayName = "DialogHeader"
 
 const DialogFooter = ({ className, ...props }) => (
-  <div className={cn("flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-5 border-t border-border/50 mt-2 shrink-0 pb-2 sm:pb-0", className)} {...props} />
+  <div className={cn("flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5 pt-5 border-t border-border/80 dark:border-white/12 mt-2 shrink-0 pb-2 sm:pb-0", className)} {...props} />
 )
 DialogFooter.displayName = "DialogFooter"
 

@@ -91,7 +91,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
         priority,
         audience,
         attachments: [],
-        reactions: { 'Ã°Å¸â€˜Â': [], 'Ã¢ÂÂ¤Ã¯Â¸Â': [], 'Ã°Å¸â€˜Å½': [] },
+        reactions: { '👍': [], '❤️': [], '👎': [] },
         comments: [],
         readBy: [currentUser?.id || 'admin'],
         poll: hasPoll && pollQuestion ? {
@@ -231,7 +231,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
             authorName: currentUser?.name || 'System Admin', 
             text, 
             date: new Date().toISOString(),
-            reactions: { 'Ã°Å¸â€˜Â': [], 'Ã¢ÂÂ¤Ã¯Â¸Â': [] },
+            reactions: { '👍': [], '❤️': [] },
             replies: []
           }]
         }
@@ -307,7 +307,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                   authorName: currentUser?.name || 'System Admin',
                   text,
                   date: new Date().toISOString(),
-                  reactions: { 'Ã°Å¸â€˜Â': [] }
+                  reactions: { '👍': [] }
                 }]
               }
             }
@@ -647,7 +647,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                   {post.poll && (
                     <div className="mt-6 p-4 rounded-xl border border-border/50 bg-muted/20">
                       <h4 className="font-medium text-sm mb-4 flex items-center gap-2 text-foreground">
-                         <span className="text-lg">Ã°Å¸â€œÅ </span> {post.poll.question}
+                         <span className="text-lg">📊</span> {post.poll.question}
                       </h4>
                       <div className="flex flex-col gap-3">
                         {post.poll.options.map((opt, i) => {
@@ -673,19 +673,19 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                 
                 <CardFooter className="pt-3 pb-3 border-t flex flex-wrap justify-between items-center gap-3">
                   <div className="flex flex-wrap gap-1 -ml-2">
-                    <HoverTooltip content={getReactionTitle(post.reactions['Ã°Å¸â€˜Â'])}>
-                      <Button variant="ghost" size="sm" onClick={() => handleReaction(post.id, 'Ã°Å¸â€˜Â')} className="h-8 px-2 text-muted-foreground hover:text-foreground hover:bg-muted/50">
-                        Ã°Å¸â€˜Â <span className="ml-1.5 text-xs font-medium">{getReactionCount(post.reactions['Ã°Å¸â€˜Â'])}</span>
+                    <HoverTooltip content={getReactionTitle(post.reactions['👍'])}>
+                      <Button variant="ghost" size="sm" onClick={() => handleReaction(post.id, '👍')} className="h-8 px-2 text-muted-foreground hover:text-foreground hover:bg-muted/50">
+                        👍 <span className="ml-1.5 text-xs font-medium">{getReactionCount(post.reactions['👍'])}</span>
                       </Button>
                     </HoverTooltip>
-                    <HoverTooltip content={getReactionTitle(post.reactions['Ã¢ÂÂ¤Ã¯Â¸Â'])}>
-                      <Button variant="ghost" size="sm" onClick={() => handleReaction(post.id, 'Ã¢ÂÂ¤Ã¯Â¸Â')} className="h-8 px-2 text-muted-foreground hover:text-foreground hover:bg-muted/50">
-                        Ã¢ÂÂ¤Ã¯Â¸Â <span className="ml-1.5 text-xs font-medium">{getReactionCount(post.reactions['Ã¢ÂÂ¤Ã¯Â¸Â'])}</span>
+                    <HoverTooltip content={getReactionTitle(post.reactions['❤️'])}>
+                      <Button variant="ghost" size="sm" onClick={() => handleReaction(post.id, '❤️')} className="h-8 px-2 text-muted-foreground hover:text-foreground hover:bg-muted/50">
+                        ❤️ <span className="ml-1.5 text-xs font-medium">{getReactionCount(post.reactions['❤️'])}</span>
                       </Button>
                     </HoverTooltip>
-                    <HoverTooltip content={getReactionTitle(post.reactions['Ã°Å¸â€˜Å½'])}>
-                      <Button variant="ghost" size="sm" onClick={() => handleReaction(post.id, 'Ã°Å¸â€˜Å½')} className="h-8 px-2 text-muted-foreground hover:text-foreground hover:bg-muted/50">
-                        Ã°Å¸â€˜Å½ <span className="ml-1.5 text-xs font-medium">{getReactionCount(post.reactions['Ã°Å¸â€˜Å½'])}</span>
+                    <HoverTooltip content={getReactionTitle(post.reactions['👎'])}>
+                      <Button variant="ghost" size="sm" onClick={() => handleReaction(post.id, '👎')} className="h-8 px-2 text-muted-foreground hover:text-foreground hover:bg-muted/50">
+                        👎 <span className="ml-1.5 text-xs font-medium">{getReactionCount(post.reactions['👎'])}</span>
                       </Button>
                     </HoverTooltip>
                     <Button variant="ghost" size="sm" onClick={() => toggleComments(post.id)} className="h-8 px-2 ml-1 text-muted-foreground hover:text-foreground hover:bg-muted/50">
@@ -739,19 +739,19 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                                 )}
                               </div>
                               <div className="flex items-center gap-3 mt-1 ml-1">
-                                <HoverTooltip content={getReactionTitle(comment.reactions?.['Ã°Å¸â€˜Â'])}>
-                                  <button onClick={() => handleCommentReaction(post.id, comment.id, 'Ã°Å¸â€˜Â')} className="text-[10px] font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
-                                    Ã°Å¸â€˜Â {getReactionCount(comment.reactions?.['Ã°Å¸â€˜Â'])}
+                                <HoverTooltip content={getReactionTitle(comment.reactions?.['👍'])}>
+                                  <button onClick={() => handleCommentReaction(post.id, comment.id, '👍')} className="text-[10px] font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
+                                    👍 {getReactionCount(comment.reactions?.['👍'])}
                                   </button>
                                 </HoverTooltip>
-                                <HoverTooltip content={getReactionTitle(comment.reactions?.['Ã¢ÂÂ¤Ã¯Â¸Â'])}>
-                                  <button onClick={() => handleCommentReaction(post.id, comment.id, 'Ã¢ÂÂ¤Ã¯Â¸Â')} className="text-[10px] font-medium text-muted-foreground hover:text-destructive transition-colors flex items-center gap-1">
-                                    Ã¢ÂÂ¤Ã¯Â¸Â {getReactionCount(comment.reactions?.['Ã¢ÂÂ¤Ã¯Â¸Â'])}
+                                <HoverTooltip content={getReactionTitle(comment.reactions?.['❤️'])}>
+                                  <button onClick={() => handleCommentReaction(post.id, comment.id, '❤️')} className="text-[10px] font-medium text-muted-foreground hover:text-destructive transition-colors flex items-center gap-1">
+                                    ❤️ {getReactionCount(comment.reactions?.['❤️'])}
                                   </button>
                                 </HoverTooltip>
-                                <HoverTooltip content={getReactionTitle(comment.reactions?.['Ã°Å¸â€˜Å½'])}>
-                                  <button onClick={() => handleCommentReaction(post.id, comment.id, 'Ã°Å¸â€˜Å½')} className="text-[10px] font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
-                                    Ã°Å¸â€˜Å½ {getReactionCount(comment.reactions?.['Ã°Å¸â€˜Å½'])}
+                                <HoverTooltip content={getReactionTitle(comment.reactions?.['👎'])}>
+                                  <button onClick={() => handleCommentReaction(post.id, comment.id, '👎')} className="text-[10px] font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
+                                    👎 {getReactionCount(comment.reactions?.['👎'])}
                                   </button>
                                 </HoverTooltip>
                                 <button onClick={() => setExpandedComments(prev => ({ ...prev, [`reply-${comment.id}`]: !prev[`reply-${comment.id}`] }))} className="text-[10px] font-medium text-muted-foreground hover:text-primary transition-colors">
@@ -805,19 +805,19 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                                           )}
                                         </div>
                                         <div className="flex items-center gap-3 mt-0.5 ml-1">
-                                          <HoverTooltip content={getReactionTitle(reply.reactions?.['Ã°Å¸â€˜Â'])}>
-                                            <button onClick={() => handleReplyReaction(post.id, comment.id, reply.id, 'Ã°Å¸â€˜Â')} className="text-[9px] font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
-                                              Ã°Å¸â€˜Â {getReactionCount(reply.reactions?.['Ã°Å¸â€˜Â'])}
+                                          <HoverTooltip content={getReactionTitle(reply.reactions?.['👍'])}>
+                                            <button onClick={() => handleReplyReaction(post.id, comment.id, reply.id, '👍')} className="text-[9px] font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
+                                              👍 {getReactionCount(reply.reactions?.['👍'])}
                                             </button>
                                           </HoverTooltip>
-                                          <HoverTooltip content={getReactionTitle(reply.reactions?.['Ã¢ÂÂ¤Ã¯Â¸Â'])}>
-                                            <button onClick={() => handleReplyReaction(post.id, comment.id, reply.id, 'Ã¢ÂÂ¤Ã¯Â¸Â')} className="text-[9px] font-medium text-muted-foreground hover:text-destructive transition-colors flex items-center gap-1">
-                                              Ã¢ÂÂ¤Ã¯Â¸Â {getReactionCount(reply.reactions?.['Ã¢ÂÂ¤Ã¯Â¸Â'])}
+                                          <HoverTooltip content={getReactionTitle(reply.reactions?.['❤️'])}>
+                                            <button onClick={() => handleReplyReaction(post.id, comment.id, reply.id, '❤️')} className="text-[9px] font-medium text-muted-foreground hover:text-destructive transition-colors flex items-center gap-1">
+                                              ❤️ {getReactionCount(reply.reactions?.['❤️'])}
                                             </button>
                                           </HoverTooltip>
-                                          <HoverTooltip content={getReactionTitle(reply.reactions?.['Ã°Å¸â€˜Å½'])}>
-                                            <button onClick={() => handleReplyReaction(post.id, comment.id, reply.id, 'Ã°Å¸â€˜Å½')} className="text-[9px] font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
-                                              Ã°Å¸â€˜Å½ {getReactionCount(reply.reactions?.['Ã°Å¸â€˜Å½'])}
+                                          <HoverTooltip content={getReactionTitle(reply.reactions?.['👎'])}>
+                                            <button onClick={() => handleReplyReaction(post.id, comment.id, reply.id, '👎')} className="text-[9px] font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
+                                              👎 {getReactionCount(reply.reactions?.['👎'])}
                                             </button>
                                           </HoverTooltip>
                                           {canModify(reply.authorId) && (

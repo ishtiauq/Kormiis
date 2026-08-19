@@ -1,4 +1,19 @@
-import { auth, db, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, createUserWithEmailAndPassword, signInWithEmailAndPassword, updatePassword, deleteUser, signOut, doc, setDoc, getDocFromServer, serverTimestamp, RecaptchaVerifier, signInWithPhoneNumber, EmailAuthProvider, reauthenticateWithCredential } from './firebase.js';
+import { auth, secondaryAuth, db, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, createUserWithEmailAndPassword, signInWithEmailAndPassword, updatePassword, deleteUser, signOut, doc, setDoc, getDoc, getDocFromServer, serverTimestamp, RecaptchaVerifier, signInWithPhoneNumber, EmailAuthProvider, reauthenticateWithCredential } from './firebase.js';
+
+/**
+ * Parses an identifier (email or phone). If it looks like a phone number,
+ * maps it to a dummy email to allow password-based login.
+ */
+export const parseIdentifier = (identifier) => {
+  const trimmed = (identifier || '').trim();
+  // Basic check: if it mostly contains numbers and +, consider it a phone
+  const isPhone = /^\+?[0-9\s-]+$/.test(trimmed) && trimmed.replace(/[^\d]/g, '').length >= 7;
+  if (isPhone) {
+    const cleanPhone = trimmed.replace(/[^\d+]/g, '');
+    return `${cleanPhone}@kormiis.local`;
+  }
+  return trimmed.toLowerCase();
+};
 
 /**
  * Returns the company + employee linkage for an authenticated user.
@@ -50,7 +65,7 @@ export const createBusinessSpace = async (user, { name }) => {
   await setDoc(userRef, {
     uid,
     email,
-    fullName: user.displayName || '',
+    fullName: user.displayName || 'Space Admin',
     companyUid: uid,
     role: 'Admin',
     companyName,
@@ -133,28 +148,57 @@ export const acceptInvite = async (user, invite) => {
 };
 
 /**
- * Registers a teammate by email (Google-only sign-in). No Firebase Auth
- * password account is created — the teammate signs in with their own Google
- * account and is auto-linked when their email matches this invite.
+ * Registers a teammate by email or phone. Uses secondaryAuth to create the account 
+ * without signing out the admin.
  */
-export const provisionEmployeeAccount = async ({ email, name, role, companyUid, employeeId, department, avatar }) => {
-  if (!db) throw new Error('Firebase not configured');
-  if (!email) throw new Error('Teammate email is required to send an invite.');
-  if (!companyUid) throw new Error('Missing company ID — cannot invite teammate.');
-  const key = email.trim().toLowerCase();
+export const provisionEmployeeAccount = async ({ email, password, name, role, companyUid, employeeId, department, avatar }) => {
+  if (!db || !secondaryAuth) throw new Error('Firebase not configured');
+  if (!email) throw new Error('Teammate identifier is required.');
+  if (!companyUid) throw new Error('Missing company ID.');
+  
+  const parsedEmail = parseIdentifier(email);
+  let uid = null;
 
-  await setDoc(doc(db, 'invites', key), {
+  try {
+    // 1. Create the user in Firebase Auth using the secondary instance
+    const userCredential = await createUserWithEmailAndPassword(secondaryAuth, parsedEmail, password || 'KormiisTemp123!');
+    uid = userCredential.user.uid;
+    
+    // Sign out from the secondary instance just in case
+    await signOut(secondaryAuth);
+  } catch (error) {
+    // If the account already exists, we could handle it or throw
+    if (error.code === 'auth/email-already-in-use') {
+      throw new Error('An account with this email/number already exists.');
+    }
+    throw error;
+  }
+
+  // 2. Create the user doc
+  await setDoc(doc(db, 'users', uid), {
+    uid,
+    email: parsedEmail,
+    fullName: name || '',
     companyUid,
     employeeId: employeeId || '',
+    role: role || 'Teammate',
+    department: department || '',
+    avatar: avatar || '',
+    joinedAt: serverTimestamp(),
+  });
+
+  // 3. Register in company's members subcollection
+  await setDoc(doc(db, 'companies', companyUid, 'members', uid), {
+    employeeId: employeeId || '',
+    email: parsedEmail,
     name: name || '',
     role: role || 'Teammate',
     department: department || '',
     avatar: avatar || '',
-    status: 'invited',
-    createdAt: serverTimestamp(),
-  });
+    registeredAt: serverTimestamp(),
+  }, { merge: true });
 
-  return { uid: null, invited: true };
+  return { uid, invited: false };
 };
 
 /**
@@ -233,13 +277,15 @@ export const getGoogleRedirectResult = async () => {
 
 export const loginWithEmail = async (email, password) => {
   if (!auth) throw new Error('Firebase not configured');
-  const result = await signInWithEmailAndPassword(auth, email, password);
+  const parsedEmail = parseIdentifier(email);
+  const result = await signInWithEmailAndPassword(auth, parsedEmail, password);
   return result.user;
 };
 
 export const registerWithEmail = async (email, password) => {
   if (!auth) throw new Error('Firebase not configured');
-  const result = await createUserWithEmailAndPassword(auth, email, password);
+  const parsedEmail = parseIdentifier(email);
+  const result = await createUserWithEmailAndPassword(auth, parsedEmail, password);
   return result.user;
 };
 

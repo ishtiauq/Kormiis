@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { GlassTimePicker } from './GlassTimePicker.jsx'
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog"
+import { exportDailyAttendancePDF, exportMonthlyAttendancePDF } from '../../utils/pdfExport.js'
 
 const z = (v) => v < 10 ? `0${v}` : `${v}`
 
@@ -36,9 +37,9 @@ export default function DailyLogs({ employees, attendance, setAttendance, addToa
   }
 
   return (
-    <Card className="border-border/50 shadow-sm rounded-2xl overflow-hidden bg-card">
+    <Card className="border-border/50 shadow-sm rounded-2xl overflow-visible bg-card">
       <CardContent className="p-0">
-        <div className="bg-muted/30 border-b border-border p-4 sm:p-5 flex justify-between items-center flex-wrap gap-4">
+        <div className="bg-muted/30 border-b border-border p-4 sm:p-5 flex justify-between items-center flex-wrap gap-4 rounded-t-2xl">
           <div className="flex items-center gap-3 relative">
             <Button variant="outline" className="rounded-full bg-background shadow-sm h-10 px-5 border-border/50 hover:border-primary/50" onClick={(e) => { e.stopPropagation(); setShowDatePicker(v => !v); setCalYear(selYear); setCalMonth(selMonth) }}>
               {new Date(selectedDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
@@ -49,7 +50,7 @@ export default function DailyLogs({ employees, attendance, setAttendance, addToa
             </span>
             {showDatePicker && (
               <div onClick={e => e.stopPropagation()}
-                className="absolute top-full left-0 z-50 w-[280px] p-4 mt-2 rounded-xl border border-border bg-popover text-popover-foreground shadow-2xl">
+                className="absolute top-full left-0 z-50 w-[280px] p-4 mt-2 rounded-2xl border-none glass-kormiis-modal text-popover-foreground shadow-2xl">
                 <div className="flex justify-between items-center mb-3">
                   <Button variant="ghost" size="icon" className="size-8" onClick={() => { if (calMonth === 0) { setCalMonth(11); setCalYear(y => y - 1) } else setCalMonth(m => m - 1) }} aria-label="Previous month">
                     <Icon name="chevron_left" size={16}/>
@@ -80,9 +81,17 @@ export default function DailyLogs({ employees, attendance, setAttendance, addToa
               </div>
             )}
           </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => exportDailyAttendancePDF(employees, logs, selectedDate)} className="rounded-full text-xs font-semibold hover:text-primary hover:border-primary/50 transition-colors shadow-sm">
+              <Icon name="picture_as_pdf" size={16} className="mr-1.5" /> Daily PDF
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => exportMonthlyAttendancePDF(employees, attendance, calMonth, calYear)} className="rounded-full text-xs font-semibold hover:text-primary hover:border-primary/50 transition-colors shadow-sm">
+              <Icon name="picture_as_pdf" size={16} className="mr-1.5" /> Monthly PDF
+            </Button>
+          </div>
         </div>
 
-        <div className="flex flex-col max-h-[550px] overflow-y-auto no-scrollbar">
+        <div className="flex flex-col">
           {employees.map((emp, idx) => {
             const log = logs[emp.id] || { status: 'Absent', checkIn: '--', checkOut: '--', hours: '0.0' }
             const ps = PILL_STYLES[log.status] || PILL_STYLES.Absent

@@ -12,7 +12,7 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
-let app, auth, db, storage;
+let app, auth, db, storage, secondaryApp, secondaryAuth;
 
 try {
   // Only initialize if the API key is present
@@ -24,6 +24,10 @@ try {
       localCache: persistentLocalCache(),
       experimentalForceLongPolling: true
     });
+    
+    // Initialize secondary app for provisioning teammate accounts without signing out the admin
+    secondaryApp = initializeApp(firebaseConfig, 'SecondaryApp');
+    secondaryAuth = getAuth(secondaryApp);
   } else {
     console.warn('Firebase configuration missing. Please add VITE_FIREBASE_* environment variables to your .env file.');
   }
@@ -31,4 +35,4 @@ try {
   console.error('Firebase initialization error:', error);
 }
 
-export { auth, db, storage, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updatePassword, deleteUser, RecaptchaVerifier, signInWithPhoneNumber, EmailAuthProvider, reauthenticateWithCredential, doc, setDoc, getDoc, getDocFromServer, serverTimestamp, collection, getDocs, writeBatch, onSnapshot };
+export { auth, secondaryAuth, db, storage, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updatePassword, deleteUser, RecaptchaVerifier, signInWithPhoneNumber, EmailAuthProvider, reauthenticateWithCredential, doc, setDoc, getDoc, getDocFromServer, serverTimestamp, collection, getDocs, writeBatch, onSnapshot };
