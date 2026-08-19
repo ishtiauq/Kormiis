@@ -640,8 +640,8 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
             {/* Aspect-Ratio Synchronized Character & Marquee Wrapper */}
             <div className="relative h-full aspect-[2502/1682] max-h-[42vh] sm:max-h-[48vh] md:max-h-[52vh] lg:max-h-[56vh] max-w-[88vw] sm:max-w-[80vw] md:max-w-[74vw] lg:max-w-full flex items-end justify-center">
 
-            {/* BACKGROUND CONTINUOUS MARQUEE STREAM: Lifted higher up across forehead / crown */}
-            <div className="absolute top-[-2%] sm:top-[1%] md:top-[2%] lg:top-[4%] left-1/2 -translate-x-1/2 w-screen flex flex-col gap-1.5 sm:gap-3.5 z-0 pointer-events-none marquee-mask select-none">
+            {/* BACKGROUND CONTINUOUS MARQUEE STREAM: Responsive alignment with head */}
+            <div className="absolute top-[-3%] sm:top-[-1%] md:top-[1%] lg:top-[-8%] left-1/2 -translate-x-1/2 w-screen flex flex-col gap-1.5 sm:gap-3.5 z-0 pointer-events-none marquee-mask select-none">
               
               {/* Stream Row 1: Smooth Infinite Loop Scrolling Left */}
               <div className="w-full overflow-hidden flex">
