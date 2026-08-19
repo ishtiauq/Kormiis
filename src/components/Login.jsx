@@ -599,43 +599,46 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
       </div>
 
       {/* 2. Main Hero Showcase Section (Strict 100dvh full viewport height across all devices) */}
-      <main className="relative w-full h-[100dvh] min-h-[100dvh] max-h-[100dvh] flex flex-col justify-between items-center pt-20 sm:pt-24 md:pt-28 lg:pt-36 pb-2 sm:pb-3 text-center overflow-hidden shrink-0 isolate">
+      <main className="relative w-full h-[100dvh] min-h-[100dvh] max-h-[100dvh] flex flex-col justify-between items-center pt-20 sm:pt-24 md:pt-28 lg:pt-28 xl:pt-32 pb-0 text-center overflow-hidden shrink-0 isolate">
         
         {/* HERO SECTION CANVAS AMBIENT BACKDROP GLOW (Subtle, Velvet & Ultra-Diffused) */}
         <div className="absolute inset-0 pointer-events-none -z-10 overflow-hidden select-none">
           <div className="absolute top-[38%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[450px] sm:w-[750px] lg:w-[1050px] h-[300px] sm:h-[450px] lg:h-[600px] bg-gradient-to-b from-primary/18 via-orange-500/10 to-transparent blur-[120px] sm:blur-[180px] lg:blur-[220px] rounded-full" />
         </div>
 
-        {/* Top Content Block: Bold Fluid Responsive Headline (3-lines on mobile, 2-lines on desktop) + Subtitle */}
-        <div className="flex flex-col items-center justify-center text-center shrink-0 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 z-10 w-full">
-          <h1 className="text-fluid-display-xl font-black tracking-tight text-white leading-[1.1] text-center w-full uppercase">
-            <span>MANAGE YOUR</span>
-            <br className="sm:hidden" />{' '}
-            <span className="text-primary relative inline-block">
-              {typed || '\u00A0'}
-              <motion.span
-                animate={{ opacity: [1, 0, 1] }}
-                transition={{ repeat: Infinity, duration: 0.8, ease: "easeInOut" }}
-                className="inline-block w-[3px] sm:w-[5px] h-[0.82em] bg-primary align-baseline ml-1"
-              />
-            </span>
-            <br />
-            <span>WITH EASE</span>
-          </h1>
-          <div className="mt-3 sm:mt-4.5 flex items-center justify-center">
-            <div className="inline-flex items-center justify-center px-4 sm:px-5.5 py-1.5 sm:py-2 rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/25">
-              <p className="text-fluid-xs sm:text-fluid-sm font-semibold tracking-wide text-center leading-snug">
-                The only HRM app you need for your workspace.
-              </p>
+        {/* Fluid Container: Couples Headline & Image with Dynamic Gap */}
+        <div className="w-full flex-1 min-h-0 flex flex-col justify-between items-center gap-1 sm:gap-1.5 md:gap-2 lg:gap-[clamp(0.25rem,1.5vh,1.25rem)] z-10">
+          
+          {/* Top Content Block: Bold Fluid Responsive Headline (3-lines on mobile, 2-lines on desktop) + Subtitle */}
+          <div className="flex flex-col items-center justify-center text-center shrink-0 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 z-10 w-full">
+            <h1 className="text-fluid-display-xl font-black tracking-tight text-white leading-[1.1] text-center w-full uppercase">
+              <span>MANAGE YOUR</span>
+              <br className="sm:hidden" />{' '}
+              <span className="text-primary relative inline-block">
+                {typed || '\u00A0'}
+                <motion.span
+                  animate={{ opacity: [1, 0, 1] }}
+                  transition={{ repeat: Infinity, duration: 0.8, ease: "easeInOut" }}
+                  className="inline-block w-[3px] sm:w-[5px] h-[0.82em] bg-primary align-baseline ml-1"
+                />
+              </span>
+              <br />
+              <span>WITH EASE</span>
+            </h1>
+            <div className="mt-2 sm:mt-2.5 lg:mt-[clamp(0.4rem,1.2vh,1rem)] flex items-center justify-center">
+              <div className="inline-flex items-center justify-center px-4 sm:px-5.5 py-1.5 sm:py-2 rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/25">
+                <p className="text-fluid-xs sm:text-fluid-sm font-semibold tracking-wide text-center leading-snug">
+                  The only HRM app you need for your workspace.
+                </p>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Hero Artwork Image Container with Infinite Background Feature Streams & Character Foreground */}
-        <div className="relative w-full flex-1 min-h-0 flex items-center md:items-end justify-center z-0 pb-1 -translate-y-3 sm:-translate-y-6 md:-translate-y-8 lg:translate-y-0">
-          
-          {/* Aspect-Ratio Synchronized Character & Marquee Wrapper (Slightly compact on mobile/iPad for breathing space) */}
-          <div className="relative h-full aspect-[2502/1682] max-h-[35vh] sm:max-h-[40vh] md:max-h-[44vh] lg:max-h-[52vh] max-w-[85vw] sm:max-w-[78vw] md:max-w-[72vw] lg:max-w-full flex items-end justify-center">
+          {/* Hero Artwork Image Container with Infinite Background Feature Streams & Character Foreground */}
+          <div className="relative w-full flex-1 min-h-0 flex items-center sm:items-end justify-center z-0 pb-0 -translate-y-3 sm:-translate-y-4 md:-translate-y-5 lg:translate-y-0">
+            
+            {/* Aspect-Ratio Synchronized Character & Marquee Wrapper */}
+            <div className="relative h-full aspect-[2502/1682] max-h-[42vh] sm:max-h-[48vh] md:max-h-[52vh] lg:max-h-[56vh] max-w-[88vw] sm:max-w-[80vw] md:max-w-[74vw] lg:max-w-full flex items-end justify-center">
 
             {/* BACKGROUND CONTINUOUS MARQUEE STREAM: Lifted higher up across forehead / crown */}
             <div className="absolute top-[-2%] sm:top-[1%] md:top-[2%] lg:top-[4%] left-1/2 -translate-x-1/2 w-screen flex flex-col gap-1.5 sm:gap-3.5 z-0 pointer-events-none marquee-mask select-none">
@@ -725,12 +728,14 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
 
         </div>
 
-        {/* 3. In-Viewport Legal Links & Micro Footer */}
-        <LandingFooter 
-          onOpenLegal={(type) => setLegalModal(type)}
-        />
+        </div>
 
       </main>
+
+      {/* 3. Footer (Accessible via scroll) */}
+      <LandingFooter 
+        onOpenLegal={(type) => setLegalModal(type)}
+      />
 
       {/* Authentication & Workspace Access Dialog Modal */}
       <Dialog open={authModalOpen} onOpenChange={setAuthModalOpen}>
