@@ -213,6 +213,8 @@ const HERO_FEATURE_ROWS = [
   ]
 ]
 
+const ALL_HERO_FEATURES = [...HERO_FEATURE_ROWS[0], ...HERO_FEATURE_ROWS[1]]
+
 export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode }) {
   const [isLoading, setIsLoading] = useState(false)
   const [authTab, setAuthTab] = useState('in') // 'in' (Sign in) | 'up' (Sign up)
@@ -599,7 +601,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
       </div>
 
       {/* 2. Main Hero Showcase Section (Strict 100dvh full viewport height across all devices) */}
-      <main className="relative w-full h-[100dvh] min-h-[100dvh] max-h-[100dvh] flex flex-col justify-between items-center pt-20 sm:pt-24 md:pt-28 lg:pt-28 xl:pt-32 pb-0 text-center overflow-hidden shrink-0 isolate">
+      <main className="relative w-full h-[100dvh] min-h-[100dvh] max-h-[100dvh] flex flex-col justify-between items-center pt-16 sm:pt-20 md:pt-24 lg:pt-28 xl:pt-32 pb-0 text-center overflow-hidden shrink-0 isolate">
         
         {/* HERO SECTION CANVAS AMBIENT BACKDROP GLOW (Subtle, Velvet & Ultra-Diffused) */}
         <div className="absolute inset-0 pointer-events-none -z-10 overflow-hidden select-none">
@@ -607,7 +609,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
         </div>
 
         {/* Fluid Container: Couples Headline & Image with Dynamic Gap */}
-        <div className="w-full flex-1 min-h-0 flex flex-col justify-between items-center gap-1 sm:gap-1.5 md:gap-2 lg:gap-[clamp(0.25rem,1.5vh,1.25rem)] z-10">
+        <div className="w-full flex-1 min-h-0 flex flex-col justify-start lg:justify-between items-center gap-1 sm:gap-2 lg:gap-[clamp(0.25rem,1.5vh,1.25rem)] z-10">
           
           {/* Top Content Block: Bold Fluid Responsive Headline (3-lines on mobile, 2-lines on desktop) + Subtitle */}
           <div className="flex flex-col items-center justify-center text-center shrink-0 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 z-10 w-full">
@@ -635,87 +637,130 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
           </div>
 
           {/* Hero Artwork Image Container with Infinite Background Feature Streams & Character Foreground */}
-          <div className="relative w-full flex-1 min-h-0 flex items-center sm:items-end justify-center z-0 pb-0 -translate-y-3 sm:-translate-y-4 md:-translate-y-5 lg:translate-y-0">
+          <div className="relative w-full flex-1 min-h-0 flex items-end justify-center z-0 pb-16 sm:pb-18 md:pb-20 lg:pb-0 translate-y-0">
             
-            {/* Aspect-Ratio Synchronized Character & Marquee Wrapper */}
-            <div className="relative h-full aspect-[2502/1682] max-h-[42vh] sm:max-h-[48vh] md:max-h-[52vh] lg:max-h-[56vh] max-w-[88vw] sm:max-w-[80vw] md:max-w-[74vw] lg:max-w-full flex items-end justify-center">
+            {/* 1. MOBILE & TABLET/IPAD ONLY: Single Vertical Infinite Marquee Stream behind character (< lg) */}
+            {/* Anchored at top-0 of this flex-1 section = EXACTLY flush with the bottom of the Subheading across all devices */}
+            <div className="lg:hidden absolute top-0 sm:top-0.5 bottom-[22%] sm:bottom-[25%] md:bottom-[28%] left-1/2 -translate-x-1/2 w-max max-w-[94vw] flex justify-center z-0 pointer-events-none marquee-mask-vertical select-none overflow-hidden">
+              <div className="animate-marquee-vertical flex flex-col items-center gap-2 sm:gap-2.5 py-1">
+                {[...ALL_HERO_FEATURES, ...ALL_HERO_FEATURES].map((item, idx) => (
+                  <div 
+                    key={`vert-${idx}`}
+                    className={`relative w-[265px] xs:w-[285px] sm:w-[315px] flex items-center justify-between gap-2 px-3 sm:px-4 py-1.5 sm:py-2.5 rounded-full bg-gradient-to-r ${item.pillBg} shadow-2xl backdrop-blur-2xl shrink-0 overflow-hidden border border-white/10`}
+                  >
+                    {/* Top Edge Specular Rim Light */}
+                    <div className={`absolute top-0 inset-x-2 h-[1px] sm:h-[1.5px] bg-gradient-to-r ${item.rimLight} pointer-events-none rounded-full blur-[0.2px] z-20`} />
+                    <div className={`absolute top-0 inset-x-4 h-1.5 sm:h-2 bg-gradient-to-b ${item.rimLight} opacity-20 pointer-events-none blur-sm z-10`} />
 
-            {/* BACKGROUND CONTINUOUS MARQUEE STREAM: Responsive alignment with head */}
-            <div className="absolute top-[-3%] sm:top-[-1%] md:top-[1%] lg:top-[-8%] left-1/2 -translate-x-1/2 w-screen flex flex-col gap-1.5 sm:gap-3.5 z-0 pointer-events-none marquee-mask select-none">
-              
-              {/* Stream Row 1: Smooth Infinite Loop Scrolling Left */}
-              <div className="w-full overflow-hidden flex">
-                <div className="animate-marquee-left flex items-center gap-2 sm:gap-4.5">
-                  {[...HERO_FEATURE_ROWS[0], ...HERO_FEATURE_ROWS[0]].map((item, idx) => (
-                    <div 
-                      key={`row1-${idx}`}
-                      className={`relative flex items-center gap-1.5 sm:gap-3 px-2 sm:px-4 py-1 sm:py-2.5 rounded-full bg-gradient-to-r ${item.pillBg} shadow-2xl backdrop-blur-2xl shrink-0 overflow-hidden`}
-                    >
-                      {/* Top Edge Specular Rim Light */}
-                      <div className={`absolute top-0 inset-x-2 h-[1px] sm:h-[1.5px] bg-gradient-to-r ${item.rimLight} pointer-events-none rounded-full blur-[0.2px] z-20`} />
-                      <div className={`absolute top-0 inset-x-4 h-1.5 sm:h-2.5 bg-gradient-to-b ${item.rimLight} opacity-20 pointer-events-none blur-sm z-10`} />
-
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
                       {/* 3D Embossed Glossy Icon Container */}
-                      <div className={`relative size-5.5 sm:size-8.5 rounded-md sm:rounded-xl bg-gradient-to-br ${item.iconGrad} flex items-center justify-center text-white shadow-lg ${item.iconShadow} shrink-0 overflow-hidden`}>
+                      <div className={`relative size-5.5 sm:size-7.5 rounded-md sm:rounded-xl bg-gradient-to-br ${item.iconGrad} flex items-center justify-center text-white shadow-lg ${item.iconShadow} shrink-0 overflow-hidden`}>
                         <div className="absolute inset-0 bg-gradient-to-b from-white/25 via-transparent to-black/25 pointer-events-none" />
                         <Icon 
                           name={item.icon} 
                           size={undefined} 
-                          className="!text-[12px] sm:!text-[17px] leading-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] relative z-10" 
+                          className="!text-[12px] sm:!text-[16px] leading-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] relative z-10" 
                         />
                       </div>
 
                       {/* Feature Title */}
-                      <span className="text-[10px] sm:text-sm font-bold text-white tracking-tight whitespace-nowrap drop-shadow-sm">
+                      <span className="text-[11px] sm:text-xs font-bold text-white tracking-tight whitespace-nowrap truncate drop-shadow-sm">
                         {item.label}
                       </span>
-
-                      {/* Micro-Tag Pill */}
-                      <span className={`text-[8px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full ${item.tagBg} whitespace-nowrap shadow-xs`}>
-                        {item.tag}
-                      </span>
                     </div>
-                  ))}
-                </div>
+
+                    {/* Micro-Tag Pill */}
+                    <span className={`text-[8px] sm:text-[9.5px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full ${item.tagBg} whitespace-nowrap shadow-xs shrink-0`}>
+                      {item.tag}
+                    </span>
+                  </div>
+                ))}
               </div>
-
-              {/* Stream Row 2: Smooth Infinite Loop Scrolling Right */}
-              <div className="w-full overflow-hidden flex">
-                <div className="animate-marquee-right flex items-center gap-2 sm:gap-4.5">
-                  {[...HERO_FEATURE_ROWS[1], ...HERO_FEATURE_ROWS[1]].map((item, idx) => (
-                    <div 
-                      key={`row2-${idx}`}
-                      className={`relative flex items-center gap-1.5 sm:gap-3 px-2 sm:px-4 py-1 sm:py-2.5 rounded-full bg-gradient-to-r ${item.pillBg} shadow-2xl backdrop-blur-2xl shrink-0 overflow-hidden`}
-                    >
-                      {/* Top Edge Specular Rim Light */}
-                      <div className={`absolute top-0 inset-x-2 h-[1px] sm:h-[1.5px] bg-gradient-to-r ${item.rimLight} pointer-events-none rounded-full blur-[0.2px] z-20`} />
-                      <div className={`absolute top-0 inset-x-4 h-1.5 sm:h-2.5 bg-gradient-to-b ${item.rimLight} opacity-20 pointer-events-none blur-sm z-10`} />
-
-                      {/* 3D Embossed Glossy Icon Container */}
-                      <div className={`relative size-5.5 sm:size-8.5 rounded-md sm:rounded-xl bg-gradient-to-br ${item.iconGrad} flex items-center justify-center text-white shadow-lg ${item.iconShadow} shrink-0 overflow-hidden`}>
-                        <div className="absolute inset-0 bg-gradient-to-b from-white/25 via-transparent to-black/25 pointer-events-none" />
-                        <Icon 
-                          name={item.icon} 
-                          size={undefined} 
-                          className="!text-[12px] sm:!text-[17px] leading-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] relative z-10" 
-                        />
-                      </div>
-
-                      {/* Feature Title */}
-                      <span className="text-[10px] sm:text-sm font-bold text-white tracking-tight whitespace-nowrap drop-shadow-sm">
-                        {item.label}
-                      </span>
-
-                      {/* Micro-Tag Pill */}
-                      <span className={`text-[8px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full ${item.tagBg} whitespace-nowrap shadow-xs`}>
-                        {item.tag}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
             </div>
+
+            {/* Aspect-Ratio Synchronized Character & Desktop Marquee Wrapper */}
+            <div className="relative h-full aspect-[2502/1682] max-h-[46vh] sm:max-h-[50vh] md:max-h-[53vh] lg:max-h-[56vh] max-w-[90vw] sm:max-w-[82vw] md:max-w-[76vw] lg:max-w-full flex items-end justify-center z-10">
+
+              {/* 2. DESKTOP & LAPTOP ONLY: Dual Horizontal Infinite Marquee Streams (lg:flex) */}
+              <div className="hidden lg:flex absolute top-[-8%] left-1/2 -translate-x-1/2 w-screen flex-col gap-3.5 z-0 pointer-events-none marquee-mask select-none">
+                
+                {/* Stream Row 1: Smooth Infinite Loop Scrolling Left */}
+                <div className="w-full overflow-hidden flex">
+                  <div className="animate-marquee-left flex items-center gap-4.5">
+                    {[...HERO_FEATURE_ROWS[0], ...HERO_FEATURE_ROWS[0]].map((item, idx) => (
+                      <div 
+                        key={`row1-${idx}`}
+                        className={`relative w-[295px] xl:w-[320px] flex items-center justify-between gap-3 px-4 py-2.5 rounded-full bg-gradient-to-r ${item.pillBg} shadow-2xl backdrop-blur-2xl shrink-0 overflow-hidden border border-white/10`}
+                      >
+                        {/* Top Edge Specular Rim Light */}
+                        <div className={`absolute top-0 inset-x-2 h-[1.5px] bg-gradient-to-r ${item.rimLight} pointer-events-none rounded-full blur-[0.2px] z-20`} />
+                        <div className={`absolute top-0 inset-x-4 h-2.5 bg-gradient-to-b ${item.rimLight} opacity-20 pointer-events-none blur-sm z-10`} />
+
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          {/* 3D Embossed Glossy Icon Container */}
+                          <div className={`relative size-8.5 rounded-xl bg-gradient-to-br ${item.iconGrad} flex items-center justify-center text-white shadow-lg ${item.iconShadow} shrink-0 overflow-hidden`}>
+                            <div className="absolute inset-0 bg-gradient-to-b from-white/25 via-transparent to-black/25 pointer-events-none" />
+                            <Icon 
+                              name={item.icon} 
+                              size={undefined} 
+                              className="!text-[17px] leading-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] relative z-10" 
+                            />
+                          </div>
+
+                          {/* Feature Title */}
+                          <span className="text-sm font-bold text-white tracking-tight whitespace-nowrap truncate drop-shadow-sm">
+                            {item.label}
+                          </span>
+                        </div>
+
+                        {/* Micro-Tag Pill */}
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${item.tagBg} whitespace-nowrap shadow-xs shrink-0`}>
+                          {item.tag}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Stream Row 2: Smooth Infinite Loop Scrolling Right */}
+                <div className="w-full overflow-hidden flex">
+                  <div className="animate-marquee-right flex items-center gap-4.5">
+                    {[...HERO_FEATURE_ROWS[1], ...HERO_FEATURE_ROWS[1]].map((item, idx) => (
+                      <div 
+                        key={`row2-${idx}`}
+                        className={`relative w-[295px] xl:w-[320px] flex items-center justify-between gap-3 px-4 py-2.5 rounded-full bg-gradient-to-r ${item.pillBg} shadow-2xl backdrop-blur-2xl shrink-0 overflow-hidden border border-white/10`}
+                      >
+                        {/* Top Edge Specular Rim Light */}
+                        <div className={`absolute top-0 inset-x-2 h-[1.5px] bg-gradient-to-r ${item.rimLight} pointer-events-none rounded-full blur-[0.2px] z-20`} />
+                        <div className={`absolute top-0 inset-x-4 h-2.5 bg-gradient-to-b ${item.rimLight} opacity-20 pointer-events-none blur-sm z-10`} />
+
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          {/* 3D Embossed Glossy Icon Container */}
+                          <div className={`relative size-8.5 rounded-xl bg-gradient-to-br ${item.iconGrad} flex items-center justify-center text-white shadow-lg ${item.iconShadow} shrink-0 overflow-hidden`}>
+                            <div className="absolute inset-0 bg-gradient-to-b from-white/25 via-transparent to-black/25 pointer-events-none" />
+                            <Icon 
+                              name={item.icon} 
+                              size={undefined} 
+                              className="!text-[17px] leading-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] relative z-10" 
+                            />
+                          </div>
+
+                          {/* Feature Title */}
+                          <span className="text-sm font-bold text-white tracking-tight whitespace-nowrap truncate drop-shadow-sm">
+                            {item.label}
+                          </span>
+                        </div>
+
+                        {/* Micro-Tag Pill */}
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${item.tagBg} whitespace-nowrap shadow-xs shrink-0`}>
+                          {item.tag}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+              </div>
 
             {/* FOREGROUND: Main Character Artwork (Strict 100% fit of aspect container) */}
             <img 
