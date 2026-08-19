@@ -1,2 +1,12 @@
+import Icon from "@/components/ui/Icon.jsx"
 import AttendancePage from './attendance/AttendancePage.jsx'
-export default AttendancePage
+
+const attendanceTabs = [
+  { id: 'daily', label: 'Daily Logs', icon: <Icon name="schedule" size={15}/> },
+  { id: 'roster', label: 'Roster', icon: <Icon name="swap_vert" size={15}/> },
+  { id: 'overtime', label: 'Overtime', icon: <Icon name="memory" size={15}/> },
+]
+
+export default function Attendance(props) {
+  return <AttendancePage {...props} headline="Attendance" icon="schedule" tabs={attendanceTabs} defaultTab="daily" />
+}

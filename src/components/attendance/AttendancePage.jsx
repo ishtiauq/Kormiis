@@ -24,21 +24,25 @@ export default function AttendancePage({
   addNotification, 
   addAuditLog,
   settings,
-  headline = 'Attendance & Leaves'
+  headline = 'Attendance & Leaves',
+  icon = 'schedule',
+  tabs: propTabs,
+  defaultTab = 'daily'
 }) {
-  const [tab, setTab] = useState('daily')
-  const tabs = [
+  const allTabs = [
     { id: 'daily', label: 'Daily Logs', icon: <Icon name="schedule" size={15}/> },
     { id: 'leave', label: 'Leave Requests', icon: <Icon name="calendar_month" size={15}/> },
     { id: 'roster', label: 'Roster', icon: <Icon name="swap_vert" size={15}/> },
     { id: 'overtime', label: 'Overtime', icon: <Icon name="memory" size={15}/> },
   ]
+  const tabs = propTabs || allTabs
+  const [tab, setTab] = useState(defaultTab)
 
   return (
     <div className="animate-fade-in flex flex-col gap-6 w-full pb-10">
       <div className="flex items-center justify-between">
         <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
-          <Icon name="schedule" className="text-foreground" size={20}/>
+          <Icon name={icon} className="text-foreground" size={20}/>
           {headline}
         </h1>
       </div>

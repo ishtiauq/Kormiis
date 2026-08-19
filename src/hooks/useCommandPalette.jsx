@@ -13,7 +13,8 @@ export function useCommandPalette({ employees, themeMode, toggleTheme, setCurren
     const saved = localStorage.getItem('kormiis_recent_actions')
     return saved ? JSON.parse(saved) : [
       { id: 'page-employees', type: 'page', label: 'Go to Employees', view: 'employees' },
-      { id: 'page-attendance', type: 'page', label: 'Go to Attendance & Leaves', view: 'attendance' }
+      { id: 'page-attendance', type: 'page', label: 'Go to Attendance', view: 'attendance' },
+      { id: 'page-leaves', type: 'page', label: 'Go to Leaves', view: 'leaves' }
     ]
   })
 
@@ -35,7 +36,8 @@ export function useCommandPalette({ employees, themeMode, toggleTheme, setCurren
       { id: 'page-dashboard', category: 'Pages', label: 'Go to Dashboard', action: () => setCurrentView('dashboard'), keywords: 'dashboard home main' },
       { id: 'page-employees', category: 'Pages', label: 'Go to Employees', action: () => setCurrentView('employees'), keywords: 'employees staff members directory profile' },
       { id: 'page-payroll', category: 'Pages', label: 'Go to Payroll', action: () => setCurrentView('payroll'), keywords: 'payroll salary pay compensation' },
-      { id: 'page-attendance', category: 'Pages', label: 'Go to Attendance & Leaves', action: () => setCurrentView('attendance'), keywords: 'attendance leaves roster schedule timeoff vacation' },
+      { id: 'page-attendance', category: 'Pages', label: 'Go to Attendance', action: () => setCurrentView('attendance'), keywords: 'attendance daily logs roster schedule overtime clock in out' },
+      { id: 'page-leaves', category: 'Pages', label: 'Go to Leaves', action: () => setCurrentView('leaves'), keywords: 'leaves time off vacation leave requests balance' },
       { id: 'page-announcements', category: 'Pages', label: 'Go to Announcements', action: () => setCurrentView('announcements'), keywords: 'announcements news posts updates' },
       { id: 'page-calendar', category: 'Pages', label: 'Go to Events', action: () => setCurrentView('calendar'), keywords: 'calendar events meetings holidays schedule' },
       { id: 'page-documents', category: 'Pages', label: 'Go to Documents', action: () => setCurrentView('documents'), keywords: 'documents files upload download manager' },

@@ -5,6 +5,7 @@ const Dashboard = lazy(() => import('./Dashboard.jsx'))
 const Employees = lazy(() => import('./Employees.jsx'))
 const Payroll = lazy(() => import('./Payroll.jsx'))
 const Attendance = lazy(() => import('./Attendance.jsx'))
+const Leaves = lazy(() => import('./Leaves.jsx'))
 const Expenses = lazy(() => import('./Expenses.jsx'))
 const Announcements = lazy(() => import('./Announcements.jsx'))
 const Calendar = lazy(() => import('./Calendar.jsx'))
@@ -64,6 +65,9 @@ export default function AppContent({ currentView, setCurrentView, isAppLoading, 
       break
     case 'attendance':
       view = <Attendance employees={data.employees} attendance={data.attendance} setAttendance={data.handleSetAttendance} roster={data.roster} setRoster={data.setRoster} shiftSwaps={data.shiftSwaps} setShiftSwaps={data.setShiftSwaps} shiftTemplates={data.settings?.shiftTemplates} overtimeClaims={data.overtimeClaims} setOvertimeClaims={data.setOvertimeClaims} addLog={data.addLog} addToast={data.addToast} addNotification={data.addNotification} addAuditLog={data.addAuditLog} settings={data.settings} />
+      break
+    case 'leaves':
+      view = <Leaves employees={data.employees} attendance={data.attendance} setAttendance={data.handleSetAttendance} addLog={data.addLog} addToast={data.addToast} settings={data.settings} />
       break
     case 'announcements':
       view = <Announcements employees={data.employees} announcements={data.announcements} setAnnouncements={data.setAnnouncements} addLog={data.addLog} addToast={data.addToast} currentUser={user} addNotification={data.addNotification} />
