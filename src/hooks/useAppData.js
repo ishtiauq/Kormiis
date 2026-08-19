@@ -3,6 +3,8 @@ import { validateDatabase } from '../services/validator.js'
 import { encryptJson, decryptJson } from '../services/crypto.js'
 import { EMPLOYEES_STORAGE_KEY, timestampArrayChanges, getDeviceInfo } from '../utils/helpers.js'
 import { subscribeToTable, writeToTable, fetchTableFromFirestore } from '../services/bridge.js'
+import { initPushSync, broadcast, updateBadge, notifyOnHidden, showSystemNotification } from '../services/pushNotifications.js'
+import { ensurePushSetup } from '../services/fcm.js'
 
 export default function useAppData({ user, addToast }) {
   /* ─── DB state ─── */
@@ -66,27 +68,64 @@ export default function useAppData({ user, addToast }) {
 
   const [showNotifications, setShowNotifications] = useState(false)
 
-  const addNotification = (text, view = null) => {
-    setNotifications(prev => [{ 
-      id: `notif-${Date.now()}`, 
-      text, 
-      read: false, 
+  const notificationsRef = useRef(notifications)
+  useEffect(() => { notificationsRef.current = notifications }, [notifications])
+
+  useEffect(() => {
+    initPushSync(() => notificationsRef.current.filter(n => !n.read).length)
+    updateBadge(notificationsRef.current.filter(n => !n.read).length)
+  }, [])
+
+  useEffect(() => {
+    if (!user) return
+    let unsubscribe = null
+    ensurePushSetup({
+      enabled: settings?.notifications?.pushEnabled,
+      onMessage: (msg) => {
+        const view = String(msg.url || '').replace(/^\//, '').split(/[?#]/)[0].trim() || null
+        addNotification(msg.body || msg.title, view, { title: msg.title, category: msg.category || 'system' })
+        showSystemNotification({ title: msg.title, body: msg.body, url: msg.url })
+      },
+    }).then((res) => { unsubscribe = res.unsubscribe })
+    return () => { if (unsubscribe) unsubscribe() }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, settings?.notifications?.pushEnabled])
+
+  const addNotification = (text, view = null, opts = {}) => {
+    const category = opts.category || (typeof view === 'string' && view !== 'dashboard' ? view : 'system')
+    const notif = {
+      id: `notif-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      text,
+      title: opts.title || text,
+      category,
+      read: false,
       timestamp: Date.now(),
       time: 'Just now',
-      view 
-    }, ...prev])
+      view
+    }
+    setNotifications(prev => [notif, ...prev])
+    notifyOnHidden(notif, settings?.notifications?.pushEnabled)
+    const count = notificationsRef.current.filter(n => !n.read).length + 1
+    updateBadge(count)
+    broadcast({ type: 'badge', count })
   }
 
   const markNotificationsRead = (id = null) => {
-    if (id) {
-      setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
-    } else {
-      setNotifications(prev => prev.map(n => ({ ...n, read: true })))
-    }
+    setNotifications(prev => {
+      const next = id
+        ? prev.map(n => n.id === id ? { ...n, read: true } : n)
+        : prev.map(n => ({ ...n, read: true }))
+      const count = next.filter(n => !n.read).length
+      updateBadge(count)
+      broadcast({ type: 'badge', count })
+      return next
+    })
   }
 
   const clearNotifications = () => {
     setNotifications([])
+    updateBadge(0)
+    broadcast({ type: 'badge', count: 0 })
   }
 
   /* ─── Data state initialisers ─── */
@@ -120,7 +159,7 @@ export default function useAppData({ user, addToast }) {
   const [assets, setAssets] = useState(() => loadSaved('kormiis_assets') || [])
   const [assetRequests, setAssetRequests] = useState(() => loadSaved('kormiis_asset_requests') || [])
   const [assetCategories, setAssetCategories] = useState(() => loadSaved('kormiis_asset_categories') || ['Laptop', 'Phone', 'Monitor', 'Peripherals', 'Access Card'])
-  const [settings, setSettingsRaw] = useState(() => loadSaved('kormiis_settings') || { currency: '৳', officeLocation: { lat: 23.8103, lng: 90.4125, radius: 100 }, salaryStructure: [{ id: 'basic', name: 'Basic Salary', percentage: 50, type: 'earning' }, { id: 'hra', name: 'House Rent Allowance (HRA)', percentage: 25, type: 'earning' }, { id: 'medical', name: 'Medical Allowance', percentage: 10, type: 'earning' }, { id: 'conveyance', name: 'Conveyance Allowance', percentage: 10, type: 'earning' }, { id: 'pf', name: 'Provident Fund (PF)', percentage: 5, type: 'deduction' }], company: { name: 'Kormiis Ltd.', email: 'hr@kormiis.io', website: 'www.kormiis.io', logo: '', logoX: 0, logoY: 0, logoZoom: 1 }, shiftTemplates: [{ id: 'st-1', name: 'Morning Shift', start: '09:00', end: '18:00', break: 60, color: '#3b82f6' }, { id: 'st-2', name: 'Evening Shift', start: '14:00', end: '23:00', break: 60, color: '#8b5cf6' }, { id: 'st-3', name: 'Night Shift', start: '22:00', end: '07:00', break: 60, color: '#1e293b' }, { id: 'st-4', name: 'Half-Day', start: '09:00', end: '13:00', break: 0, color: '#f59e0b' }], overtimeRules: { multiplierWeekday: 1.5, multiplierWeekend: 2.0 }, notifications: { syncAlerts: true, emailDigests: false } })
+  const [settings, setSettingsRaw] = useState(() => loadSaved('kormiis_settings') || { currency: '৳', officeLocation: { lat: 23.8103, lng: 90.4125, radius: 100 }, salaryStructure: [{ id: 'basic', name: 'Basic Salary', percentage: 50, type: 'earning' }, { id: 'hra', name: 'House Rent Allowance (HRA)', percentage: 25, type: 'earning' }, { id: 'medical', name: 'Medical Allowance', percentage: 10, type: 'earning' }, { id: 'conveyance', name: 'Conveyance Allowance', percentage: 10, type: 'earning' }, { id: 'pf', name: 'Provident Fund (PF)', percentage: 5, type: 'deduction' }], company: { name: 'Kormiis Ltd.', email: 'hr@kormiis.io', website: 'www.kormiis.io', logo: '', logoX: 0, logoY: 0, logoZoom: 1 }, shiftTemplates: [{ id: 'st-1', name: 'Morning Shift', start: '09:00', end: '18:00', break: 60 }, { id: 'st-2', name: 'Night Shift', start: '22:00', end: '07:00', break: 60 }], overtimeRules: { multiplierWeekday: 1.5, multiplierWeekend: 2.0 }, notifications: { syncAlerts: true, emailDigests: false } })
   const [syncLogs, setSyncLogs] = useState(() => loadSaved('kormiis_sync_logs') || [])
 
   /* ─── addLog ─── */

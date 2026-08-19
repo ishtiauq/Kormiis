@@ -25,6 +25,7 @@ admin.initializeApp();
 const burnout = require('./burnout');
 const gigs = require('./gigs');
 const performance = require('./performance');
+const push = require('./push');
 
 module.exports = {
   // Feature 1
@@ -47,4 +48,10 @@ module.exports = {
   getPerformanceScores: performance.getPerformanceScores,
   getMyScore: performance.getMyScore,
   getPerformanceTrends: performance.getPerformanceTrends,
+
+  // Feature 8 — push notifications
+  registerDeviceToken: push.registerDeviceToken,
+  unregisterDeviceToken: push.unregisterDeviceToken,
+  sendPush: push.sendPush,
+  sendTestPush: push.sendTestPush,
 };

@@ -161,7 +161,7 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
         setDocuments(prev => prev.map(d => d.id === editingDoc.id ? { ...d, name: formName, category: formCategory, description: formDescription } : d))
         addToast('Document metadata updated', 'success')
         addLog('Document Updated', formName)
-        if (addNotification) addNotification(`Company document updated: "${formName}"`)
+        if (addNotification) addNotification(`Company document updated: "${formName}"`, 'documents', { title: 'Document Updated', category: 'document' })
       } else {
         const id = `doc-${Date.now()}`;
         const fileName = formFile?.name || `${formName.replace(/\s+/g, '_')}.pdf`;
@@ -194,7 +194,7 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
         setDocuments(prev => [newDoc, ...prev])
         addToast('Document uploaded and stored securely.', 'success')
         addLog('Document Uploaded', formName)
-        if (addNotification) addNotification(`New company document available: "${formName}"`)
+        if (addNotification) addNotification(`New company document available: "${formName}"`, 'documents', { title: 'New Document', category: 'document' })
       }
 
       setShowUploadModal(false)

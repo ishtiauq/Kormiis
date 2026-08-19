@@ -102,7 +102,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
       setAnnouncements(prev => [newPost, ...prev])
       addToast('Announcement posted', 'success')
       addLog('Posted Announcement', title)
-      if (addNotification) addNotification(`New announcement posted: "${title}"`)
+      if (addNotification) addNotification(`New announcement posted: "${title}"`, 'announcements', { title: 'New Announcement', category: 'announcement' })
     }
 
     setIsDialogOpen(false)

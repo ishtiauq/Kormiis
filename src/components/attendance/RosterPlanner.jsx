@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useRoster } from '../../hooks/useRoster.js'
 import { addDays } from '../../services/attendance.js'
 import { formatDateShort } from '../../services/date.js'
@@ -5,14 +7,49 @@ import Icon from "@/components/ui/Icon.jsx"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
+import ShiftTemplatesModal, { SHIFT_COLOR_PALETTE } from './ShiftTemplatesModal.jsx'
 
-export default function RosterPlanner({ employees, roster, setRoster, shiftTemplates, addToast }) {
+export default function RosterPlanner({ employees, roster, setRoster, shiftTemplates, setShiftTemplates, addToast }) {
   const {
     weekStart, setWeekStart,
     weekDates, labels, assign, copyPrevWeek, goBack, goNext,
     openRosterEmp, setOpenRosterEmp, openRosterDate, setOpenRosterDate,
     closeAll
   } = useRoster(roster, setRoster, shiftTemplates, employees)
+
+  const [menuRect, setMenuRect] = useState(null)
+  const [manageOpen, setManageOpen] = useState(false)
+
+  const colorFor = (t, i) => t?.color || SHIFT_COLOR_PALETTE[i % SHIFT_COLOR_PALETTE.length]
+
+  const closeMenu = () => { setOpenRosterEmp(null); setOpenRosterDate(null); setMenuRect(null) }
+
+  useEffect(() => {
+    if (!menuRect) return
+    const onScroll = () => closeMenu()
+    const onResize = () => closeMenu()
+    const onKey = (e) => { if (e.key === 'Escape') closeMenu() }
+    window.addEventListener('scroll', onScroll, true)
+    window.addEventListener('resize', onResize)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      window.removeEventListener('scroll', onScroll, true)
+      window.removeEventListener('resize', onResize)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [menuRect])
+
+  const handleToggle = (e, empId, d) => {
+    e.stopPropagation()
+    if (openRosterEmp === empId && openRosterDate === d) {
+      closeMenu()
+    } else {
+      const rect = e.currentTarget.getBoundingClientRect()
+      setOpenRosterEmp(empId)
+      setOpenRosterDate(d)
+      setMenuRect({ top: rect.top, bottom: rect.bottom, centerX: rect.left + rect.width / 2 })
+    }
+  }
 
   const assignWithRestCheck = (empId, dateStr, templateId) => {
     if (templateId !== 'Off') {
@@ -40,11 +77,15 @@ export default function RosterPlanner({ employees, roster, setRoster, shiftTempl
   }
 
   return (
+    <>
     <Card>
       <CardContent className="p-5 sm:p-6">
         <div className="flex justify-between items-center flex-wrap gap-3 pb-4">
           <h3 className="text-base font-bold m-0 text-foreground">Weekly Roster Planner</h3>
           <div className="flex items-center gap-3">
+            <Button variant="outline" size="sm" onClick={() => setManageOpen(true)}>
+              <Icon name="add" size={14}/> Add Shift
+            </Button>
             <Button variant="outline" size="sm" onClick={handleCopyPrev}>
               <Icon name="calendar_month" size={14}/> Copy Prev Week
             </Button>
@@ -87,23 +128,37 @@ export default function RosterPlanner({ employees, roster, setRoster, shiftTempl
                       const entry = (roster || []).find(r => r.employeeId === emp.id && r.date === d)
                       const tid = entry?.templateId || 'Off'
                       const tmpl = (shiftTemplates || []).find(t => t.id === tid)
+                      const tmplIdx = (shiftTemplates || []).findIndex(t => t.id === tid)
+                      const cellColor = tmpl ? colorFor(tmpl, tmplIdx) : undefined
                       const isOpen = openRosterEmp === emp.id && openRosterDate === d
+
+                      let menuStyle = null
+                      if (isOpen && menuRect) {
+                        const itemCount = 1 + (shiftTemplates || []).length
+                        const estH = 12 + itemCount * 32
+                        const openAbove = menuRect.top >= estH + 8
+                        const left = Math.max(8, Math.min(window.innerWidth - 168, menuRect.centerX - 80))
+                        menuStyle = openAbove
+                          ? { left, width: 160, bottom: window.innerHeight - menuRect.top + 4 }
+                          : { left, width: 160, top: menuRect.bottom + 4 }
+                      }
+
                       return (
                         <TableCell key={d} className="text-center p-2 relative">
-                          <button aria-label={`${emp.name} - ${tmpl ? tmpl.name : 'Off'}`} onClick={(e) => { e.stopPropagation(); setOpenRosterEmp(v => v === emp.id && openRosterDate === d ? null : emp.id); setOpenRosterDate(d) }}
+                          <button aria-label={`${emp.name} - ${tmpl ? tmpl.name : 'Off'}`} onClick={(e) => handleToggle(e, emp.id, d)}
                             className="w-full px-2 py-1.5 rounded-md text-xs font-semibold min-h-8 cursor-pointer flex items-center justify-center gap-1 border border-input"
                             style={{
-                              background: tmpl ? `${tmpl.color}18` : undefined,
-                              color: tmpl ? tmpl.color : 'text-muted-foreground',
+                              background: cellColor ? `${cellColor}18` : undefined,
+                              color: cellColor || 'text-muted-foreground',
                             }}>
                             {tmpl ? tmpl.name : 'Off'}
                             <svg width="8" height="5" viewBox="0 0 10 6" fill="none" className="opacity-50"><path d="M1 1l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                           </button>
-                          {isOpen && (
-                            <div onClick={e => e.stopPropagation()}
-                              className="absolute left-1/2 z-50 min-w-[120px] p-1.5 -translate-x-1/2 rounded-xl border border-border bg-popover text-popover-foreground shadow-xl"
-                              style={{ top: 'calc(100% + 4px)' }}>
-                              <button key="Off" aria-label="Set as off" onClick={() => { assignWithRestCheck(emp.id, d, 'Off'); setOpenRosterEmp(null) }}
+                          {isOpen && menuStyle && createPortal(
+                            <div onClick={e => e.stopPropagation()} role="menu"
+                              className="fixed z-[100] p-1.5 rounded-xl border border-border bg-popover text-popover-foreground shadow-xl"
+                              style={menuStyle}>
+                              <button key="Off" aria-label="Set as off" onClick={() => { assignWithRestCheck(emp.id, d, 'Off'); closeMenu() }}
                                 className="block w-full px-2.5 py-1.5 rounded-full text-xs font-semibold text-center transition-colors hover:bg-accent"
                                 style={{
                                   background: tid === 'Off' ? '#6c757d' : undefined,
@@ -111,17 +166,18 @@ export default function RosterPlanner({ employees, roster, setRoster, shiftTempl
                                 }}>
                                 Off
                               </button>
-                              {(shiftTemplates || []).map(t => (
-                                <button key={t.id} aria-label={`Set shift: ${t.name}`} onClick={() => { assignWithRestCheck(emp.id, d, t.id); setOpenRosterEmp(null) }}
+                              {(shiftTemplates || []).map((t, i) => (
+                                <button key={t.id} aria-label={`Set shift: ${t.name}`} onClick={() => { assignWithRestCheck(emp.id, d, t.id); closeMenu() }}
                                   className="block w-full px-2.5 py-1.5 rounded-full text-xs font-semibold text-center transition-colors hover:bg-accent"
                                   style={{
-                                    background: tid === t.id ? t.color : undefined,
+                                    background: tid === t.id ? colorFor(t, i) : undefined,
                                     color: tid === t.id ? '#fff' : undefined,
                                   }}>
                                   {t.name}
                                 </button>
                               ))}
-                            </div>
+                            </div>,
+                            document.body
                           )}
                         </TableCell>
                       )
@@ -133,6 +189,8 @@ export default function RosterPlanner({ employees, roster, setRoster, shiftTempl
           </div>
         </div>
       </CardContent>
-    </Card>
+      </Card>
+      <ShiftTemplatesModal open={manageOpen} onOpenChange={setManageOpen} shiftTemplates={shiftTemplates} setShiftTemplates={setShiftTemplates} addToast={addToast} />
+    </>
   )
 }

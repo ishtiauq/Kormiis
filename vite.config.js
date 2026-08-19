@@ -11,14 +11,15 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: false,
-      includeAssets: ['logo.svg', 'Kormiis Monogram Logo 192.png', 'Kormiis Monogram Logo 512.png', 'screenshot-desktop.jpg', 'screenshot-mobile.jpg'],
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      injectManifest: {
+        globPatterns: ['**/*.{js,css,html,json,png,svg,jpg,jpeg,webp,woff2,ico}'],
+        globIgnores: ['**/Hero Assets.png', '**/screenshot-*.jpg'],
+        maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
+      },
       devOptions: {
         enabled: false
-      },
-      workbox: {
-        maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
-        skipWaiting: true,
-        clientsClaim: true,
       },
       manifest: {
         name: 'Kormiis',

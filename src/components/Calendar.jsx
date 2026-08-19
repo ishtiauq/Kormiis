@@ -90,7 +90,7 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
       ))
       addToast('Event updated', 'success')
       addLog('Event Updated', `${formTitle} on ${formDate}`)
-      if (addNotification) addNotification(`Company event updated: "${formTitle}" on ${formDate}`)
+      if (addNotification) addNotification(`Company event updated: "${formTitle}" on ${formDate}`, 'calendar', { title: 'Event Updated', category: 'event' })
     } else {
       const newEvent = {
         id: `evt-${Date.now()}`,
@@ -105,7 +105,7 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
       setEvents(prev => [...prev, newEvent])
       addToast('Event created', 'success')
       addLog('Event Created', `${formTitle} on ${formDate}`)
-      if (addNotification) addNotification(`New company event scheduled: "${formTitle}" on ${formDate}`)
+      if (addNotification) addNotification(`New company event scheduled: "${formTitle}" on ${formDate}`, 'calendar', { title: 'New Event', category: 'event' })
     }
 
     setShowEventModal(false)

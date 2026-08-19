@@ -900,7 +900,7 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
     addToast('Asset assigned successfully', 'success')
     const empName = employees.find(emp => emp.id === assignForm.employeeId)?.name || 'unknown'
     addLog('Asset "' + assignTarget.name + '" assigned to ' + empName)
-    if (addNotification) addNotification(`You have been assigned a new asset: "${assignTarget.name}"`)
+    if (addNotification) addNotification(`You have been assigned a new asset: "${assignTarget.name}"`, 'assets', { title: 'Asset Assigned', category: 'asset' })
     generateAgreementPDF(assignTarget, employees.find(emp => emp.id === assignForm.employeeId), assignForm.notes)
   }
 

@@ -22,6 +22,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectItem } from "@/components/ui/select"
+import { requestPushPermission, showSystemNotification, getPushPermission } from "../services/pushNotifications.js"
+import { sendTestPush, isFcmAvailable } from "../services/fcm.js"
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
 
 
@@ -106,8 +108,9 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
   const fileInputRef = useRef(null)
   const [syncAlerts, setSyncAlerts] = useState(settings.notifications?.syncAlerts ?? true)
   const [emailDigests, setEmailDigests] = useState(settings.notifications?.emailDigests ?? false)
-  const [shiftTemplates, setShiftTemplates] = useState(settings.shiftTemplates || [])
-  const [overtimeRules, setOvertimeRules] = useState(settings.overtimeRules || { multiplierWeekday: 1.5, multiplierWeekend: 2.0 })
+  const [pushEnabled, setPushEnabled] = useState(settings.notifications?.pushEnabled ?? false)
+  const [pushPermission, setPushPermission] = useState(() => getPushPermission())
+  const [isPushTesting, setIsPushTesting] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [showResetModal, setShowResetModal] = useState(false)
   useModal(() => setShowResetModal(false))
@@ -137,9 +140,8 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
     if (settings.notifications) {
       if (settings.notifications.syncAlerts !== undefined) setSyncAlerts(settings.notifications.syncAlerts)
       if (settings.notifications.emailDigests !== undefined) setEmailDigests(settings.notifications.emailDigests)
+      if (settings.notifications.pushEnabled !== undefined) setPushEnabled(settings.notifications.pushEnabled)
     }
-    if (settings.shiftTemplates) setShiftTemplates(settings.shiftTemplates)
-    if (settings.overtimeRules) setOvertimeRules(settings.overtimeRules)
   }, [settings])
 
   const earningsSum = salaryStructure.filter(s => s.type === 'earning').reduce((a, c) => a + c.percentage, 0)
@@ -174,9 +176,9 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
     Promise.resolve().then(() => {
       setSettings({
         ...settings,
-        currency, salaryStructure, expensePolicies, leavePolicies, shiftTemplates, overtimeRules, officeLocation,
+        currency, salaryStructure, expensePolicies, leavePolicies, officeLocation,
         company: { ...settings.company, name: companyName, email: companyEmail, website: companyWebsite, logo, logoX, logoY, logoZoom },
-        notifications: { syncAlerts, emailDigests }
+        notifications: { syncAlerts, emailDigests, pushEnabled }
       })
       addLog('Settings Updated', 'Saved system settings and synced configurations', 'success')
       setIsSaving(false)
@@ -213,7 +215,6 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
     { id: 'company', icon: <Icon name="apartment" size={20}/>, label: 'Company Profile' },
     { id: 'attendance', icon: <Icon name="pin_drop" size={20}/>, label: 'Attendance & Leaves' },
     { id: 'expenses', icon: <Icon name="wallet" size={20}/>, label: 'Expense Policies' },
-    { id: 'rosters', icon: <Icon name="calendar_clock" size={20}/>, label: 'Rosters & Shifts' },
     { id: 'notifications', icon: <Icon name="notifications_active" size={20}/>, label: 'Notifications' },
     { id: 'audit', icon: <Icon name="list" size={20}/>, label: 'Audit Logs' },
     { id: 'security', icon: <Icon name="verified_user" size={20}/>, label: 'Security' },
@@ -396,6 +397,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
         </Card>
       )
       case 'notifications': return (
+        <div className="flex flex-col gap-6">
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
@@ -419,6 +421,79 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
             ))}
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Icon name="notifications" className="h-5 w-5 text-muted-foreground" size={20}/>
+              <CardTitle className="text-lg">Push Notifications</CardTitle>
+            </div>
+            <CardDescription>Get system-level alerts on this device — desktop, phone, or any open tab — even when the app is in the background.</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col">
+            <div className="py-4 flex justify-between items-center border-b border-border">
+              <div className="flex flex-col gap-1">
+                <span className="font-medium text-sm">Enable Push Alerts</span>
+                <span className="text-xs text-muted-foreground">Shows OS notifications for new activity while the app is minimized or on another tab.</span>
+              </div>
+              <input type="checkbox" checked={pushEnabled} onChange={e => setPushEnabled(e.target.checked)} className="h-4 w-4 rounded accent-primary cursor-pointer shrink-0 ml-4" />
+            </div>
+            <div className="py-4 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-col gap-1">
+                <span className="font-medium text-sm">Browser Permission</span>
+                <span className={`text-xs ${pushPermission === 'denied' ? 'text-red-500 font-semibold' : 'text-muted-foreground'}`}>
+                  {pushPermission === 'granted' ? 'Granted — system notifications will appear.'
+                    : pushPermission === 'denied' ? 'Blocked — enable from your browser\'s site settings to receive push alerts.'
+                    : pushPermission === 'unsupported' ? 'Not supported on this browser.'
+                    : 'Not requested yet.'}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                {pushPermission !== 'granted' && pushPermission !== 'unsupported' && (
+                  <Button variant="outline" size="sm" onClick={async () => {
+                    const res = await requestPushPermission()
+                    setPushPermission(res)
+                    if (res === 'granted' && addToast) addToast('Push notifications enabled.', 'success')
+                    else if (res === 'denied' && addToast) addToast('Permission blocked by the browser.', 'error')
+                  }}>
+                    <Icon name="notifications_active" className="mr-2 h-4 w-4" size={16} /> Allow
+                  </Button>
+                )}
+                <Button variant="outline" size="sm" disabled={isPushTesting} onClick={async () => {
+                  if (pushPermission !== 'granted') {
+                    const res = await requestPushPermission()
+                    setPushPermission(res)
+                    if (res !== 'granted') {
+                      if (addToast) addToast('Allow notification permission first.', 'warning')
+                      return
+                    }
+                  }
+                  setIsPushTesting(true)
+                  const fcmRes = await sendTestPush()
+                  if (fcmRes.ok) {
+                    if (addToast) addToast(fcmRes.delivered > 0 ? `FCM push sent (${fcmRes.delivered}/${fcmRes.sent} delivered).` : (fcmRes.message || 'FCM test queued.'), fcmRes.delivered > 0 ? 'success' : 'warning')
+                  } else {
+                    await showSystemNotification({ title: 'Kormiis Test Alert', body: 'Push notifications are working on this device. 🎉', url: '' })
+                    if (addToast) addToast(fcmRes.reason === 'no-backend' ? 'Backend not deployed — showing local system notification. Run `firebase deploy --only functions` for FCM.' : 'Test push sent (local).', 'success')
+                  }
+                  setIsPushTesting(false)
+                }}>
+                  {isPushTesting ? <Icon name="monitoring" className="mr-2 h-4 w-4 animate-spin" size={16} /> : <Icon name="send" className="mr-2 h-4 w-4" size={16} />}
+                  Send Test Notification
+                </Button>
+              </div>
+            </div>
+            {pushEnabled && (
+              <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-muted/30 border border-border text-xs text-muted-foreground">
+                <Icon name={isFcmAvailable() ? 'cloud_done' : 'cloud_off'} size={15} className={isFcmAvailable() ? 'text-emerald-500' : 'text-amber-500'} />
+                {isFcmAvailable()
+                  ? 'Firebase Cloud Messaging ready — pushes reach this device even when the app is closed.'
+                  : 'Cloud Messaging not configured yet: add your Web Push (VAPID) key to VITE_FIREBASE_VAPID_KEY in .env, then rebuild.'}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+        </div>
       )
       case 'attendance': return (
         <div className="flex flex-col gap-6">
@@ -558,71 +633,6 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
             </div>
           </CardContent>
         </Card>
-      )
-      case 'rosters': return (
-        <div className="flex flex-col gap-6">
-          <Card>
-            <CardHeader className="flex flex-row justify-between items-center space-y-0">
-              <div className="flex items-center gap-2">
-                <Icon name="calendar_clock" className="h-5 w-5 text-muted-foreground" size={20}/>
-                <CardTitle className="text-lg">Shift Templates</CardTitle>
-              </div>
-              <Button variant="outline" size="sm" onClick={() => setShiftTemplates(prev => [...prev, { id: `st-${Date.now()}`, name: 'New Shift', start: '09:00', end: '17:00', break: 60, color: '#333333' }])}>
-                <Icon name="add" className="mr-2 h-4 w-4" size={16}/> Add Shift
-              </Button>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-4">
-              {shiftTemplates.map(t => (
-                <div key={t.id} className="flex flex-wrap gap-4 items-end p-4 bg-muted/30 border border-border rounded-lg">
-                  <div className="flex-1 min-w-[140px] flex flex-col gap-2">
-                    <label className="text-xs font-medium text-muted-foreground uppercase">Shift Name</label>
-                    <Input value={t.name} onChange={e => setShiftTemplates(prev => prev.map(x => x.id === t.id ? { ...x, name: e.target.value } : x))} />
-                  </div>
-                  <div className="w-[100px] flex flex-col gap-2">
-                    <label className="text-xs font-medium text-muted-foreground uppercase">Start</label>
-                    <Input type="time" value={t.start} onChange={e => setShiftTemplates(prev => prev.map(x => x.id === t.id ? { ...x, start: e.target.value } : x))} />
-                  </div>
-                  <div className="w-[100px] flex flex-col gap-2">
-                    <label className="text-xs font-medium text-muted-foreground uppercase">End</label>
-                    <Input type="time" value={t.end} onChange={e => setShiftTemplates(prev => prev.map(x => x.id === t.id ? { ...x, end: e.target.value } : x))} />
-                  </div>
-                  <div className="w-[80px] flex flex-col gap-2">
-                    <label className="text-xs font-medium text-muted-foreground uppercase">Break(m)</label>
-                    <Input type="number" value={t.break} onChange={e => setShiftTemplates(prev => prev.map(x => x.id === t.id ? { ...x, break: parseInt(e.target.value) || 0 } : x))} />
-                  </div>
-                  <div className="w-[50px] flex flex-col gap-2">
-                    <label className="text-xs font-medium text-transparent uppercase">C</label>
-                    <input type="color" value={t.color} onChange={e => setShiftTemplates(prev => prev.map(x => x.id === t.id ? { ...x, color: e.target.value } : x))} className="h-10 w-full p-0 border-0 bg-transparent rounded cursor-pointer" />
-                  </div>
-                  <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-red-500 mb-0.5" onClick={() => setShiftTemplates(prev => prev.filter(x => x.id !== t.id))}>
-                    <Icon name="delete" className="h-4 w-4" size={16}/>
-                  </Button>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Icon name="monitoring" className="h-5 w-5 text-muted-foreground" size={20}/>
-                <CardTitle className="text-lg">Overtime Rules</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm font-medium text-muted-foreground uppercase tracking-wider text-[11px]">Weekday Multiplier</label>
-                  <Input type="number" step="0.1" value={overtimeRules.multiplierWeekday} onChange={e => setOvertimeRules(prev => ({ ...prev, multiplierWeekday: parseFloat(e.target.value) || 1 }))} />
-                </div>
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm font-medium text-muted-foreground uppercase tracking-wider text-[11px]">Weekend/Holiday Multiplier</label>
-                  <Input type="number" step="0.1" value={overtimeRules.multiplierWeekend} onChange={e => setOvertimeRules(prev => ({ ...prev, multiplierWeekend: parseFloat(e.target.value) || 1 }))} />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
       )
       case 'audit': return (
         <Card>
@@ -782,7 +792,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                   <div className="p-4 md:p-6 border-t border-border bg-muted/10 flex flex-col gap-6">
                     {isActive && renderSettingsContent(item.id)}
                     
-                    {isActive && ['payroll', 'company', 'attendance', 'expenses', 'rosters', 'notifications'].includes(item.id) && (
+                    {isActive && ['payroll', 'company', 'attendance', 'expenses', 'notifications'].includes(item.id) && (
                       <div className="flex justify-end gap-3 pt-4 mt-2 border-t border-border/50">
                         <Button variant="ghost" onClick={() => setShowResetModal(true)}>Reset Defaults</Button>
                         <Button onClick={handleSave} disabled={isSaving || (item.id === 'payroll' && isOver100)}>

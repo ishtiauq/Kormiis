@@ -6,6 +6,7 @@ import LeaveRequests from './LeaveRequests.jsx'
 import LeaveBalanceCard from './LeaveBalanceCard.jsx'
 import RosterPlanner from './RosterPlanner.jsx'
 import ShiftSwaps from './ShiftSwaps.jsx'
+import OvertimeRulesEditor from './OvertimeRulesEditor.jsx'
 import OvertimeClaims from './OvertimeClaims.jsx'
 
 export default function AttendancePage({ 
@@ -16,7 +17,6 @@ export default function AttendancePage({
   setRoster, 
   shiftSwaps, 
   setShiftSwaps, 
-  shiftTemplates, 
   overtimeClaims, 
   setOvertimeClaims, 
   addLog, 
@@ -24,6 +24,7 @@ export default function AttendancePage({
   addNotification, 
   addAuditLog,
   settings,
+  setSettings,
   headline = 'Attendance & Leaves',
   icon = 'schedule',
   tabs: propTabs,
@@ -37,6 +38,18 @@ export default function AttendancePage({
   ]
   const tabs = propTabs || allTabs
   const [tab, setTab] = useState(defaultTab)
+
+  const shiftTemplates = settings?.shiftTemplates || []
+  const overtimeRules = settings?.overtimeRules || { multiplierWeekday: 1.5, multiplierWeekend: 2.0 }
+
+  const updateShiftTemplates = (updater) => {
+    if (!setSettings) return
+    setSettings(prev => ({ ...prev, shiftTemplates: typeof updater === 'function' ? updater(prev?.shiftTemplates || []) : updater }))
+  }
+  const updateOvertimeRules = (updater) => {
+    if (!setSettings) return
+    setSettings(prev => ({ ...prev, overtimeRules: typeof updater === 'function' ? updater(prev?.overtimeRules || { multiplierWeekday: 1.5, multiplierWeekend: 2.0 }) : updater }))
+  }
 
   return (
     <div className="animate-fade-in flex flex-col gap-6 w-full pb-10">
@@ -83,11 +96,16 @@ export default function AttendancePage({
       )}
       {tab === 'roster' && (
         <div className="flex flex-col gap-5">
-          <RosterPlanner employees={employees} roster={roster} setRoster={setRoster} shiftTemplates={shiftTemplates} addToast={addToast} />
+          <RosterPlanner employees={employees} roster={roster} setRoster={setRoster} shiftTemplates={shiftTemplates} setShiftTemplates={updateShiftTemplates} addToast={addToast} />
           <ShiftSwaps employees={employees} shiftSwaps={shiftSwaps} setShiftSwaps={setShiftSwaps} roster={roster} setRoster={setRoster} addToast={addToast} />
         </div>
       )}
-      {tab === 'overtime' && <OvertimeClaims employees={employees} overtimeClaims={overtimeClaims} setOvertimeClaims={setOvertimeClaims} addToast={addToast} />}
+      {tab === 'overtime' && (
+        <div className="flex flex-col gap-5">
+          <OvertimeRulesEditor overtimeRules={overtimeRules} setOvertimeRules={updateOvertimeRules} />
+          <OvertimeClaims employees={employees} overtimeClaims={overtimeClaims} setOvertimeClaims={setOvertimeClaims} addToast={addToast} />
+        </div>
+      )}
     </div>
   )
 }

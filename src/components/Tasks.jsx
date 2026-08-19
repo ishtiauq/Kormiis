@@ -91,7 +91,7 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
       if (addNotification) {
         taskForm.assigneeIds.forEach(id => {
           if (id !== currentUser?.id && !editingTask.assigneeIds?.includes(id)) {
-            addNotification(`You have been assigned to task: "${taskForm.title}"`)
+            addNotification(`You have been assigned to task: "${taskForm.title}"`, 'tasks', { title: 'Task Assigned', category: 'task' })
           }
         })
       }
@@ -107,7 +107,7 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
       if (addNotification && taskForm.assigneeIds?.length > 0) {
         taskForm.assigneeIds.forEach(id => {
           if (id !== currentUser?.id) {
-            addNotification(`You have been assigned a new task: "${taskForm.title}"`)
+            addNotification(`You have been assigned a new task: "${taskForm.title}"`, 'tasks', { title: 'New Task Assigned', category: 'task' })
           }
         })
       }
@@ -170,11 +170,11 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
         if (t.id === editingTask.id) {
           const updatedTask = { ...t, updates: [...(t.updates || []), newUpdate] }
           if (t.createdBy && t.createdBy !== currentUser?.id) {
-             if (addNotification) addNotification(`${currentUser?.name || 'Someone'} added an update to task: "${t.title}"`)
+             if (addNotification) addNotification(`${currentUser?.name || 'Someone'} added an update to task: "${t.title}"`, 'tasks', { title: 'Task Update', category: 'task' })
           }
           t.assigneeIds?.forEach(assigneeId => {
              if (assigneeId !== currentUser?.id) {
-                if (addNotification) addNotification(`${currentUser?.name || 'Someone'} updated task: "${t.title}"`)
+                if (addNotification) addNotification(`${currentUser?.name || 'Someone'} updated task: "${t.title}"`, 'tasks', { title: 'Task Update', category: 'task' })
              }
           })
           return updatedTask

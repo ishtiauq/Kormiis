@@ -1,4 +1,5 @@
 import Icon from "@/components/ui/Icon.jsx"
+import { CATEGORY_META } from "../../services/pushNotifications.js"
 import { Button } from "@/components/ui/button"
 import kormiisLogo from '../../Assets/Kormiis Logo Final.svg'
 import kormiisWhiteLogo from '../../Assets/Kormiis white Logo.svg'
@@ -269,7 +270,9 @@ export default function Topbar({
                   <p className="text-sm font-medium text-muted-foreground m-0">No new notifications</p>
                 </div>
               ) : (
-                filteredNotifications.map(n => (
+                filteredNotifications.map(n => {
+                  const meta = CATEGORY_META[n.category] || CATEGORY_META.system
+                  return (
                   <div 
                     role="listitem" 
                     key={n.id} 
@@ -287,15 +290,26 @@ export default function Topbar({
                     }`}
                   >
                     {!n.read && (
-                      <span className="absolute left-2.5 top-1/2 -translate-y-1/2 flex size-2">
+                      <span className="absolute right-3 top-3 flex size-2">
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                         <span className="relative inline-flex rounded-full size-2 bg-primary"></span>
                       </span>
                     )}
-                    <p className={`text-fluid-sm m-0 leading-snug text-foreground ${!n.read ? 'pl-3 font-semibold' : 'font-medium'}`}>{n.text}</p>
-                    <span className={`text-[11px] block mt-1 text-muted-foreground ${!n.read ? 'pl-3' : ''}`}>{n.time}</span>
+                    <div className="flex items-start gap-2.5">
+                      <span className="size-7 shrink-0 rounded-lg flex items-center justify-center mt-0.5" style={{ background: `${meta.color}1a`, color: meta.color }}>
+                        <Icon name={meta.icon} size={14} />
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        {n.title && n.title !== n.text && (
+                          <p className="text-fluid-sm font-semibold m-0 leading-snug text-foreground">{n.title}</p>
+                        )}
+                        <p className={`text-fluid-sm m-0 leading-snug text-foreground ${!n.read ? 'font-semibold' : 'font-medium'}`}>{n.text}</p>
+                        <span className={`text-[11px] block mt-1 text-muted-foreground`}>{n.time}</span>
+                      </div>
+                    </div>
                   </div>
-                ))
+                  )
+                })
               )}
             </div>
             <DialogFooter className="p-3 px-6 bg-white/[0.04] dark:bg-black/20 pb-3 flex justify-between items-center">
@@ -376,7 +390,9 @@ export default function Topbar({
                   <p className="text-sm font-medium text-muted-foreground m-0">No new notifications</p>
                 </div>
               ) : (
-                filteredNotifications.map(n => (
+                filteredNotifications.map(n => {
+                  const meta = CATEGORY_META[n.category] || CATEGORY_META.system
+                  return (
                   <div 
                     role="listitem" 
                     key={n.id} 
@@ -394,15 +410,26 @@ export default function Topbar({
                     }`}
                   >
                     {!n.read && (
-                      <span className="absolute left-2.5 top-1/2 -translate-y-1/2 flex size-2">
+                      <span className="absolute right-3 top-3 flex size-2">
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                         <span className="relative inline-flex rounded-full size-2 bg-primary"></span>
                       </span>
                     )}
-                    <p className={`text-fluid-sm m-0 leading-snug text-foreground ${!n.read ? 'pl-3 font-semibold' : 'font-medium'}`}>{n.text}</p>
-                    <span className={`text-[11px] block mt-1 text-muted-foreground ${!n.read ? 'pl-3' : ''}`}>{n.time}</span>
+                    <div className="flex items-start gap-2.5">
+                      <span className="size-7 shrink-0 rounded-lg flex items-center justify-center mt-0.5" style={{ background: `${meta.color}1a`, color: meta.color }}>
+                        <Icon name={meta.icon} size={14} />
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        {n.title && n.title !== n.text && (
+                          <p className="text-fluid-sm font-semibold m-0 leading-snug text-foreground">{n.title}</p>
+                        )}
+                        <p className={`text-fluid-sm m-0 leading-snug text-foreground ${!n.read ? 'font-semibold' : 'font-medium'}`}>{n.text}</p>
+                        <span className={`text-[11px] block mt-1 text-muted-foreground`}>{n.time}</span>
+                      </div>
+                    </div>
                   </div>
-                ))
+                  )
+                })
               )}
             </div>
 

@@ -30,6 +30,14 @@ export default function App() {
 
   const [isInitialLoading, setIsInitialLoading] = useState(true)
   const [currentView, setCurrentView] = useState(() => localStorage.getItem('kormiis_current_view') || 'dashboard')
+
+  useEffect(() => {
+    window.__kormiisNavigate = (view) => {
+      if (view && view !== currentView) setCurrentView(view)
+      window.focus()
+    }
+    return () => { window.__kormiisNavigate = null }
+  }, [currentView])
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const [showMobileMenu, setShowMobileMenu] = useState(false)
   const [isScrollingDown, setIsScrollingDown] = useState(false)
