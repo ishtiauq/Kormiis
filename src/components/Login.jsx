@@ -512,9 +512,9 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
   }
 
   return (
-<div 
+    <div 
       ref={containerRef}
-      className="force-light-mode h-dvh bg-background text-foreground relative overflow-y-auto overflow-x-hidden font-sans scroll-smooth snap-y snap-mandatory transition-colors duration-[1500ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
+      className="dark force-dark-mode h-dvh bg-[#090a0f] text-foreground relative overflow-y-auto overflow-x-hidden font-sans scroll-smooth snap-y snap-mandatory transition-colors duration-[1500ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
     >
       
       {/* Top-Left Brand Logo (Compact on mobile, standard on tablet/desktop) */}
