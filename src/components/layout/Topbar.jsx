@@ -1,19 +1,43 @@
 import Icon from "@/components/ui/Icon.jsx"
 import { Button } from "@/components/ui/button"
 import kormiisLogo from '../../Assets/Kormiis Logo Final.svg'
-import kormiisLogoDark from '../../Assets/Kormiis Logo Dark.svg'
+import kormiisWhiteLogo from '../../Assets/Kormiis white Logo.svg'
 
 import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleTheme, handleSync, isSyncing, dataIntegrityIssues = [], showCorruptionModal, setShowCorruptionModal, handleAutoRepairDatabase, setShowNotifications, markNotificationsRead, unreadCount, showNotifications, notifications = [], clearNotifications, onProfileClick, handleLogout, showThemeToggle = true, user, setCurrentView }) {
+export default function Topbar({ 
+  isDarkMode, 
+  toggleSidebar, 
+  themeMode, 
+  toggleTheme, 
+  handleSync, 
+  isSyncing, 
+  dataIntegrityIssues = [], 
+  showCorruptionModal, 
+  setShowCorruptionModal, 
+  handleAutoRepairDatabase, 
+  setShowNotifications, 
+  markNotificationsRead, 
+  unreadCount, 
+  showNotifications, 
+  notifications = [], 
+  clearNotifications, 
+  onProfileClick, 
+  handleLogout, 
+  showThemeToggle = true, 
+  user, 
+  setCurrentView,
+  onOpenSearch
+}) {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true)
   const buttonRef = useRef(null)
   const [modalPos, setModalPos] = useState({ top: 0, right: 0 })
   const [notificationTab, setNotificationTab] = useState('all')
   const filteredNotifications = notificationTab === 'unread' ? notifications.filter(n => !n.read) : notifications
+  const isDark = isDarkMode ?? (themeMode === 'dark' || (typeof document !== 'undefined' && document.documentElement.classList.contains('dark')))
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true)
@@ -44,109 +68,129 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
 
   return (
     <>
-      {/* Mobile: Liquid Glass Top Bar */}
-      {isMobile ? (
-        <header aria-label="Top bar" className="topbar topbar-bar w-full h-14 px-4 flex items-center justify-between glass-kormiis text-foreground transition-all duration-300">
-          <div className="flex items-center shrink-0">
+      {/* Apple Liquid Glass Floating Capsule Navbar */}
+      <header 
+        aria-label="Top Navigation Bar" 
+        className="topbar pointer-events-auto w-[calc(100%-1rem)] sm:w-[94%] md:w-[90%] max-w-4xl mx-auto h-13 sm:h-15 md:h-16 px-2.5 sm:px-4 md:px-5 flex items-center justify-between rounded-full glass-kormiis text-foreground transition-all duration-300 relative select-none shadow-xl"
+      >
+        {/* Left: Brand Logo Pill */}
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          <button
+            onClick={() => setCurrentView && setCurrentView('dashboard')}
+            className="flex items-center px-2 sm:px-2.5 py-1 rounded-full apple-glass-btn cursor-pointer transition-all active:scale-95 group"
+            title="Kormiis Dashboard"
+          >
             <img 
-              src={isDarkMode ? kormiisLogoDark : kormiisLogo} 
+              src={isDark ? kormiisWhiteLogo : kormiisLogo} 
               alt="Kormiis Logo" 
-              className="block h-9 w-auto max-w-[160px] object-contain shrink-0 drop-shadow-sm" 
+              className="h-7 sm:h-8 md:h-9 w-auto max-w-[120px] sm:max-w-[150px] object-contain shrink-0 drop-shadow-sm group-hover:opacity-90 transition-opacity" 
             />
-          </div>
-          <div className="flex items-center gap-0.5 shrink-0">
-            {showThemeToggle && (
-              <button
-                onClick={toggleTheme}
-                title={`Theme: ${themeMode}`}
-                className="rounded-full size-10 sm:size-11 text-foreground !bg-transparent hover:opacity-80 transition-opacity shrink-0 flex items-center justify-center cursor-pointer"
-              >
-                {themeMode === 'light' ? <Icon name="light_mode" size={20} /> : <Icon name="dark_mode" size={20} />}
-              </button>
-            )}
-            {onProfileClick && (
-              <button
-                onClick={onProfileClick}
-                title="Profile"
-                aria-label="Profile"
-                className="rounded-full size-10 sm:size-11 p-0 overflow-hidden shrink-0 !border-transparent cursor-pointer bg-transparent hover:opacity-80 transition-opacity"
-              >
-                <img
-                  src={user?.avatar || "https://i.pravatar.cc/150?u=a042581f4e29026704d"}
-                  alt={user?.name ? `${user.name}'s profile` : "Profile"}
-                  className="w-full h-full object-cover rounded-full border border-border/50 shadow-sm"
-                />
-              </button>
-            )}
-          </div>
-        </header>
-      ) : (
-        <header aria-label="Top bar" className="topbar w-[98%] min-[400px]:w-[94%] sm:w-[85%] max-w-3xl mx-auto h-14 sm:h-16 px-2 min-[400px]:px-4 flex items-center justify-between rounded-full glass-kormiis text-foreground transition-all duration-300">
+          </button>
+        </div>
+
+        {/* Center: Apple Spotlight Search Trigger (Hidden on very small screens, visible on md+) */}
+        {onOpenSearch && (
+          <button
+            onClick={onOpenSearch}
+            className="hidden md:flex items-center gap-2.5 px-3.5 py-1.5 rounded-full apple-glass-btn text-muted-foreground hover:text-foreground text-xs font-medium cursor-pointer transition-all shrink-0 max-w-[240px] w-full"
+            title="Search actions, pages, and employees (⌘K)"
+          >
+            <Icon name="search" size={16} className="text-muted-foreground" />
+            <span className="truncate flex-1 text-left">Search or jump to...</span>
+            <kbd className="px-1.5 py-0.5 text-[10px] font-semibold bg-background/60 dark:bg-white/10 rounded-md border border-border/50 text-foreground/80">⌘K</kbd>
+          </button>
+        )}
+
+        {/* Right: Actions Group (Live Status, Theme, Notification, Profile) */}
+        <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
           
-          {/* Left Section: Brand Pill */}
-          <div className="flex items-center gap-1 min-[400px]:gap-3 sm:gap-4 shrink-0">
+          {/* Data Integrity / Auto-Repair Alert (if discrepancies exist) */}
+          {dataIntegrityIssues && dataIntegrityIssues.length > 0 && (
+            <button
+              onClick={() => setShowCorruptionModal && setShowCorruptionModal(true)}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-destructive/15 text-destructive border border-destructive/30 hover:bg-destructive/25 transition-all cursor-pointer animate-pulse"
+              title={`${dataIntegrityIssues.length} data discrepancies detected`}
+            >
+              <Icon name="warning" size={14} />
+              <span className="hidden sm:inline">{dataIntegrityIssues.length}</span>
+            </button>
+          )}
 
-
-            <div className="flex items-center px-2 min-[400px]:px-3 py-1 sm:py-1.5 rounded-xl bg-transparent border-transparent">
-              <img 
-                src={isDarkMode ? kormiisLogoDark : kormiisLogo} 
-                alt="Kormiis Logo" 
-                className="h-8 sm:h-10 w-auto max-w-[140px] sm:max-w-[180px] object-contain shrink-0 drop-shadow-sm" 
-              />
+          {/* Live / Offline Status Beacon */}
+          {isOnline ? (
+            <div 
+              className="hidden min-[480px]:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black tracking-wider uppercase apple-glass-btn text-foreground select-none"
+              title="Realtime cloud connection active"
+            >
+              <span className="relative flex size-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
+                <span className="relative inline-flex rounded-full size-2 bg-emerald-500"></span>
+              </span>
+              <span className="text-[10px] font-extrabold text-foreground">LIVE</span>
             </div>
-          </div>
+          ) : (
+            <div 
+              className="hidden min-[480px]:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase text-muted-foreground apple-glass-btn select-none"
+              title="Offline mode - changes stored locally"
+            >
+              <span className="size-2 rounded-full bg-muted-foreground/60"></span>
+              <span>OFFLINE</span>
+            </div>
+          )}
 
-          {/* Right Section: Live Status Badge + Theme Toggle + Notification Trigger */}
-          <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
-            
-            {/* Flat Live / Offline Status Badge with Shimmer */}
-            {isOnline ? (
-              <div className="btn-shimmer bg-live-red h-8 px-3 rounded-full text-xs font-black tracking-wider uppercase flex items-center gap-2 select-none shrink-0 shadow-xs">
-                <span className="relative flex size-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-80"></span>
-                  <span className="relative inline-flex rounded-full size-2 bg-white"></span>
+          {/* Theme Toggle Button */}
+          {showThemeToggle && (
+            <button
+              onClick={toggleTheme}
+              title={`Switch Theme (Current: ${themeMode})`}
+              aria-label="Toggle light/dark theme"
+              className="rounded-full size-8 sm:size-9 text-foreground apple-glass-btn shrink-0 flex items-center justify-center cursor-pointer"
+            >
+              {themeMode === 'light' ? <Icon name="light_mode" size={18} /> : <Icon name="dark_mode" size={18} />}
+            </button>
+          )}
+
+          {/* Notifications Trigger */}
+          <div className="relative">
+            <button
+              ref={buttonRef}
+              onClick={() => { 
+                setShowNotifications(prev => !prev); 
+                if (markNotificationsRead) markNotificationsRead();
+              }}
+              title="Notifications"
+              aria-label="Notifications"
+              className="rounded-full size-8 sm:size-9 text-foreground apple-glass-btn relative shrink-0 flex items-center justify-center cursor-pointer"
+              id="notification-trigger"
+            >
+              <Icon name="notifications_active" size={18} />
+              {unreadCount > 0 && (
+                <span className="absolute top-1 right-1 flex size-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
+                  <span className="relative inline-flex rounded-full size-2.5 bg-destructive"></span>
                 </span>
-                <span>LIVE</span>
-              </div>
-            ) : (
-              <div className="h-8 px-3 rounded-full text-xs font-bold tracking-wider uppercase text-muted-foreground bg-muted border border-border flex items-center gap-2 select-none shrink-0">
-                <span className="w-2 h-2 rounded-full bg-muted-foreground/60"></span>
-                <span>OFFLINE</span>
-              </div>
-            )}
-
-            {/* Theme Toggle Button */}
-            {showThemeToggle && (
-              <button
-                onClick={toggleTheme}
-                title={`Theme: ${themeMode}`}
-                className="rounded-full size-8 min-[400px]:size-9 sm:size-10 text-foreground !bg-transparent hover:opacity-80 transition-opacity shrink-0 flex items-center justify-center cursor-pointer"
-              >
-                {themeMode === 'light' ? <Icon name="light_mode" size={20} /> : <Icon name="dark_mode" size={20} />}
-              </button>
-            )}
-
-            {/* Notifications Button (Desktop) */}
-            <div className="relative">
-              <button
-                ref={buttonRef}
-                onClick={() => { setShowNotifications(prev => !prev); markNotificationsRead() }}
-                className="rounded-full size-8 min-[400px]:size-9 sm:size-10 text-foreground !bg-transparent hover:opacity-80 transition-opacity relative shrink-0 flex items-center justify-center cursor-pointer"
-                id="notification-trigger"
-              >
-                <Icon name="notifications_active" size={20} />
-                {unreadCount > 0 && (
-                  <span className="absolute top-1.5 right-1.5 flex size-3">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
-                    <span className="relative inline-flex rounded-full size-3 bg-destructive"></span>
-                  </span>
-                )}
-              </button>
-            </div>
-
+              )}
+            </button>
           </div>
-        </header>
-      )}
+
+          {/* User Profile Avatar Pill */}
+          {user && (
+            <button
+              onClick={onProfileClick || (() => setCurrentView && setCurrentView('profile'))}
+              title={user?.name ? `${user.name} (My Profile)` : "My Profile"}
+              aria-label="Open Profile"
+              className="rounded-full size-8 sm:size-9 p-0.5 overflow-hidden shrink-0 apple-glass-btn cursor-pointer flex items-center justify-center ring-1 ring-white/30 dark:ring-white/15 hover:ring-primary/50 transition-all"
+            >
+              <img
+                src={user?.avatar || "https://i.pravatar.cc/150?u=a042581f4e29026704d"}
+                alt={user?.name ? `${user.name}'s profile` : "Profile"}
+                className="w-full h-full object-cover rounded-full"
+              />
+            </button>
+          )}
+
+        </div>
+      </header>
 
       {/* Mobile Notifications Dialog */}
       {showNotifications && isMobile && (

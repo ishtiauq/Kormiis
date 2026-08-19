@@ -1,39 +1,34 @@
 import React from 'react'
-import kormiisWhiteLogo from '../../Assets/Kormiis white Logo.svg'
 
 export default function LandingFooter({ onOpenLegal }) {
   const currentYear = new Date().getFullYear()
 
   return (
-    <footer className="w-full bg-black py-6 px-4 sm:px-6 lg:px-8 mt-auto">
-      <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+    <footer className="w-full z-20 px-4 sm:px-6 lg:px-8 py-1 pb-16 sm:pb-18 lg:pb-2 shrink-0">
+      <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 text-xs text-[#888888]">
         
-        {/* Brand Logo only (White) */}
-        <div className="flex items-center shrink-0">
-          <img 
-            src={kormiisWhiteLogo} 
-            alt="Kormiis" 
-            className="h-6 sm:h-7 w-auto object-contain" 
-          />
-        </div>
+        {/* Copyright */}
+        <span className="whitespace-nowrap text-xs text-[#888888]">
+          © {currentYear} Kormiis Ltd.
+        </span>
 
-        {/* Essential Links & Copyright */}
-        <div className="flex flex-wrap items-center justify-center sm:justify-end gap-6 text-xs text-[#bbbbbb]">
+        {/* Essential Legal Links Box */}
+        <div className="inline-flex items-center gap-2 sm:gap-2.5 px-2.5 sm:px-3.5 py-0.5 sm:py-1 rounded-full bg-[#18181b] border border-white/10 shadow-sm text-xs">
           <button 
             type="button" 
             onClick={() => onOpenLegal && onOpenLegal('privacy')} 
-            className="hover:text-white transition-colors"
+            className="hover:text-white transition-colors cursor-pointer whitespace-nowrap text-xs text-[#888888]"
           >
-            Privacy Policy
+            Privacy
           </button>
+          <span className="text-white/20 text-xs select-none">|</span>
           <button 
             type="button" 
             onClick={() => onOpenLegal && onOpenLegal('terms')} 
-            className="hover:text-white transition-colors"
+            className="hover:text-white transition-colors cursor-pointer whitespace-nowrap text-xs text-[#888888]"
           >
-            Terms of Service
+            Terms
           </button>
-          <span className="text-[#888888]">© {currentYear} Kormiis Ltd. All rights reserved.</span>
         </div>
 
       </div>

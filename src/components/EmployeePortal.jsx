@@ -320,7 +320,7 @@ export default function EmployeePortal({
         <div className="w-full max-w-[1600px] flex flex-col relative">
           
           {/* Sticky Header Wrapper */}
-          <div className={`sticky top-0 z-40 w-full pt-0 md:pt-8 lg:pt-10 pb-6 md:pb-8 lg:pb-10 px-0 md:px-6 lg:px-8 transition-transform duration-300 ease-in-out ${isMobile && isScrollingDown && !showMobileMenu ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
+          <div className={`sticky top-0 z-40 w-full pt-3 sm:pt-4 md:pt-6 pb-2 sm:pb-3 px-2 sm:px-4 md:px-6 pointer-events-none transition-transform duration-300 ease-in-out ${isMobile && isScrollingDown && !showMobileMenu ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
             <Topbar
                 isDarkMode={themeMode === 'dark'}
                 toggleSidebar={() => {
