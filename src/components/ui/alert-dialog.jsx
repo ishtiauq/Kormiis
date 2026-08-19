@@ -15,7 +15,7 @@ const AlertDialogOverlay = React.forwardRef(({ className, ...props }, ref) => (
   <AriaModalOverlay
     ref={ref}
     className={cn(
-      "fixed inset-0 z-50 bg-black/80 backdrop-blur-md transition-all duration-200 data-[entering]:animate-in data-[entering]:fade-in-0 data-[exiting]:animate-out data-[exiting]:fade-out-0 flex items-center justify-center p-4",
+      "fixed inset-0 z-50 bg-black/60 backdrop-blur-md transition-all duration-200 data-[entering]:animate-in data-[entering]:fade-in-0 data-[exiting]:animate-out data-[exiting]:fade-out-0 flex items-center justify-center p-4",
       className
     )}
     {...props}
@@ -28,7 +28,7 @@ const AlertDialogContent = React.forwardRef(({ className, children, ...props }, 
     <AriaModal
       ref={ref}
       className={cn(
-        "w-full max-w-md flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#0e0e12] text-card-foreground shadow-2xl transition-all duration-200 data-[entering]:animate-in data-[entering]:zoom-in-95 data-[exiting]:animate-out data-[exiting]:zoom-out-95 p-0 relative",
+        "w-full max-w-md flex flex-col overflow-hidden rounded-[28px] glass-kormiis-modal text-card-foreground shadow-2xl transition-all duration-200 data-[entering]:animate-in data-[entering]:zoom-in-95 data-[exiting]:animate-out data-[exiting]:zoom-out-95 p-0 relative",
         className
       )}
       {...props}
@@ -44,12 +44,12 @@ const AlertDialogContent = React.forwardRef(({ className, children, ...props }, 
 AlertDialogContent.displayName = "AlertDialogContent"
 
 const AlertDialogHeader = ({ className, ...props }) => (
-  <div className={cn("flex flex-col space-y-1.5 text-left", className)} {...props} />
+  <div className={cn("flex flex-col space-y-2 text-left pb-3 border-b border-border/80 dark:border-white/12", className)} {...props} />
 )
 AlertDialogHeader.displayName = "AlertDialogHeader"
 
 const AlertDialogFooter = ({ className, ...props }) => (
-  <div className={cn("flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5 pt-3 border-t border-border/40 mt-1", className)} {...props} />
+  <div className={cn("flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5 pt-4 border-t border-border/80 dark:border-white/12 mt-1", className)} {...props} />
 )
 AlertDialogFooter.displayName = "AlertDialogFooter"
 

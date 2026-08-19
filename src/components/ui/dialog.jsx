@@ -28,7 +28,7 @@ const DialogContent = React.forwardRef(({ className, overlayClassName, children,
     <AriaModal
       ref={ref}
       className={cn(
-        "w-full max-w-lg max-h-[95vh] flex flex-col overflow-hidden rounded-[28px] glass-kormiis-modal text-white shadow-2xl p-0",
+        "w-full max-w-lg max-h-[95vh] flex flex-col overflow-hidden rounded-[28px] glass-kormiis-modal text-foreground shadow-2xl p-0",
         className
       )}
       {...props}
@@ -42,12 +42,12 @@ const DialogContent = React.forwardRef(({ className, overlayClassName, children,
 DialogContent.displayName = "DialogContent"
 
 const DialogHeader = ({ className, ...props }) => (
-  <div className={cn("flex flex-col space-y-1.5 text-left pb-4 shrink-0", className)} {...props} />
+  <div className={cn("flex flex-col space-y-2 text-left pb-4 shrink-0 border-b border-border/80 dark:border-white/12", className)} {...props} />
 )
 DialogHeader.displayName = "DialogHeader"
 
 const DialogFooter = ({ className, ...props }) => (
-  <div className={cn("flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-5 border-t border-border/50 mt-2 shrink-0 pb-2 sm:pb-0", className)} {...props} />
+  <div className={cn("flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5 pt-5 border-t border-border/80 dark:border-white/12 mt-2 shrink-0 pb-2 sm:pb-0", className)} {...props} />
 )
 DialogFooter.displayName = "DialogFooter"
 

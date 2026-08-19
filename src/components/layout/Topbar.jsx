@@ -73,33 +73,26 @@ export default function Topbar({
         aria-label="Top Navigation Bar" 
         className="topbar pointer-events-auto w-[calc(100%-1rem)] sm:w-[94%] md:w-[90%] max-w-4xl mx-auto h-13 sm:h-15 md:h-16 px-2.5 sm:px-4 md:px-5 flex items-center justify-between rounded-full glass-kormiis text-foreground transition-all duration-300 relative select-none shadow-xl"
       >
-        {/* Left: Brand Logo Pill */}
+        {/* Left: Brand Logo (Pure Logo, No Container Box) */}
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-          <button
-            onClick={() => setCurrentView && setCurrentView('dashboard')}
-            className="flex items-center px-2 sm:px-2.5 py-1 rounded-full apple-glass-btn cursor-pointer transition-all active:scale-95 group"
+          <a
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              if (setCurrentView) setCurrentView('dashboard');
+            }}
+            className="flex items-center cursor-pointer transition-opacity hover:opacity-80 active:scale-95 outline-none no-underline border-none bg-transparent p-0 m-0 shadow-none"
+            style={{ background: 'transparent', border: 'none', boxShadow: 'none', padding: 0, margin: 0 }}
             title="Kormiis Dashboard"
           >
             <img 
               src={isDark ? kormiisWhiteLogo : kormiisLogo} 
               alt="Kormiis Logo" 
-              className="h-7 sm:h-8 md:h-9 w-auto max-w-[120px] sm:max-w-[150px] object-contain shrink-0 drop-shadow-sm group-hover:opacity-90 transition-opacity" 
+              className="h-7 sm:h-8 md:h-9 w-auto max-w-[120px] sm:max-w-[150px] object-contain shrink-0 drop-shadow-sm transition-opacity" 
+              style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}
             />
-          </button>
+          </a>
         </div>
-
-        {/* Center: Apple Spotlight Search Trigger (Hidden on very small screens, visible on md+) */}
-        {onOpenSearch && (
-          <button
-            onClick={onOpenSearch}
-            className="hidden md:flex items-center gap-2.5 px-3.5 py-1.5 rounded-full apple-glass-btn text-muted-foreground hover:text-foreground text-xs font-medium cursor-pointer transition-all shrink-0 max-w-[240px] w-full"
-            title="Search actions, pages, and employees (⌘K)"
-          >
-            <Icon name="search" size={16} className="text-muted-foreground" />
-            <span className="truncate flex-1 text-left">Search or jump to...</span>
-            <kbd className="px-1.5 py-0.5 text-[10px] font-semibold bg-background/60 dark:bg-white/10 rounded-md border border-border/50 text-foreground/80">⌘K</kbd>
-          </button>
-        )}
 
         {/* Right: Actions Group (Live Status, Theme, Notification, Profile) */}
         <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">

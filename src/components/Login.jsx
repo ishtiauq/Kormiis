@@ -787,13 +787,13 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                     Business Space Name
                   </label>
                   <div className="relative flex items-center">
-                    <Icon name="corporate_fare" size={18} className="absolute left-3.5 text-white/50 pointer-events-none" />
+                    <Icon name="corporate_fare" size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/60 z-10 pointer-events-none" />
                     <Input
                       id="space-name"
                       value={spaceName}
                       onChange={(e) => setSpaceName(e.target.value)}
                       placeholder="e.g. Acme Studio"
-                      className="h-11 rounded-xl text-xs sm:text-sm pl-10 bg-black/40 border-white/15 text-white placeholder:text-white/40 focus:border-primary/80 focus:bg-black/60 transition-colors backdrop-blur-sm"
+                      className="h-11 rounded-xl text-xs sm:text-sm !pl-10.5 bg-black/40 border-white/20 text-white placeholder:text-white/45 focus:border-primary focus:bg-black/60 transition-colors backdrop-blur-sm shadow-inner"
                       autoFocus
                     />
                   </div>
@@ -828,28 +828,28 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
               <div className="flex flex-col gap-3">
                 <form onSubmit={handleEmailSignIn} className="flex flex-col gap-2.5 w-full">
                   <div className="relative flex items-center">
-                    <Icon name="mail" size={18} className="absolute left-3.5 text-white/50 pointer-events-none" />
+                    <Icon name="mail" size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/60 z-10 pointer-events-none" />
                     <Input
                       type="text"
                       placeholder="Work Email or Phone"
                       value={emailOrPhone}
                       onChange={(e) => setEmailOrPhone(e.target.value)}
-                      className="h-11 rounded-xl text-xs sm:text-sm pl-10 bg-black/40 border-white/15 text-white placeholder:text-white/40 focus:border-primary/80 focus:bg-black/60 transition-colors backdrop-blur-sm"
+                      className="h-11 rounded-xl text-xs sm:text-sm !pl-10.5 bg-black/40 border-white/20 text-white placeholder:text-white/45 focus:border-primary focus:bg-black/60 transition-colors backdrop-blur-sm shadow-inner"
                     />
                   </div>
                   <div className="relative flex items-center">
-                    <Icon name="lock" size={18} className="absolute left-3.5 text-white/50 pointer-events-none" />
+                    <Icon name="lock" size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/60 z-10 pointer-events-none" />
                     <Input
                       type={showPassword ? "text" : "password"}
                       placeholder="Password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="h-11 rounded-xl text-xs sm:text-sm pl-10 pr-10 bg-black/40 border-white/15 text-white placeholder:text-white/40 focus:border-primary/80 focus:bg-black/60 transition-colors backdrop-blur-sm"
+                      className="h-11 rounded-xl text-xs sm:text-sm !pl-10.5 !pr-10.5 bg-black/40 border-white/20 text-white placeholder:text-white/45 focus:border-primary focus:bg-black/60 transition-colors backdrop-blur-sm shadow-inner"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 text-white/50 hover:text-white p-1 transition-colors cursor-pointer"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white p-1 transition-colors cursor-pointer z-10"
                       title={showPassword ? "Hide password" : "Show password"}
                     >
                       <Icon name={showPassword ? "visibility_off" : "visibility"} size={18} />
@@ -891,41 +891,41 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
               <div className="flex flex-col gap-3">
                 <form onSubmit={(e) => { e.preventDefault(); setLoginMode('create'); setPendingUser(null); handleCreateBusinessSpace(e) }} className="flex flex-col gap-2.5 w-full">
                   <div className="relative flex items-center">
-                    <Icon name="mail" size={18} className="absolute left-3.5 text-white/50 pointer-events-none" />
+                    <Icon name="mail" size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/60 z-10 pointer-events-none" />
                     <Input
                       type="text"
                       placeholder="Work Email"
                       value={emailOrPhone}
                       onChange={(e) => setEmailOrPhone(e.target.value)}
-                      className="h-11 rounded-xl text-xs sm:text-sm pl-10 bg-black/40 border-white/15 text-white placeholder:text-white/40 focus:border-primary/80 focus:bg-black/60 transition-colors backdrop-blur-sm"
+                      className="h-11 rounded-xl text-xs sm:text-sm !pl-10.5 bg-black/40 border-white/20 text-white placeholder:text-white/45 focus:border-primary focus:bg-black/60 transition-colors backdrop-blur-sm shadow-inner"
                     />
                   </div>
                   <div className="relative flex items-center">
-                    <Icon name="lock" size={18} className="absolute left-3.5 text-white/50 pointer-events-none" />
+                    <Icon name="lock" size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/60 z-10 pointer-events-none" />
                     <Input
                       type={showPassword ? "text" : "password"}
                       placeholder="Create Password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="h-11 rounded-xl text-xs sm:text-sm pl-10 pr-10 bg-black/40 border-white/15 text-white placeholder:text-white/40 focus:border-primary/80 focus:bg-black/60 transition-colors backdrop-blur-sm"
+                      className="h-11 rounded-xl text-xs sm:text-sm !pl-10.5 !pr-10.5 bg-black/40 border-white/20 text-white placeholder:text-white/45 focus:border-primary focus:bg-black/60 transition-colors backdrop-blur-sm shadow-inner"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 text-white/50 hover:text-white p-1 transition-colors cursor-pointer"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white p-1 transition-colors cursor-pointer z-10"
                       title={showPassword ? "Hide password" : "Show password"}
                     >
                       <Icon name={showPassword ? "visibility_off" : "visibility"} size={18} />
                     </button>
                   </div>
                   <div className="relative flex items-center">
-                    <Icon name="corporate_fare" size={18} className="absolute left-3.5 text-white/50 pointer-events-none" />
+                    <Icon name="corporate_fare" size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/60 z-10 pointer-events-none" />
                     <Input
                       type="text"
                       placeholder="Company / Business Name"
                       value={spaceName}
                       onChange={(e) => setSpaceName(e.target.value)}
-                      className="h-11 rounded-xl text-xs sm:text-sm pl-10 bg-black/40 border-white/15 text-white placeholder:text-white/40 focus:border-primary/80 focus:bg-black/60 transition-colors backdrop-blur-sm"
+                      className="h-11 rounded-xl text-xs sm:text-sm !pl-10.5 bg-black/40 border-white/20 text-white placeholder:text-white/45 focus:border-primary focus:bg-black/60 transition-colors backdrop-blur-sm shadow-inner"
                     />
                   </div>
                   <button
