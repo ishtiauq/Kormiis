@@ -682,7 +682,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
             <div className="relative h-full aspect-[2502/1682] max-h-[46vh] sm:max-h-[50vh] md:max-h-[53vh] lg:max-h-[44vh] xl:max-h-[48vh] max-w-[90vw] sm:max-w-[82vw] md:max-w-[76vw] lg:max-w-full flex items-end justify-center z-10">
 
               {/* 2. DESKTOP & LAPTOP ONLY: Dual Horizontal Infinite Marquee Streams (lg:flex) */}
-              <div className="hidden lg:flex absolute top-[-3%] xl:top-[-1%] left-1/2 -translate-x-1/2 w-screen flex-col gap-2.5 xl:gap-3.5 z-0 pointer-events-none marquee-mask select-none">
+              <div className="hidden lg:flex absolute top-[-10%] xl:top-[-8%] left-1/2 -translate-x-1/2 w-screen flex-col gap-2.5 xl:gap-3.5 z-0 pointer-events-none marquee-mask select-none">
                 
                 {/* Stream Row 1: Smooth Infinite Loop Scrolling Left */}
                 <div className="w-full overflow-hidden flex">
