@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Select, SelectItem } from "@/components/ui/select"
 import { DatePicker } from "@/components/ui/date-picker"
+import defaultAvatar from '../Assets/default-avatar.svg'
 
 
 
@@ -202,7 +203,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
         email: newEmail,
         phone: newPhone,
         uid,
-        avatar: '',
+        avatar: defaultAvatar,
         dob: newDob,
         joiningDate: newJoiningDate,
         nidPassportId: newNidPassportId
@@ -580,7 +581,7 @@ EMP-103,Shakil Hossain,shakil@kormiis.com,Human Resources,HR Officer,Active,1992
                           }
                           delete row.password;
                         }
-                        row.avatar = row.avatar || '';
+                        row.avatar = row.avatar || defaultAvatar;
                         row.updated_at = new Date().toISOString();
                         imported.push(row);
                       }
@@ -666,125 +667,151 @@ EMP-103,Shakil Hossain,shakil@kormiis.com,Human Resources,HR Officer,Active,1992
                           No employees in this department.
                         </div>
                       ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 items-start">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 items-start">
                           {group.items.map(emp => {
                             const isExpanded = expandedCardId === emp.id
                             return (
-                              <Card key={emp.id} className="relative overflow-visible group hover:border-primary/50 transition-colors cursor-pointer" onClick={() => setViewingEmployee(emp)}>
-                
+                              <Card key={emp.id} className="relative group glass-card overflow-visible hover:-translate-y-0.5 hover:shadow-2xl hover:border-primary/40 transition-all duration-400 cursor-pointer" onClick={() => setViewingEmployee(emp)}>
+
                 {/* Selection Checkbox */}
-                <div 
-                  onClick={(e) => e.stopPropagation()} 
-                  className={`absolute top-3 left-3 z-10 p-1 rounded bg-background border shadow-sm transition-opacity ${selectedIds.has(emp.id) ? 'opacity-100 border-primary' : 'opacity-0 group-hover:opacity-100 border-border'}`}
+                <div
+                  onClick={(e) => e.stopPropagation()}
+                  className={`absolute top-3 left-3 z-10 p-1 rounded-full bg-background/80 backdrop-blur border shadow-sm transition-opacity ${selectedIds.has(emp.id) ? 'opacity-100 border-primary' : 'opacity-0 group-hover:opacity-100 border-border'}`}
                 >
                   <input
                     type="checkbox"
                     checked={selectedIds.has(emp.id)}
                     onChange={(e) => toggleSelect(emp.id, e)}
-                    className="w-4 h-4 cursor-pointer m-0 block"
+                    className="w-4 h-4 cursor-pointer m-0 block accent-primary"
                   />
                 </div>
 
-                <CardContent className="p-5">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <Avatar className={`h-12 w-12 border shadow-sm transition-all duration-300 ${emp.status !== 'Active' ? 'grayscale opacity-70' : ''}`}>
-                        {emp.avatar && !imageErrors[emp.id] && (
-                          <AvatarImage src={emp.avatar} alt={emp.name} style={{ transform: `translate(${emp.photoX || 0}px, ${emp.photoY || 0}px) scale(${emp.photoZoom || 1})`, transformOrigin: 'center' }} onError={() => setImageErrors(prev => ({...prev, [emp.id]: true}))} />
+                <CardContent className="p-0">
+
+                  {/* Header */}
+                  <div className="p-3.5 pb-3 flex items-center gap-3">
+                    <div className="relative shrink-0">
+                      <Avatar className={`h-11 w-11 border-2 shadow-sm transition-all duration-300 ${emp.status !== 'Active' ? 'grayscale opacity-70' : ''}`}>
+                        {!imageErrors[emp.id] && (
+                          <AvatarImage src={emp.avatar || defaultAvatar} alt={emp.name} style={{ transform: `translate(${emp.photoX || 0}px, ${emp.photoY || 0}px) scale(${emp.photoZoom || 1})`, transformOrigin: 'center' }} onError={() => setImageErrors(prev => ({...prev, [emp.id]: true}))} />
                         )}
                         <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
                           {getAvatarFallback(emp.name).initials}
                         </AvatarFallback>
                       </Avatar>
-                      <div className="flex flex-col gap-0.5 min-w-0">
-                        <h4 className="font-bold text-base break-words leading-none mb-0.5">{emp.name}</h4>
-                        <span className="text-sm font-medium text-muted-foreground break-words">{emp.designation || emp.role}</span>
-                      </div>
+                      <span className={`absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full border-2 border-background ${emp.status === 'Active' ? 'bg-green-500' : emp.status === 'On Leave' ? 'bg-amber-500' : 'bg-red-500'}`} />
                     </div>
-                    
-                    <Badge variant={emp.status === 'Active' ? 'default' : emp.status === 'On Leave' ? 'secondary' : 'destructive'} className={`shrink-0 text-[10px] h-5 ${emp.status==='Active'?'bg-green-500/10 text-green-700 hover:bg-green-500/20 border-green-500/20':''}`}>
-                      {emp.status}
-                    </Badge>
+
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-bold text-sm leading-tight truncate">{emp.name}</h4>
+                      <p className="text-xs font-medium text-muted-foreground truncate mt-0.5">{emp.designation || emp.role}</p>
+                      <span className={`inline-flex items-center px-1.5 py-0 mt-1 rounded-full text-[10px] font-semibold border ${emp.status === 'Active' ? 'bg-green-500/10 text-green-700 border-green-500/20' : emp.status === 'On Leave' ? 'bg-amber-500/10 text-amber-700 border-amber-500/20' : 'bg-red-500/10 text-red-700 border-red-500/20'}`}>
+                        {emp.status}
+                      </span>
+                    </div>
+
+                    {/* Quick contact actions */}
+                    <div className="flex flex-col gap-1 shrink-0">
+                      {emp.email && (
+                        <a
+                          href={`mailto:${emp.email}`}
+                          onClick={(e) => e.stopPropagation()}
+                          title={`Email ${emp.name}`}
+                          className="liquid-icon-btn size-7 inline-flex items-center justify-center rounded-full bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 active:scale-90 transition-all cursor-pointer"
+                        >
+                          <Icon name="mail" size={14}/>
+                        </a>
+                      )}
+                      {emp.phone && (
+                        <a
+                          href={`tel:${emp.phone.replace(/[\s-]/g, '')}`}
+                          onClick={(e) => e.stopPropagation()}
+                          title={`Call ${emp.name}`}
+                          className="liquid-icon-btn size-7 inline-flex items-center justify-center rounded-full bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 active:scale-90 transition-all cursor-pointer"
+                        >
+                          <Icon name="call" size={14}/>
+                        </a>
+                      )}
+                    </div>
                   </div>
-                  {/* Expanded Content */}
-                  <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-[350px] opacity-100 mt-4 pt-4 border-t border-border' : 'max-h-0 opacity-0'}`}>
-                    <div className="flex flex-col gap-4">
-                      
-                      <div className="flex flex-col gap-2.5">
-                        <div className="flex items-center text-sm text-muted-foreground">
-                          <Icon name="apartment" className="mr-2 h-4 w-4 shrink-0 text-muted-foreground/70" size={16}/>
-                          <span className="break-words">{emp.department}</span>
-                        </div>                        <div className="flex items-center text-sm text-muted-foreground">
-                          <Icon name="mail" className="mr-2 h-4 w-4 shrink-0 text-muted-foreground/70" size={16}/>
-                          <span className="break-all">{emp.email || 'No email'}</span>
-                        </div>
-                        {emp.phone && (
-                          <div className="flex items-center text-sm text-muted-foreground">
-                            <Icon name="call" className="mr-2 h-4 w-4 shrink-0 text-muted-foreground/70" size={16}/>
-                            <span className="break-all">{emp.phone}</span>
-                          </div>
+
+                  {/* Chips: department + employee id */}
+                  <div className="px-3.5 pb-3 flex items-center gap-1.5 flex-wrap">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted/50 border border-border/70 text-[11px] font-medium text-muted-foreground">
+                      <Icon name="apartment" size={12} className="text-primary/70"/> {emp.department}
+                    </span>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted/50 border border-border/70 text-[11px] font-medium text-muted-foreground font-mono">
+                      <Icon name="badge" size={12} className="text-primary/70"/> {emp.id}
+                    </span>
+                  </div>
+
+                  {/* Expanded panel */}
+                  <div className={`overflow-hidden transition-all duration-400 ease-[cubic-bezier(0.175,0.885,0.32,1.15)] ${isExpanded ? 'max-h-[400px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                    <div className="mx-3 mb-2.5 rounded-xl border border-border/70 bg-muted/30 p-3 flex flex-col gap-3">
+                      <div className="flex flex-col gap-1.5 text-xs text-muted-foreground">
+                        {emp.email && (
+                          <a href={`mailto:${emp.email}`} className="flex items-center gap-1.5 break-all hover:text-primary transition-colors">
+                            <Icon name="mail" className="h-3.5 w-3.5 shrink-0 text-muted-foreground/70" size={14}/> {emp.email}
+                          </a>
                         )}
-                      </div>
-                      
-                      <div className="flex flex-wrap gap-2 text-xs">
-                        <div className="flex-1 min-w-[85px] flex flex-col justify-center p-2.5 rounded-lg bg-muted/40 border border-border/50">
-                          <span className="text-muted-foreground font-medium mb-0.5">Emp ID</span>
-                          <span className="font-semibold text-foreground break-words">{emp.id}</span>
+                        {emp.phone && (
+                          <a href={`tel:${emp.phone.replace(/[\s-]/g, '')}`} className="flex items-center gap-1.5 break-all hover:text-primary transition-colors">
+                            <Icon name="call" className="h-3.5 w-3.5 shrink-0 text-muted-foreground/70" size={14}/> {emp.phone}
+                          </a>
+                        )}
+                        <div className="flex items-center gap-1.5">
+                          <Icon name="cake" className="h-3.5 w-3.5 shrink-0 text-muted-foreground/70" size={14}/>
+                          <span>DOB: {emp.dob ? formatDate(emp.dob) : 'N/A'}</span>
                         </div>
-                        <div className="flex-1 min-w-[85px] flex flex-col justify-center p-2.5 rounded-lg bg-muted/40 border border-border/50">
-                          <span className="text-muted-foreground font-medium mb-0.5">Joined</span>
-                          <span className="font-semibold text-foreground break-words">{emp.joiningDate ? formatDate(emp.joiningDate) : 'N/A'}</span>
-                        </div>
-                        <div className="flex-1 min-w-[85px] flex flex-col justify-center p-2.5 rounded-lg bg-muted/40 border border-border/50">
-                          <span className="text-muted-foreground font-medium mb-0.5">DOB</span>
-                          <span className="font-semibold text-foreground break-words">{emp.dob ? formatDate(emp.dob) : 'N/A'}</span>
+                        <div className="flex items-center gap-1.5">
+                          <Icon name="calendar_month" className="h-3.5 w-3.5 shrink-0 text-muted-foreground/70" size={14}/>
+                          <span>Joined: {emp.joiningDate ? formatDate(emp.joiningDate) : 'N/A'}</span>
                         </div>
                       </div>
 
                       <div className="flex gap-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="flex-1 h-8 text-xs font-medium bg-background hover:bg-muted"
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1 h-7 text-xs font-medium bg-background hover:bg-muted"
                           onClick={(e) => {
-                            e.stopPropagation(); 
+                            e.stopPropagation();
                             setEditingEmployee(emp); setNewEmpId(emp.id); setNewName(emp.name); setNewRole(emp.role || 'Teammate'); setNewDesignation(emp.designation || emp.role || ''); setNewPermissions(emp.permissions || []); setNewDept(emp.department); setNewEmail(emp.email || ''); setNewPhone(emp.phone || ''); setNewStatus(emp.status); setNewDob(emp.dob || ''); setNewJoiningDate(emp.joiningDate || ''); setNewNidPassportId(emp.nidPassportId || ''); setIsCustomDept(false); setCustomDept(''); setShowAddForm(true);
                           }}
                         >
                           <Icon name="edit" className="mr-1.5 h-3.5 w-3.5" size={14}/> Edit
                         </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="flex-1 h-8 text-xs font-medium text-destructive hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30"
-                          onClick={(e) => { 
-                            e.stopPropagation(); 
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1 h-7 text-xs font-medium text-destructive hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30"
+                          onClick={(e) => {
+                            e.stopPropagation();
                             setConfirmDelete(() => () => {
                               handleDeleteEmployee(emp.id, emp.name);
                               setConfirmDelete(null);
-                            }); 
+                            });
                           }}
                         >
                           <Icon name="delete" className="mr-1.5 h-3.5 w-3.5" size={14}/> Delete
                         </Button>
                       </div>
-                      
                     </div>
                   </div>
 
-                  {/* Expand Toggle —  always at the bottom of the card */}
-                  <div className="flex justify-center mt-2">
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-6 w-full hover:bg-muted/50 rounded-md"
+                  {/* Expand Toggle — sleek icon button at the bottom of the card */}
+                  <div className="flex justify-center py-1 border-t border-border/60">
+                    <button
                       onClick={(e) => {
                         e.stopPropagation();
                         setExpandedCardId(prev => prev === emp.id ? null : emp.id);
                       }}
+                      aria-label={isExpanded ? 'Collapse details' : 'Expand details'}
+                      title={isExpanded ? 'Collapse details' : 'Expand details'}
+                      className="liquid-icon-btn size-6 inline-flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all cursor-pointer active:scale-90"
                     >
-                      <Icon name="keyboard_arrow_down" className={`h-4 w-4 text-muted-foreground transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} size={16}/>
-                    </Button>
+                      <Icon name="keyboard_arrow_down" className={`h-3.5 w-3.5 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} size={14}/>
+                    </button>
                   </div>
                 </CardContent>
               </Card>
@@ -808,8 +835,8 @@ EMP-103,Shakil Hossain,shakil@kormiis.com,Human Resources,HR Officer,Active,1992
             <>
               <div className="flex flex-col items-center pt-4 pb-2">
                 <Avatar className="h-24 w-24 mb-4 border-2 border-primary/20 shadow-sm text-2xl">
-                  {viewingEmployee.avatar && !imageErrors[viewingEmployee.id] && (
-                    <AvatarImage src={viewingEmployee.avatar} alt={viewingEmployee.name} style={{ transform: `translate(${viewingEmployee.photoX || 0}px, ${viewingEmployee.photoY || 0}px) scale(${viewingEmployee.photoZoom || 1})`, transformOrigin: 'center' }} onError={() => setImageErrors(prev => ({...prev, [viewingEmployee.id]: true}))} />
+                  {!imageErrors[viewingEmployee.id] && (
+                    <AvatarImage src={viewingEmployee.avatar || defaultAvatar} alt={viewingEmployee.name} style={{ transform: `translate(${viewingEmployee.photoX || 0}px, ${viewingEmployee.photoY || 0}px) scale(${viewingEmployee.photoZoom || 1})`, transformOrigin: 'center' }} onError={() => setImageErrors(prev => ({...prev, [viewingEmployee.id]: true}))} />
                   )}
                   <AvatarFallback className="bg-primary/10 text-primary text-lg font-bold">
                     {getAvatarFallback(viewingEmployee.name).initials}
@@ -833,11 +860,23 @@ EMP-103,Shakil Hossain,shakil@kormiis.com,Human Resources,HR Officer,Active,1992
                 </div>
                 <div className="grid grid-cols-3 items-center gap-4">
                   <span className="text-sm font-medium text-muted-foreground text-right">Work Email</span>
-                  <span className="col-span-2 text-sm break-all text-primary">{viewingEmployee.email || '-'}</span>
+                  <span className="col-span-2 text-sm break-all text-primary">
+                    {viewingEmployee.email ? (
+                      <a href={`mailto:${viewingEmployee.email}`} className="inline-flex items-center gap-1.5 hover:underline underline-offset-4">
+                        <Icon name="mail" className="h-3.5 w-3.5 shrink-0" size={14}/>{viewingEmployee.email}
+                      </a>
+                    ) : '-'}
+                  </span>
                 </div>
                 <div className="grid grid-cols-3 items-center gap-4">
                   <span className="text-sm font-medium text-muted-foreground text-right">Phone Number</span>
-                  <span className="col-span-2 text-sm font-sans">{viewingEmployee.phone || '-'}</span>
+                  <span className="col-span-2 text-sm font-sans">
+                    {viewingEmployee.phone ? (
+                      <a href={`tel:${viewingEmployee.phone.replace(/[\s-]/g, '')}`} className="inline-flex items-center gap-1.5 hover:underline underline-offset-4">
+                        <Icon name="call" className="h-3.5 w-3.5 shrink-0" size={14}/>{viewingEmployee.phone}
+                      </a>
+                    ) : '-'}
+                  </span>
                 </div>
                 <div className="grid grid-cols-3 items-center gap-4">
                   <span className="text-sm font-medium text-muted-foreground text-right">Joined Date</span>
@@ -890,17 +929,6 @@ EMP-103,Shakil Hossain,shakil@kormiis.com,Human Resources,HR Officer,Active,1992
 
           <form onSubmit={handleSaveEmployee} className="flex flex-col gap-6 py-4">
             
-            {/* Default Avatar Preview */}
-            <div className="p-4 rounded-xl border border-dashed bg-muted/20">
-              <label className="text-sm font-medium mb-3 block">Profile Avatar</label>
-              <div className="flex gap-4 items-center">
-                <div className="h-20 w-20 rounded-full bg-primary/10 text-primary flex items-center justify-center text-2xl font-bold border-2 border-primary/20 shrink-0">
-                  {newName ? getAvatarFallback(newName).initials : '?'}
-                </div>
-                <p className="flex-1 text-sm text-muted-foreground">A default avatar is generated automatically from the employee's initials. No photo upload needed.</p>
-              </div>
-            </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium">Employee ID</label>
