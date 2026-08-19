@@ -321,6 +321,35 @@ html.dark .bg-card:hover,
     inset 0 1px 1px 0 rgba(255, 255, 255, 0.35) !important;
 }
 
+/* Dedicated Apple Floating Sidebar Glass Material */
+.glass-floating-sidebar {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.18) 100%) !important;
+  backdrop-filter: saturate(190%) blur(32px) !important;
+  -webkit-backdrop-filter: saturate(190%) blur(32px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.30) !important;
+  box-shadow: 
+    0 20px 40px -10px rgba(0, 0, 0, 0.08),
+    0 2px 6px 0 rgba(0, 0, 0, 0.04),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.35),
+    inset 1px 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+.dark .glass-floating-sidebar,
+html.dark .glass-floating-sidebar,
+[data-theme="dark"] .glass-floating-sidebar {
+  background: linear-gradient(135deg, rgba(24, 24, 34, 0.65) 0%, rgba(12, 12, 18, 0.45) 100%) !important;
+  backdrop-filter: saturate(190%) blur(36px) !important;
+  -webkit-backdrop-filter: saturate(190%) blur(36px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  box-shadow: 
+    0 28px 60px -12px rgba(0, 0, 0, 0.85),
+    0 6px 16px 0 rgba(0, 0, 0, 0.55),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.18),
+    inset 1px 0 1px 0 rgba(255, 255, 255, 0.10) !important;
+}
+
 /* ==============================================================
    2. BUTTON COMPONENT: LIQUID GLASS BUTTON & MICRO-INTERACTIONS
    Spring physics (stiffness 300, damping 25, mass 1)

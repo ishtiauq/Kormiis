@@ -73,8 +73,9 @@ export default function Topbar({
         aria-label="Top Navigation Bar" 
         className="topbar pointer-events-auto w-[calc(100%-1rem)] sm:w-[94%] md:w-[90%] max-w-4xl mx-auto h-13 sm:h-15 md:h-16 px-2.5 sm:px-4 md:px-5 flex items-center justify-between rounded-full glass-kormiis text-foreground transition-all duration-300 relative select-none shadow-xl"
       >
-        {/* Left: Brand Logo (Pure Logo, No Container Box) */}
+        {/* Left: Brand Logo */}
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+
           <a
             href="#"
             onClick={(e) => {
@@ -109,27 +110,7 @@ export default function Topbar({
             </button>
           )}
 
-          {/* Live / Offline Status Beacon */}
-          {isOnline ? (
-            <div 
-              className="hidden min-[480px]:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black tracking-wider uppercase apple-glass-btn text-foreground select-none"
-              title="Realtime cloud connection active"
-            >
-              <span className="relative flex size-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
-                <span className="relative inline-flex rounded-full size-2 bg-emerald-500"></span>
-              </span>
-              <span className="text-[10px] font-extrabold text-foreground">LIVE</span>
-            </div>
-          ) : (
-            <div 
-              className="hidden min-[480px]:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase text-muted-foreground apple-glass-btn select-none"
-              title="Offline mode - changes stored locally"
-            >
-              <span className="size-2 rounded-full bg-muted-foreground/60"></span>
-              <span>OFFLINE</span>
-            </div>
-          )}
+
 
           {/* Theme Toggle Button */}
           {showThemeToggle && (

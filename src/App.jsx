@@ -68,24 +68,16 @@ export default function App() {
   }, [])
 
   useEffect(() => {
-    if (mobileMenuOpen) {
+    if (showMobileMenu) {
       window.history.pushState({ mobileMenu: true }, '')
-      const handlePop = () => setMobileMenuOpen(false)
+      const handlePop = () => setShowMobileMenu(false)
       window.addEventListener('popstate', handlePop)
       return () => window.removeEventListener('popstate', handlePop)
     }
-  }, [mobileMenuOpen])
+  }, [showMobileMenu])
 
   const toggleSidebar = () => {
-    const width = window.innerWidth
-    if (width >= 768) {
-      const next = !isCollapsed
-      setIsCollapsed(next)
-      localStorage.setItem('sidebar_collapsed', next)
-    } else {
-      setIsCollapsed(false)
-      setMobileMenuOpen(!mobileMenuOpen)
-    }
+    setShowMobileMenu(prev => !prev)
   }
 
   useEffect(() => {
@@ -196,7 +188,7 @@ export default function App() {
 
 
       <main 
-        className={`content dashboard-content ${isMobile ? 'pb-24' : 'pb-12'} flex-1 overflow-y-auto overflow-x-hidden flex flex-col items-center max-w-[100vw]`} 
+        className={`content dashboard-content ${isMobile ? 'pb-24' : 'pb-12 md:pl-20 lg:pl-24'} flex-1 overflow-y-auto overflow-x-hidden flex flex-col items-center max-w-[100vw] transition-all duration-300`} 
         style={{ scrollbarGutter: 'stable' }}
         onScroll={handleScroll}
       >

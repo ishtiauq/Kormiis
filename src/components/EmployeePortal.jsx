@@ -313,7 +313,7 @@ export default function EmployeePortal({
       />
 
       <main 
-        className={`content dashboard-content ${isMobile ? 'pb-24' : 'pb-12'} flex-1 overflow-y-auto overflow-x-hidden flex flex-col items-center max-w-[100vw]`} 
+        className={`content dashboard-content ${isMobile ? 'pb-24' : 'pb-12 md:pl-20 lg:pl-24'} flex-1 overflow-y-auto overflow-x-hidden flex flex-col items-center max-w-[100vw] transition-all duration-300`} 
         style={{ scrollbarGutter: 'stable' }}
         onScroll={handleScroll}
       >
@@ -323,13 +323,7 @@ export default function EmployeePortal({
           <div className={`sticky top-0 z-40 w-full pt-3 sm:pt-4 md:pt-6 pb-2 sm:pb-3 px-2 sm:px-4 md:px-6 pointer-events-none transition-transform duration-300 ease-in-out ${isMobile && isScrollingDown && !showMobileMenu ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
             <Topbar
                 isDarkMode={themeMode === 'dark'}
-                toggleSidebar={() => {
-                  if (isMobile) {
-                    setShowMobileMenu(true)
-                  } else {
-                    setIsSidebarCollapsed(!isSidebarCollapsed)
-                  }
-                }}
+                toggleSidebar={() => setShowMobileMenu(prev => !prev)}
                 themeMode={themeMode}
                 toggleTheme={toggleTheme}
                 handleSync={() => {}} 
