@@ -79,6 +79,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
   const [newPermissions, setNewPermissions] = useState([])
   const [newDept, setNewDept] = useState('Engineering')
   const [newEmail, setNewEmail] = useState('')
+  const [newPhone, setNewPhone] = useState('')
   const [newStatus, setNewStatus] = useState('Active')
   const [newDob, setNewDob] = useState('')
   const [newJoiningDate, setNewJoiningDate] = useState('')
@@ -138,6 +139,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
     setNewEmpId(generatedId)
     setNewPassword('')
     setNewAvatar('')
+    setNewPhone('')
     setPhotoX(0)
     setPhotoY(0)
     setPhotoZoom(1)
@@ -146,7 +148,12 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
 
   const handleSaveEmployee = async (e) => {
     e.preventDefault()
-    if (!newEmpId || !newName || !newRole || !newEmail || !newDesignation) return
+    if (!newEmpId || !newName || !newRole || (!newEmail && !newPhone) || !newDesignation) {
+      if (!newEmail && !newPhone) {
+        addToast('Please provide at least a Work Email or Phone Number.', 'warning')
+      }
+      return
+    }
 
     const finalDept = isCustomDept ? customDept.trim() : newDept
     if (!finalDept) return
@@ -162,7 +169,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
       // profile). The Firebase sign-in email can't be changed from the client
       // SDK, so an admin edit only updates the directory record here.
       if (newEmail && newEmail !== editingEmployee.email) {
-        addToast('Email updated in the directory. The sign-in email is unchanged — reset it in the Firebase console if needed.', 'warning')
+        addToast('Email updated in the directory. The sign-in email is unchanged —  reset it in the Firebase console if needed.', 'warning')
       }
 
       // Update employee list
@@ -176,6 +183,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
         department: finalDept,
         status: newStatus,
         email: newEmail,
+        phone: newPhone,
         dob: newDob,
         joiningDate: newJoiningDate,
         cvFileName: newCvFileName,
@@ -195,17 +203,18 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
         addLog('Identity Uploaded', `Uploaded ID/Passport (${newNidFileName}) for ${newName}`)
       }
     } else {
-      if (!newEmail) {
-        addToast('An email is required so the teammate can be invited to sign in.', 'warning')
+      const authIdentifier = newEmail.trim() || newPhone.trim()
+      if (!authIdentifier) {
+        addToast('An email or phone number is required so the teammate can sign in.', 'warning')
         return
       }
 
-      // Invite the teammate by email — they sign in with their own Google account
+      // Invite the teammate by email/phone
       let uid = null
       const companyUid = adminUid || currentUser?.uid
       try {
         const result = await provisionEmployeeAccount({
-          email: newEmail,
+          email: authIdentifier,
           password: newPassword,
           name: newName,
           role: newRole,
@@ -230,6 +239,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
         department: finalDept,
         status: newStatus,
         email: newEmail,
+        phone: newPhone,
         uid,
         avatar: newAvatar || `https://images.unsplash.com/photo-${1500000000000 + Math.floor(Math.random() * 1000000)}?auto=format&fit=crop&q=80&w=200`,
         dob: newDob,
@@ -263,6 +273,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
     setNewPermissions([])
     setNewDept('Engineering')
     setNewEmail('')
+    setNewPhone('')
     setNewStatus('Active')
     setNewDob('')
     setNewJoiningDate('')
@@ -328,7 +339,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
     const count = selectedIds.size
     if (count === 0) return
     const selected = employees.filter(emp => selectedIds.has(emp.id))
-    const headers = ['ID', 'Name', 'Role', 'Department', 'Email', 'Status', 'DOB', 'Joining Date']
+    const headers = ['ID', 'Name', 'Role', 'Department', 'Email', 'Phone', 'Status', 'DOB', 'Joining Date']
     const csvRows = [headers.join(',')]
     selected.forEach(emp => {
       csvRows.push([
@@ -337,6 +348,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
         `"${(emp.role || '').replace(/"/g, '""')}"`,
         `"${(emp.department || '').replace(/"/g, '""')}"`,
         emp.email || '',
+        emp.phone || '',
         emp.status || '',
         emp.dob || '',
         emp.joiningDate || ''
@@ -357,9 +369,12 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
 
   // Filter list
   const filteredEmployees = employees.filter(emp => {
-    const matchesSearch = emp.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) || 
-                           emp.role.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-                           emp.email.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+    const term = debouncedSearchTerm.toLowerCase()
+    const matchesSearch = (emp.name && emp.name.toLowerCase().includes(term)) || 
+                          (emp.role && emp.role.toLowerCase().includes(term)) ||
+                          (emp.id && emp.id.toLowerCase().includes(term)) ||
+                          (emp.email && emp.email.toLowerCase().includes(term)) ||
+                          (emp.phone && emp.phone.includes(debouncedSearchTerm))
     const matchesDept = deptFilter === 'All' || emp.department === deptFilter
     return matchesSearch && matchesDept
   })
@@ -733,11 +748,16 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
                         <div className="flex items-center text-sm text-muted-foreground">
                           <Icon name="apartment" className="mr-2 h-4 w-4 shrink-0 text-muted-foreground/70" size={16}/>
                           <span className="break-words">{emp.department}</span>
-                        </div>
-                        <div className="flex items-center text-sm text-muted-foreground">
+                        </div>                        <div className="flex items-center text-sm text-muted-foreground">
                           <Icon name="mail" className="mr-2 h-4 w-4 shrink-0 text-muted-foreground/70" size={16}/>
-                          <span className="break-all">{emp.email}</span>
+                          <span className="break-all">{emp.email || 'No email'}</span>
                         </div>
+                        {emp.phone && (
+                          <div className="flex items-center text-sm text-muted-foreground">
+                            <Icon name="call" className="mr-2 h-4 w-4 shrink-0 text-muted-foreground/70" size={16}/>
+                            <span className="break-all">{emp.phone}</span>
+                          </div>
+                        )}
                       </div>
                       
                       <div className="flex flex-wrap gap-2 text-xs">
@@ -762,7 +782,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
                           className="flex-1 h-8 text-xs font-medium bg-background hover:bg-muted"
                           onClick={(e) => {
                             e.stopPropagation(); 
-                            setEditingEmployee(emp); setNewEmpId(emp.id); setNewName(emp.name); setNewRole(emp.role || 'Teammate'); setNewDesignation(emp.designation || emp.role || ''); setNewPermissions(emp.permissions || []); setNewDept(emp.department); setNewEmail(emp.email); setNewStatus(emp.status); setNewDob(emp.dob || ''); setNewJoiningDate(emp.joiningDate || ''); setNewCvFileName(emp.cvFileName || ''); setNewNidFileName(emp.nidFileName || ''); setNewAvatar(emp.avatar || ''); setPhotoX(emp.photoX || 0); setPhotoY(emp.photoY || 0); setPhotoZoom(emp.photoZoom || 1); setIsCustomDept(false); setCustomDept(''); setShowAddForm(true);
+                            setEditingEmployee(emp); setNewEmpId(emp.id); setNewName(emp.name); setNewRole(emp.role || 'Teammate'); setNewDesignation(emp.designation || emp.role || ''); setNewPermissions(emp.permissions || []); setNewDept(emp.department); setNewEmail(emp.email || ''); setNewPhone(emp.phone || ''); setNewStatus(emp.status); setNewDob(emp.dob || ''); setNewJoiningDate(emp.joiningDate || ''); setNewCvFileName(emp.cvFileName || ''); setNewNidFileName(emp.nidFileName || ''); setNewAvatar(emp.avatar || ''); setPhotoX(emp.photoX || 0); setPhotoY(emp.photoY || 0); setPhotoZoom(emp.photoZoom || 1); setIsCustomDept(false); setCustomDept(''); setShowAddForm(true);
                           }}
                         >
                           <Icon name="edit" className="mr-1.5 h-3.5 w-3.5" size={14}/> Edit
@@ -786,7 +806,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
                     </div>
                   </div>
 
-                  {/* Expand Toggle — always at the bottom of the card */}
+                  {/* Expand Toggle —  always at the bottom of the card */}
                   <div className="flex justify-center mt-2">
                     <Button 
                       variant="ghost" 
@@ -834,7 +854,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
                 </Badge>
               </div>
               
-              <div className="grid gap-4 py-4 px-2">
+              <div className="grid gap-3 py-4 px-2">
                 <div className="grid grid-cols-3 items-center gap-4">
                   <span className="text-sm font-medium text-muted-foreground text-right">Employee ID</span>
                   <span className="col-span-2 text-sm font-semibold font-sans">{viewingEmployee.id}</span>
@@ -844,8 +864,12 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
                   <span className="col-span-2 text-sm">{viewingEmployee.department}</span>
                 </div>
                 <div className="grid grid-cols-3 items-center gap-4">
-                  <span className="text-sm font-medium text-muted-foreground text-right">Email Address</span>
-                  <span className="col-span-2 text-sm break-all text-primary">{viewingEmployee.email}</span>
+                  <span className="text-sm font-medium text-muted-foreground text-right">Work Email</span>
+                  <span className="col-span-2 text-sm break-all text-primary">{viewingEmployee.email || '-'}</span>
+                </div>
+                <div className="grid grid-cols-3 items-center gap-4">
+                  <span className="text-sm font-medium text-muted-foreground text-right">Phone Number</span>
+                  <span className="col-span-2 text-sm font-sans">{viewingEmployee.phone || '-'}</span>
                 </div>
                 <div className="grid grid-cols-3 items-center gap-4">
                   <span className="text-sm font-medium text-muted-foreground text-right">Joined Date</span>
@@ -864,7 +888,8 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
                   setNewDesignation(viewingEmployee.designation || viewingEmployee.role || '');
                   setNewPermissions(viewingEmployee.permissions || []);
                   setNewDept(viewingEmployee.department);
-                  setNewEmail(viewingEmployee.email);
+                  setNewEmail(viewingEmployee.email || '');
+                  setNewPhone(viewingEmployee.phone || '');
                   setNewStatus(viewingEmployee.status);
                   setNewDob(viewingEmployee.dob || '');
                   setNewJoiningDate(viewingEmployee.joiningDate || '');
@@ -878,7 +903,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
                   setCustomDept('');
                   setShowAddForm(true);
                 }}>
-                  <Icon name="edit" className="mr-2 h-4 w-4" size={16}/> Edit Profile
+                  <Icon name="edit" className="mr-2 h-4 w-4" size={16}/> Edit Record
                 </Button>
               </DialogFooter>
             </>
@@ -1089,8 +1114,23 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
               </div>
 
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium">Email or Phone Number</label>
-                <Input type="text" required value={newEmail} onChange={(e) => setNewEmail(e.target.value)} />
+                <label className="text-sm font-medium">Work Email</label>
+                <Input 
+                  type="email" 
+                  placeholder="e.g. employee@company.com" 
+                  value={newEmail} 
+                  onChange={(e) => setNewEmail(e.target.value)} 
+                />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium">Phone Number</label>
+                <Input 
+                  type="tel" 
+                  placeholder="e.g. +8801700000000 or 017..." 
+                  value={newPhone} 
+                  onChange={(e) => setNewPhone(e.target.value)} 
+                />
               </div>
 
               {!editingEmployee && (
@@ -1122,7 +1162,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
 
             <div className="mt-4 border-t pt-4">
               <div className="w-full bg-muted/50 px-3 py-2.5 rounded-md text-[11px] text-muted-foreground text-left leading-relaxed mb-4">
-                The teammate signs in with this identifier and password, or their Google account.
+                The teammate signs in using their Work Email or Phone Number with their password, or their Google account.
               </div>
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={handleCloseForm}>Cancel</Button>

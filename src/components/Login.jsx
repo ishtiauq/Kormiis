@@ -302,7 +302,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) {
-      alert("App installation is not available right now. You might have already installed it, or your browser may not support it.")
+      alert('To install the app, use your browser menu (e.g. Chrome 3 dots -> Install App, or Safari -> Add to Home Screen).')
       return
     }
     deferredPrompt.prompt()
@@ -313,140 +313,87 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
     }
   }
 
-  // Set dark theme and ensure natural scrolling on landing page
-  useEffect(() => {
-    const root = document.documentElement
-    const hadDark = root.classList.contains('dark')
-    root.classList.add('dark')
-    root.setAttribute('data-theme', 'dark')
-
-    const prevHtmlOverflow = document.documentElement.style.overflow
-    const prevBodyOverflow = document.body.style.overflow
-    const prevHtmlHeight = document.documentElement.style.height
-    const prevBodyHeight = document.body.style.height
-
-    document.documentElement.style.overflowY = 'auto'
-    document.documentElement.style.overflowX = 'clip'
-    document.documentElement.style.height = 'auto'
-    document.body.style.overflowY = 'auto'
-    document.body.style.overflowX = 'clip'
-    document.body.style.height = 'auto'
-
-    return () => {
-      if (!hadDark) {
-        root.classList.remove('dark')
-        root.setAttribute('data-theme', 'light')
-      }
-      document.documentElement.style.overflow = prevHtmlOverflow
-      document.body.style.overflow = prevBodyOverflow
-      document.documentElement.style.height = prevHtmlHeight
-      document.body.style.height = prevBodyHeight
-    }
-  }, [])
-
-  const adminSession = (account) => ({
-    id: account.id,
-    uid: account.id,
-    name: account.name,
-    email: account.email,
-    role: 'Admin',
-    companyName: account.companyName,
-    avatar: '',
-    isWorkspaceOwner: true,
-    adminAccountId: account.id,
-    token: account.id
-  })
+  // --- Auth Handlers ---
 
   const completeAdminLogin = (user, companyName) => {
-    setIsLoading(true)
-    recordLoginActivity(user?.uid, user?.uid)
-    setTimeout(() => {
-      setIsLoading(false)
-      setLoadingMode(null)
-      onLogin(adminSession({
-        id: user?.uid || 'local',
-        name: user?.displayName || 'System Admin',
-        email: user?.email || 'admin@company.com',
-        companyName: companyName || 'Kormiis Ltd.'
-      }))
-    }, 300)
+    const adminObj = {
+      uid: user.uid,
+      email: user.email,
+      name: user.displayName || user.email?.split('@')[0] || 'Workspace Owner',
+      companyName: companyName || 'My Workspace',
+      companyUid: user.uid,
+      role: 'Admin',
+      department: 'Management',
+    }
+    setIsLoading(false)
+    setLoadingMode(null)
+    setPendingUser(null)
+    setLoginMode(null)
+    setAuthModalOpen(false)
+    onLogin(adminObj)
   }
 
-  const completeTeammateLogin = (company, user) => {
-    const employeeUser = {
-      name: company.fullName || company.name || user.displayName || user.email,
-      email: user.email,
-      role: company.role || 'Teammate',
-      department: company.department || '',
-      avatar: company.avatar || '',
-      isEmployee: true,
-      id: company.employeeId,
-      employeeId: company.employeeId,
-      adminUid: company.companyUid,
+  const completeTeammateLogin = (user, linkage) => {
+    const teammateObj = {
       uid: user.uid,
-      token: ''
+      email: user.email,
+      name: linkage.fullName || user.displayName || user.email?.split('@')[0] || 'Teammate',
+      companyName: linkage.companyName || 'My Workspace',
+      companyUid: linkage.companyUid,
+      employeeId: linkage.employeeId,
+      role: linkage.role || 'Teammate',
+      department: linkage.department || 'General',
+      avatar: linkage.avatar || user.photoURL || '',
     }
-    recordLoginActivity(company.companyUid, user.uid)
+    setIsLoading(false)
     setLoadingMode(null)
-    onLogin(employeeUser)
+    setPendingUser(null)
+    setLoginMode(null)
+    setAuthModalOpen(false)
+    onLogin(teammateObj)
   }
 
   const finishGoogleLogin = async (user, mode) => {
-    if (!user) return
-    const company = await getCompanyForUser(user.uid)
-
-    if (company?.companyUid && company.companyUid !== user.uid) {
-      if (mode === 'create') {
-        promptAlreadyInSpace(user)
+    try {
+      const linkage = await getCompanyForUser(user.uid)
+      if (linkage?.companyUid) {
+        if (linkage.companyUid === user.uid) {
+          completeAdminLogin(user, linkage.companyName)
+        } else {
+          completeTeammateLogin(user, linkage)
+        }
         return
       }
-      completeTeammateLogin(company, user)
-      return
-    }
 
-    const invite = user.email ? await getInviteByEmail(user.email) : null
-    if (invite?.companyUid) {
       if (mode === 'create') {
-        promptAlreadyInSpace(user)
-        return
-      }
-      try {
-        await acceptInvite(user, invite)
-        completeTeammateLogin(invite, user)
-      } catch (err) {
-        setError('Could not join your company: ' + err.message)
+        setPendingUser(user)
+        setLoginMode('create')
         setIsLoading(false)
         setLoadingMode(null)
-      }
-      return
-    }
-
-    if (company) {
-      if (mode === 'create') {
-        promptAlreadyInSpace(user)
         return
       }
-      completeAdminLogin(user, company.companyName)
-      return
-    }
 
-    if (mode === 'create') {
-      setPendingUser(user)
+      if (mode === 'join') {
+        const adminObj = {
+          uid: user.uid,
+          email: user.email,
+          name: user.displayName || user.email?.split('@')[0] || 'Workspace Owner',
+          companyName: 'My Workspace',
+          companyUid: user.uid,
+          role: 'Admin',
+          department: 'Management',
+        }
+        setIsLoading(false)
+        setLoadingMode(null)
+        setAuthModalOpen(false)
+        onLogin(adminObj)
+        return
+      }
+    } catch (err) {
+      setError('Error resolving your workspace: ' + err.message)
       setIsLoading(false)
       setLoadingMode(null)
-      return
     }
-
-    setError('You are not part of the team yet. Ask your admin to add your email, or create your own Business Space.')
-    setIsLoading(false)
-    setLoadingMode(null)
-  }
-
-  const promptAlreadyInSpace = (user) => {
-    setAlreadyUser(user)
-    setShowAlreadyInSpace(true)
-    setIsLoading(false)
-    setLoadingMode(null)
   }
 
   const switchAuthTab = (tab) => {
