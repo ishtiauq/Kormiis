@@ -84,15 +84,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
   const [newDob, setNewDob] = useState('')
   const [newJoiningDate, setNewJoiningDate] = useState('')
   const [newPassword, setNewPassword] = useState('')
-  const [newCvFileName, setNewCvFileName] = useState('')
-  const [newNidFileName, setNewNidFileName] = useState('')
-  const [newAvatar, setNewAvatar] = useState('')
-  
-  // Repositioning states
-  const [photoX, setPhotoX] = useState(0)
-  const [photoY, setPhotoY] = useState(0)
-  const [photoZoom, setPhotoZoom] = useState(1)
-  const [dragStart, setDragStart] = useState(null)
+  const [newNidPassportId, setNewNidPassportId] = useState('')
 
   // Dynamic department states
   const [isCustomDept, setIsCustomDept] = useState(false)
@@ -104,24 +96,8 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
     .filter(d => !removedDepts.includes(d))
   const filterDepartments = ['All', ...activeDepts]
 
-  // Image Drag Handlers
-  const handlePointerDown = (e) => {
-    e.preventDefault()
-    setDragStart({ x: e.clientX - photoX, y: e.clientY - photoY })
-    e.currentTarget.setPointerCapture(e.pointerId)
-  }
-
-  const handlePointerMove = (e) => {
-    if (!dragStart) return
-    setPhotoX(e.clientX - dragStart.x)
-    setPhotoY(e.clientY - dragStart.y)
-  }
-
-  const handlePointerUp = (e) => {
-    if (dragStart) {
-      setDragStart(null)
-    }
-  }
+  // Image Drag Handlers removed — profile photo upload is no longer used; a
+  // default initials avatar is generated for every employee instead.
 
   const handleCopyInviteLink = () => {
     const companyId = adminUid || currentUser?.uid;
@@ -138,11 +114,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
     const generatedId = `EMP-${Math.floor(100 + Math.random() * 900)}`
     setNewEmpId(generatedId)
     setNewPassword('')
-    setNewAvatar('')
     setNewPhone('')
-    setPhotoX(0)
-    setPhotoY(0)
-    setPhotoZoom(1)
     setShowAddForm(true)
   }
 
@@ -186,22 +158,11 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
         phone: newPhone,
         dob: newDob,
         joiningDate: newJoiningDate,
-        cvFileName: newCvFileName,
-        nidFileName: newNidFileName,
-        avatar: newAvatar || emp.avatar,
-        photoX: photoX,
-        photoY: photoY,
-        photoZoom: photoZoom
+        nidPassportId: newNidPassportId
       } : emp))
       
       addLog('Updated employee profile', `Saved edits for ${newName} (${newEmpId})`)
       if (addAuditLog) addAuditLog('UPDATE', 'Employee', `Updated employee profile for ${newName} (${newEmpId})`)
-      if (newCvFileName) {
-        addLog('CV Uploaded', `Uploaded CV (${newCvFileName}) for ${newName}`)
-      }
-      if (newNidFileName) {
-        addLog('Identity Uploaded', `Uploaded ID/Passport (${newNidFileName}) for ${newName}`)
-      }
     } else {
       const authIdentifier = newEmail.trim() || newPhone.trim()
       if (!authIdentifier) {
@@ -221,7 +182,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
           companyUid,
           employeeId: newEmpId,
           department: finalDept,
-          avatar: newAvatar || ''
+          avatar: ''
         })
         uid = result.uid
       } catch (err) {
@@ -241,24 +202,14 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
         email: newEmail,
         phone: newPhone,
         uid,
-        avatar: newAvatar || `https://images.unsplash.com/photo-${1500000000000 + Math.floor(Math.random() * 1000000)}?auto=format&fit=crop&q=80&w=200`,
+        avatar: '',
         dob: newDob,
         joiningDate: newJoiningDate,
-        cvFileName: newCvFileName,
-        nidFileName: newNidFileName,
-        photoX: photoX,
-        photoY: photoY,
-        photoZoom: photoZoom
+        nidPassportId: newNidPassportId
       }
       setEmployees(prev => [...prev, newEmp])
       addLog('Added new employee', `Saved ${newName} (${newEmpId})`)
       if (addAuditLog) addAuditLog('CREATE', 'Employee', `Created new employee profile for ${newName} (${newEmpId})`)
-      if (newCvFileName) {
-        addLog('CV Uploaded', `Synced CV (${newCvFileName}) to employee directory`)
-      }
-      if (newNidFileName) {
-        addLog('Identity Uploaded', `Synced ID/Passport (${newNidFileName}) to employee directory`)
-      }
     }
 
     // Reset Form
@@ -277,13 +228,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
     setNewStatus('Active')
     setNewDob('')
     setNewJoiningDate('')
-    setNewCvFileName('')
-    setNewNidFileName('')
-    setNewAvatar('')
-    setPhotoX(0)
-    setPhotoY(0)
-    setPhotoZoom(1)
-    setDragStart(null)
+    setNewNidPassportId('')
     setIsCustomDept(false)
     setCustomDept('')
     setEditingEmployee(null)
@@ -459,6 +404,24 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
     return value.replace(/^[=+\-@\t\r]/, '')
   }
 
+  const DEMO_CSV = `id,name,email,department,role,status,dob,joiningDate,avatar,password
+EMP-101,Rafiqul Islam,rafiqul@kormiis.com,Engineering,Teammate,Active,1995-03-12,2024-01-15,,
+EMP-102,Tasnim Akter,tasnim@kormiis.com,Design,Teammate,Active,1997-07-24,2024-02-01,,
+EMP-103,Shakil Hossain,shakil@kormiis.com,Human Resources,HR Officer,Active,1992-11-05,2023-09-10,,`
+
+  const handleDownloadDemoCSV = () => {
+    const blob = new Blob([DEMO_CSV], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'demo_employees_template.csv'
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+    addToast('Demo CSV downloaded. Fill in the rows and re-upload via Import CSV.', 'info')
+  }
+
   return (
     <div className="animate-fade-in flex flex-col gap-6 w-full pb-10">
       
@@ -617,7 +580,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
                           }
                           delete row.password;
                         }
-                        row.avatar = row.avatar || `https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200`;
+                        row.avatar = row.avatar || '';
                         row.updated_at = new Date().toISOString();
                         imported.push(row);
                       }
@@ -645,6 +608,9 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
             </Button>
             <Button variant="outline" onClick={() => document.getElementById('csv-file-input').click()} className="shadow-sm flex-1 sm:flex-none">
               <Icon name="table_chart" className="mr-2 h-4 w-4" size={16}/> Import CSV
+            </Button>
+            <Button variant="outline" onClick={handleDownloadDemoCSV} className="shadow-sm flex-1 sm:flex-none">
+              <Icon name="file_download" className="mr-2 h-4 w-4 text-primary" size={16}/> Demo CSV
             </Button>
             <Button onClick={handleOpenAddForm} className="shadow-sm shadow-primary/20 flex-1 sm:flex-none">
               <Icon name="add" className="mr-2 h-4 w-4" size={16}/> Add Employee
@@ -726,8 +692,8 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
                         {emp.avatar && !imageErrors[emp.id] && (
                           <AvatarImage src={emp.avatar} alt={emp.name} style={{ transform: `translate(${emp.photoX || 0}px, ${emp.photoY || 0}px) scale(${emp.photoZoom || 1})`, transformOrigin: 'center' }} onError={() => setImageErrors(prev => ({...prev, [emp.id]: true}))} />
                         )}
-                        <AvatarFallback className="bg-primary/10 text-primary">
-                          <Icon name="person" size={20}/>
+                        <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
+                          {getAvatarFallback(emp.name).initials}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col gap-0.5 min-w-0">
@@ -782,7 +748,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
                           className="flex-1 h-8 text-xs font-medium bg-background hover:bg-muted"
                           onClick={(e) => {
                             e.stopPropagation(); 
-                            setEditingEmployee(emp); setNewEmpId(emp.id); setNewName(emp.name); setNewRole(emp.role || 'Teammate'); setNewDesignation(emp.designation || emp.role || ''); setNewPermissions(emp.permissions || []); setNewDept(emp.department); setNewEmail(emp.email || ''); setNewPhone(emp.phone || ''); setNewStatus(emp.status); setNewDob(emp.dob || ''); setNewJoiningDate(emp.joiningDate || ''); setNewCvFileName(emp.cvFileName || ''); setNewNidFileName(emp.nidFileName || ''); setNewAvatar(emp.avatar || ''); setPhotoX(emp.photoX || 0); setPhotoY(emp.photoY || 0); setPhotoZoom(emp.photoZoom || 1); setIsCustomDept(false); setCustomDept(''); setShowAddForm(true);
+                            setEditingEmployee(emp); setNewEmpId(emp.id); setNewName(emp.name); setNewRole(emp.role || 'Teammate'); setNewDesignation(emp.designation || emp.role || ''); setNewPermissions(emp.permissions || []); setNewDept(emp.department); setNewEmail(emp.email || ''); setNewPhone(emp.phone || ''); setNewStatus(emp.status); setNewDob(emp.dob || ''); setNewJoiningDate(emp.joiningDate || ''); setNewNidPassportId(emp.nidPassportId || ''); setIsCustomDept(false); setCustomDept(''); setShowAddForm(true);
                           }}
                         >
                           <Icon name="edit" className="mr-1.5 h-3.5 w-3.5" size={14}/> Edit
@@ -842,9 +808,11 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
             <>
               <div className="flex flex-col items-center pt-4 pb-2">
                 <Avatar className="h-24 w-24 mb-4 border-2 border-primary/20 shadow-sm text-2xl">
-                  <AvatarImage src={viewingEmployee.avatar} alt={viewingEmployee.name} style={{ transform: `translate(${viewingEmployee.photoX || 0}px, ${viewingEmployee.photoY || 0}px) scale(${viewingEmployee.photoZoom || 1})`, transformOrigin: 'center' }} onError={() => setImageErrors(prev => ({...prev, [viewingEmployee.id]: true}))} />
-                  <AvatarFallback className="bg-primary/10 text-primary">
-                    <Icon name="person" size={40}/>
+                  {viewingEmployee.avatar && !imageErrors[viewingEmployee.id] && (
+                    <AvatarImage src={viewingEmployee.avatar} alt={viewingEmployee.name} style={{ transform: `translate(${viewingEmployee.photoX || 0}px, ${viewingEmployee.photoY || 0}px) scale(${viewingEmployee.photoZoom || 1})`, transformOrigin: 'center' }} onError={() => setImageErrors(prev => ({...prev, [viewingEmployee.id]: true}))} />
+                  )}
+                  <AvatarFallback className="bg-primary/10 text-primary text-lg font-bold">
+                    {getAvatarFallback(viewingEmployee.name).initials}
                   </AvatarFallback>
                 </Avatar>
                 <h3 className="text-xl font-bold text-foreground text-center">{viewingEmployee.name}</h3>
@@ -875,6 +843,10 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
                   <span className="text-sm font-medium text-muted-foreground text-right">Joined Date</span>
                   <span className="col-span-2 text-sm">{viewingEmployee.joiningDate ? formatDate(viewingEmployee.joiningDate) : 'N/A'}</span>
                 </div>
+                <div className="grid grid-cols-3 items-center gap-4">
+                  <span className="text-sm font-medium text-muted-foreground text-right">NID / Passport ID</span>
+                  <span className="col-span-2 text-sm font-sans">{viewingEmployee.nidPassportId || '-'}</span>
+                </div>
               </div>
 
               <DialogFooter className="sm:justify-end gap-2 mt-4">
@@ -893,12 +865,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
                   setNewStatus(viewingEmployee.status);
                   setNewDob(viewingEmployee.dob || '');
                   setNewJoiningDate(viewingEmployee.joiningDate || '');
-                  setNewCvFileName(viewingEmployee.cvFileName || '');
-                  setNewNidFileName(viewingEmployee.nidFileName || '');
-                  setNewAvatar(viewingEmployee.avatar || '');
-                  setPhotoX(viewingEmployee.photoX || 0);
-                  setPhotoY(viewingEmployee.photoY || 0);
-                  setPhotoZoom(viewingEmployee.photoZoom || 1);
+                  setNewNidPassportId(viewingEmployee.nidPassportId || '');
                   setIsCustomDept(false);
                   setCustomDept('');
                   setShowAddForm(true);
@@ -923,77 +890,15 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
 
           <form onSubmit={handleSaveEmployee} className="flex flex-col gap-6 py-4">
             
-            {/* HD Profile Photo Upload */}
+            {/* Default Avatar Preview */}
             <div className="p-4 rounded-xl border border-dashed bg-muted/20">
-              <label className="text-sm font-medium mb-3 block">Profile Photo & Framing</label>
+              <label className="text-sm font-medium mb-3 block">Profile Avatar</label>
               <div className="flex gap-4 items-center">
-                <div 
-                  onPointerMove={handlePointerMove}
-                  onPointerUp={handlePointerUp}
-                  onPointerLeave={handlePointerUp}
-                  className="overflow-hidden relative h-20 w-20 rounded-full border-2 border-primary/20 bg-muted/50 cursor-grab active:cursor-grabbing"
-                  style={{ touchAction: 'none' }}
-                >
-                  {newAvatar ? (
-                    <img
-                      src={newAvatar}
-                      alt="Preview"
-                      onPointerDown={handlePointerDown}
-                      className="absolute top-0 left-0 w-full h-full object-cover"
-                      style={{
-                        transform: `translate(${photoX}px, ${photoY}px) scale(${photoZoom})`,
-                        transformOrigin: 'center',
-                        pointerEvents: 'auto'
-                      }}
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground text-center">No Image</div>
-                  )}
+                <div className="h-20 w-20 rounded-full bg-primary/10 text-primary flex items-center justify-center text-2xl font-bold border-2 border-primary/20 shrink-0">
+                  {newName ? getAvatarFallback(newName).initials : '?'}
                 </div>
-
-                <div className="flex-1 flex flex-col gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="w-fit"
-                    onClick={() => document.getElementById('photo-file-input').click()}
-                  >
-                    {newAvatar ? 'Change Photo' : 'Upload Photo'}
-                  </Button>
-                  <input
-                    id="photo-file-input"
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => {
-                      if (e.target.files && e.target.files[0]) {
-                        const reader = new FileReader();
-                        reader.onload = (event) => {
-                          setNewAvatar(event.target.result);
-                          setPhotoX(0); setPhotoY(0); setPhotoZoom(1);
-                        };
-                        reader.readAsDataURL(e.target.files[0]);
-                      }
-                    }}
-                  />
-                  <span className="text-[10px] text-muted-foreground">Drag image inside frame to adjust.</span>
-                </div>
+                <p className="flex-1 text-sm text-muted-foreground">A default avatar is generated automatically from the employee's initials. No photo upload needed.</p>
               </div>
-
-              {newAvatar && (
-                <div className="mt-3">
-                  <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                    <span>Zoom</span>
-                    <span>{Math.round(photoZoom * 100)}%</span>
-                  </div>
-                  <input 
-                    type="range" min="1" max="3" step="0.02" 
-                    value={photoZoom} onChange={(e) => setPhotoZoom(parseFloat(e.target.value))}
-                    className="w-full accent-primary"
-                  />
-                </div>
-              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1145,12 +1050,12 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
               <DatePicker label="Joining Date" value={newJoiningDate} onChange={(e) => setNewJoiningDate(e.target.value)} />
 
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium">Upload CV</label>
-                <Button type="button" variant="outline" className="w-full justify-start" onClick={() => document.getElementById('cv-file-input').click()}>
-                  <Icon name="table_chart" className="mr-2 h-4 w-4 text-muted-foreground" size={16}/>
-                  {newCvFileName ? (newCvFileName.length > 15 ? newCvFileName.substring(0, 15) + '...' : newCvFileName) : 'Upload Document'}
-                </Button>
-                <input id="cv-file-input" type="file" accept=".pdf,.doc,.docx" className="hidden" onChange={(e) => e.target.files && setNewCvFileName(e.target.files[0].name)} />
+                <label className="text-sm font-medium">NID / Passport ID</label>
+                <Input
+                  placeholder="e.g. 1994123456789 or P1234567"
+                  value={newNidPassportId}
+                  onChange={(e) => setNewNidPassportId(e.target.value)}
+                />
               </div>
 
               <Select label="Employment Status" value={newStatus} onChange={setNewStatus}>

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import Icon from "@/components/ui/Icon.jsx"
 import TooltipPopover from '../TooltipPopover.jsx'
 import kormiisLogo from '../../Assets/Kormiis Logo Final.svg'
@@ -87,6 +87,23 @@ export default function Sidebar({
   const top4Items = visibleNavItems.slice(0, 4)
   const isAnyOtherActive = !top4Items.some(item => item.id === currentView)
 
+  // Width of the widest menu label (matches text-sm/500/20px) so the expanded
+  // sidebar hugs the longest menu tab exactly.
+  const expandedWidth = useMemo(() => {
+    if (typeof document === 'undefined' || !visibleNavItems?.length) return 240
+    const probe = document.createElement('span')
+    probe.style.cssText = 'position:fixed;visibility:hidden;pointer-events:none;white-space:nowrap;font-size:14px;font-weight:500;line-height:20px;font-family:inherit'
+    let max = 0
+    for (const item of visibleNavItems) {
+      probe.textContent = item.label || ''
+      document.body.appendChild(probe)
+      max = Math.max(max, probe.offsetWidth)
+      probe.remove()
+    }
+    // label + icon(22) + gap(12) + item px(24) + aside p(20) + border(2)
+    return Math.max(160, Math.min(max + 82, 262))
+  }, [visibleNavItems])
+
   return (
     <aside
       ref={sidebarRef}
@@ -96,9 +113,10 @@ export default function Sidebar({
       aria-label="Floating navigation sidebar"
       className={`hidden md:flex flex-col fixed left-3 md:left-5 top-1/2 -translate-y-1/2 z-50 glass-kormiis text-sidebar-foreground rounded-3xl border border-white/30 dark:border-white/14 shadow-2xl transition-all duration-350 ease-[cubic-bezier(0.34,1.56,0.64,1)] overflow-hidden ${
         isOpen
-          ? 'w-[240px] sm:w-[250px] h-[calc(100vh-4rem)] max-h-[660px] p-2.5 shadow-2xl'
-          : 'w-[56px] h-auto p-1.5 cursor-pointer shadow-xl'
+          ? 'h-[calc(100vh-4rem)] max-h-[660px] p-2.5 shadow-2xl'
+          : 'w-[50px] h-auto p-1 cursor-pointer shadow-xl'
       }`}
+      style={{ width: isOpen ? `${expandedWidth}px` : undefined }}
     >
       {/* NAVIGATION ITEMS */}
       <nav 
