@@ -50,6 +50,7 @@ const getInitialsAvatar = (name) => {
 export default function EmployeePortal({ 
   currentUser,
   themeMode,
+  isDarkMode,
   toggleTheme,
   employees, 
   attendance, 
@@ -278,22 +279,24 @@ export default function EmployeePortal({
   }
 
   const navItems = [
-    { id: 'dashboard', icon: <Icon name="home" size={18}/>, label: 'Dashboard' },
-    { id: 'my-tasks', icon: <Icon name="check_box" size={18}/>, label: 'Tasks' },
-    { id: 'events', icon: <Icon name="calendar_month" size={18}/>, label: 'Events' },
-    { id: 'announcements', icon: <Icon name="rss_feed" size={18}/>, label: 'Feed' },
-    { id: 'my-assets', icon: <Icon name="monitor" size={18}/>, label: 'Assets' },
+    { id: 'dashboard', icon: <Icon name="dashboard" size={18}/>, label: 'Dashboard' },
     { id: 'attendance', icon: <Icon name="schedule" size={18}/>, label: 'Attendance' },
-    ...(currentUser?.permissions?.includes('manage_attendance') ? [{ id: 'team_attendance', icon: <Icon name="check_circle" size={18}/>, label: 'Team Attendance' }] : []),
+    { id: 'my-tasks', icon: <Icon name="check_box" size={18}/>, label: 'Tasks' },
+    { id: 'announcements', icon: <Icon name="rss_feed" size={18}/>, label: 'Announcements' },
+    { id: 'events', icon: <Icon name="calendar_month" size={18}/>, label: 'Events' },
+    { id: 'leave', icon: <Icon name="event_busy" size={18}/>, label: 'Leave' },
     { id: 'payslips', icon: <Icon name="account_balance" size={18}/>, label: 'Payslips' },
     { id: 'expenses', icon: <Icon name="wallet" size={18}/>, label: 'Expenses' },
     { id: 'documents', icon: <Icon name="folder_open" size={18}/>, label: 'Documents' },
     { id: 'notes', icon: <Icon name="sticky_note_2" size={18}/>, label: 'Notes' },
-    { id: 'leave', icon: <Icon name="calendar_month" size={18}/>, label: 'Leave' },
+    { id: 'my-assets', icon: <Icon name="devices_other" size={18}/>, label: 'Assets' },
     { id: 'gigs', icon: <Icon name="handshake" size={18}/>, label: 'Help Hub' },
     { id: 'performance', icon: <Icon name="insights" size={18}/>, label: 'Performance' },
+    ...(currentUser?.permissions?.includes('manage_attendance') ? [{ id: 'team_attendance', icon: <Icon name="check_circle" size={18}/>, label: 'Team Attendance' }] : []),
     { id: 'profile', icon: <Icon name="person" size={18}/>, label: 'Profile' }
   ]
+
+  const resolvedIsDark = isDarkMode ?? (themeMode === 'dark')
 
   return (
     <div className="dashboard-root app-shell relative" style={{ display: 'flex', height: '100vh', width: '100vw', maxWidth: '100vw', overflow: 'hidden', boxSizing: 'border-box' }}>
@@ -301,7 +304,7 @@ export default function EmployeePortal({
       <Sidebar
         visibleNavItems={navItems}
         isCollapsed={isSidebarCollapsed}
-        isDarkMode={themeMode === 'dark'}
+        isDarkMode={resolvedIsDark}
         currentView={activeTab}
         setCurrentView={setActiveTab}
         mobileMenuOpen={showMobileMenu}
@@ -322,7 +325,7 @@ export default function EmployeePortal({
           {/* Sticky Header Wrapper */}
           <div className={`sticky top-0 z-40 w-full pt-3 sm:pt-4 md:pt-6 pb-2 sm:pb-3 px-2 sm:px-4 md:px-6 pointer-events-none transition-transform duration-300 ease-in-out ${isMobile && isScrollingDown && !showMobileMenu ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
             <Topbar
-                isDarkMode={themeMode === 'dark'}
+                isDarkMode={resolvedIsDark}
                 toggleSidebar={() => setShowMobileMenu(prev => !prev)}
                 themeMode={themeMode}
                 toggleTheme={toggleTheme}
@@ -335,6 +338,7 @@ export default function EmployeePortal({
                 notifications={notifications}
                 clearNotifications={clearNotifications}
                 onProfileClick={() => setActiveTab('profile')}
+                handleLogout={handleLogout}
                 setCurrentView={setActiveTab}
                 user={currentUser}
             />

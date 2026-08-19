@@ -70,7 +70,7 @@ export default function Topbar({
     <>
 {/* Mobile: Liquid Glass Top Bar */}
       {isMobile ? (
-        <header aria-label="Top bar" className="topbar topbar-bar w-full h-14 px-4 flex items-center justify-between glass-apple text-foreground transition-all duration-300">
+        <header aria-label="Top bar" className="topbar topbar-bar pointer-events-auto w-full h-14 px-4 flex items-center justify-between glass-apple text-foreground transition-all duration-300">
           <div className="flex items-center shrink-0">
             <a
               href="#"
@@ -137,68 +137,90 @@ export default function Topbar({
           </div>
         </header>
       ) : (
-        <header aria-label="Top bar" className="topbar w-[98%] min-[400px]:w-[94%] sm:w-[85%] max-w-3xl mx-auto h-14 sm:h-16 px-2 min-[400px]:px-4 flex items-center justify-between rounded-full glass-apple text-foreground transition-all duration-300">
+        <header aria-label="Top bar" className="topbar pointer-events-auto w-[98%] min-[400px]:w-[94%] sm:w-[85%] max-w-3xl mx-auto h-14 sm:h-16 px-3 sm:px-4 md:px-5 flex items-center justify-between rounded-full glass-apple text-foreground transition-all duration-300">
           
-          {/* Data Integrity / Auto-Repair Alert (if discrepancies exist) */}
-          {dataIntegrityIssues && dataIntegrityIssues.length > 0 && (
-            <button
-              onClick={() => setShowCorruptionModal && setShowCorruptionModal(true)}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-destructive/15 text-destructive border border-destructive/30 hover:bg-destructive/25 transition-all cursor-pointer animate-pulse"
-              title={`${dataIntegrityIssues.length} data discrepancies detected`}
-            >
-              <Icon name="warning" size={14} />
-              <span className="hidden sm:inline">{dataIntegrityIssues.length}</span>
-            </button>
-          )}
-
-          {/* Theme Toggle Button */}
-          {showThemeToggle && (
-            <button
-              onClick={toggleTheme}
-              title={`Switch Theme (Current: ${themeMode})`}
-              aria-label="Toggle light/dark theme"
-              className="rounded-full size-9 sm:size-9 text-foreground apple-glass-btn shrink-0 flex items-center justify-center cursor-pointer active:scale-95 transition-all"
-            >
-              {themeMode === 'light' ? <Icon name="light_mode" size={18} /> : <Icon name="dark_mode" size={18} />}
-            </button>
-          )}
-
-          {/* Notifications Trigger */}
-          <div className="relative">
-            <button
-              ref={buttonRef}
-              onClick={() => { 
-                setShowNotifications(prev => !prev); 
-                if (markNotificationsRead) markNotificationsRead();
+          {/* Left: Brand Logo & Quick Search */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                if (setCurrentView) setCurrentView('dashboard');
               }}
-              title="Notifications"
-              aria-label="Notifications"
-              className="rounded-full size-9 sm:size-9 text-foreground apple-glass-btn relative shrink-0 flex items-center justify-center cursor-pointer active:scale-95 transition-all"
-              id="notification-trigger"
+              className="flex items-center cursor-pointer transition-opacity hover:opacity-80 active:scale-95 outline-none no-underline border-none bg-transparent p-0 m-0 shadow-none"
+              style={{ background: 'transparent', border: 'none', boxShadow: 'none', padding: 0, margin: 0 }}
+              title="Kormiis Dashboard"
             >
-              <Icon name="notifications_active" size={18} />
-              {unreadCount > 0 && (
-                <span className="absolute top-1 right-1 flex size-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
-                  <span className="relative inline-flex rounded-full size-2.5 bg-destructive"></span>
-                </span>
-              )}
-            </button>
+              <img
+                src={isDark ? kormiisWhiteLogo : kormiisLogo}
+                alt="Kormiis Logo"
+                className="h-7 sm:h-8 md:h-9 w-auto max-w-[120px] sm:max-w-[140px] object-contain shrink-0 drop-shadow-sm transition-opacity"
+                style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}
+              />
+            </a>
+
+            {/* Data Integrity / Auto-Repair Alert (if discrepancies exist) */}
+            {dataIntegrityIssues && dataIntegrityIssues.length > 0 && (
+              <button
+                onClick={() => setShowCorruptionModal && setShowCorruptionModal(true)}
+                className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-destructive/15 text-destructive border border-destructive/30 hover:bg-destructive/25 transition-all cursor-pointer animate-pulse"
+                title={`${dataIntegrityIssues.length} data discrepancies detected`}
+              >
+                <Icon name="warning" size={14} />
+                <span className="hidden sm:inline">{dataIntegrityIssues.length}</span>
+              </button>
+            )}
           </div>
 
-          {/* User Profile Trigger Button */}
-          {user && (
-            <button
-              onClick={onProfileClick || (() => setCurrentView && setCurrentView('profile'))}
-              title={user?.name ? `${user.name} (My Profile)` : "My Profile"}
-              aria-label="Open Profile"
-              className="rounded-full size-9 sm:size-9 text-foreground apple-glass-btn shrink-0 flex items-center justify-center cursor-pointer active:scale-95 transition-all"
-            >
-              <Icon name="person" size={19} />
-            </button>
-          )}
+          {/* Right: Actions Group (Theme, Notification, Profile) */}
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            {showThemeToggle && (
+              <button
+                onClick={toggleTheme}
+                title={`Switch Theme (Current: ${themeMode})`}
+                aria-label="Toggle light/dark theme"
+                className="rounded-full size-9 sm:size-9 text-foreground apple-glass-btn shrink-0 flex items-center justify-center cursor-pointer active:scale-95 transition-all"
+              >
+                {themeMode === 'light' ? <Icon name="light_mode" size={18} /> : <Icon name="dark_mode" size={18} />}
+              </button>
+            )}
 
-      </header>
+            {/* Notifications Trigger */}
+            <div className="relative">
+              <button
+                ref={buttonRef}
+                onClick={() => { 
+                  setShowNotifications(prev => !prev); 
+                  if (markNotificationsRead) markNotificationsRead();
+                }}
+                title="Notifications"
+                aria-label="Notifications"
+                className="rounded-full size-9 sm:size-9 text-foreground apple-glass-btn relative shrink-0 flex items-center justify-center cursor-pointer active:scale-95 transition-all"
+                id="notification-trigger"
+              >
+                <Icon name="notifications_active" size={18} />
+                {unreadCount > 0 && (
+                  <span className="absolute top-1 right-1 flex size-2.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
+                    <span className="relative inline-flex rounded-full size-2.5 bg-destructive"></span>
+                  </span>
+                )}
+              </button>
+            </div>
+
+            {/* User Profile Trigger Button */}
+            {user && (
+              <button
+                onClick={onProfileClick || (() => setCurrentView && setCurrentView('profile'))}
+                title={user?.name ? `${user.name} (My Profile)` : "My Profile"}
+                aria-label="Open Profile"
+                className="rounded-full size-9 sm:size-9 text-foreground apple-glass-btn shrink-0 flex items-center justify-center cursor-pointer active:scale-95 transition-all"
+              >
+                <Icon name="person" size={19} />
+              </button>
+            )}
+          </div>
+        </header>
       )}
 
       {/* Mobile Notifications Dialog */}

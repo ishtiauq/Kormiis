@@ -273,6 +273,7 @@ html.dark .glass-kormiis,
 html.dark .glass-kormiis-modal,
 [data-theme="dark"] .glass-kormiis-modal,
 .force-dark-mode .glass-kormiis-modal,
+.force-dark-mode.glass-kormiis-modal,
 .dark .glass-popover,
 [data-theme="dark"] .glass-popover {
   background: linear-gradient(135deg, rgba(24, 24, 34, 0.55) 0%, rgba(10, 10, 16, 0.42) 100%) !important;

@@ -119,6 +119,7 @@ export default function App() {
       <EmployeePortal
         currentUser={{...user, id: user.id || user.employeeId, role: user.role || 'Teammate', department: user.department || 'Engineering'}}
         themeMode={themeMode}
+        isDarkMode={isDarkMode}
         toggleTheme={toggleTheme}
         employees={appData.employees}
         attendance={appData.attendance}
