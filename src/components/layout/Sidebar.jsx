@@ -103,7 +103,7 @@ export default function Sidebar({
       {/* NAVIGATION ITEMS */}
       <nav 
         aria-label="Main navigation" 
-        className={`sidebar-nav-scroll flex-1 flex flex-col gap-1.5 ${
+        className={`sidebar-nav-scroll flex-1 flex flex-col gap-1.5 items-center ${
           isOpen ? 'overflow-y-auto py-1 pr-0.5' : 'overflow-hidden justify-center'
         }`}
       >
@@ -166,7 +166,7 @@ export default function Sidebar({
 
         {/* Resting state hint: 3 dots indicator when collapsed */}
         {!isOpen && (
-          <div className="flex flex-col items-center justify-center py-1 mt-0.5 gap-1 opacity-60">
+          <div className="size-10 flex flex-col items-center justify-center gap-1 opacity-60">
             <span className={`size-1 rounded-full ${isAnyOtherActive ? 'bg-primary ring-2 ring-primary/40' : 'bg-sidebar-foreground/40'}`} />
             <span className="size-1 rounded-full bg-sidebar-foreground/40" />
             <span className="size-1 rounded-full bg-sidebar-foreground/40" />
