@@ -125,12 +125,12 @@ html.dark,
 
   /* Apple Ultra-Liquid Glass Tokens (Dark Mode) */
   --glass-bg: linear-gradient(135deg, rgba(30, 30, 42, 0.45) 0%, rgba(14, 14, 20, 0.32) 100%);
-  --glass-border: rgba(255, 255, 255, 0.15);
+  --glass-border: rgba(255, 255, 255, 0.14);
   --glass-shadow: 
     0 24px 50px -12px rgba(0, 0, 0, 0.75),
     0 3px 8px 0 rgba(0, 0, 0, 0.45),
-    inset 0 1px 1px 0 rgba(255, 255, 255, 0.25),
-    inset 1px 0 1px 0 rgba(255, 255, 255, 0.15);
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.12),
+    inset 1px 0 1px 0 rgba(255, 255, 255, 0.06);
   
   --glass-btn-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.03) 100%);
   --glass-btn-border: rgba(255, 255, 255, 0.16);
@@ -173,10 +173,10 @@ html.dark,
 body {
   background-color: var(--background);
   background-image: 
-    radial-gradient(at 10% 10%, rgba(254, 53, 1, 0.08) 0px, transparent 45%),
-    radial-gradient(at 90% 15%, rgba(59, 130, 246, 0.08) 0px, transparent 50%),
-    radial-gradient(at 50% 85%, rgba(147, 51, 234, 0.06) 0px, transparent 55%),
-    radial-gradient(at 85% 90%, rgba(16, 185, 129, 0.05) 0px, transparent 50%);
+    radial-gradient(at 8% 8%, rgba(254, 53, 1, 0.12) 0px, transparent 48%),
+    radial-gradient(at 92% 12%, rgba(59, 130, 246, 0.12) 0px, transparent 52%),
+    radial-gradient(at 50% 80%, rgba(147, 51, 234, 0.10) 0px, transparent 56%),
+    radial-gradient(at 85% 90%, rgba(16, 185, 129, 0.08) 0px, transparent 48%);
   background-attachment: fixed;
   color: var(--foreground);
   font-family: var(--font-sans);
@@ -189,19 +189,38 @@ body {
 html.dark body,
 body[data-theme="dark"],
 [data-theme="dark"] body {
+  background-color: #090a0f !important;
   background-image: 
-    radial-gradient(at 0% 0%, rgba(254, 53, 1, 0.14) 0px, transparent 45%),
-    radial-gradient(at 100% 10%, rgba(59, 130, 246, 0.12) 0px, transparent 50%),
-    radial-gradient(at 50% 50%, rgba(147, 51, 234, 0.10) 0px, transparent 55%),
-    radial-gradient(at 80% 90%, rgba(16, 185, 129, 0.08) 0px, transparent 45%);
+    radial-gradient(at 5% 5%, rgba(254, 53, 1, 0.20) 0px, transparent 48%),
+    radial-gradient(at 95% 10%, rgba(59, 130, 246, 0.18) 0px, transparent 52%),
+    radial-gradient(at 50% 50%, rgba(147, 51, 234, 0.16) 0px, transparent 56%),
+    radial-gradient(at 80% 90%, rgba(16, 185, 129, 0.14) 0px, transparent 48%);
   background-attachment: fixed;
 }
 
-html, body, #root {
+html, body {
   min-height: 100%;
   width: 100%;
   margin: 0;
   padding: 0;
+  overscroll-behavior: none !important;
+}
+
+.dark,
+html.dark,
+[data-theme="dark"] {
+  color-scheme: dark;
+  background-color: #090a0f !important;
+}
+
+#root,
+.app-shell,
+.dashboard-root,
+.dashboard-content,
+main {
+  background: transparent !important;
+  background-color: transparent !important;
+  overscroll-behavior: none !important;
 }
 
 /* ==============================================================
@@ -294,12 +313,12 @@ html.dark .bg-card,
   background: linear-gradient(135deg, rgba(28, 28, 40, 0.42) 0%, rgba(14, 14, 22, 0.30) 100%) !important;
   backdrop-filter: saturate(190%) blur(32px) !important;
   -webkit-backdrop-filter: saturate(190%) blur(32px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
   box-shadow: 
-    0 24px 50px -12px rgba(0, 0, 0, 0.75),
-    0 3px 8px 0 rgba(0, 0, 0, 0.45),
-    inset 0 1px 1px 0 rgba(255, 255, 255, 0.25),
-    inset 1px 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+    0 24px 50px -12px rgba(0, 0, 0, 0.85),
+    0 3px 8px 0 rgba(0, 0, 0, 0.55),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.10),
+    inset 1px 0 1px 0 rgba(255, 255, 255, 0.05) !important;
 }
 
 .glass-card:hover,
@@ -316,9 +335,9 @@ html.dark .bg-card,
 html.dark .bg-card:hover,
 [data-theme="dark"] .bg-card:hover {
   box-shadow: 
-    0 30px 60px -10px rgba(0, 0, 0, 0.85),
-    0 6px 12px -2px rgba(0, 0, 0, 0.6),
-    inset 0 1px 1px 0 rgba(255, 255, 255, 0.35) !important;
+    0 30px 60px -10px rgba(0, 0, 0, 0.95),
+    0 6px 12px -2px rgba(0, 0, 0, 0.7),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.14) !important;
 }
 
 /* Dedicated Apple Floating Sidebar Glass Material */

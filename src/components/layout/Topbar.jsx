@@ -71,7 +71,7 @@ export default function Topbar({
       {/* Apple Liquid Glass Floating Capsule Navbar */}
       <header 
         aria-label="Top Navigation Bar" 
-        className="topbar pointer-events-auto w-[calc(100%-1rem)] sm:w-[94%] md:w-[90%] max-w-4xl mx-auto h-13 sm:h-15 md:h-16 px-2.5 sm:px-4 md:px-5 flex items-center justify-between rounded-full glass-kormiis text-foreground transition-all duration-300 relative select-none shadow-xl"
+        className="topbar pointer-events-auto w-[calc(100%-1rem)] sm:w-[94%] md:w-[90%] max-w-4xl mx-auto h-13 sm:h-15 md:h-16 px-3 sm:px-4 md:px-5 flex items-center justify-between rounded-full glass-kormiis text-foreground transition-all duration-300 relative select-none shadow-xl border border-white/30 dark:border-white/14"
       >
         {/* Left: Brand Logo */}
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
@@ -95,7 +95,7 @@ export default function Topbar({
           </a>
         </div>
 
-        {/* Right: Actions Group (Live Status, Theme, Notification, Profile) */}
+        {/* Right: Actions Group (Theme, Notification, Profile) */}
         <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
           
           {/* Data Integrity / Auto-Repair Alert (if discrepancies exist) */}
@@ -110,15 +110,13 @@ export default function Topbar({
             </button>
           )}
 
-
-
           {/* Theme Toggle Button */}
           {showThemeToggle && (
             <button
               onClick={toggleTheme}
               title={`Switch Theme (Current: ${themeMode})`}
               aria-label="Toggle light/dark theme"
-              className="rounded-full size-8 sm:size-9 text-foreground apple-glass-btn shrink-0 flex items-center justify-center cursor-pointer"
+              className="rounded-full size-9 sm:size-9 text-foreground apple-glass-btn shrink-0 flex items-center justify-center cursor-pointer active:scale-95 transition-all"
             >
               {themeMode === 'light' ? <Icon name="light_mode" size={18} /> : <Icon name="dark_mode" size={18} />}
             </button>
@@ -134,7 +132,7 @@ export default function Topbar({
               }}
               title="Notifications"
               aria-label="Notifications"
-              className="rounded-full size-8 sm:size-9 text-foreground apple-glass-btn relative shrink-0 flex items-center justify-center cursor-pointer"
+              className="rounded-full size-9 sm:size-9 text-foreground apple-glass-btn relative shrink-0 flex items-center justify-center cursor-pointer active:scale-95 transition-all"
               id="notification-trigger"
             >
               <Icon name="notifications_active" size={18} />
@@ -147,19 +145,15 @@ export default function Topbar({
             </button>
           </div>
 
-          {/* User Profile Avatar Pill */}
+          {/* User Profile Trigger Button */}
           {user && (
             <button
               onClick={onProfileClick || (() => setCurrentView && setCurrentView('profile'))}
               title={user?.name ? `${user.name} (My Profile)` : "My Profile"}
               aria-label="Open Profile"
-              className="rounded-full size-8 sm:size-9 p-0.5 overflow-hidden shrink-0 apple-glass-btn cursor-pointer flex items-center justify-center ring-1 ring-white/30 dark:ring-white/15 hover:ring-primary/50 transition-all"
+              className="rounded-full size-9 sm:size-9 text-foreground apple-glass-btn shrink-0 flex items-center justify-center cursor-pointer active:scale-95 transition-all"
             >
-              <img
-                src={user?.avatar || "https://i.pravatar.cc/150?u=a042581f4e29026704d"}
-                alt={user?.name ? `${user.name}'s profile` : "Profile"}
-                className="w-full h-full object-cover rounded-full"
-              />
+              <Icon name="person" size={19} />
             </button>
           )}
 
@@ -169,36 +163,48 @@ export default function Topbar({
       {/* Mobile Notifications Dialog */}
       {showNotifications && isMobile && (
         <Dialog open={showNotifications} onOpenChange={setShowNotifications}>
-          <DialogContent className="sm:max-w-[425px] p-0">
-            <DialogHeader className="p-4 px-6 border-b border-border/50 bg-muted/20 pb-3">
+          <DialogContent className="max-w-md p-0 overflow-hidden">
+            <DialogHeader className="p-4 sm:p-6 pb-3">
               <div className="flex justify-between items-center w-full">
-                <DialogTitle className="text-lg font-extrabold tracking-tight text-foreground leading-none">Notifications</DialogTitle>
-                <Badge variant="secondary" className="text-[10px] px-2 py-0.5">
+                <div className="flex items-center gap-2.5">
+                  <div className="size-8 rounded-xl flex items-center justify-center bg-primary/10 text-primary">
+                    <Icon name="notifications" size={18} />
+                  </div>
+                  <DialogTitle className="text-fluid-lg font-bold tracking-tight text-foreground m-0">Notifications</DialogTitle>
+                </div>
+                <Badge variant="secondary" className="text-xs font-semibold px-2.5 py-0.5 rounded-full">
                   {filteredNotifications.length} Total
                 </Badge>
               </div>
-              <div className="flex gap-2 mt-4">
-                <Button 
-                  variant={notificationTab === 'all' ? 'default' : 'outline'} 
-                  size="sm" 
+              <div className="flex gap-2 mt-3.5">
+                <button 
                   onClick={() => setNotificationTab('all')}
-                  className="h-7 text-xs rounded-full px-4"
+                  className={`h-7.5 text-xs font-semibold rounded-full px-3.5 transition-all cursor-pointer ${
+                    notificationTab === 'all' 
+                      ? 'bg-primary text-primary-foreground shadow-sm' 
+                      : 'apple-glass-btn text-muted-foreground hover:text-foreground'
+                  }`}
                 >
                   All
-                </Button>
-                <Button 
-                  variant={notificationTab === 'unread' ? 'default' : 'outline'} 
-                  size="sm" 
+                </button>
+                <button 
                   onClick={() => setNotificationTab('unread')}
-                  className="h-7 text-xs rounded-full px-4"
+                  className={`h-7.5 text-xs font-semibold rounded-full px-3.5 transition-all cursor-pointer ${
+                    notificationTab === 'unread' 
+                      ? 'bg-primary text-primary-foreground shadow-sm' 
+                      : 'apple-glass-btn text-muted-foreground hover:text-foreground'
+                  }`}
                 >
-                  Unread
-                </Button>
+                  Unread {unreadCount > 0 && `(${unreadCount})`}
+                </button>
               </div>
             </DialogHeader>
-            <div className="max-h-[60vh] overflow-y-auto p-2">
+            <div className="max-h-[60vh] overflow-y-auto p-3 flex flex-col gap-1.5" style={{ scrollbarWidth: 'thin' }}>
               {filteredNotifications.length === 0 ? (
-                <div className="p-8 text-center text-sm text-muted-foreground">No new notifications</div>
+                <div className="py-10 px-4 text-center flex flex-col items-center justify-center gap-2">
+                  <Icon name="notifications_off" size={32} className="text-muted-foreground/40" />
+                  <p className="text-sm font-medium text-muted-foreground m-0">No new notifications</p>
+                </div>
               ) : (
                 filteredNotifications.map(n => (
                   <div 
@@ -211,34 +217,37 @@ export default function Topbar({
                       if (markNotificationsRead) markNotificationsRead(n.id);
                       setShowNotifications(false);
                     }}
-                    className={`p-3 px-4 rounded-xl transition-colors cursor-pointer my-1 border relative ${n.read ? 'bg-background hover:bg-muted/50 border-transparent opacity-70' : 'bg-primary/5 hover:bg-primary/10 border-primary/20 shadow-sm'}`}
+                    className={`p-3 px-3.5 rounded-2xl transition-all cursor-pointer border relative select-none ${
+                      n.read 
+                        ? 'hover:bg-white/20 dark:hover:bg-white/[0.06] border-transparent opacity-75 text-foreground/80' 
+                        : 'bg-primary/10 hover:bg-primary/15 border-primary/25 shadow-xs text-foreground font-medium backdrop-blur-md'
+                    }`}
                   >
-                    {!n.read && <div className="absolute left-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-primary" />}
-                    <p className={`text-fluid-sm m-0 leading-relaxed text-foreground ${!n.read ? 'pl-2 font-semibold' : 'font-medium'}`}>{n.text}</p>
-                    <span className={`text-[11px] block mt-1.5 text-muted-foreground ${!n.read ? 'pl-2' : ''}`}>{n.time}</span>
+                    {!n.read && (
+                      <span className="absolute left-2.5 top-1/2 -translate-y-1/2 flex size-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                        <span className="relative inline-flex rounded-full size-2 bg-primary"></span>
+                      </span>
+                    )}
+                    <p className={`text-fluid-sm m-0 leading-snug text-foreground ${!n.read ? 'pl-3 font-semibold' : 'font-medium'}`}>{n.text}</p>
+                    <span className={`text-[11px] block mt-1 text-muted-foreground ${!n.read ? 'pl-3' : ''}`}>{n.time}</span>
                   </div>
                 ))
               )}
             </div>
-            <DialogFooter className="p-3 px-6 bg-muted/10 pb-3">
-              <div className="flex justify-between items-center w-full">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={(e) => { e.stopPropagation(); if(clearNotifications) clearNotifications(); }} 
-                  className="text-xs text-muted-foreground hover:text-destructive"
-                >
-                  Clear All
-                </Button>
-                <Button 
-                  variant="secondary" 
-                  size="sm" 
-                  onClick={(e) => { e.stopPropagation(); setShowNotifications(false); }} 
-                  className="text-xs"
-                >
-                  Close
-                </Button>
-              </div>
+            <DialogFooter className="p-3 px-6 bg-white/[0.04] dark:bg-black/20 pb-3 flex justify-between items-center">
+              <button 
+                onClick={(e) => { e.stopPropagation(); if(clearNotifications) clearNotifications(); }} 
+                className="text-xs font-semibold text-muted-foreground hover:text-destructive transition-colors cursor-pointer"
+              >
+                Clear All
+              </button>
+              <button 
+                onClick={(e) => { e.stopPropagation(); setShowNotifications(false); }} 
+                className="liquid-glass-btn h-8 px-4 rounded-full text-xs font-semibold cursor-pointer"
+              >
+                Close
+              </button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -255,40 +264,54 @@ export default function Topbar({
           <div
             role="dialog"
             aria-label="Notifications"
-            className="fixed flex flex-col overflow-hidden rounded-2xl border border-border bg-background text-popover-foreground shadow-2xl animate-in fade-in-0 zoom-in-95 p-0 z-50"
+            className="fixed flex flex-col overflow-hidden rounded-3xl glass-popover text-foreground shadow-2xl animate-in fade-in-0 zoom-in-95 p-0 z-50 border border-white/30 dark:border-white/12"
             style={{ top: `${modalPos.top}px`, right: `${modalPos.right}px`, width: '380px' }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-500 via-rose-500 to-primary z-10" />
-            <div className="p-4 px-6 flex flex-col gap-4 border-b border-border/50 bg-muted/20 relative z-20">
+            {/* Header */}
+            <div className="p-4 sm:p-5 pb-3 flex flex-col gap-3 border-b border-border/80 dark:border-white/10 relative z-20">
               <div className="flex justify-between items-center w-full">
-                <h2 className="text-lg font-extrabold tracking-tight text-foreground leading-none">Notifications</h2>
-                <Badge variant="secondary" className="text-[10px] px-2 py-0.5">
+                <div className="flex items-center gap-2.5">
+                  <div className="size-7.5 rounded-xl flex items-center justify-center bg-primary/10 text-primary">
+                    <Icon name="notifications" size={17} />
+                  </div>
+                  <h2 className="text-fluid-lg font-bold tracking-tight text-foreground m-0 leading-none">Notifications</h2>
+                </div>
+                <Badge variant="secondary" className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full">
                   {filteredNotifications.length} Total
                 </Badge>
               </div>
-              <div className="flex gap-2">
-                <Button 
-                  variant={notificationTab === 'all' ? 'default' : 'outline'} 
-                  size="sm" 
+              <div className="flex gap-2 mt-1">
+                <button 
                   onClick={() => setNotificationTab('all')}
-                  className="h-7 text-xs rounded-full px-4"
+                  className={`h-7.5 text-xs font-semibold rounded-full px-3.5 transition-all cursor-pointer ${
+                    notificationTab === 'all' 
+                      ? 'bg-primary text-primary-foreground shadow-sm' 
+                      : 'apple-glass-btn text-muted-foreground hover:text-foreground'
+                  }`}
                 >
                   All
-                </Button>
-                <Button 
-                  variant={notificationTab === 'unread' ? 'default' : 'outline'} 
-                  size="sm" 
+                </button>
+                <button 
                   onClick={() => setNotificationTab('unread')}
-                  className="h-7 text-xs rounded-full px-4"
+                  className={`h-7.5 text-xs font-semibold rounded-full px-3.5 transition-all cursor-pointer ${
+                    notificationTab === 'unread' 
+                      ? 'bg-primary text-primary-foreground shadow-sm' 
+                      : 'apple-glass-btn text-muted-foreground hover:text-foreground'
+                  }`}
                 >
-                  Unread
-                </Button>
+                  Unread {unreadCount > 0 && `(${unreadCount})`}
+                </button>
               </div>
             </div>
-            <div className="max-h-[350px] overflow-y-auto p-2">
+
+            {/* Notifications List */}
+            <div className="max-h-[360px] overflow-y-auto p-3 flex flex-col gap-1.5" style={{ scrollbarWidth: 'thin' }}>
               {filteredNotifications.length === 0 ? (
-                <div className="p-8 text-center text-sm text-muted-foreground">No new notifications</div>
+                <div className="py-10 px-4 text-center flex flex-col items-center justify-center gap-2">
+                  <Icon name="notifications_off" size={28} className="text-muted-foreground/40" />
+                  <p className="text-sm font-medium text-muted-foreground m-0">No new notifications</p>
+                </div>
               ) : (
                 filteredNotifications.map(n => (
                   <div 
@@ -301,34 +324,39 @@ export default function Topbar({
                       if (markNotificationsRead) markNotificationsRead(n.id);
                       setShowNotifications(false);
                     }}
-                    className={`p-3 px-4 rounded-xl transition-colors cursor-pointer my-1 border relative ${n.read ? 'bg-background hover:bg-muted/50 border-transparent opacity-70' : 'bg-primary/5 hover:bg-primary/10 border-primary/20 shadow-sm'}`}
+                    className={`p-3 px-3.5 rounded-2xl transition-all cursor-pointer border relative select-none ${
+                      n.read 
+                        ? 'hover:bg-white/20 dark:hover:bg-white/[0.06] border-transparent opacity-75 text-foreground/80' 
+                        : 'bg-primary/10 hover:bg-primary/15 border-primary/25 shadow-xs text-foreground font-medium backdrop-blur-md'
+                    }`}
                   >
-                    {!n.read && <div className="absolute left-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-primary" />}
-                    <p className={`text-fluid-sm m-0 leading-relaxed text-foreground ${!n.read ? 'pl-2 font-semibold' : 'font-medium'}`}>{n.text}</p>
-                    <span className={`text-[11px] block mt-1.5 text-muted-foreground ${!n.read ? 'pl-2' : ''}`}>{n.time}</span>
+                    {!n.read && (
+                      <span className="absolute left-2.5 top-1/2 -translate-y-1/2 flex size-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                        <span className="relative inline-flex rounded-full size-2 bg-primary"></span>
+                      </span>
+                    )}
+                    <p className={`text-fluid-sm m-0 leading-snug text-foreground ${!n.read ? 'pl-3 font-semibold' : 'font-medium'}`}>{n.text}</p>
+                    <span className={`text-[11px] block mt-1 text-muted-foreground ${!n.read ? 'pl-3' : ''}`}>{n.time}</span>
                   </div>
                 ))
               )}
             </div>
-            <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4 px-6 border-t border-border/50 mt-2 shrink-0 pb-4 bg-muted/5 relative z-20">
-              <div className="flex justify-between items-center w-full">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={(e) => { e.stopPropagation(); if(clearNotifications) clearNotifications(); }} 
-                  className="text-xs text-muted-foreground hover:text-destructive"
-                >
-                  Clear All
-                </Button>
-                <Button 
-                  variant="secondary" 
-                  size="sm" 
-                  onClick={(e) => { e.stopPropagation(); setShowNotifications(false); }} 
-                  className="text-xs"
-                >
-                  Close
-                </Button>
-              </div>
+
+            {/* Footer */}
+            <div className="p-3 px-5 border-t border-border/80 dark:border-white/10 flex justify-between items-center bg-white/[0.04] dark:bg-black/20 rounded-b-3xl relative z-20">
+              <button 
+                onClick={(e) => { e.stopPropagation(); if(clearNotifications) clearNotifications(); }} 
+                className="text-xs font-semibold text-muted-foreground hover:text-destructive transition-colors cursor-pointer"
+              >
+                Clear All
+              </button>
+              <button 
+                onClick={(e) => { e.stopPropagation(); setShowNotifications(false); }} 
+                className="liquid-glass-btn h-7.5 px-3.5 rounded-full text-xs font-semibold cursor-pointer"
+              >
+                Close
+              </button>
             </div>
           </div>
         </>,

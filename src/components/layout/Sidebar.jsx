@@ -94,7 +94,7 @@ export default function Sidebar({
       onMouseLeave={handleMouseLeave}
       onClick={handleBarTouchOrClick}
       aria-label="Floating navigation sidebar"
-      className={`hidden md:flex flex-col fixed left-3 md:left-5 top-1/2 -translate-y-1/2 z-50 glass-floating-sidebar text-sidebar-foreground rounded-3xl transition-all duration-350 ease-[cubic-bezier(0.34,1.56,0.64,1)] overflow-hidden ${
+      className={`hidden md:flex flex-col fixed left-3 md:left-5 top-1/2 -translate-y-1/2 z-50 glass-kormiis text-sidebar-foreground rounded-3xl border border-white/30 dark:border-white/14 shadow-2xl transition-all duration-350 ease-[cubic-bezier(0.34,1.56,0.64,1)] overflow-hidden ${
         isOpen
           ? 'w-[240px] sm:w-[250px] h-[calc(100vh-4rem)] max-h-[660px] p-2.5 shadow-2xl'
           : 'w-[56px] h-auto p-1.5 cursor-pointer shadow-xl'
