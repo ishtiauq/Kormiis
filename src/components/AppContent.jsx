@@ -1,36 +1,38 @@
-import Dashboard from './Dashboard.jsx'
-import Employees from './Employees.jsx'
-import Payroll from './Payroll.jsx'
-import Attendance from './Attendance.jsx'
-import Expenses from './Expenses.jsx'
-import Announcements from './Announcements.jsx'
-import Calendar from './Calendar.jsx'
-import Documents from './Documents.jsx'
-import Assets from './Assets.jsx'
-import Settings from './Settings.jsx'
-import Tasks from './Tasks.jsx'
-import ProfileView from './ProfileView.jsx'
-import Notes from './Notes.jsx'
-import GigBoardPage from './hr/GigBoardPage.jsx'
-import PerformancePage from './hr/PerformancePage.jsx'
-import WellbeingPage from './hr/WellbeingPage.jsx'
+import { lazy, Suspense } from 'react'
 import LoadingScreen from './layout/LoadingScreen.jsx'
-import { Skeleton } from "@/components/ui/skeleton"
+
+const Dashboard = lazy(() => import('./Dashboard.jsx'))
+const Employees = lazy(() => import('./Employees.jsx'))
+const Payroll = lazy(() => import('./Payroll.jsx'))
+const Attendance = lazy(() => import('./Attendance.jsx'))
+const Expenses = lazy(() => import('./Expenses.jsx'))
+const Announcements = lazy(() => import('./Announcements.jsx'))
+const Calendar = lazy(() => import('./Calendar.jsx'))
+const Documents = lazy(() => import('./Documents.jsx'))
+const Assets = lazy(() => import('./Assets.jsx'))
+const Settings = lazy(() => import('./Settings.jsx'))
+const Tasks = lazy(() => import('./Tasks.jsx'))
+const ProfileView = lazy(() => import('./ProfileView.jsx'))
+const Notes = lazy(() => import('./Notes.jsx'))
+const GigBoardPage = lazy(() => import('./hr/GigBoardPage.jsx'))
+const PerformancePage = lazy(() => import('./hr/PerformancePage.jsx'))
+const WellbeingPage = lazy(() => import('./hr/WellbeingPage.jsx'))
+
+function ViewSkeleton() {
+  return (
+    <div className="w-full flex flex-col gap-4 animate-pulse" aria-hidden="true">
+      <div className="h-8 w-48 rounded-xl bg-foreground/10" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {[0, 1, 2, 3].map((i) => (
+          <div key={i} className="h-28 rounded-2xl bg-foreground/10" />
+        ))}
+      </div>
+      <div className="h-64 rounded-2xl bg-foreground/10" />
+    </div>
+  )
+}
 
 export default function AppContent({ currentView, setCurrentView, isAppLoading, hasPermission, user, isSidebarCollapsed, themeMode, toggleTheme, ...data }) {
-  const renderBreadcrumbs = () => {
-    if (currentView === 'dashboard') return null
-    return (
-      <div className="breadcrumb-container">
-        <span className="breadcrumb-item" onClick={() => setCurrentView('dashboard')}>Dashboard</span>
-        <span>/</span>
-        <span className="breadcrumb-current" style={{ textTransform: 'capitalize' }}>
-          {currentView === 'profile' ? 'My Profile' : currentView}
-        </span>
-      </div>
-    )
-  }
-
   if (isAppLoading) {
     return <LoadingScreen isDarkMode={themeMode === 'dark'} />
   }
@@ -49,40 +51,63 @@ export default function AppContent({ currentView, setCurrentView, isAppLoading, 
     )
   }
 
+  let view
   switch (currentView) {
     case 'dashboard':
-      return <Dashboard employees={data.employees} syncLogs={data.syncLogs} addLog={data.addLog} onSync={data.handleSync} setCurrentView={setCurrentView} announcements={data.announcements} events={data.events} payroll={data.payroll} isSidebarCollapsed={isSidebarCollapsed} hasPermission={hasPermission} tasks={data.tasks} documents={data.documents} assets={data.assets} attendance={data.attendance} setAttendance={data.handleSetAttendance} currentUser={user} addToast={data.addToast} settings={data.settings} notes={data.notes} setNotes={data.handleSetNotes} />
+      view = <Dashboard employees={data.employees} syncLogs={data.syncLogs} addLog={data.addLog} onSync={data.handleSync} setCurrentView={setCurrentView} announcements={data.announcements} events={data.events} payroll={data.payroll} isSidebarCollapsed={isSidebarCollapsed} hasPermission={hasPermission} tasks={data.tasks} documents={data.documents} assets={data.assets} attendance={data.attendance} setAttendance={data.handleSetAttendance} currentUser={user} addToast={data.addToast} settings={data.settings} notes={data.notes} setNotes={data.handleSetNotes} />
+      break
     case 'employees':
-      return <Employees employees={data.employees} setEmployees={data.handleSetEmployees} addLog={data.addLog} addAuditLog={data.addAuditLog} pendingProfileEdits={data.pendingProfileEdits} setPendingProfileEdits={data.setPendingProfileEdits} addToast={data.addToast} selectedEmployeeId={data.selectedEmployeeId} setSelectedEmployeeId={data.setSelectedEmployeeId} isSidebarCollapsed={isSidebarCollapsed} adminUid={data.adminUid} currentUser={user} />
+      view = <Employees employees={data.employees} setEmployees={data.handleSetEmployees} addLog={data.addLog} addAuditLog={data.addAuditLog} pendingProfileEdits={data.pendingProfileEdits} setPendingProfileEdits={data.setPendingProfileEdits} addToast={data.addToast} selectedEmployeeId={data.selectedEmployeeId} setSelectedEmployeeId={data.setSelectedEmployeeId} isSidebarCollapsed={isSidebarCollapsed} adminUid={data.adminUid} currentUser={user} />
+      break
     case 'payroll':
-      return <Payroll employees={data.employees} payroll={data.payroll} setPayroll={data.handleSetPayroll} addLog={data.addLog} settings={data.settings} addAuditLog={data.addAuditLog} />
+      view = <Payroll employees={data.employees} payroll={data.payroll} setPayroll={data.handleSetPayroll} addLog={data.addLog} settings={data.settings} addAuditLog={data.addAuditLog} />
+      break
     case 'attendance':
-      return <Attendance employees={data.employees} attendance={data.attendance} setAttendance={data.handleSetAttendance} roster={data.roster} setRoster={data.setRoster} shiftSwaps={data.shiftSwaps} setShiftSwaps={data.setShiftSwaps} shiftTemplates={data.settings?.shiftTemplates} overtimeClaims={data.overtimeClaims} setOvertimeClaims={data.setOvertimeClaims} addLog={data.addLog} addToast={data.addToast} addNotification={data.addNotification} addAuditLog={data.addAuditLog} settings={data.settings} />
+      view = <Attendance employees={data.employees} attendance={data.attendance} setAttendance={data.handleSetAttendance} roster={data.roster} setRoster={data.setRoster} shiftSwaps={data.shiftSwaps} setShiftSwaps={data.setShiftSwaps} shiftTemplates={data.settings?.shiftTemplates} overtimeClaims={data.overtimeClaims} setOvertimeClaims={data.setOvertimeClaims} addLog={data.addLog} addToast={data.addToast} addNotification={data.addNotification} addAuditLog={data.addAuditLog} settings={data.settings} />
+      break
     case 'announcements':
-      return <Announcements employees={data.employees} announcements={data.announcements} setAnnouncements={data.setAnnouncements} addLog={data.addLog} addToast={data.addToast} currentUser={user} addNotification={data.addNotification} />
+      view = <Announcements employees={data.employees} announcements={data.announcements} setAnnouncements={data.setAnnouncements} addLog={data.addLog} addToast={data.addToast} currentUser={user} addNotification={data.addNotification} />
+      break
     case 'calendar':
-      return <Calendar events={data.events} setEvents={data.handleSetEvents} employees={data.employees} addLog={data.addLog} addToast={data.addToast} currentUser={user} addNotification={data.addNotification} />
+      view = <Calendar events={data.events} setEvents={data.handleSetEvents} employees={data.employees} addLog={data.addLog} addToast={data.addToast} currentUser={user} addNotification={data.addNotification} />
+      break
     case 'documents':
-      return <Documents documents={data.documents} setDocuments={data.handleSetDocuments} employees={data.employees} addLog={data.addLog} addToast={data.addToast} currentUser={user} adminUid={data.adminUid} addNotification={data.addNotification} />
+      view = <Documents documents={data.documents} setDocuments={data.handleSetDocuments} employees={data.employees} addLog={data.addLog} addToast={data.addToast} currentUser={user} adminUid={data.adminUid} addNotification={data.addNotification} />
+      break
     case 'assets':
-      return <Assets employees={data.employees} assets={data.assets} setAssets={data.setAssets} assetRequests={data.assetRequests} setAssetRequests={data.setAssetRequests} assetCategories={data.assetCategories} setAssetCategories={data.setAssetCategories} addLog={data.addLog} addToast={data.addToast} currentUser={user} addNotification={data.addNotification} />
+      view = <Assets employees={data.employees} assets={data.assets} setAssets={data.setAssets} assetRequests={data.assetRequests} setAssetRequests={data.setAssetRequests} assetCategories={data.assetCategories} setAssetCategories={data.setAssetCategories} addLog={data.addLog} addToast={data.addToast} currentUser={user} addNotification={data.addNotification} />
+      break
     case 'tasks':
-      return <Tasks tasks={data.tasks} setTasks={data.handleSetTasks} employees={data.employees} currentUser={user} addToast={data.addToast} addLog={data.addLog} addNotification={data.addNotification} />
+      view = <Tasks tasks={data.tasks} setTasks={data.handleSetTasks} employees={data.employees} currentUser={user} addToast={data.addToast} addLog={data.addLog} addNotification={data.addNotification} />
+      break
     case 'expenses':
-      return <Expenses employees={data.employees} expenses={data.expenses} setExpenses={data.handleSetExpenses} settings={data.settings} addLog={data.addLog} addToast={data.addToast} addAuditLog={data.addAuditLog} currentUser={user} />
+      view = <Expenses employees={data.employees} expenses={data.expenses} setExpenses={data.handleSetExpenses} settings={data.settings} addLog={data.addLog} addToast={data.addToast} addAuditLog={data.addAuditLog} currentUser={user} />
+      break
     case 'settings':
-      return <Settings settings={data.settings} setSettings={data.handleSetSettings} addLog={data.addLog} addToast={data.addToast} auditLogs={data.auditLogs} themeMode={themeMode} toggleTheme={toggleTheme} />
+      view = <Settings settings={data.settings} setSettings={data.handleSetSettings} addLog={data.addLog} addToast={data.addToast} auditLogs={data.auditLogs} themeMode={themeMode} toggleTheme={toggleTheme} />
+      break
     case 'profile':
-      return <ProfileView currentUser={user} pendingProfileEdits={data.pendingProfileEdits} setPendingProfileEdits={data.setPendingProfileEdits} addToast={data.addToast} addLog={data.addLog} settings={data.settings} setSettings={data.handleSetSettings} employees={data.employees} setEmployees={data.handleSetEmployees} />
+      view = <ProfileView currentUser={user} pendingProfileEdits={data.pendingProfileEdits} setPendingProfileEdits={data.setPendingProfileEdits} addToast={data.addToast} addLog={data.addLog} settings={data.settings} setSettings={data.handleSetSettings} employees={data.employees} setEmployees={data.handleSetEmployees} />
+      break
     case 'notes':
-      return <Notes notes={data.notes} setNotes={data.handleSetNotes} currentUser={user} addToast={data.addToast} />
+      view = <Notes notes={data.notes} setNotes={data.handleSetNotes} currentUser={user} addToast={data.addToast} />
+      break
     case 'gigs':
-      return <GigBoardPage adminUid={data.adminUid} currentUser={user} employees={data.employees} addToast={data.addToast} />
+      view = <GigBoardPage adminUid={data.adminUid} currentUser={user} employees={data.employees} addToast={data.addToast} />
+      break
     case 'performance':
-      return <PerformancePage adminUid={data.adminUid} currentUser={user} addToast={data.addToast} />
+      view = <PerformancePage adminUid={data.adminUid} currentUser={user} addToast={data.addToast} />
+      break
     case 'wellbeing':
-      return <WellbeingPage adminUid={data.adminUid} currentUser={user} employees={data.employees} addToast={data.addToast} />
+      view = <WellbeingPage adminUid={data.adminUid} currentUser={user} employees={data.employees} addToast={data.addToast} />
+      break
     default:
-      return <Dashboard employees={data.employees} syncLogs={data.syncLogs} addLog={data.addLog} onSync={data.handleSync} setCurrentView={setCurrentView} announcements={data.announcements} events={data.events} payroll={data.payroll} isSidebarCollapsed={isSidebarCollapsed} hasPermission={hasPermission} tasks={data.tasks} documents={data.documents} assets={data.assets} attendance={data.attendance} setAttendance={data.handleSetAttendance} currentUser={user} addToast={data.addToast} />
+      view = <Dashboard employees={data.employees} syncLogs={data.syncLogs} addLog={data.addLog} onSync={data.handleSync} setCurrentView={setCurrentView} announcements={data.announcements} events={data.events} payroll={data.payroll} isSidebarCollapsed={isSidebarCollapsed} hasPermission={hasPermission} tasks={data.tasks} documents={data.documents} assets={data.assets} attendance={data.attendance} setAttendance={data.handleSetAttendance} currentUser={user} addToast={data.addToast} />
   }
+
+  return (
+    <Suspense fallback={<ViewSkeleton />}>
+      {view}
+    </Suspense>
+  )
 }

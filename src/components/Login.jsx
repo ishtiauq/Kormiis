@@ -243,6 +243,17 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
   const [isWaiting, setIsWaiting] = useState(true)
 
   useEffect(() => {
+    const link = document.createElement('link')
+    link.rel = 'preload'
+    link.as = 'image'
+    link.href = '/hero.webp'
+    link.type = 'image/webp'
+    link.fetchPriority = 'high'
+    document.head.appendChild(link)
+    return () => link.remove()
+  }, [])
+
+  useEffect(() => {
     const word = ROTATING_WORDS[wordIndex % ROTATING_WORDS.length] || ROTATING_WORDS[0]
     let timeout
 
@@ -709,11 +720,18 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
               </div>
 
             {/* FOREGROUND: Main Character Artwork (Strict 100% fit of aspect container) */}
-            <img 
-              src="/Hero%20Assets.png" 
-              alt="Manage your Team with Ease" 
-              className="relative z-10 w-full h-full object-contain object-bottom drop-shadow-[0_25px_60px_rgba(0,0,0,0.95)] select-none pointer-events-none"
-            />
+            <picture>
+              <source srcSet="/hero.webp" type="image/webp" />
+              <img 
+                src="/Hero%20Assets.png" 
+                alt="Manage your Team with Ease" 
+                width={1600}
+                height={1076}
+                fetchPriority="high"
+                decoding="async"
+                className="relative z-10 w-full h-full object-contain object-bottom drop-shadow-[0_25px_60px_rgba(0,0,0,0.95)] select-none pointer-events-none"
+              />
+            </picture>
 
           </div>
 

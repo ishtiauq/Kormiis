@@ -1,7 +1,6 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, lazy, Suspense } from 'react'
 
 import Login from './components/Login.jsx'
-import EmployeePortal from './components/EmployeePortal.jsx'
 import Sidebar from './components/layout/Sidebar.jsx'
 import Topbar from './components/layout/Topbar.jsx'
 import MobileTabButton from './components/layout/MobileTabButton.jsx'
@@ -19,6 +18,8 @@ import { useAuth } from './hooks/useAuth.js'
 import { useCommandPalette } from './hooks/useCommandPalette.jsx'
 import LoadingScreen from './components/layout/LoadingScreen.jsx'
 import useAppData from './hooks/useAppData.js'
+
+const EmployeePortal = lazy(() => import('./components/EmployeePortal.jsx'))
 
 export default function App() {
   const { themeMode, isDarkMode, toggleTheme, setThemeMode } = useTheme()
@@ -38,7 +39,7 @@ export default function App() {
   const [selectedEmployeeId, setSelectedEmployeeId] = useState(null)
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsInitialLoading(false), 1200)
+    const timer = setTimeout(() => setIsInitialLoading(false), 700)
     return () => clearTimeout(timer)
   }, [])
 
@@ -116,8 +117,9 @@ export default function App() {
 
   if (user.isEmployee || user.role === 'Teammate') {
     return (
-      <EmployeePortal
-        currentUser={{...user, id: user.id || user.employeeId, role: user.role || 'Teammate', department: user.department || 'Engineering'}}
+      <Suspense fallback={<LoadingScreen isDarkMode={isDarkMode} message="Loading your workspace..." />}>
+        <EmployeePortal
+          currentUser={{...user, id: user.id || user.employeeId, role: user.role || 'Teammate', department: user.department || 'Engineering'}}
         themeMode={themeMode}
         isDarkMode={isDarkMode}
         toggleTheme={toggleTheme}
@@ -161,6 +163,7 @@ export default function App() {
         markNotificationsRead={appData.markNotificationsRead}
         clearNotifications={appData.clearNotifications}
       />
+      </Suspense>
     )
   }
 
