@@ -211,12 +211,13 @@ const HERO_FEATURE_ROWS = [
       rimLight: 'from-transparent via-red-400/90 to-transparent',
     },
   ]
+]
 const ALL_HERO_FEATURES = [...HERO_FEATURE_ROWS[0], ...HERO_FEATURE_ROWS[1]]
 
 export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode }) {
+  const containerRef = useRef(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
 
   // Auth / onboarding state
   const [authTab, setAuthTab] = useState('in') // 'in' (Sign in) | 'up' (Sign up)
@@ -541,7 +542,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
 
           {/* Start for Free CTA */}
           <button
-            onClick={() => setIsAuthModalOpen(true)}
+            onClick={() => openAuthModal('up')}
             className="bg-primary text-primary-foreground px-3.5 sm:px-5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold shadow-md shadow-primary/25 hover:opacity-95 active:scale-95 transition-all flex items-center gap-1 sm:gap-1.5 cursor-pointer"
           >
             <span>Start for free</span>
@@ -552,7 +553,6 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
 
       {/* 2. Main Hero Showcase Section (Strict 100dvh full viewport height across all devices) */}
       <main className="relative w-full h-[100dvh] min-h-[100dvh] max-h-[100dvh] flex flex-col justify-between items-center pt-16 sm:pt-20 md:pt-24 lg:pt-28 xl:pt-32 pb-0 text-center overflow-hidden shrink-0 isolate">
-        </div>
 
         {/* Fluid Container: Couples Headline & Image with Dynamic Gap */}
         <div className="w-full flex-1 min-h-0 flex flex-col justify-start lg:justify-between items-center gap-1 sm:gap-2 lg:gap-[clamp(0.25rem,1.5vh,1.25rem)] z-10">
@@ -800,9 +800,6 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                     This becomes your company profile. You'll be the workspace owner (admin).
                   </p>
                 </div>
-                    This becomes your company profile. You'll be the workspace owner (admin).
-                  </p>
-                </div>
                 <button
                   type="submit"
                   disabled={isLoading}
@@ -877,7 +874,6 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                   <div className="flex-1 h-px bg-white/20" />
                   <span className="text-[10px] font-bold text-white/70 tracking-wider">OR</span>
                   <div className="flex-1 h-px bg-white/20" />
-                </div>
                 </div>
 
                 <button

@@ -72,62 +72,70 @@ export default function Topbar({
       {isMobile ? (
         <header aria-label="Top bar" className="topbar topbar-bar w-full h-14 px-4 flex items-center justify-between glass-apple text-foreground transition-all duration-300">
           <div className="flex items-center shrink-0">
-      ) : (
-        {/* Apple Liquid Glass Floating Capsule Navbar */}
-        <header 
-          aria-label="Top Navigation Bar" 
-          className="topbar pointer-events-auto w-[calc(100%-1rem)] sm:w-[94%] md:w-[90%] max-w-4xl mx-auto h-13 sm:h-15 md:h-16 px-3 sm:px-4 md:px-5 flex items-center justify-between rounded-full glass-kormiis text-foreground transition-all duration-300 relative select-none shadow-xl border border-white/30 dark:border-white/14"
-        >
-          {/* Left: Brand Logo */}
-          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-
-          <a
-            href="#"
-            onClick={(e) => {
-              e.preventDefault();
-              if (setCurrentView) setCurrentView('dashboard');
-            }}
-            className="flex items-center cursor-pointer transition-opacity hover:opacity-80 active:scale-95 outline-none no-underline border-none bg-transparent p-0 m-0 shadow-none"
-            style={{ background: 'transparent', border: 'none', boxShadow: 'none', padding: 0, margin: 0 }}
-            title="Kormiis Dashboard"
-          >
-            <img 
-              src={isDark ? kormiisWhiteLogo : kormiisLogo} 
-              alt="Kormiis Logo" 
-              className="h-7 sm:h-8 md:h-9 w-auto max-w-[120px] sm:max-w-[150px] object-contain shrink-0 drop-shadow-sm transition-opacity" 
-              style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}
-            />
-          </a>
-        </div>
-
-        {/* Right: Actions Group (Theme, Notification, Profile) */}
-        <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
-          {showThemeToggle && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleTheme}
-              title={`Theme: ${themeMode}`}
-              className="rounded-full size-10 sm:size-11 text-foreground hover:bg-muted shrink-0"
-            >
-              {themeMode === 'light' ? <Icon name="light_mode" size={20} /> : <Icon name="dark_mode" size={20} />}
-            </Button>
-          )}
-          {onProfileClick && (
-            <button
-              onClick={onProfileClick}
-              title="Profile"
-              aria-label="Profile"
-              className="rounded-full size-10 sm:size-11 p-0 overflow-hidden shrink-0 !border-transparent cursor-pointer bg-transparent hover:opacity-80 transition-opacity"
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                if (setCurrentView) setCurrentView('dashboard');
+              }}
+              className="flex items-center cursor-pointer transition-opacity hover:opacity-80 active:scale-95 outline-none no-underline border-none bg-transparent p-0 m-0 shadow-none"
+              style={{ background: 'transparent', border: 'none', boxShadow: 'none', padding: 0, margin: 0 }}
+              title="Kormiis Dashboard"
             >
               <img
-                src={user?.avatar || "https://i.pravatar.cc/150?u=a042581f4e29026704d"}
-                alt={user?.name ? `${user.name}'s profile` : "Profile"}
-                className="w-full h-full object-cover rounded-full border border-border/50 shadow-sm"
+                src={isDark ? kormiisWhiteLogo : kormiisLogo}
+                alt="Kormiis Logo"
+                className="h-7 sm:h-8 w-auto max-w-[120px] object-contain shrink-0 drop-shadow-sm transition-opacity"
+                style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}
               />
-            </button>
-          )}
-        </div>
+            </a>
+          </div>
+
+          {/* Right: Actions Group (Theme, Notification, Profile) */}
+          <div className="flex items-center gap-1.5 shrink-0">
+            {showThemeToggle && (
+              <button
+                onClick={toggleTheme}
+                title={`Theme: ${themeMode}`}
+                aria-label="Toggle light/dark theme"
+                className="rounded-full size-9 text-foreground apple-glass-btn shrink-0 flex items-center justify-center cursor-pointer active:scale-95 transition-all"
+              >
+                {themeMode === 'light' ? <Icon name="light_mode" size={18} /> : <Icon name="dark_mode" size={18} />}
+              </button>
+            )}
+            <div className="relative">
+              <button
+                ref={buttonRef}
+                onClick={() => {
+                  setShowNotifications(prev => !prev);
+                  if (markNotificationsRead) markNotificationsRead();
+                }}
+                title="Notifications"
+                aria-label="Notifications"
+                className="rounded-full size-9 text-foreground apple-glass-btn relative shrink-0 flex items-center justify-center cursor-pointer active:scale-95 transition-all"
+                id="notification-trigger"
+              >
+                <Icon name="notifications_active" size={18} />
+                {unreadCount > 0 && (
+                  <span className="absolute top-1 right-1 flex size-2.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
+                    <span className="relative inline-flex rounded-full size-2.5 bg-destructive"></span>
+                  </span>
+                )}
+              </button>
+            </div>
+            {user && (
+              <button
+                onClick={onProfileClick || (() => setCurrentView && setCurrentView('profile'))}
+                title={user?.name ? `${user.name} (My Profile)` : "My Profile"}
+                aria-label="Open Profile"
+                className="rounded-full size-9 text-foreground apple-glass-btn shrink-0 flex items-center justify-center cursor-pointer active:scale-95 transition-all"
+              >
+                <Icon name="person" size={19} />
+              </button>
+            )}
+          </div>
+        </header>
       ) : (
         <header aria-label="Top bar" className="topbar w-[98%] min-[400px]:w-[94%] sm:w-[85%] max-w-3xl mx-auto h-14 sm:h-16 px-2 min-[400px]:px-4 flex items-center justify-between rounded-full glass-apple text-foreground transition-all duration-300">
           
@@ -190,8 +198,8 @@ export default function Topbar({
             </button>
           )}
 
-        </div>
       </header>
+      )}
 
       {/* Mobile Notifications Dialog */}
       {showNotifications && isMobile && (
