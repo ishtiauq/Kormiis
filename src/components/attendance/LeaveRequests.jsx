@@ -7,8 +7,8 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog"
 
-export default function LeaveRequests({ employees, attendance, setAttendance, addToast }) {
-  const { pendingLeaves, approveLeave, rejectLeave, pendingCount } = useLeaves(attendance, setAttendance, addToast)
+export default function LeaveRequests({ employees, attendance, setAttendance, addToast, addNotification }) {
+  const { pendingLeaves, approveLeave, rejectLeave, pendingCount } = useLeaves(attendance, setAttendance, addToast, addNotification)
 
   const [pendingAction, setPendingAction] = useState(null) // { id, action: 'approve' | 'reject', empName }
 
