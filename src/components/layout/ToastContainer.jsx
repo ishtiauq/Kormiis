@@ -24,9 +24,9 @@ const getToastStyles = (type) => {
     case 'info':
     default:
       return {
-        bg: 'bg-zinc-900 text-white border-zinc-800 shadow-xl dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-200',
+        bg: 'bg-card text-foreground border-border/80 shadow-xl backdrop-blur-xl',
         icon: 'info',
-        iconColor: 'text-white dark:text-zinc-900'
+        iconColor: 'text-primary'
       }
   }
 }

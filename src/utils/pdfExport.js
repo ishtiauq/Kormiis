@@ -1,6 +1,3 @@
-import jsPDF from 'jspdf'
-import autoTable from 'jspdf-autotable'
-
 const z = (v) => v < 10 ? `0${v}` : `${v}`
 
 function addCompanyBranding(doc, settings, startY = 14) {
@@ -37,7 +34,9 @@ function addCompanyBranding(doc, settings, startY = 14) {
   return currentY + 14
 }
 
-export function exportDailyAttendancePDF(employees, logs, selectedDate, settings = {}) {
+export async function exportDailyAttendancePDF(employees, logs, selectedDate, settings = {}) {
+  const { default: jsPDF } = await import('jspdf')
+  const { default: autoTable } = await import('jspdf-autotable')
   const doc = new jsPDF()
   const companyName = settings?.company?.name || 'Kormiis'
   
@@ -84,7 +83,9 @@ export function exportDailyAttendancePDF(employees, logs, selectedDate, settings
   doc.save(`${companyName.replace(/\s+/g, '_')}_Attendance_${selectedDate}.pdf`)
 }
 
-export function exportMonthlyAttendancePDF(employees, attendance, calMonth, calYear, settings = {}) {
+export async function exportMonthlyAttendancePDF(employees, attendance, calMonth, calYear, settings = {}) {
+  const { default: jsPDF } = await import('jspdf')
+  const { default: autoTable } = await import('jspdf-autotable')
   const doc = new jsPDF()
   const companyName = settings?.company?.name || 'Kormiis'
   

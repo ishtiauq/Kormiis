@@ -1,6 +1,4 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
-import jsPDF from 'jspdf'
-import autoTable from 'jspdf-autotable'
 import Icon from "@/components/ui/Icon.jsx"
 import { uploadDocumentFile, deleteDocumentFile } from '../services/bridge.js'
 import { Card, CardContent } from "@/components/ui/card"
@@ -85,7 +83,7 @@ export default function Documents({
   const categoryScrollRef = useRef(null)
   const { confirm, ConfirmDialog } = useConfirm()
 
-  const generateOfficialHRLetter = (e) => {
+  const generateOfficialHRLetter = async (e) => {
     e?.preventDefault()
     const emp = (employees || []).find(e => e.id === letterEmpId) || employees[0]
     if (!emp) {
@@ -94,6 +92,7 @@ export default function Documents({
     }
 
     try {
+      const { default: jsPDF } = await import('jspdf')
       const doc = new jsPDF({ unit: 'mm', format: 'a4' })
       const companyName = settings?.company?.name || 'Kormiis Ltd.'
       const companyLogo = settings?.company?.logo

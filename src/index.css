@@ -302,15 +302,15 @@ html.dark .glass-kormiis,
 /* Modals & Popovers (iOS 26 Ultra-Liquid Glass) */
 .glass-kormiis-modal,
 .glass-popover {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.58) 0%, rgba(255, 255, 255, 0.32) 100%) !important;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.88) 0%, rgba(255, 255, 255, 0.72) 100%) !important;
   -webkit-backdrop-filter: saturate(190%) blur(36px) brightness(104%) !important;
   backdrop-filter: saturate(190%) blur(36px) brightness(104%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.35) !important;
+  border: 1px solid rgba(255, 255, 255, 0.80) !important;
   box-shadow: 
-    0 32px 64px -12px rgba(0, 0, 0, 0.18),
-    0 10px 24px -4px rgba(0, 0, 0, 0.08),
-    inset 0 1px 1px 0 rgba(255, 255, 255, 0.45),
-    inset 1px 0 1px 0 rgba(255, 255, 255, 0.20) !important;
+    0 28px 60px -12px rgba(0, 0, 0, 0.14),
+    0 8px 20px -4px rgba(0, 0, 0, 0.05),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.90),
+    inset 1px 0 1px 0 rgba(255, 255, 255, 0.50) !important;
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
   will-change: backdrop-filter, transform;
@@ -324,14 +324,15 @@ html.dark .glass-kormiis-modal,
 .force-dark-mode .glass-kormiis-modal,
 .force-dark-mode.glass-kormiis-modal,
 .dark .glass-popover,
+html.dark .glass-popover,
 [data-theme="dark"] .glass-popover {
-  background: linear-gradient(135deg, rgba(24, 24, 34, 0.55) 0%, rgba(10, 10, 16, 0.42) 100%) !important;
+  background: linear-gradient(135deg, rgba(24, 24, 34, 0.82) 0%, rgba(12, 12, 18, 0.72) 100%) !important;
   -webkit-backdrop-filter: saturate(190%) blur(36px) brightness(105%) !important;
   backdrop-filter: saturate(190%) blur(36px) brightness(105%) !important;
   border: 1px solid rgba(255, 255, 255, 0.16) !important;
   box-shadow: 
-    0 24px 48px -16px rgba(0, 0, 0, 0.5),
-    0 8px 18px -4px rgba(0, 0, 0, 0.35),
+    0 24px 48px -16px rgba(0, 0, 0, 0.6),
+    0 8px 18px -4px rgba(0, 0, 0, 0.4),
     inset 0 1px 1px 0 rgba(255, 255, 255, 0.25),
     inset 1px 0 1px 0 rgba(255, 255, 255, 0.15),
     inset 0 -1px 1px 0 rgba(0, 0, 0, 0.4) !important;

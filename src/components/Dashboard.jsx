@@ -220,12 +220,12 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
       </div>
       <div className="border-t border-border border-headline" />
       
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between glass-card p-5 sm:p-6 rounded-3xl border border-white/30 dark:border-white/12 shadow-xl gap-4 mb-2">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between glass-card p-5 sm:p-6 rounded-3xl border border-black/[0.08] dark:border-white/12 shadow-xl gap-4 mb-2">
         <h2 className="text-fluid-lg sm:text-fluid-xl font-extrabold tracking-tight flex items-center gap-3 text-foreground m-0">
           <Icon name="monitoring" className="text-primary shrink-0" size={28}/>
           Admin Overview
         </h2>
-        <span className="text-xs sm:text-sm font-semibold text-foreground apple-glass-btn px-4 py-2 rounded-full border border-white/20 dark:border-white/10 shrink-0">
+        <span className="text-xs sm:text-sm font-semibold text-foreground apple-glass-btn px-4 py-2 rounded-full border border-black/[0.08] dark:border-white/10 shrink-0">
           {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
         </span>
       </div>
@@ -248,7 +248,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
             recentAnnouncements.map((ann, idx) => (
               <div
                 key={ann.id || idx}
-                className="flex items-center gap-3 p-3 px-3.5 rounded-2xl bg-black/[0.03] dark:bg-black/35 border border-black/[0.06] dark:border-white/[0.08] hover:bg-black/[0.06] dark:hover:bg-black/55 transition-all cursor-pointer select-none active:scale-[0.99]"
+                className="flex items-center gap-3 p-3 px-3.5 rounded-2xl bg-white/60 dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] hover:bg-white/90 dark:hover:bg-white/[0.08] transition-all cursor-pointer select-none active:scale-[0.99] shadow-[0_2px_8px_rgba(0,0,0,0.02)] dark:shadow-none"
                 onClick={() => setCurrentView && setCurrentView('announcements')}
               >
                 <Icon name="rss_feed" className="text-amber-500 shrink-0" size={24}/>
@@ -326,7 +326,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
                 <span className="text-xs font-semibold text-muted-foreground">Workforce Efficiency</span>
                 <span className="text-base font-bold text-foreground">{efficiencyScore}%</span>
               </div>
-              <div className="w-full bg-black/10 dark:bg-black/40 rounded-full h-2 overflow-hidden shadow-inner">
+              <div className="w-full bg-black/[0.06] dark:bg-white/10 rounded-full h-2 overflow-hidden shadow-inner">
                 <div className="bg-purple-500 h-2 rounded-full transition-all duration-500" style={{ width: `${efficiencyScore}%` }}></div>
               </div>
             </div>
@@ -336,7 +336,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
                 <span className="text-xs font-semibold text-muted-foreground">Task Completion</span>
                 <span className="text-base font-bold text-foreground">{taskCompletionRate}%</span>
               </div>
-              <div className="w-full bg-black/10 dark:bg-black/40 rounded-full h-2 overflow-hidden shadow-inner">
+              <div className="w-full bg-black/[0.06] dark:bg-white/10 rounded-full h-2 overflow-hidden shadow-inner">
                 <div className="bg-blue-500 h-2 rounded-full transition-all duration-500" style={{ width: `${taskCompletionRate}%` }}></div>
               </div>
             </div>
@@ -346,7 +346,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
                 <span className="text-xs font-semibold text-muted-foreground">Attendance Rate</span>
                 <span className="text-base font-bold text-foreground">{attendanceRate}%</span>
               </div>
-              <div className="w-full bg-black/10 dark:bg-black/40 rounded-full h-2 overflow-hidden shadow-inner">
+              <div className="w-full bg-black/[0.06] dark:bg-white/10 rounded-full h-2 overflow-hidden shadow-inner">
                 <div className="bg-emerald-500 h-2 rounded-full transition-all duration-500" style={{ width: `${attendanceRate}%` }}></div>
               </div>
             </div>
@@ -371,7 +371,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
               <span className="text-xs font-medium text-muted-foreground">Pending Tasks</span>
             </div>
             {tasks.filter(t => t.status !== 'Done').slice(0, 2).map((t, i) => (
-              <div key={i} className="flex items-center gap-3 p-2.5 px-3 rounded-2xl bg-black/[0.03] dark:bg-black/35 border border-black/[0.06] dark:border-white/[0.08]">
+              <div key={i} className="flex items-center gap-3 p-2.5 px-3 rounded-2xl bg-white/60 dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] hover:bg-white/90 dark:hover:bg-white/[0.08] transition-all shadow-[0_2px_8px_rgba(0,0,0,0.02)] dark:shadow-none">
                 <div className="size-2 rounded-full bg-orange-500 shrink-0" />
                 <p className="text-fluid-sm font-medium text-foreground truncate flex-1 m-0">{t.title}</p>
                 <Badge variant="outline" className="text-[10px] shrink-0 rounded-full px-2">{t.status}</Badge>
@@ -401,7 +401,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
           ) : (
             <div className="flex flex-col gap-2.5">
               {upcomingMilestones.map((milestone, i) => (
-                <div key={i} className="flex items-center gap-3 p-3 px-3.5 border border-black/[0.06] dark:border-white/[0.08] rounded-2xl bg-black/[0.03] dark:bg-black/35 hover:bg-black/[0.06] dark:hover:bg-black/55 transition-all">
+                <div key={i} className="flex items-center gap-3 p-3 px-3.5 border border-black/[0.06] dark:border-white/[0.08] rounded-2xl bg-white/60 dark:bg-white/[0.04] hover:bg-white/90 dark:hover:bg-white/[0.08] transition-all shadow-[0_2px_8px_rgba(0,0,0,0.02)] dark:shadow-none">
                   <Avatar className="size-8 shrink-0 rounded-xl">
                     {milestone.avatar ? <AvatarImage src={milestone.avatar} alt={milestone.empName} className="object-cover" /> : null}
                     <AvatarFallback className="bg-primary/10 text-primary rounded-xl"><Icon name="person" size={16}/></AvatarFallback>
@@ -433,7 +433,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
               <div key={item.key} className="border-b border-border/80 dark:border-white/10 last:border-none">
                 <button
                   onClick={() => setAttFilter(attFilter === item.key ? null : item.key)}
-                  className="w-full flex items-center justify-between px-6 py-3.5 border-none bg-transparent hover:bg-black/[0.04] dark:hover:bg-black/40 transition-colors cursor-pointer text-xs sm:text-sm font-bold text-foreground"
+                  className="w-full flex items-center justify-between px-6 py-3.5 border-none bg-transparent hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-colors cursor-pointer text-xs sm:text-sm font-bold text-foreground"
                 >
                   <span className="flex items-center gap-3">
                     <span className={`pulse-dot ${item.dot} m-0`}></span>
@@ -444,12 +444,12 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
                   </Badge>
                 </button>
                 {attFilter === item.key && (
-                  <div className="px-6 pb-4 pt-1 bg-black/[0.02] dark:bg-black/30">
+                  <div className="px-6 pb-4 pt-1 bg-white/40 dark:bg-black/30">
                     {attendanceLists[item.key].length === 0 ? (
                       <p className="my-1.5 text-fluid-xs text-muted-foreground">No personnel in this category</p>
                     ) : (
                       attendanceLists[item.key].map((emp) => (
-                        <div key={emp.id} className="flex items-center gap-3.5 py-2.5 border-b border-border/60 dark:border-white/10 last:border-none">
+                        <div key={emp.id} className="flex items-center gap-3.5 py-2.5 border-b border-black/[0.06] dark:border-white/10 last:border-none">
                           <Avatar className="size-8 shrink-0 rounded-xl">
                             {emp.avatar ? <AvatarImage src={emp.avatar} alt={emp.name} className="object-cover" /> : null}
                             <AvatarFallback className="bg-primary/10 text-primary rounded-xl"><Icon name="person" size={16}/></AvatarFallback>
@@ -485,7 +485,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
             upcomingEvents.map((evt, idx) => (
               <div
                 key={evt.id || idx}
-                className="flex items-center gap-3 p-3 px-3.5 rounded-2xl bg-black/[0.03] dark:bg-black/35 border border-black/[0.06] dark:border-white/[0.08] hover:bg-black/[0.06] dark:hover:bg-black/55 transition-all cursor-pointer select-none active:scale-[0.99]"
+                className="flex items-center gap-3 p-3 px-3.5 rounded-2xl bg-white/60 dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] hover:bg-white/90 dark:hover:bg-white/[0.08] transition-all cursor-pointer select-none active:scale-[0.99] shadow-[0_2px_8px_rgba(0,0,0,0.02)] dark:shadow-none"
                 onClick={() => setCurrentView && setCurrentView('calendar')}
               >
                 <Icon name="calendar_month" style={{ color: evt.type === 'holiday' ? '#10b981' : evt.type === 'birthday' ? '#f59e0b' : '#3b82f6' }} className="shrink-0" size={24}/>
@@ -518,7 +518,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
         >
           <div className="flex flex-col h-full gap-2.5">
             {recentDocuments.length > 0 ? recentDocuments.map((doc, i) => (
-              <div key={i} className="flex flex-col gap-1 p-2.5 px-3 rounded-2xl bg-black/[0.03] dark:bg-black/35 border border-black/[0.06] dark:border-white/[0.08] hover:bg-black/[0.06] dark:hover:bg-black/55 transition-all">
+              <div key={i} className="flex flex-col gap-1 p-2.5 px-3 rounded-2xl bg-white/60 dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] hover:bg-white/90 dark:hover:bg-white/[0.08] transition-all shadow-[0_2px_8px_rgba(0,0,0,0.02)] dark:shadow-none">
                 <div className="flex justify-between items-center">
                   <span className="text-xs font-bold text-foreground truncate pr-2">{doc.name}</span>
                   <Badge variant="secondary" className="text-[10px] shrink-0 rounded-full px-2 py-0.5">{doc.category || 'Doc'}</Badge>
@@ -547,7 +547,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
             <p className="text-center my-auto text-fluid-xs text-muted-foreground">No payroll data found</p>
           ) : (
             <>
-              <div className="grid grid-cols-2 gap-3 p-3.5 rounded-2xl bg-black/[0.03] dark:bg-black/35 border border-black/[0.06] dark:border-white/[0.08]">
+              <div className="grid grid-cols-2 gap-3 p-3.5 rounded-2xl bg-white/60 dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] shadow-[0_2px_8px_rgba(0,0,0,0.02)] dark:shadow-none">
                 <div>
                   <span className="block text-xs font-medium text-muted-foreground">Paid</span>
                   <span className="text-fluid-xl font-black tabular-nums text-emerald-600 dark:text-emerald-400 mt-0.5 block">{paidCount}</span>
@@ -617,7 +617,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
               </div>
             </div>
             
-            <div className="flex items-center justify-between p-3.5 rounded-2xl bg-black/[0.03] dark:bg-black/35 border border-black/[0.06] dark:border-white/[0.08]">
+            <div className="flex items-center justify-between p-3.5 rounded-2xl bg-white/60 dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] shadow-[0_2px_8px_rgba(0,0,0,0.02)] dark:shadow-none">
               <div className="flex flex-col">
                 <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-0.5">Available</span>
                 <span className="text-base font-bold text-foreground">{availableAssetsCount}</span>

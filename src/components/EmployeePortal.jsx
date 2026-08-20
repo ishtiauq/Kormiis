@@ -1,6 +1,4 @@
 import { useState, useEffect, useRef } from 'react'
-import jsPDF from 'jspdf'
-import autoTable from 'jspdf-autotable'
 import Icon from "@/components/ui/Icon.jsx"
 import DailyChecklistWidget from './DailyChecklistWidget.jsx'
 import { useModal } from '../services/useModal.js'
@@ -92,7 +90,12 @@ export default function EmployeePortal({
   setShowNotifications,
   notifications,
   markNotificationsRead,
-  clearNotifications
+  clearNotifications,
+  dataIntegrityIssues = [],
+  showCorruptionModal,
+  setShowCorruptionModal,
+  handleAutoRepairDatabase,
+  isSyncing = false
 }) {
   const [activeTab, setActiveTab] = useState('dashboard') // dashboard, attendance, payslips, leave, profile
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
@@ -340,7 +343,11 @@ export default function EmployeePortal({
                 themeMode={themeMode}
                 toggleTheme={toggleTheme}
                 handleSync={() => {}} 
-                isSyncing={false}
+                isSyncing={isSyncing}
+                dataIntegrityIssues={dataIntegrityIssues}
+                showCorruptionModal={showCorruptionModal}
+                setShowCorruptionModal={setShowCorruptionModal}
+                handleAutoRepairDatabase={handleAutoRepairDatabase}
                 setShowNotifications={setShowNotifications}
                 markNotificationsRead={markNotificationsRead}
                 unreadCount={notifications ? notifications.filter(n => !n.read).length : 0}
@@ -1050,8 +1057,10 @@ function AttendanceView({
 function PayslipsView({ currentUser, payroll, addToast, settings }) {
   const myPayslips = (payroll?.history || []).filter(p => p.employeeId === currentUser.id)
 
-  const downloadSlipPDF = (slip) => {
+  const downloadSlipPDF = async (slip) => {
     try {
+      const { default: jsPDF } = await import('jspdf')
+      const { default: autoTable } = await import('jspdf-autotable')
       const doc = new jsPDF()
       const companyName = settings?.company?.name || 'Kormiis'
       const companyLogo = settings?.company?.logo

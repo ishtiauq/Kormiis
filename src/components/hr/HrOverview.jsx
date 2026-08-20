@@ -8,7 +8,7 @@ const stat = (icon, label, value, toneColor, view, setCurrentView) => (
   <button 
     key={label}
     onClick={() => setCurrentView && setCurrentView(view)}
-    className="flex flex-col items-start gap-1 p-2.5 sm:p-3 rounded-2xl bg-black/[0.03] dark:bg-black/35 border border-black/[0.06] dark:border-white/[0.08] hover:bg-black/[0.06] dark:hover:bg-black/55 transition-all active:scale-[0.98] cursor-pointer text-left w-full"
+    className="flex flex-col items-start gap-1 p-2.5 sm:p-3 rounded-2xl bg-white/60 dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] hover:bg-white/90 dark:hover:bg-white/[0.08] transition-all active:scale-[0.98] cursor-pointer text-left w-full shadow-[0_2px_8px_rgba(0,0,0,0.02)] dark:shadow-none"
   >
     <Icon name={icon} size={28} className={toneColor}/>
     <span className="text-fluid-xl font-black tabular-nums text-foreground leading-tight mt-0.5">{value}</span>

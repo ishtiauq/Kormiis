@@ -2,8 +2,6 @@ import { useState, useRef, useEffect } from 'react'
 import Icon from "@/components/ui/Icon.jsx"
 import AdSlot from './AdSlot'
 import { useModal } from '../services/useModal.js'
-import jsPDF from 'jspdf'
-import autoTable from 'jspdf-autotable'
 import { formatDate } from '../services/date.js'
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -904,8 +902,10 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
     generateAgreementPDF(assignTarget, employees.find(emp => emp.id === assignForm.employeeId), assignForm.notes)
   }
 
-  const generateAgreementPDF = (asset, employee, notes = 'Good condition') => {
+  const generateAgreementPDF = async (asset, employee, notes = 'Good condition') => {
     try {
+      const { default: jsPDF } = await import('jspdf')
+      const { default: autoTable } = await import('jspdf-autotable')
       const doc = new jsPDF()
       const companyName = settings?.company?.name || 'Kormiis Ltd.'
       const companyLogo = settings?.company?.logo

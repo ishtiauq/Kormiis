@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react'
-import * as XLSX from 'xlsx'
 import Icon from "@/components/ui/Icon.jsx"
 import { useModal } from '../services/useModal.js'
 import AdSlot from './AdSlot.jsx'
@@ -372,36 +371,42 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
     })
   }
 
-  const handleDownloadSelected = () => {
+  const handleDownloadSelected = async () => {
     const count = selectedIds.size
     if (count === 0) return
-    const selected = employees.filter(emp => selectedIds.has(emp.id))
-    const exportData = selected.map(emp => ({
-      'Employee ID': emp.id,
-      'Full Name': emp.name || '',
-      'Work Email': emp.email || '',
-      'Department': emp.department || '',
-      'Role / Designation': emp.role || emp.designation || '',
-      'System Role': emp.systemRole || 'Teammate',
-      'Status': emp.status || 'Active',
-      'Phone': emp.phone || '',
-      'Date of Birth': emp.dob || '',
-      'Joining Date': emp.joiningDate || '',
-      'Monthly Salary': emp.salary || '',
-      'Address': emp.address || ''
-    }))
-    const wb = XLSX.utils.book_new()
-    const ws = XLSX.utils.json_to_sheet(exportData)
-    ws['!cols'] = [
-      { wch: 18 }, { wch: 26 }, { wch: 28 }, { wch: 20 },
-      { wch: 24 }, { wch: 16 }, { wch: 14 }, { wch: 18 },
-      { wch: 16 }, { wch: 16 }, { wch: 16 }, { wch: 26 }
-    ]
-    XLSX.utils.book_append_sheet(wb, ws, "Selected Employees")
-    XLSX.writeFile(wb, `Selected_Employees_${new Date().toISOString().slice(0, 10)}.xlsx`)
-    addLog('Downloaded employee data', `Exported ${count} employee records as Excel`)
-    addToast(`Exported ${count} employee record(s) to Excel.`, 'success')
-    clearSelection()
+    try {
+      const XLSX = await import('xlsx')
+      const selected = employees.filter(emp => selectedIds.has(emp.id))
+      const exportData = selected.map(emp => ({
+        'Employee ID': emp.id,
+        'Full Name': emp.name || '',
+        'Work Email': emp.email || '',
+        'Department': emp.department || '',
+        'Role / Designation': emp.role || emp.designation || '',
+        'System Role': emp.systemRole || 'Teammate',
+        'Status': emp.status || 'Active',
+        'Phone': emp.phone || '',
+        'Date of Birth': emp.dob || '',
+        'Joining Date': emp.joiningDate || '',
+        'Monthly Salary': emp.salary || '',
+        'Address': emp.address || ''
+      }))
+      const wb = XLSX.utils.book_new()
+      const ws = XLSX.utils.json_to_sheet(exportData)
+      ws['!cols'] = [
+        { wch: 18 }, { wch: 26 }, { wch: 28 }, { wch: 20 },
+        { wch: 24 }, { wch: 16 }, { wch: 14 }, { wch: 18 },
+        { wch: 16 }, { wch: 16 }, { wch: 16 }, { wch: 26 }
+      ]
+      XLSX.utils.book_append_sheet(wb, ws, "Selected Employees")
+      XLSX.writeFile(wb, `Selected_Employees_${new Date().toISOString().slice(0, 10)}.xlsx`)
+      addLog('Downloaded employee data', `Exported ${count} employee records as Excel`)
+      addToast(`Exported ${count} employee record(s) to Excel.`, 'success')
+      clearSelection()
+    } catch (err) {
+      console.error(err)
+      addToast('Failed to export employees: ' + err.message, 'danger')
+    }
   }
 
   // Filter list
@@ -494,8 +499,9 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
     return value.replace(/^[=+\-@\t\r]/, '')
   }
 
-  const handleDownloadDemoExcel = () => {
+  const handleDownloadDemoExcel = async () => {
     try {
+      const XLSX = await import('xlsx')
       const templateData = [
         {
           "Employee ID (Optional)": "EMP-101",
@@ -721,6 +727,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
                 if (!file) return
                 e.target.value = ''
                 try {
+                  const XLSX = await import('xlsx')
                   const data = await file.arrayBuffer()
                   const wb = XLSX.read(data, { type: 'array', cellDates: true })
                   const sheetName = wb.SheetNames.find(s => s.toLowerCase().includes('employee') || s.toLowerCase().includes('template') || s.toLowerCase().includes('data')) || wb.SheetNames[0]

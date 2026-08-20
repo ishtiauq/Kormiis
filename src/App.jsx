@@ -170,6 +170,11 @@ export default function App() {
         notifications={appData.notifications}
         markNotificationsRead={appData.markNotificationsRead}
         clearNotifications={appData.clearNotifications}
+        dataIntegrityIssues={appData.dataIntegrityIssues}
+        showCorruptionModal={appData.showCorruptionModal}
+        setShowCorruptionModal={appData.setShowCorruptionModal}
+        handleAutoRepairDatabase={appData.handleAutoRepairDatabase}
+        isSyncing={appData.isSyncing}
       />
       </Suspense>
     )

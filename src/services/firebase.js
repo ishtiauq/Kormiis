@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updatePassword, deleteUser, RecaptchaVerifier, signInWithPhoneNumber, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
-import { getFirestore, doc, setDoc, getDoc, getDocFromServer, serverTimestamp, initializeFirestore, persistentLocalCache, collection, getDocs, writeBatch, onSnapshot } from 'firebase/firestore';
+import { getFirestore, doc, setDoc, getDoc, getDocFromServer, serverTimestamp, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, getDocs, writeBatch, onSnapshot } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import { getMessaging, isSupported as isMessagingSupported } from 'firebase/messaging';
 import { getFunctions, httpsCallable } from 'firebase/functions';
@@ -26,7 +26,9 @@ try {
     auth = getAuth(app);
     storage = getStorage(app);
     db = initializeFirestore(app, { 
-      localCache: persistentLocalCache(),
+      localCache: persistentLocalCache({
+        tabManager: persistentMultipleTabManager()
+      }),
       experimentalForceLongPolling: true
     });
     functions = getFunctions(app, 'asia-south1');

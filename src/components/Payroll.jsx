@@ -1,6 +1,4 @@
 import { useState, useRef, useMemo, useEffect } from 'react'
-import jsPDF from 'jspdf'
-import autoTable from 'jspdf-autotable'
 import Icon from "@/components/ui/Icon.jsx"
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -362,13 +360,14 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
   }
 
   // Generate PDF payslip
-  const generatePayslipReceipt = (entry, payDate) => {
+  const generatePayslipReceipt = async (entry, payDate) => {
     const loanDeduction = Math.min(entry.loan.remaining, entry.loan.installment)
     const net = entry.baseSalary + entry.allowance - entry.deductions - entry.advance - loanDeduction
     const grossVal = entry.grossSalary
     const companyName = settings?.company?.name || 'Kormiis'
     const companyLogo = settings?.company?.logo
 
+    const { default: jsPDF } = await import('jspdf')
     const doc = new jsPDF({ unit: 'mm', format: 'a4' })
     const pageW = doc.internal.pageSize.getWidth()
     const margin = 20
@@ -595,8 +594,10 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
     addLog('Ledger Updated', `${applyGlobally ? 'Globally updated' : 'Updated'} compensation for ${selectedEmpLog.employee.name}`, 'success')
   }
 
-  const handleDownloadPayrollPDF = () => {
+  const handleDownloadPayrollPDF = async () => {
     if (!entries) return
+    const { default: jsPDF } = await import('jspdf')
+    const { default: autoTable } = await import('jspdf-autotable')
     const doc = new jsPDF()
     
     doc.setFontSize(16)
