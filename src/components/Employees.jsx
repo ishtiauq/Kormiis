@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import * as XLSX from 'xlsx'
 import Icon from "@/components/ui/Icon.jsx"
 import { useModal } from '../services/useModal.js'
 import AdSlot from './AdSlot.jsx'
@@ -32,6 +33,9 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
   const [showDeptManager, setShowDeptManager] = useState(false)
   const [deptManagerState, setDeptManagerState] = useState({ editing: null, deleteConfirm: null })
   const [removedDepts, setRemovedDepts] = useState([])
+  const [avatarUploadCardId, setAvatarUploadCardId] = useState(null)
+  const cardFileInputRef = useRef(null)
+  const formFileInputRef = useRef(null)
   useModal(() => setViewingEmployee(null))
 
   useEffect(() => {
@@ -86,6 +90,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
   const [newJoiningDate, setNewJoiningDate] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [newNidPassportId, setNewNidPassportId] = useState('')
+  const [newAvatar, setNewAvatar] = useState('')
 
   // Dynamic department states
   const [isCustomDept, setIsCustomDept] = useState(false)
@@ -97,8 +102,74 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
     .filter(d => !removedDepts.includes(d))
   const filterDepartments = ['All', ...activeDepts]
 
-  // Image Drag Handlers removed — profile photo upload is no longer used; a
-  // default initials avatar is generated for every employee instead.
+  const processAvatarFile = (file, onSuccess) => {
+    if (!file) return
+    if (!file.type.startsWith('image/')) {
+      addToast('Please upload a valid image file (PNG, JPG, WEBP).', 'warning')
+      return
+    }
+    const minSize = 5 * 1024 // 5 KB
+    const maxSize = 500 * 1024 // 500 KB Max (Best practice for ultra-lite avatars)
+    if (file.size < minSize) {
+      addToast('Image is too small (Min: 5 KB). Recommended aspect ratio is 1:1 (Square).', 'warning')
+      return
+    }
+    if (file.size > maxSize) {
+      addToast('Image is too large (Max: 500 KB). Keep files under 500 KB to keep the app ultra-fast.', 'warning')
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      const result = event.target.result
+      const img = new Image()
+      img.onload = () => {
+        // Auto-center crop & compress to 256x256 WebP / JPEG (~15-30 KB ultra-light payload)
+        try {
+          const targetDim = 256
+          const canvas = document.createElement('canvas')
+          canvas.width = targetDim
+          canvas.height = targetDim
+          const ctx = canvas.getContext('2d')
+          
+          const minSide = Math.min(img.width, img.height)
+          const sx = (img.width - minSide) / 2
+          const sy = (img.height - minSide) / 2
+          
+          ctx.drawImage(img, sx, sy, minSide, minSide, 0, 0, targetDim, targetDim)
+          
+          const optimizedDataUrl = canvas.toDataURL('image/webp', 0.85) || canvas.toDataURL('image/jpeg', 0.85)
+          onSuccess(optimizedDataUrl)
+        } catch {
+          onSuccess(result)
+        }
+      }
+      img.onerror = () => {
+        onSuccess(result)
+      }
+      img.src = result
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const fetchGmailAvatar = (email, onSuccess) => {
+    if (!email || !email.includes('@')) {
+      addToast('Please provide a valid email address first.', 'warning')
+      return
+    }
+    const cleanEmail = email.trim().toLowerCase()
+    const avatarUrl = `https://unavatar.io/${encodeURIComponent(cleanEmail)}`
+    
+    const testImg = new Image()
+    testImg.onload = () => {
+      onSuccess(avatarUrl)
+      addToast('Google / Gmail avatar fetched successfully!', 'success')
+    }
+    testImg.onerror = () => {
+      addToast(`No public Google avatar found for ${cleanEmail}. You can upload a custom photo.`, 'info')
+    }
+    testImg.src = avatarUrl
+  }
 
   const handleCopyInviteLink = () => {
     const companyId = adminUid || currentUser?.uid;
@@ -116,6 +187,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
     setNewEmpId(generatedId)
     setNewPassword('')
     setNewPhone('')
+    setNewAvatar('')
     setShowAddForm(true)
   }
 
@@ -138,11 +210,8 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
     }
 
     if (editingEmployee) {
-      // The teammate manages their own login password (self-service in their
-      // profile). The Firebase sign-in email can't be changed from the client
-      // SDK, so an admin edit only updates the directory record here.
       if (newEmail && newEmail !== editingEmployee.email) {
-        addToast('Email updated in the directory. The sign-in email is unchanged —  reset it in the Firebase console if needed.', 'warning')
+        addToast('Email updated in the directory. The sign-in email is unchanged — reset it in the Firebase console if needed.', 'warning')
       }
 
       // Update employee list
@@ -157,6 +226,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
         status: newStatus,
         email: newEmail,
         phone: newPhone,
+        avatar: newAvatar || editingEmployee.avatar || defaultAvatar,
         dob: newDob,
         joiningDate: newJoiningDate,
         nidPassportId: newNidPassportId
@@ -183,7 +253,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
           companyUid,
           employeeId: newEmpId,
           department: finalDept,
-          avatar: ''
+          avatar: newAvatar || ''
         })
         uid = result.uid
       } catch (err) {
@@ -203,7 +273,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
         email: newEmail,
         phone: newPhone,
         uid,
-        avatar: defaultAvatar,
+        avatar: newAvatar || defaultAvatar,
         dob: newDob,
         joiningDate: newJoiningDate,
         nidPassportId: newNidPassportId
@@ -230,10 +300,31 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
     setNewDob('')
     setNewJoiningDate('')
     setNewNidPassportId('')
+    setNewAvatar('')
     setIsCustomDept(false)
     setCustomDept('')
     setEditingEmployee(null)
     setShowAddForm(false)
+  }
+
+  const handleOpenEditForm = (emp) => {
+    setEditingEmployee(emp)
+    setNewEmpId(emp.id || '')
+    setNewName(emp.name || '')
+    setNewRole(emp.role || 'Teammate')
+    setNewDesignation(emp.designation || emp.role || '')
+    setNewPermissions(emp.permissions || [])
+    setNewDept(emp.department || 'Engineering')
+    setNewEmail(emp.email || '')
+    setNewPhone(emp.phone || '')
+    setNewStatus(emp.status || 'Active')
+    setNewDob(emp.dob || '')
+    setNewJoiningDate(emp.joiningDate || '')
+    setNewNidPassportId(emp.nidPassportId || '')
+    setNewAvatar(emp.avatar || '')
+    setIsCustomDept(false)
+    setCustomDept('')
+    setShowAddForm(true)
   }
 
   const handleDeleteEmployee = async (id, name) => {
@@ -285,31 +376,31 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
     const count = selectedIds.size
     if (count === 0) return
     const selected = employees.filter(emp => selectedIds.has(emp.id))
-    const headers = ['ID', 'Name', 'Role', 'Department', 'Email', 'Phone', 'Status', 'DOB', 'Joining Date']
-    const csvRows = [headers.join(',')]
-    selected.forEach(emp => {
-      csvRows.push([
-        emp.id,
-        `"${(emp.name || '').replace(/"/g, '""')}"`,
-        `"${(emp.role || '').replace(/"/g, '""')}"`,
-        `"${(emp.department || '').replace(/"/g, '""')}"`,
-        emp.email || '',
-        emp.phone || '',
-        emp.status || '',
-        emp.dob || '',
-        emp.joiningDate || ''
-      ].join(','))
-    })
-    const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `selected_employees_${new Date().toISOString().slice(0, 10)}.csv`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
-    addLog('Downloaded employee data', `Exported ${count} employee records as CSV`)
+    const exportData = selected.map(emp => ({
+      'Employee ID': emp.id,
+      'Full Name': emp.name || '',
+      'Work Email': emp.email || '',
+      'Department': emp.department || '',
+      'Role / Designation': emp.role || emp.designation || '',
+      'System Role': emp.systemRole || 'Teammate',
+      'Status': emp.status || 'Active',
+      'Phone': emp.phone || '',
+      'Date of Birth': emp.dob || '',
+      'Joining Date': emp.joiningDate || '',
+      'Monthly Salary': emp.salary || '',
+      'Address': emp.address || ''
+    }))
+    const wb = XLSX.utils.book_new()
+    const ws = XLSX.utils.json_to_sheet(exportData)
+    ws['!cols'] = [
+      { wch: 18 }, { wch: 26 }, { wch: 28 }, { wch: 20 },
+      { wch: 24 }, { wch: 16 }, { wch: 14 }, { wch: 18 },
+      { wch: 16 }, { wch: 16 }, { wch: 16 }, { wch: 26 }
+    ]
+    XLSX.utils.book_append_sheet(wb, ws, "Selected Employees")
+    XLSX.writeFile(wb, `Selected_Employees_${new Date().toISOString().slice(0, 10)}.xlsx`)
+    addLog('Downloaded employee data', `Exported ${count} employee records as Excel`)
+    addToast(`Exported ${count} employee record(s) to Excel.`, 'success')
     clearSelection()
   }
 
@@ -390,8 +481,6 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
     addToast('Profile updates rejected.', 'info')
   }
 
-  const expectedHeaders = ['id', 'name', 'email', 'department', 'role', 'status', 'dob', 'joiningDate', 'avatar', 'password']
-
   const validateCSVRow = (row) => {
     if (!row.name || !row.name.trim()) return 'Name is required'
     if (!row.email || !row.email.trim()) return 'Email is required'
@@ -405,22 +494,118 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
     return value.replace(/^[=+\-@\t\r]/, '')
   }
 
-  const DEMO_CSV = `id,name,email,department,role,status,dob,joiningDate,avatar,password
-EMP-101,Rafiqul Islam,rafiqul@kormiis.com,Engineering,Teammate,Active,1995-03-12,2024-01-15,,
-EMP-102,Tasnim Akter,tasnim@kormiis.com,Design,Teammate,Active,1997-07-24,2024-02-01,,
-EMP-103,Shakil Hossain,shakil@kormiis.com,Human Resources,HR Officer,Active,1992-11-05,2023-09-10,,`
+  const handleDownloadDemoExcel = () => {
+    try {
+      const templateData = [
+        {
+          "Employee ID (Optional)": "EMP-101",
+          "Full Name (Required)": "Rafiqul Islam",
+          "Work Email (Required)": "rafiqul@kormiis.com",
+          "Department": "Engineering",
+          "Role / Designation": "Full Stack Developer",
+          "System Role": "Teammate",
+          "Employment Status": "Active",
+          "Phone Number": "+880 1712 345678",
+          "Date of Birth (YYYY-MM-DD)": "1995-03-12",
+          "Joining Date (YYYY-MM-DD)": "2024-01-15",
+          "Monthly Salary": 75000,
+          "Address": "Dhanmondi, Dhaka"
+        },
+        {
+          "Employee ID (Optional)": "EMP-102",
+          "Full Name (Required)": "Tasnim Akter",
+          "Work Email (Required)": "tasnim@kormiis.com",
+          "Department": "Design",
+          "Role / Designation": "UI/UX Designer",
+          "System Role": "Teammate",
+          "Employment Status": "Active",
+          "Phone Number": "+880 1812 987654",
+          "Date of Birth (YYYY-MM-DD)": "1997-07-24",
+          "Joining Date (YYYY-MM-DD)": "2024-02-01",
+          "Monthly Salary": 65000,
+          "Address": "Banani, Dhaka"
+        },
+        {
+          "Employee ID (Optional)": "EMP-103",
+          "Full Name (Required)": "Shakil Hossain",
+          "Work Email (Required)": "shakil@kormiis.com",
+          "Department": "Human Resources",
+          "Role / Designation": "HR Executive",
+          "System Role": "HR Officer",
+          "Employment Status": "Active",
+          "Phone Number": "+880 1912 112233",
+          "Date of Birth (YYYY-MM-DD)": "1992-11-05",
+          "Joining Date (YYYY-MM-DD)": "2023-09-10",
+          "Monthly Salary": 55000,
+          "Address": "Uttara, Dhaka"
+        },
+        {
+          "Employee ID (Optional)": "EMP-104",
+          "Full Name (Required)": "Nusrat Jahan",
+          "Work Email (Required)": "nusrat@kormiis.com",
+          "Department": "Marketing",
+          "Role / Designation": "Content Strategist",
+          "System Role": "Teammate",
+          "Employment Status": "On Leave",
+          "Phone Number": "+880 1612 445566",
+          "Date of Birth (YYYY-MM-DD)": "1996-04-18",
+          "Joining Date (YYYY-MM-DD)": "2023-11-20",
+          "Monthly Salary": 60000,
+          "Address": "Mirpur, Dhaka"
+        }
+      ]
 
-  const handleDownloadDemoCSV = () => {
-    const blob = new Blob([DEMO_CSV], { type: 'text/csv;charset=utf-8;' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'demo_employees_template.csv'
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
-    addToast('Demo CSV downloaded. Fill in the rows and re-upload via Import CSV.', 'info')
+      const guideData = [
+        { "Column Name": "Full Name (Required)", "Mandatory": "YES", "Valid Format / Example": "Rafiqul Islam", "Notes / Instructions": "Official full name of the employee." },
+        { "Column Name": "Work Email (Required)", "Mandatory": "YES", "Valid Format / Example": "rafiqul@kormiis.com", "Notes / Instructions": "Valid email address. Used for account creation and login invites." },
+        { "Column Name": "Employee ID (Optional)", "Mandatory": "NO", "Valid Format / Example": "EMP-101 (or leave blank)", "Notes / Instructions": "Unique company ID. Auto-generated if left blank." },
+        { "Column Name": "Department", "Mandatory": "NO", "Valid Format / Example": "Engineering / HR / Design / Marketing", "Notes / Instructions": "Department to organize the employee into groups." },
+        { "Column Name": "Role / Designation", "Mandatory": "NO", "Valid Format / Example": "Senior Developer, UI Designer", "Notes / Instructions": "Designation displayed on employee profile cards." },
+        { "Column Name": "System Role", "Mandatory": "NO", "Valid Format / Example": "Teammate | HR Officer | Manager", "Notes / Instructions": "Access permission level in the app (default: Teammate)." },
+        { "Column Name": "Employment Status", "Mandatory": "NO", "Valid Format / Example": "Active | On Leave | Inactive", "Notes / Instructions": "Current status (default: Active)." },
+        { "Column Name": "Phone Number", "Mandatory": "NO", "Valid Format / Example": "+880 1712 345678", "Notes / Instructions": "Contact phone number." },
+        { "Column Name": "Date of Birth (YYYY-MM-DD)", "Mandatory": "NO", "Valid Format / Example": "1995-03-12", "Notes / Instructions": "Birth date (format: YYYY-MM-DD)." },
+        { "Column Name": "Joining Date (YYYY-MM-DD)", "Mandatory": "NO", "Valid Format / Example": "2024-01-15", "Notes / Instructions": "Date of joining (format: YYYY-MM-DD)." },
+        { "Column Name": "Monthly Salary", "Mandatory": "NO", "Valid Format / Example": "75000", "Notes / Instructions": "Monthly gross salary for payroll calculation." },
+        { "Column Name": "Address", "Mandatory": "NO", "Valid Format / Example": "Dhaka, Bangladesh", "Notes / Instructions": "Current residential address." }
+      ]
+
+      const wb = XLSX.utils.book_new()
+      const wsTemplate = XLSX.utils.json_to_sheet(templateData)
+      const wsGuide = XLSX.utils.json_to_sheet(guideData)
+
+      wsTemplate['!cols'] = [
+        { wch: 22 }, // ID
+        { wch: 26 }, // Name
+        { wch: 28 }, // Email
+        { wch: 20 }, // Department
+        { wch: 24 }, // Role
+        { wch: 16 }, // System Role
+        { wch: 18 }, // Status
+        { wch: 20 }, // Phone
+        { wch: 26 }, // DOB
+        { wch: 26 }, // Joining Date
+        { wch: 18 }, // Salary
+        { wch: 26 }  // Address
+      ]
+
+      wsGuide['!cols'] = [
+        { wch: 28 },
+        { wch: 14 },
+        { wch: 38 },
+        { wch: 65 }
+      ]
+
+      XLSX.utils.book_append_sheet(wb, wsTemplate, "Employees Template")
+      XLSX.utils.book_append_sheet(wb, wsGuide, "Instructions & Guide")
+
+      XLSX.writeFile(wb, "Kormiis_Employees_Import_Template.xlsx")
+      addToast('Demo Excel template downloaded with sample data & field guide.', 'success')
+      addLog('Downloaded template', 'Downloaded Demo Excel employee template')
+    } catch (err) {
+      console.error(err)
+      addToast('Failed to download Excel template: ' + err.message, 'danger')
+    }
   }
 
   return (
@@ -500,7 +685,7 @@ EMP-103,Shakil Hossain,shakil@kormiis.com,Human Resources,HR Officer,Active,1992
             <Icon name="delete" className="mr-1 h-3.5 w-3.5" size={14}/> Delete ({selectedIds.size})
           </Button>
           <Button size="sm" variant="default" className="h-8" onClick={handleDownloadSelected}>
-            <Icon name="download" className="mr-1 h-3.5 w-3.5" size={14}/> Download CSV
+            <Icon name="download" className="mr-1 h-3.5 w-3.5" size={14}/> Download Excel
           </Button>
           <Button size="icon" variant="ghost" className="h-8 w-8 hover:bg-primary/20 hover:text-primary rounded-full" onClick={clearSelection}>
             <Icon name="close" className="h-4 w-4" size={16}/>
@@ -527,91 +712,143 @@ EMP-103,Shakil Hossain,shakil@kormiis.com,Human Resources,HR Officer,Active,1992
               <span className="text-sm font-medium whitespace-nowrap">Select All</span>
             </div>
             <input
-              id="csv-file-input"
+              id="employee-file-input"
               type="file"
-              accept=".csv"
+              accept=".xlsx, .xls, .csv"
+              className="hidden"
+              onChange={async (e) => {
+                const file = e.target.files?.[0]
+                if (!file) return
+                e.target.value = ''
+                try {
+                  const data = await file.arrayBuffer()
+                  const wb = XLSX.read(data, { type: 'array', cellDates: true })
+                  const sheetName = wb.SheetNames.find(s => s.toLowerCase().includes('employee') || s.toLowerCase().includes('template') || s.toLowerCase().includes('data')) || wb.SheetNames[0]
+                  const ws = wb.Sheets[sheetName]
+                  const rows = XLSX.utils.sheet_to_json(ws, { defval: '', raw: false })
+
+                  if (!rows || rows.length === 0) {
+                    addToast('The uploaded spreadsheet has no data rows.', 'warning')
+                    return
+                  }
+
+                  const getVal = (row, ...keys) => {
+                    for (const k of keys) {
+                      const matchedKey = Object.keys(row).find(rk => rk.toLowerCase().replace(/[^a-z0-9]/g, '') === k.toLowerCase().replace(/[^a-z0-9]/g, ''))
+                      if (matchedKey && row[matchedKey] !== undefined && row[matchedKey] !== '') {
+                        return String(row[matchedKey]).trim()
+                      }
+                    }
+                    return ''
+                  }
+
+                  const imported = []
+                  const errors = []
+
+                  for (let i = 0; i < rows.length; i++) {
+                    const rawRow = rows[i]
+                    const name = getVal(rawRow, 'fullname', 'name', 'employeename', 'fullname(required)')
+                    const email = getVal(rawRow, 'workemail', 'email', 'workemail(required)')
+                    const id = getVal(rawRow, 'employeeid', 'id', 'empid', 'employeeid(optional)') || `EMP-${Date.now().toString().slice(-4)}${i + 1}`
+                    const department = getVal(rawRow, 'department', 'dept') || 'General'
+                    const role = getVal(rawRow, 'roledesignation', 'role', 'designation', 'jobtitle') || 'Teammate'
+                    const systemRole = getVal(rawRow, 'systemrole', 'accessrole') || 'Teammate'
+                    const status = getVal(rawRow, 'employmentstatus', 'status') || 'Active'
+                    const phone = getVal(rawRow, 'phonenumber', 'phone', 'mobile', 'contact')
+                    const dob = getVal(rawRow, 'dateofbirth', 'dob', 'dateofbirth(yyyymmdd)')
+                    const joiningDate = getVal(rawRow, 'joiningdate', 'doj', 'joiningdate(yyyymmdd)')
+                    const salary = getVal(rawRow, 'monthlysalary', 'salary')
+                    const address = getVal(rawRow, 'address', 'location')
+
+                    const row = {
+                      id: sanitizeCell(id),
+                      name: sanitizeCell(name),
+                      email: sanitizeCell(email),
+                      department: sanitizeCell(department),
+                      role: sanitizeCell(role),
+                      systemRole: sanitizeCell(systemRole),
+                      status: ['Active', 'On Leave', 'Inactive'].includes(status) ? status : 'Active',
+                      phone: sanitizeCell(phone),
+                      dob: sanitizeCell(dob),
+                      joiningDate: sanitizeCell(joiningDate),
+                      salary: salary ? Number(salary) : undefined,
+                      address: sanitizeCell(address),
+                      avatar: defaultAvatar,
+                      updated_at: new Date().toISOString()
+                    }
+
+                    const error = validateCSVRow(row)
+                    if (error) {
+                      errors.push(`Row ${i + 2}: ${error}`)
+                      continue
+                    }
+
+                    if (row.email) {
+                      try {
+                        const companyUid = adminUid || currentUser?.uid
+                        const prov = await provisionEmployeeAccount({
+                          email: row.email,
+                          name: row.name,
+                          role: row.role || 'Teammate',
+                          companyUid,
+                          employeeId: row.id,
+                          department: row.department || '',
+                          avatar: row.avatar || ''
+                        })
+                        row.uid = prov.uid || ''
+                      } catch (provErr) {
+                        errors.push(`Row ${i + 2}: invite not sent (${provErr.message})`)
+                        continue
+                      }
+                    }
+
+                    imported.push(row)
+                  }
+
+                  if (errors.length > 0) {
+                    addToast(`Skipped ${errors.length} invalid row(s)`, 'warning')
+                  }
+
+                  if (imported.length > 0) {
+                    setEmployees(prev => {
+                      const existingIds = new Set(prev.map(e => e.id))
+                      const filteredImport = imported.filter(e => !existingIds.has(e.id))
+                      return [...prev, ...filteredImport]
+                    })
+                    addToast(`Successfully imported ${imported.length} employee(s) from spreadsheet.`, 'success')
+                    addLog('Imported employees', `Imported ${imported.length} employee records from spreadsheet`)
+                  }
+                } catch (err) {
+                  console.error(err)
+                  addToast('Failed to parse Excel/CSV file: ' + err.message, 'danger')
+                }
+              }}
+            />
+            <input 
+              type="file"
+              ref={cardFileInputRef}
+              accept="image/png,image/jpeg,image/webp,image/jpg"
               className="hidden"
               onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  const reader = new FileReader();
-                  reader.onload = async (event) => {
-                    const csvText = event.target.result;
-                    try {
-                      const lines = csvText.split('\\n').filter(line => line.trim());
-                      if (lines.length < 2) {
-                        addToast('CSV file must have a header row and at least one data row.', 'warning');
-                        return;
-                      }
-                      const rawHeaders = lines[0].split(',').map(h => h.trim().replace(/^["']|["']$/g, '').toLowerCase());
-                      const validHeaders = expectedHeaders.filter(h => rawHeaders.includes(h));
-                      if (validHeaders.length === 0) {
-                        addToast('CSV headers must include at least one of: ' + expectedHeaders.join(', '), 'warning');
-                        return;
-                      }
-                      const imported = [];
-                      const errors = [];
-                      for (let i = 1; i < lines.length; i++) {
-                        const cols = lines[i].split(',').map(c => sanitizeCell(c.trim().replace(/^["']|["']$/g, '')));
-                        const row = {};
-                        rawHeaders.forEach((header, index) => {
-                          row[header] = cols[index] || '';
-                        });
-                        const error = validateCSVRow(row);
-                        if (error) {
-                          errors.push(`Row ${i + 1}: ${error}`);
-                          continue;
-                        }
-                        if (row.email) {
-                          try {
-                            const companyUid = adminUid || currentUser?.uid
-                            const prov = await provisionEmployeeAccount({
-                              email: row.email,
-                              name: row.name,
-                              role: row.role || 'Teammate',
-                              companyUid,
-                              employeeId: row.id,
-                              department: row.department || '',
-                              avatar: row.avatar || ''
-                            })
-                            row.uid = prov.uid || ''
-                          } catch (provErr) {
-                            errors.push(`Row ${i + 1}: invite not sent (${provErr.message})`)
-                            continue
-                          }
-                          delete row.password;
-                        }
-                        row.avatar = row.avatar || defaultAvatar;
-                        row.updated_at = new Date().toISOString();
-                        imported.push(row);
-                      }
-                      if (errors.length > 0) {
-                        addToast(`Skipped ${errors.length} invalid row(s)`, 'warning');
-                      }
-                      if (imported.length > 0) {
-                        setEmployees(prev => {
-                          const existingIds = new Set(prev.map(e => e.id));
-                          const filteredImport = imported.filter(e => !existingIds.has(e.id));
-                          return [...prev, ...filteredImport];
-                        });
-                        addToast(`Successfully imported ${imported.length} employees.`, 'success');
-                      }
-                    } catch (err) {
-                      addToast('Failed to parse CSV file: ' + err.message, 'danger');
-                    }
-                  };
-                  reader.readAsText(file);
-                }
+                const file = e.target.files?.[0]
+                if (!file || !avatarUploadCardId) return
+                e.target.value = ''
+                processAvatarFile(file, (dataUrl) => {
+                  setEmployees(prev => prev.map(emp => emp.id === avatarUploadCardId ? { ...emp, avatar: dataUrl } : emp))
+                  setImageErrors(prev => ({ ...prev, [avatarUploadCardId]: false }))
+                  addToast('Profile photo updated successfully!', 'success')
+                  addLog('Updated profile photo', `Updated photo for ${avatarUploadCardId}`)
+                })
               }}
             />
             <Button variant="outline" onClick={handleCopyInviteLink} className="shadow-sm flex-1 sm:flex-none">
               <Icon name="link" className="mr-2 h-4 w-4 text-primary" size={16}/> Invite Link
             </Button>
-            <Button variant="outline" onClick={() => document.getElementById('csv-file-input').click()} className="shadow-sm flex-1 sm:flex-none">
-              <Icon name="table_chart" className="mr-2 h-4 w-4" size={16}/> Import CSV
+            <Button variant="outline" onClick={() => document.getElementById('employee-file-input').click()} className="shadow-sm flex-1 sm:flex-none">
+              <Icon name="table_chart" className="mr-2 h-4 w-4 text-primary" size={16}/> Import Excel / CSV
             </Button>
-            <Button variant="outline" onClick={handleDownloadDemoCSV} className="shadow-sm flex-1 sm:flex-none">
-              <Icon name="file_download" className="mr-2 h-4 w-4 text-primary" size={16}/> Demo CSV
+            <Button variant="outline" onClick={handleDownloadDemoExcel} className="shadow-sm flex-1 sm:flex-none">
+              <Icon name="table_view" className="mr-2 h-4 w-4 text-emerald-500" size={16}/> Demo Excel
             </Button>
             <Button onClick={handleOpenAddForm} className="shadow-sm shadow-primary/20 flex-1 sm:flex-none">
               <Icon name="add" className="mr-2 h-4 w-4" size={16}/> Add Employee
@@ -667,156 +904,194 @@ EMP-103,Shakil Hossain,shakil@kormiis.com,Human Resources,HR Officer,Active,1992
                           No employees in this department.
                         </div>
                       ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 items-start">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-start">
                           {group.items.map(emp => {
                             const isExpanded = expandedCardId === emp.id
                             return (
-                              <Card key={emp.id} className="relative group glass-card overflow-visible hover:-translate-y-0.5 hover:shadow-2xl hover:border-primary/40 transition-all duration-400 cursor-pointer" onClick={() => setViewingEmployee(emp)}>
+                              <div 
+                                key={emp.id} 
+                                className="relative group rounded-[28px] p-5 sm:p-6 glass-kormiis glass-apple text-foreground border border-white/30 dark:border-white/14 hover:border-primary/50 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between overflow-hidden isolate"
+                              >
+                                {/* 1. Top Header: Checkbox & Quick Action Glass Icon Buttons */}
+                                <div className="flex items-center justify-between gap-2 mb-3.5 relative z-10">
+                                  {/* Apple Circular Checkbox */}
+                                  <div
+                                    onClick={(e) => toggleSelect(emp.id, e)}
+                                    className={`size-6 rounded-full border-2 transition-all flex items-center justify-center cursor-pointer ${
+                                      selectedIds.has(emp.id)
+                                        ? 'bg-primary border-primary text-primary-foreground shadow-md shadow-primary/30 scale-105'
+                                        : 'border-border/80 dark:border-white/20 bg-background/50 group-hover:border-primary/50 hover:bg-background/80'
+                                    }`}
+                                    title={selectedIds.has(emp.id) ? "Deselect" : "Select"}
+                                  >
+                                    {selectedIds.has(emp.id) && (
+                                      <Icon name="check" size={14} className="stroke-[3]" />
+                                    )}
+                                  </div>
 
-                {/* Selection Checkbox */}
-                <div
-                  onClick={(e) => e.stopPropagation()}
-                  className={`absolute top-3 left-3 z-10 p-1 rounded-full bg-background/80 backdrop-blur border shadow-sm transition-opacity ${selectedIds.has(emp.id) ? 'opacity-100 border-primary' : 'opacity-0 group-hover:opacity-100 border-border'}`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedIds.has(emp.id)}
-                    onChange={(e) => toggleSelect(emp.id, e)}
-                    className="w-4 h-4 cursor-pointer m-0 block accent-primary"
-                  />
-                </div>
+                                  {/* Quick Contact & Action Buttons */}
+                                  <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                                    {emp.email && (
+                                      <a
+                                        href={`mailto:${emp.email}`}
+                                        title={`Email ${emp.name}`}
+                                        className="liquid-icon-btn size-7.5 rounded-full flex items-center justify-center bg-black/5 dark:bg-white/5 hover:bg-primary/20 hover:text-primary active:scale-90 border border-black/10 dark:border-white/10 transition-all text-muted-foreground hover:text-foreground shadow-xs cursor-pointer"
+                                      >
+                                        <Icon name="mail" size={13} />
+                                      </a>
+                                    )}
+                                    {emp.phone && (
+                                      <a
+                                        href={`tel:${emp.phone.replace(/[\s-]/g, '')}`}
+                                        title={`Call ${emp.name}`}
+                                        className="liquid-icon-btn size-7.5 rounded-full flex items-center justify-center bg-black/5 dark:bg-white/5 hover:bg-primary/20 hover:text-primary active:scale-90 border border-black/10 dark:border-white/10 transition-all text-muted-foreground hover:text-foreground shadow-xs cursor-pointer"
+                                      >
+                                        <Icon name="call" size={13} />
+                                      </a>
+                                    )}
+                                    <button
+                                      title={`Edit ${emp.name}`}
+                                      onClick={() => handleOpenEditForm(emp)}
+                                      className="liquid-icon-btn size-7.5 rounded-full flex items-center justify-center bg-black/5 dark:bg-white/5 hover:bg-primary/20 hover:text-primary active:scale-90 border border-black/10 dark:border-white/10 transition-all text-muted-foreground hover:text-foreground shadow-xs cursor-pointer"
+                                    >
+                                      <Icon name="edit" size={13} />
+                                    </button>
+                                    <button
+                                      title={`Delete ${emp.name}`}
+                                      onClick={() => {
+                                        setConfirmDelete(() => () => {
+                                          handleDeleteEmployee(emp.id, emp.name);
+                                          setConfirmDelete(null);
+                                        });
+                                      }}
+                                      className="liquid-icon-btn size-7.5 rounded-full flex items-center justify-center bg-black/5 dark:bg-white/5 hover:bg-destructive/20 hover:text-destructive active:scale-90 border border-black/10 dark:border-white/10 transition-all text-muted-foreground hover:text-destructive shadow-xs cursor-pointer"
+                                    >
+                                      <Icon name="delete" size={13} />
+                                    </button>
+                                  </div>
+                                </div>
 
-                <CardContent className="p-0">
+                                {/* 2. Hero Section: Profile Avatar on Left, Name & Designation on Right */}
+                                <div className="flex items-center gap-3.5 my-2 relative z-10">
+                                  {/* Left: Avatar with Glowing Status Dot & Upload Overlay */}
+                                  <div className="relative shrink-0 group/avatar">
+                                    <div 
+                                      onClick={(e) => {
+                                        e.stopPropagation()
+                                        setAvatarUploadCardId(emp.id)
+                                        cardFileInputRef.current?.click()
+                                      }}
+                                      title="Click to Upload Photo (Max: 500 KB, 1:1 Ratio)"
+                                      className="relative cursor-pointer"
+                                    >
+                                      <Avatar className={`size-15 rounded-full border-2 border-border/60 dark:border-white/15 shadow-md ring-2 ring-primary/20 dark:ring-white/10 ring-offset-2 ring-offset-card transition-all duration-300 group-hover/avatar:scale-105 ${emp.status !== 'Active' ? 'grayscale opacity-75' : ''}`}>
+                                        {!imageErrors[emp.id] && (
+                                          <AvatarImage 
+                                            src={emp.avatar || defaultAvatar} 
+                                            alt={emp.name} 
+                                            style={{ transform: `translate(${emp.photoX || 0}px, ${emp.photoY || 0}px) scale(${emp.photoZoom || 1})`, transformOrigin: 'center' }} 
+                                            onError={() => setImageErrors(prev => ({...prev, [emp.id]: true}))} 
+                                          />
+                                        )}
+                                        <AvatarFallback className="bg-gradient-to-br from-primary/20 via-primary/10 to-transparent text-primary text-base font-black">
+                                          {getAvatarFallback(emp.name).initials}
+                                        </AvatarFallback>
+                                      </Avatar>
 
-                  {/* Header */}
-                  <div className="p-3.5 pb-3 flex items-center gap-3">
-                    <div className="relative shrink-0">
-                      <Avatar className={`h-11 w-11 border-2 shadow-sm transition-all duration-300 ${emp.status !== 'Active' ? 'grayscale opacity-70' : ''}`}>
-                        {!imageErrors[emp.id] && (
-                          <AvatarImage src={emp.avatar || defaultAvatar} alt={emp.name} style={{ transform: `translate(${emp.photoX || 0}px, ${emp.photoY || 0}px) scale(${emp.photoZoom || 1})`, transformOrigin: 'center' }} onError={() => setImageErrors(prev => ({...prev, [emp.id]: true}))} />
-                        )}
-                        <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
-                          {getAvatarFallback(emp.name).initials}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className={`absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full border-2 border-background ${emp.status === 'Active' ? 'bg-green-500' : emp.status === 'On Leave' ? 'bg-amber-500' : 'bg-red-500'}`} />
-                    </div>
+                                      {/* Hover Camera Upload Overlay */}
+                                      <div className="absolute inset-0 rounded-full bg-black/60 backdrop-blur-[2px] opacity-0 group-hover/avatar:opacity-100 flex flex-col items-center justify-center transition-all text-white">
+                                        <Icon name="photo_camera" size={15}/>
+                                        <span className="text-[8px] font-bold tracking-tight">Upload</span>
+                                      </div>
+                                    </div>
 
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-bold text-sm leading-tight truncate">{emp.name}</h4>
-                      <p className="text-xs font-medium text-muted-foreground truncate mt-0.5">{emp.designation || emp.role}</p>
-                      <span className={`inline-flex items-center px-1.5 py-0 mt-1 rounded-full text-[10px] font-semibold border ${emp.status === 'Active' ? 'bg-green-500/10 text-green-700 border-green-500/20' : emp.status === 'On Leave' ? 'bg-amber-500/10 text-amber-700 border-amber-500/20' : 'bg-red-500/10 text-red-700 border-red-500/20'}`}>
-                        {emp.status}
-                      </span>
-                    </div>
+                                    {/* Glowing Status Indicator */}
+                                    <span 
+                                      className={`absolute bottom-0 right-0 size-3.5 rounded-full border-2 border-card ${
+                                        emp.status === 'Active' 
+                                          ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.85)]' 
+                                          : emp.status === 'On Leave' 
+                                          ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.85)]' 
+                                          : 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.85)]'
+                                      }`} 
+                                    />
+                                  </div>
 
-                    {/* Quick contact actions */}
-                    <div className="flex flex-col gap-1 shrink-0">
-                      {emp.email && (
-                        <a
-                          href={`mailto:${emp.email}`}
-                          onClick={(e) => e.stopPropagation()}
-                          title={`Email ${emp.name}`}
-                          className="liquid-icon-btn size-7 inline-flex items-center justify-center rounded-full bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 active:scale-90 transition-all cursor-pointer"
-                        >
-                          <Icon name="mail" size={14}/>
-                        </a>
-                      )}
-                      {emp.phone && (
-                        <a
-                          href={`tel:${emp.phone.replace(/[\s-]/g, '')}`}
-                          onClick={(e) => e.stopPropagation()}
-                          title={`Call ${emp.name}`}
-                          className="liquid-icon-btn size-7 inline-flex items-center justify-center rounded-full bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 active:scale-90 transition-all cursor-pointer"
-                        >
-                          <Icon name="call" size={14}/>
-                        </a>
-                      )}
-                    </div>
-                  </div>
+                                  {/* Right: Name & Designation */}
+                                  <div className="flex flex-col min-w-0 flex-1 text-left justify-center">
+                                    <h4 className="font-bold text-fluid-lg text-foreground tracking-tight truncate group-hover:text-primary transition-colors leading-tight">
+                                      {emp.name}
+                                    </h4>
+                                    <p className="text-fluid-xs font-semibold text-muted-foreground truncate mt-1">
+                                      {emp.designation || emp.role}
+                                    </p>
+                                  </div>
+                                </div>
 
-                  {/* Chips: department + employee id */}
-                  <div className="px-3.5 pb-3 flex items-center gap-1.5 flex-wrap">
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted/50 border border-border/70 text-[11px] font-medium text-muted-foreground">
-                      <Icon name="apartment" size={12} className="text-primary/70"/> {emp.department}
-                    </span>
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted/50 border border-border/70 text-[11px] font-medium text-muted-foreground font-mono">
-                      <Icon name="badge" size={12} className="text-primary/70"/> {emp.id}
-                    </span>
-                  </div>
+                                {/* 3. Info Capsules: Department & Employee ID */}
+                                <div className="grid grid-cols-2 gap-2 mt-3.5 pt-3.5 border-t border-border/80 dark:border-white/12 relative z-10">
+                                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 min-w-0 shadow-xs">
+                                    <Icon name="apartment" size={13} className="text-primary shrink-0" />
+                                    <span className="text-[11px] font-medium text-foreground/90 truncate">
+                                      {emp.department}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 min-w-0 font-mono shadow-xs">
+                                    <Icon name="badge" size={13} className="text-primary shrink-0" />
+                                    <span className="text-[11px] font-medium text-muted-foreground truncate">
+                                      {emp.id}
+                                    </span>
+                                  </div>
+                                </div>
 
-                  {/* Expanded panel */}
-                  <div className={`overflow-hidden transition-all duration-400 ease-[cubic-bezier(0.175,0.885,0.32,1.15)] ${isExpanded ? 'max-h-[400px] opacity-100' : 'max-h-0 opacity-0'}`}>
-                    <div className="mx-3 mb-2.5 rounded-xl border border-border/70 bg-muted/30 p-3 flex flex-col gap-3">
-                      <div className="flex flex-col gap-1.5 text-xs text-muted-foreground">
-                        {emp.email && (
-                          <a href={`mailto:${emp.email}`} className="flex items-center gap-1.5 break-all hover:text-primary transition-colors">
-                            <Icon name="mail" className="h-3.5 w-3.5 shrink-0 text-muted-foreground/70" size={14}/> {emp.email}
-                          </a>
-                        )}
-                        {emp.phone && (
-                          <a href={`tel:${emp.phone.replace(/[\s-]/g, '')}`} className="flex items-center gap-1.5 break-all hover:text-primary transition-colors">
-                            <Icon name="call" className="h-3.5 w-3.5 shrink-0 text-muted-foreground/70" size={14}/> {emp.phone}
-                          </a>
-                        )}
-                        <div className="flex items-center gap-1.5">
-                          <Icon name="cake" className="h-3.5 w-3.5 shrink-0 text-muted-foreground/70" size={14}/>
-                          <span>DOB: {emp.dob ? formatDate(emp.dob) : 'N/A'}</span>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                          <Icon name="calendar_month" className="h-3.5 w-3.5 shrink-0 text-muted-foreground/70" size={14}/>
-                          <span>Joined: {emp.joiningDate ? formatDate(emp.joiningDate) : 'N/A'}</span>
-                        </div>
-                      </div>
+                                {/* 4. Collapsible Drawer (Details: Email, Phone, DOB, Joining Date) */}
+                                <div className={`overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.175,0.885,0.32,1.15)] ${isExpanded ? 'max-h-[220px] opacity-100 mt-2.5' : 'max-h-0 opacity-0'}`}>
+                                  <div className="rounded-2xl border border-border/80 dark:border-white/12 bg-black/5 dark:bg-white/5 p-3 flex flex-col gap-1.5 text-fluid-xs text-muted-foreground">
+                                    {emp.email && (
+                                      <div className="flex items-center gap-2 truncate">
+                                        <Icon name="mail" size={13} className="text-primary/80 shrink-0" />
+                                        <span className="truncate">{emp.email}</span>
+                                      </div>
+                                    )}
+                                    {emp.phone && (
+                                      <div className="flex items-center gap-2 truncate">
+                                        <Icon name="call" size={13} className="text-primary/80 shrink-0" />
+                                        <span className="truncate">{emp.phone}</span>
+                                      </div>
+                                    )}
+                                    {emp.dob && (
+                                      <div className="flex items-center gap-2 truncate">
+                                        <Icon name="cake" size={13} className="text-primary/80 shrink-0" />
+                                        <span className="truncate">DOB: {formatDate(emp.dob)}</span>
+                                      </div>
+                                    )}
+                                    {emp.joiningDate && (
+                                      <div className="flex items-center gap-2 truncate">
+                                        <Icon name="calendar_month" size={13} className="text-primary/80 shrink-0" />
+                                        <span className="truncate">Joined: {formatDate(emp.joiningDate)}</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
 
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="flex-1 h-7 text-xs font-medium bg-background hover:bg-muted"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setEditingEmployee(emp); setNewEmpId(emp.id); setNewName(emp.name); setNewRole(emp.role || 'Teammate'); setNewDesignation(emp.designation || emp.role || ''); setNewPermissions(emp.permissions || []); setNewDept(emp.department); setNewEmail(emp.email || ''); setNewPhone(emp.phone || ''); setNewStatus(emp.status); setNewDob(emp.dob || ''); setNewJoiningDate(emp.joiningDate || ''); setNewNidPassportId(emp.nidPassportId || ''); setIsCustomDept(false); setCustomDept(''); setShowAddForm(true);
-                          }}
-                        >
-                          <Icon name="edit" className="mr-1.5 h-3.5 w-3.5" size={14}/> Edit
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="flex-1 h-7 text-xs font-medium text-destructive hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setConfirmDelete(() => () => {
-                              handleDeleteEmployee(emp.id, emp.name);
-                              setConfirmDelete(null);
-                            });
-                          }}
-                        >
-                          <Icon name="delete" className="mr-1.5 h-3.5 w-3.5" size={14}/> Delete
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Expand Toggle — sleek icon button at the bottom of the card */}
-                  <div className="flex justify-center py-1 border-t border-border/60">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setExpandedCardId(prev => prev === emp.id ? null : emp.id);
-                      }}
-                      aria-label={isExpanded ? 'Collapse details' : 'Expand details'}
-                      title={isExpanded ? 'Collapse details' : 'Expand details'}
-                      className="liquid-icon-btn size-6 inline-flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all cursor-pointer active:scale-90"
-                    >
-                      <Icon name="keyboard_arrow_down" className={`h-3.5 w-3.5 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} size={14}/>
-                    </button>
-                  </div>
-                </CardContent>
-              </Card>
-            )
-          })}
+                                {/* 5. Card Footer: Ultra-Slim Grabber Bar Chevron Toggle Button */}
+                                <div className="mt-2 pt-1.5 border-t border-border/60 dark:border-white/10 flex items-center justify-center relative z-10">
+                                  <button
+                                    onClick={() => setExpandedCardId(prev => prev === emp.id ? null : emp.id)}
+                                    aria-label={isExpanded ? 'Collapse details' : 'Expand details'}
+                                    title={isExpanded ? 'Collapse details' : 'Expand details'}
+                                    className="liquid-icon-btn group/btn w-full h-3.5 rounded-full flex items-center justify-center bg-black/[0.04] dark:bg-white/[0.04] hover:bg-black/10 dark:hover:bg-white/10 active:scale-[0.99] border border-black/5 dark:border-white/8 text-muted-foreground hover:text-foreground transition-all cursor-pointer"
+                                  >
+                                    <Icon 
+                                      name="keyboard_arrow_down" 
+                                      size={12} 
+                                      className={`transition-transform duration-300 ${isExpanded ? 'rotate-180 text-primary' : 'group-hover/btn:translate-y-0.5'}`} 
+                                    />
+                                  </button>
+                                </div>
+                              </div>
+                            )
+                          })}
                         </div>
                       )}
                     </div>
@@ -929,6 +1204,91 @@ EMP-103,Shakil Hossain,shakil@kormiis.com,Human Resources,HR Officer,Active,1992
 
           <form onSubmit={handleSaveEmployee} className="flex flex-col gap-6 py-4">
             
+            {/* Profile Photo Uploader with Auto Gmail Sync */}
+            <div className="flex flex-col sm:flex-row items-center gap-4 p-4 rounded-2xl bg-muted/20 border border-border/80">
+              <div className="relative group/formavatar shrink-0">
+                <Avatar className="size-20 rounded-full border-2 border-primary/30 shadow-md ring-2 ring-primary/15 ring-offset-2 ring-offset-card">
+                  {newAvatar ? (
+                    <AvatarImage src={newAvatar} alt={newName || 'Avatar'} />
+                  ) : (
+                    <AvatarImage src={defaultAvatar} alt="Default" />
+                  )}
+                  <AvatarFallback className="bg-gradient-to-br from-primary/20 via-primary/10 to-transparent text-primary text-xl font-black">
+                    {newName ? getAvatarFallback(newName).initials : <Icon name="person" size={28}/>}
+                  </AvatarFallback>
+                </Avatar>
+                <button
+                  type="button"
+                  onClick={() => formFileInputRef.current?.click()}
+                  title="Upload Photo"
+                  className="absolute bottom-0 right-0 size-7 rounded-full bg-primary text-primary-foreground shadow-md flex items-center justify-center hover:scale-110 active:scale-95 transition-all cursor-pointer"
+                >
+                  <Icon name="photo_camera" size={14}/>
+                </button>
+              </div>
+
+              <div className="flex flex-col flex-1 text-center sm:text-left gap-1.5">
+                <span className="text-sm font-semibold text-foreground">Employee Profile Photo</span>
+                <p className="text-fluid-xs text-muted-foreground">
+                  Recommended: <strong className="text-foreground">1:1 Square Ratio</strong> • File Size: <strong className="text-foreground">Max 500 KB</strong> (Auto-optimized to ~25 KB WebP/JPEG)
+                </p>
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mt-1">
+                  <input
+                    type="file"
+                    ref={formFileInputRef}
+                    accept="image/png,image/jpeg,image/webp,image/jpg"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0]
+                      if (!file) return
+                      e.target.value = ''
+                      processAvatarFile(file, (dataUrl) => {
+                        setNewAvatar(dataUrl)
+                        addToast('Photo loaded and optimized to ultra-lite WebP (1:1 Ratio)!', 'success')
+                      })
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => formFileInputRef.current?.click()}
+                    className="h-8 text-xs rounded-full"
+                  >
+                    <Icon name="upload" className="mr-1.5 h-3.5 w-3.5" size={14}/> Upload Image
+                  </Button>
+
+                  {newEmail && (
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => {
+                        fetchGmailAvatar(newEmail, (avatarUrl) => {
+                          setNewAvatar(avatarUrl)
+                        })
+                      }}
+                      className="h-8 text-xs rounded-full bg-primary/10 text-primary hover:bg-primary/20"
+                    >
+                      <Icon name="sync" className="mr-1.5 h-3.5 w-3.5" size={14}/> Auto-fetch Gmail Photo
+                    </Button>
+                  )}
+
+                  {newAvatar && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setNewAvatar('')}
+                      className="h-8 text-xs rounded-full text-muted-foreground hover:text-destructive"
+                    >
+                      Reset Photo
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium">Employee ID</label>
