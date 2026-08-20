@@ -30,7 +30,14 @@ export default function Topbar({
   showThemeToggle = true, 
   user, 
   setCurrentView,
-  onOpenSearch
+  onOpenSearch,
+  attendance,
+  setAttendance,
+  expenses,
+  setExpenses,
+  tasks,
+  setTasks,
+  addToast
 }) {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true)
@@ -43,6 +50,116 @@ export default function Topbar({
   const totalUnreadCount = unreadCount + (hasIntegrityIssues ? 1 : 0)
   const totalItemCount = filteredNotifications.length + (hasIntegrityIssues ? 1 : 0)
   const isDark = isDarkMode ?? (themeMode === 'dark' || (typeof document !== 'undefined' && document.documentElement.classList.contains('dark')))
+  const isManagerOrAdmin = user?.role === 'Admin' || user?.isWorkspaceOwner || user?.role === 'Manager' || user?.role === 'HR'
+
+  const navigateToView = (viewTarget, notifId = null) => {
+    if (!viewTarget) return
+    const isAdmin = user?.role === 'Admin' || user?.isWorkspaceOwner
+    let mapped = viewTarget
+    if (!isAdmin) {
+      if (viewTarget === 'leaves') mapped = 'leave'
+      else if (viewTarget === 'tasks') mapped = 'my-tasks'
+      else if (viewTarget === 'assets') mapped = 'my-assets'
+      else if (viewTarget === 'calendar') mapped = 'events'
+    } else {
+      if (viewTarget === 'leave') mapped = 'leaves'
+      else if (viewTarget === 'my-tasks') mapped = 'tasks'
+      else if (viewTarget === 'my-assets') mapped = 'assets'
+      else if (viewTarget === 'events') mapped = 'calendar'
+    }
+
+    if (setCurrentView) setCurrentView(mapped)
+    if (notifId && markNotificationsRead) markNotificationsRead(notifId)
+    setShowNotifications(false)
+  }
+
+  const handleQuickAction = (e, notif, actionType) => {
+    e.stopPropagation()
+
+    if (actionType === 'view') {
+      navigateToView(notif.view, notif.id)
+      return
+    }
+
+    if (actionType === 'approve_leave' && setAttendance) {
+      setAttendance(prev => {
+        const leaves = prev?.leaves || []
+        const targetLeave = leaves.find(l => (l.id === notif.leaveId || l.employeeId === notif.actorId || l.employeeId === notif.targetId) && l.status === 'Pending') || leaves.find(l => l.status === 'Pending')
+        if (targetLeave) {
+          return {
+            ...prev,
+            leaves: leaves.map(l => l.id === targetLeave.id ? { ...l, status: 'Approved' } : l)
+          }
+        }
+        return prev
+      })
+      addToast?.('Leave request approved.', 'success')
+      if (markNotificationsRead) markNotificationsRead(notif.id)
+      return
+    }
+
+    if (actionType === 'reject_leave' && setAttendance) {
+      setAttendance(prev => {
+        const leaves = prev?.leaves || []
+        const targetLeave = leaves.find(l => (l.id === notif.leaveId || l.employeeId === notif.actorId || l.employeeId === notif.targetId) && l.status === 'Pending') || leaves.find(l => l.status === 'Pending')
+        if (targetLeave) {
+          return {
+            ...prev,
+            leaves: leaves.map(l => l.id === targetLeave.id ? { ...l, status: 'Rejected' } : l)
+          }
+        }
+        return prev
+      })
+      addToast?.('Leave request rejected.', 'info')
+      if (markNotificationsRead) markNotificationsRead(notif.id)
+      return
+    }
+
+    if (actionType === 'approve_expense' && setExpenses) {
+      setExpenses(prev => {
+        const exps = prev || []
+        const targetExp = exps.find(exp => (exp.id === notif.expenseId || exp.employeeId === notif.actorId) && exp.status === 'Pending') || exps.find(e => e.status === 'Pending')
+        if (targetExp) {
+          return exps.map(e => e.id === targetExp.id ? { ...e, status: 'Approved', approvedBy: user?.role || 'Admin', actionDate: new Date().toISOString() } : e)
+        }
+        return prev
+      })
+      addToast?.('Expense claim approved.', 'success')
+      if (markNotificationsRead) markNotificationsRead(notif.id)
+      return
+    }
+
+    if (actionType === 'reject_expense' && setExpenses) {
+      setExpenses(prev => {
+        const exps = prev || []
+        const targetExp = exps.find(exp => (exp.id === notif.expenseId || exp.employeeId === notif.actorId) && exp.status === 'Pending') || exps.find(e => e.status === 'Pending')
+        if (targetExp) {
+          return exps.map(e => e.id === targetExp.id ? { ...e, status: 'Rejected', rejectedBy: user?.role || 'Admin', actionDate: new Date().toISOString() } : e)
+        }
+        return prev
+      })
+      addToast?.('Expense claim rejected.', 'info')
+      if (markNotificationsRead) markNotificationsRead(notif.id)
+      return
+    }
+
+    if (actionType === 'complete_task' && setTasks) {
+      setTasks(prev => {
+        const taskList = prev || []
+        const targetTask = taskList.find(t => t.id === notif.taskId) || taskList.find(t => notif.text?.includes(t.title) && t.status !== 'Done')
+        if (targetTask) {
+          return taskList.map(t => t.id === targetTask.id ? { ...t, status: 'Done' } : t)
+        }
+        return prev
+      })
+      addToast?.('Task marked as completed.', 'success')
+      if (markNotificationsRead) markNotificationsRead(notif.id)
+      return
+    }
+
+    // Default: navigate to view
+    navigateToView(notif.view, notif.id)
+  }
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true)
@@ -393,20 +510,14 @@ export default function Topbar({
               </div>
             ) : (
               filteredNotifications.map(n => {
-                const meta = CATEGORY_META[n.category] || CATEGORY_META.system
+                const meta = CATEGORY_META[n.category] || CATEGORY_META[n.view] || CATEGORY_META.notice || CATEGORY_META.system
                 const isUnread = !n.read
 
                 return (
                   <div 
                     role="listitem" 
                     key={n.id} 
-                    onClick={() => {
-                      if (n.view && setCurrentView) {
-                        setCurrentView(n.view);
-                      }
-                      if (markNotificationsRead) markNotificationsRead(n.id);
-                      setShowNotifications(false);
-                    }}
+                    onClick={() => navigateToView(n.view, n.id)}
                     className={`group p-3 sm:p-3.5 rounded-2xl transition-all duration-200 cursor-pointer border relative select-none flex items-start gap-3 active:scale-[0.99] ${
                       isUnread 
                         ? 'bg-primary/[0.07] dark:bg-primary/[0.14] hover:bg-primary/[0.11] dark:hover:bg-primary/[0.20] border-primary/25 shadow-xs' 
@@ -429,13 +540,13 @@ export default function Topbar({
                     <div className="min-w-0 flex-1 flex flex-col gap-0.5">
                       <div className="flex items-center justify-between gap-2">
                         <span 
-                          className="text-[10px] font-black uppercase tracking-wider px-2 py-0.2 rounded-md"
+                          className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md"
                           style={{ 
                             background: `${meta.color}15`, 
                             color: meta.color 
                           }}
                         >
-                          {n.category || 'System'}
+                          {meta.label || 'Notice'}
                         </span>
                         {isUnread && (
                           <span className="flex items-center gap-1 text-[10px] font-bold text-primary">
@@ -446,18 +557,91 @@ export default function Topbar({
                       </div>
 
                       {n.title && n.title !== n.text && (
-                        <p className="text-fluid-sm font-bold m-0 mt-0.5 leading-snug text-foreground break-words">
+                        <p className="text-fluid-sm font-bold m-0 mt-1 leading-snug text-foreground break-words">
                           {n.title}
                         </p>
                       )}
 
-                      <p className={`text-fluid-xs m-0 leading-relaxed text-foreground/85 dark:text-foreground/90 break-words ${isUnread ? 'font-semibold' : 'font-medium text-muted-foreground'}`}>
+                      <p className={`text-fluid-xs m-0 mt-0.5 leading-relaxed text-foreground/85 dark:text-foreground/90 break-words ${isUnread ? 'font-semibold' : 'font-medium text-muted-foreground'}`}>
                         {n.text}
                       </p>
 
-                      <div className="flex items-center gap-1.5 mt-1 text-[10px] font-medium text-muted-foreground">
-                        <Icon name="schedule" size={12} className="opacity-70" />
-                        <span>{getRelativeTime(n.timestamp || n.time) || n.time || 'Just now'}</span>
+                      {/* Bottom row: Timestamp + Quick Action buttons */}
+                      <div className="flex flex-wrap items-center justify-between gap-2 mt-2.5 pt-1.5 border-t border-black/[0.04] dark:border-white/[0.06]">
+                        <div className="flex items-center gap-1.5 text-[10px] font-medium text-muted-foreground">
+                          <Icon name="schedule" size={12} className="opacity-70" />
+                          <span>{getRelativeTime(n.timestamp || n.time) || n.time || 'Just now'}</span>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 ml-auto">
+                          {/* Leave Quick Actions for Admin/HR */}
+                          {isManagerOrAdmin && (n.category === 'leave' || n.category === 'leaves') && (n.title?.toLowerCase().includes('request') || n.text?.toLowerCase().includes('request')) && (
+                            <>
+                              <button
+                                type="button"
+                                onClick={(e) => handleQuickAction(e, n, 'approve_leave')}
+                                className="h-6.5 px-2.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-600 dark:text-emerald-400 text-[11px] font-bold border border-emerald-500/30 flex items-center gap-1 cursor-pointer transition-all active:scale-95 shadow-2xs"
+                              >
+                                <Icon name="check" size={12} />
+                                <span>Approve</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={(e) => handleQuickAction(e, n, 'reject_leave')}
+                                className="h-6.5 px-2 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 text-rose-600 dark:text-rose-400 text-[11px] font-bold border border-rose-500/30 flex items-center gap-1 cursor-pointer transition-all active:scale-95 shadow-2xs"
+                              >
+                                <Icon name="close" size={12} />
+                                <span>Reject</span>
+                              </button>
+                            </>
+                          )}
+
+                          {/* Expense Quick Actions for Admin/HR */}
+                          {isManagerOrAdmin && (n.category === 'expense' || n.category === 'expenses') && (n.title?.toLowerCase().includes('submitted') || n.text?.toLowerCase().includes('claim') || n.text?.toLowerCase().includes('submitted')) && (
+                            <>
+                              <button
+                                type="button"
+                                onClick={(e) => handleQuickAction(e, n, 'approve_expense')}
+                                className="h-6.5 px-2.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-600 dark:text-emerald-400 text-[11px] font-bold border border-emerald-500/30 flex items-center gap-1 cursor-pointer transition-all active:scale-95 shadow-2xs"
+                              >
+                                <Icon name="check" size={12} />
+                                <span>Approve</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={(e) => handleQuickAction(e, n, 'reject_expense')}
+                                className="h-6.5 px-2 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 text-rose-600 dark:text-rose-400 text-[11px] font-bold border border-rose-500/30 flex items-center gap-1 cursor-pointer transition-all active:scale-95 shadow-2xs"
+                              >
+                                <Icon name="close" size={12} />
+                                <span>Reject</span>
+                              </button>
+                            </>
+                          )}
+
+                          {/* Task Quick Action */}
+                          {(n.category === 'task' || n.category === 'tasks') && !n.text?.toLowerCase().includes('completed') && (
+                            <button
+                              type="button"
+                              onClick={(e) => handleQuickAction(e, n, 'complete_task')}
+                              className="h-6.5 px-2.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-600 dark:text-emerald-400 text-[11px] font-bold border border-emerald-500/30 flex items-center gap-1 cursor-pointer transition-all active:scale-95 shadow-2xs"
+                            >
+                              <Icon name="check_circle" size={12} />
+                              <span>Mark Done</span>
+                            </button>
+                          )}
+
+                          {/* View link button */}
+                          {n.view && (
+                            <button
+                              type="button"
+                              onClick={(e) => handleQuickAction(e, n, 'view')}
+                              className="h-6.5 px-2.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-[11px] font-bold border border-primary/25 flex items-center gap-1 cursor-pointer transition-all active:scale-95 shadow-2xs"
+                            >
+                              <span>Open</span>
+                              <Icon name="arrow_forward" size={11} />
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>

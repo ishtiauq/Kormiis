@@ -1,6 +1,6 @@
 export * from './firebaseCore.js';
 import { app } from './firebaseCore.js';
-import { getFirestore, doc, setDoc, getDoc, getDocFromServer, serverTimestamp, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, getDocs, writeBatch, onSnapshot, deleteDoc } from 'firebase/firestore';
+import { getFirestore, doc, setDoc, getDoc, getDocFromServer, serverTimestamp, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, getDocs, writeBatch, onSnapshot, deleteDoc, query, where } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
 let db, storage;
@@ -23,4 +23,4 @@ try {
   console.error('Firebase initialization error:', error);
 }
 
-export { db, storage, doc, setDoc, getDoc, getDocFromServer, serverTimestamp, collection, getDocs, writeBatch, onSnapshot, deleteDoc };
+export { db, storage, doc, setDoc, getDoc, getDocFromServer, serverTimestamp, collection, getDocs, writeBatch, onSnapshot, deleteDoc, query, where };

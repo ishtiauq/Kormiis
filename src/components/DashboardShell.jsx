@@ -194,6 +194,13 @@ export default function DashboardShell({ user, themeMode, isDarkMode, toggleThem
                 setCurrentView={setCurrentView}
                 user={user}
                 onOpenSearch={() => setShowCommandPalette(true)}
+                attendance={appData.attendance}
+                setAttendance={appData.setAttendance || appData.handleSetAttendance}
+                expenses={appData.expenses}
+                setExpenses={appData.setExpenses || appData.handleSetExpenses}
+                tasks={appData.tasks}
+                setTasks={appData.setTasks || appData.handleSetTasks}
+                addToast={addToast}
               />
           </div>
 

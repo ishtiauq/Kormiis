@@ -236,6 +236,7 @@ export default function EmployeePortal({
       case 'payslips':
         return <PayslipsView currentUser={currentUser} payroll={payroll} addToast={addToast} settings={settings} />
       case 'leave':
+      case 'leaves':
         return <LeaveView currentUser={currentUser} attendance={attendance} setAttendance={setAttendance} addToast={addToast} addLog={addLog} settings={settings} addNotification={addNotification} />
       case 'profile':
         return <ProfileView 
@@ -253,6 +254,7 @@ export default function EmployeePortal({
           setAnnouncements={setAnnouncements}
           addNotification={addNotification}
         />
+      case 'assets':
       case 'my-assets':
         return <MyAssetsView
                  currentUser={currentUser}
@@ -265,8 +267,10 @@ export default function EmployeePortal({
                  addToast={addToast}
                  addNotification={addNotification}
                />
+      case 'tasks':
       case 'my-tasks':
         return <div className="max-w-[1200px] mx-auto w-full"><Tasks tasks={tasks} setTasks={setTasks} employees={employees} currentUser={currentUser} addToast={addToast} addLog={addLog} addNotification={addNotification} /></div>
+      case 'calendar':
       case 'events':
         return <div className="max-w-[1200px] mx-auto w-full"><Calendar events={events} setEvents={setEvents} employees={employees} addLog={addLog} addToast={addToast} currentUser={currentUser} addNotification={addNotification} /></div>
       case 'expenses':
@@ -371,6 +375,13 @@ export default function EmployeePortal({
                 handleLogout={handleLogout}
                 setCurrentView={setActiveTab}
                 user={currentUser}
+                attendance={attendance}
+                setAttendance={setAttendance}
+                expenses={expenses}
+                setExpenses={setExpenses}
+                tasks={tasks}
+                setTasks={setTasks}
+                addToast={addToast}
             />
           </div>
 

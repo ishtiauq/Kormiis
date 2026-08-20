@@ -76,8 +76,15 @@ export default function Documents({
   // Official HR Letter Generator State
   const [showLetterModal, setShowLetterModal] = useState(false)
   const [letterEmpId, setLetterEmpId] = useState(employees[0]?.id || '')
-  const [letterType, setLetterType] = useState('experience')
+  const [letterType, setLetterType] = useState('noc')
   const [letterNotes, setLetterNotes] = useState('')
+
+  const handleOpenLetterModal = (type = 'noc', empId = null) => {
+    setLetterType(type)
+    if (empId) setLetterEmpId(empId)
+    else if (!letterEmpId && employees.length > 0) setLetterEmpId(employees[0].id)
+    setShowLetterModal(true)
+  }
 
   const fileInputRef = useRef(null)
   const categoryScrollRef = useRef(null)
@@ -508,16 +515,14 @@ export default function Documents({
         </div>
 
         <div className="flex items-center gap-2.5 flex-wrap">
-          {employees.length > 0 && (
-            <Button 
-              variant="outline" 
-              onClick={() => setShowLetterModal(true)} 
-              className="rounded-2xl h-11 px-4 text-xs font-semibold gap-1.5 border-border/80 dark:border-white/12 flex-1 sm:flex-none shadow-sm"
-            >
-              <Icon name="assignment" size={16} className="text-primary"/>
-              <span>Generate HR Letter</span>
-            </Button>
-          )}
+          <Button 
+            variant="outline" 
+            onClick={() => handleOpenLetterModal('noc')} 
+            className="rounded-2xl h-11 px-4 text-xs sm:text-sm font-bold gap-2 border-primary/40 bg-primary/10 hover:bg-primary/20 text-primary flex-1 sm:flex-none shadow-sm transition-all"
+          >
+            <Icon name="assignment" size={18} className="text-primary"/>
+            <span>Auto-Generate Documents (NOC, Salary)</span>
+          </Button>
 
           <Button 
             variant="default" 
@@ -526,6 +531,131 @@ export default function Documents({
           >
             <Icon name="upload" className="mr-2 h-4 w-4" size={16}/> Upload Document
           </Button>
+        </div>
+      </div>
+
+      {/* Official HR Document & Certificate Studio (Quick Action Cards) */}
+      <div className="rounded-[28px] p-5 sm:p-6 glass-kormiis glass-apple text-foreground border border-white/30 dark:border-white/14 shadow-lg flex flex-col gap-4">
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <div>
+            <h2 className="text-fluid font-bold tracking-tight flex items-center gap-2 text-foreground">
+              <Icon name="description" className="text-primary" size={20}/>
+              <span>Official Document & Certificate Studio</span>
+            </h2>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Instantly generate, brand, and download official company PDF letters with company letterhead & QR-ready reference.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+          {/* Card 1: NOC */}
+          <div 
+            onClick={() => handleOpenLetterModal('noc')}
+            className="group relative p-4 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] hover:bg-primary/[0.08] dark:hover:bg-primary/[0.12] border border-border/70 dark:border-white/10 hover:border-primary/50 transition-all duration-300 cursor-pointer shadow-sm flex flex-col justify-between gap-3"
+          >
+            <div className="flex items-start justify-between gap-2">
+              <div className="size-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
+                <Icon name="flight_takeoff" size={20}/>
+              </div>
+              <Badge variant="outline" className="text-[10px] uppercase font-bold text-amber-600 border-amber-500/30 bg-amber-500/5">
+                NOC
+              </Badge>
+            </div>
+            <div>
+              <h3 className="font-bold text-sm text-foreground group-hover:text-primary transition-colors">
+                No Objection Certificate
+              </h3>
+              <p className="text-[11px] text-muted-foreground mt-1 line-clamp-2">
+                For foreign visa applications, passport renewal, and official travel clearances.
+              </p>
+            </div>
+            <div className="flex items-center text-xs font-semibold text-primary gap-1 pt-1 border-t border-border/40">
+              <span>Generate PDF</span>
+              <Icon name="arrow_forward" size={14} className="group-hover:translate-x-1 transition-transform"/>
+            </div>
+          </div>
+
+          {/* Card 2: Salary & Employment */}
+          <div 
+            onClick={() => handleOpenLetterModal('salary')}
+            className="group relative p-4 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] hover:bg-primary/[0.08] dark:hover:bg-primary/[0.12] border border-border/70 dark:border-white/10 hover:border-primary/50 transition-all duration-300 cursor-pointer shadow-sm flex flex-col justify-between gap-3"
+          >
+            <div className="flex items-start justify-between gap-2">
+              <div className="size-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold">
+                <Icon name="payments" size={20}/>
+              </div>
+              <Badge variant="outline" className="text-[10px] uppercase font-bold text-emerald-600 border-emerald-500/30 bg-emerald-500/5">
+                Salary
+              </Badge>
+            </div>
+            <div>
+              <h3 className="font-bold text-sm text-foreground group-hover:text-primary transition-colors">
+                Salary & Employment Certificate
+              </h3>
+              <p className="text-[11px] text-muted-foreground mt-1 line-clamp-2">
+                For bank loans, credit cards, rent agreements, and income verification.
+              </p>
+            </div>
+            <div className="flex items-center text-xs font-semibold text-primary gap-1 pt-1 border-t border-border/40">
+              <span>Generate PDF</span>
+              <Icon name="arrow_forward" size={14} className="group-hover:translate-x-1 transition-transform"/>
+            </div>
+          </div>
+
+          {/* Card 3: Experience */}
+          <div 
+            onClick={() => handleOpenLetterModal('experience')}
+            className="group relative p-4 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] hover:bg-primary/[0.08] dark:hover:bg-primary/[0.12] border border-border/70 dark:border-white/10 hover:border-primary/50 transition-all duration-300 cursor-pointer shadow-sm flex flex-col justify-between gap-3"
+          >
+            <div className="flex items-start justify-between gap-2">
+              <div className="size-10 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold">
+                <Icon name="workspace_premium" size={20}/>
+              </div>
+              <Badge variant="outline" className="text-[10px] uppercase font-bold text-blue-600 border-blue-500/30 bg-blue-500/5">
+                Experience
+              </Badge>
+            </div>
+            <div>
+              <h3 className="font-bold text-sm text-foreground group-hover:text-primary transition-colors">
+                Experience Certificate
+              </h3>
+              <p className="text-[11px] text-muted-foreground mt-1 line-clamp-2">
+                Official proof of tenure, job performance, and professional conduct.
+              </p>
+            </div>
+            <div className="flex items-center text-xs font-semibold text-primary gap-1 pt-1 border-t border-border/40">
+              <span>Generate PDF</span>
+              <Icon name="arrow_forward" size={14} className="group-hover:translate-x-1 transition-transform"/>
+            </div>
+          </div>
+
+          {/* Card 4: Verification */}
+          <div 
+            onClick={() => handleOpenLetterModal('verification')}
+            className="group relative p-4 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] hover:bg-primary/[0.08] dark:hover:bg-primary/[0.12] border border-border/70 dark:border-white/10 hover:border-primary/50 transition-all duration-300 cursor-pointer shadow-sm flex flex-col justify-between gap-3"
+          >
+            <div className="flex items-start justify-between gap-2">
+              <div className="size-10 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold">
+                <Icon name="verified_user" size={20}/>
+              </div>
+              <Badge variant="outline" className="text-[10px] uppercase font-bold text-purple-600 border-purple-500/30 bg-purple-500/5">
+                Verification
+              </Badge>
+            </div>
+            <div>
+              <h3 className="font-bold text-sm text-foreground group-hover:text-primary transition-colors">
+                Employment Verification Letter
+              </h3>
+              <p className="text-[11px] text-muted-foreground mt-1 line-clamp-2">
+                Standard proof of active employment and job designation in the organization.
+              </p>
+            </div>
+            <div className="flex items-center text-xs font-semibold text-primary gap-1 pt-1 border-t border-border/40">
+              <span>Generate PDF</span>
+              <Icon name="arrow_forward" size={14} className="group-hover:translate-x-1 transition-transform"/>
+            </div>
+          </div>
         </div>
       </div>
 

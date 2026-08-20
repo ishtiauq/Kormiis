@@ -293,13 +293,14 @@ export const burnoutApiLocal = {
 
     const risks = (await getSnapshot(companyId, 'burnout_risks', [])) || [];
     const employees = (await getSnapshot(companyId, 'employees', [])) || [];
-    const empMap = new Map(employees.map((e) => [e.id, e]));
+    const validEmps = employees.filter((e) => e.status !== 'Inactive' && e.status !== 'Terminated');
+    const empMap = new Map(validEmps.map((e) => [e.id, e]));
 
     const flagged = risks
-      .filter((r) => r.yearMonth === ym && r.riskScore > threshold)
+      .filter((r) => r.yearMonth === ym && r.riskScore > threshold && empMap.has(r.employeeId))
       .sort((a, b) => b.riskScore - a.riskScore)
       .map((r) => ({
-        id: r.id, employeeId: r.employeeId, employeeName: (empMap.get(r.employeeId) || {}).name || r.employeeId, department: (empMap.get(r.employeeId) || {}).department || '',
+        id: r.id, employeeId: r.employeeId, employeeName: (empMap.get(r.employeeId) || {}).name || r.employeeId, department: (empMap.get(r.employeeId) || {}).department || 'General',
         mondayFridaySickCount: r.mondayFridaySickCount || 0, averageLateMinutes: r.averageLateMinutes || 0, unauthorizedAbsenceCount: r.unauthorizedAbsenceCount || 0, loginDropFlag: !!r.loginDropFlag,
         riskScore: r.riskScore, alertSent: !!r.alertSent, createdAt: iso(r.createdAt),
       }));
@@ -768,11 +769,15 @@ export const performanceApiLocal = {
     const ym = (request.data && request.data.month) || lastMonthKey();
     const scores = (await getSnapshot(companyId, 'performance_scores', [])) || [];
     const employees = (await getSnapshot(companyId, 'employees', [])) || [];
-    const empMap = new Map(employees.map((e) => [e.id, e]));
-    const list = scores.filter((s) => s.yearMonth === ym).sort((a, b) => b.totalScore - a.totalScore).map((s) => ({
-      id: s.id, employeeId: s.employeeId, employeeName: (empMap.get(s.employeeId) || {}).name || s.employeeId, department: (empMap.get(s.employeeId) || {}).department || '',
-      onTimePoints: s.onTimePoints, latePenalty: s.latePenalty, absencePenalty: s.absencePenalty, overtimeDeduct: s.overtimeDeduct, leaveUtilizationPoints: s.leaveUtilizationPoints, gigPoints: s.gigPoints, totalScore: s.totalScore, grade: s.grade,
-    }));
+    const validEmps = employees.filter((e) => e.status !== 'Inactive' && e.status !== 'Terminated');
+    const empMap = new Map(validEmps.map((e) => [e.id, e]));
+    const list = scores
+      .filter((s) => s.yearMonth === ym && empMap.has(s.employeeId))
+      .sort((a, b) => b.totalScore - a.totalScore)
+      .map((s) => ({
+        id: s.id, employeeId: s.employeeId, employeeName: (empMap.get(s.employeeId) || {}).name || s.employeeId, department: (empMap.get(s.employeeId) || {}).department || 'General',
+        onTimePoints: s.onTimePoints, latePenalty: s.latePenalty, absencePenalty: s.absencePenalty, overtimeDeduct: s.overtimeDeduct, leaveUtilizationPoints: s.leaveUtilizationPoints, gigPoints: s.gigPoints, totalScore: s.totalScore, grade: s.grade,
+      }));
     return { month: ym, scores: list };
   }),
   getMyScore: onCall(async (request) => {
@@ -793,20 +798,29 @@ export const performanceApiLocal = {
     const ym = (request.data && request.data.month) || lastMonthKey();
     const scores = (await getSnapshot(companyId, 'performance_scores', [])) || [];
     const employees = (await getSnapshot(companyId, 'employees', [])) || [];
-    const empMap = new Map(employees.map((e) => [e.id, e]));
+    const validEmps = employees.filter((e) => e.status !== 'Inactive' && e.status !== 'Terminated');
+    const empMap = new Map(validEmps.map((e) => [e.id, e]));
     
-    const topList = scores.filter((s) => s.yearMonth === ym).sort((a, b) => b.totalScore - a.totalScore).slice(0, 3).map((s) => ({
-      employeeId: s.employeeId, 
-      employeeName: (empMap.get(s.employeeId) || {}).name || s.employeeId, 
-      totalScore: s.totalScore, 
-      grade: s.grade,
-    }));
+    const topList = scores
+      .filter((s) => s.yearMonth === ym && empMap.has(s.employeeId))
+      .sort((a, b) => b.totalScore - a.totalScore)
+      .slice(0, 3)
+      .map((s) => ({
+        employeeId: s.employeeId, 
+        employeeName: (empMap.get(s.employeeId) || {}).name || s.employeeId, 
+        totalScore: s.totalScore, 
+        grade: s.grade,
+      }));
     return { month: ym, topPerformers: topList };
   }),
   getTrends: onCall(async (request) => {
     const { companyId } = await requireAdmin(request);
     const employeeId = request.data && request.data.employeeId;
     if (!employeeId) throw new Error('invalid-argument: Missing employeeId.');
+    const employees = (await getSnapshot(companyId, 'employees', [])) || [];
+    if (!employees.some(e => e.id === employeeId)) {
+      return { scores: [] };
+    }
     const scores = (await getSnapshot(companyId, 'performance_scores', [])) || [];
     return { scores: scores.filter((s) => s.employeeId === employeeId).sort((a, b) => (a.yearMonth < b.yearMonth ? -1 : 1)).map((s) => ({ yearMonth: s.yearMonth, totalScore: s.totalScore, grade: s.grade })) };
   }),

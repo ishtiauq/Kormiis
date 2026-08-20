@@ -2,16 +2,25 @@ const CHANNEL = 'kormiis-notifications'
 const APP_ICON = '/Kormiis Monogram Logo 192.png'
 
 export const CATEGORY_META = {
-  announcement: { icon: 'campaign', color: '#f59e0b' },
-  event: { icon: 'event', color: '#8b5cf6' },
-  asset: { icon: 'laptop_mac', color: '#06b6d4' },
-  document: { icon: 'folder_open', color: '#3b82f6' },
-  task: { icon: 'check_circle', color: '#10b981' },
-  leave: { icon: 'calendar_month', color: '#ec4899' },
-  expense: { icon: 'wallet', color: '#f97316' },
-  payroll: { icon: 'account_balance', color: '#14b8a6' },
-  sync: { icon: 'cloud_sync', color: '#6366f1' },
-  system: { icon: 'info', color: '#94a3b8' },
+  announcement: { label: 'Announcement', icon: 'campaign', color: '#f59e0b' },
+  announcements: { label: 'Announcement', icon: 'campaign', color: '#f59e0b' },
+  event: { label: 'Event', icon: 'event', color: '#8b5cf6' },
+  calendar: { label: 'Event', icon: 'event', color: '#8b5cf6' },
+  asset: { label: 'Asset', icon: 'laptop_mac', color: '#06b6d4' },
+  assets: { label: 'Asset', icon: 'laptop_mac', color: '#06b6d4' },
+  document: { label: 'Document', icon: 'folder_open', color: '#3b82f6' },
+  documents: { label: 'Document', icon: 'folder_open', color: '#3b82f6' },
+  task: { label: 'Task', icon: 'check_circle', color: '#10b981' },
+  tasks: { label: 'Task', icon: 'check_circle', color: '#10b981' },
+  leave: { label: 'Leave', icon: 'calendar_month', color: '#ec4899' },
+  leaves: { label: 'Leave', icon: 'calendar_month', color: '#ec4899' },
+  expense: { label: 'Expense', icon: 'wallet', color: '#f97316' },
+  expenses: { label: 'Expense', icon: 'wallet', color: '#f97316' },
+  attendance: { label: 'Attendance', icon: 'schedule', color: '#6366f1' },
+  schedule: { label: 'Schedule', icon: 'schedule', color: '#6366f1' },
+  payroll: { label: 'Payroll', icon: 'account_balance', color: '#14b8a6' },
+  notice: { label: 'Notice', icon: 'info', color: '#64748b' },
+  system: { label: 'Notice', icon: 'info', color: '#64748b' },
 }
 
 let channel = null

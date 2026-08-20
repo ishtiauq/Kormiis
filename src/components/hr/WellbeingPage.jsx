@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
 import { Input } from "@/components/ui/input"
+import GlassMonthPicker from "@/components/ui/GlassMonthPicker.jsx"
 import { burnoutApi, lastMonthKey } from '../../services/hr.js'
 
 const scoreTone = (s) => {
@@ -65,10 +66,10 @@ export default function WellbeingPage({ adminUid, currentUser, addToast }) {
         <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground m-0">
           <Icon name="favorite" className="text-foreground" size={20}/> Well-being Alerts
         </h1>
-        <div className="flex items-center gap-2">
-          <Input type="month" value={month} onChange={(e) => setMonth(e.target.value)} className="w-auto" />
-          <Button variant="outline" size="sm" onClick={handleRunNow} disabled={running}>
-            <Icon name="refresh" className="mr-1.5" size={14}/> {running ? 'Running...' : 'Run analysis'}
+        <div className="flex items-center gap-2.5">
+          <GlassMonthPicker value={month} onChange={(e) => setMonth(e.target.value)} />
+          <Button variant="outline" size="sm" onClick={handleRunNow} disabled={running} className="rounded-2xl shadow-sm h-10 px-4">
+            <Icon name="refresh" className="mr-1.5" size={15}/> {running ? 'Running...' : 'Run analysis'}
           </Button>
         </div>
       </div>
@@ -79,7 +80,7 @@ export default function WellbeingPage({ adminUid, currentUser, addToast }) {
         <Card>
           <CardContent className="p-5">
             <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">High-risk employees</div>
-            <div className="text-fluid-display font-black tabular-nums text-destructive mt-1">{loading ? '—' : data?.highRiskCount ?? 0}</div>
+            <div className="text-fluid-display font-black tabular-nums text-destructive mt-1">{loading ? '...' : data?.highRiskCount ?? 0}</div>
           </CardContent>
         </Card>
         <Card>
@@ -128,7 +129,7 @@ export default function WellbeingPage({ adminUid, currentUser, addToast }) {
                     <TableRow key={r.id} className="cursor-pointer" onClick={() => setExpanded(expanded === r.id ? null : r.id)}>
                       <TableCell>
                         <div className="font-medium text-sm text-foreground">{r.employeeName}</div>
-                        <div className="text-xs text-muted-foreground">{r.department || '—'}</div>
+                        <div className="text-xs text-muted-foreground">{r.department || 'General'}</div>
                       </TableCell>
                       <TableCell className="text-center tabular-nums">{r.mondayFridaySickCount}</TableCell>
                       <TableCell className="text-center tabular-nums">{r.averageLateMinutes}</TableCell>
@@ -162,7 +163,7 @@ export default function WellbeingPage({ adminUid, currentUser, addToast }) {
       {expanded && (
         <Card>
           <CardHeader>
-            <CardTitle>Breakdown — {risks.find(r => r.id === expanded)?.employeeName}</CardTitle>
+            <CardTitle>Breakdown • {risks.find(r => r.id === expanded)?.employeeName}</CardTitle>
           </CardHeader>
           <CardContent>
             {(() => {

@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import GlassMonthPicker from "@/components/ui/GlassMonthPicker.jsx"
 import { performanceApi, currentMonthKey, lastMonthKey } from '../../services/hr.js'
 
 const gradeTone = {
@@ -127,21 +128,14 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
         <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground m-0">
           <Icon name="insights" className="text-foreground" size={20}/> Performance Tracker
         </h1>
-        <div className="flex items-center gap-2">
-          <div className="relative flex items-center h-9 min-w-[140px] rounded-xl border border-input bg-background text-sm shadow-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 transition-all cursor-pointer">
-            <Input 
-              type="month" 
-              value={month} 
-              onChange={(e) => setMonth(e.target.value)} 
-              className="border-none shadow-none focus-visible:ring-0 bg-transparent rounded-none pl-3 pr-9 h-full w-full cursor-pointer relative z-10 [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer font-semibold tabular-nums" 
-            />
-            <div className="absolute right-2.5 text-muted-foreground flex items-center z-0">
-              <Icon name="calendar_month" size={16}/>
-            </div>
-          </div>
+        <div className="flex items-center gap-2.5">
+          <GlassMonthPicker 
+            value={month} 
+            onChange={(e) => setMonth(e.target.value)} 
+          />
           {isAdmin && (
-            <Button size="sm" variant="default" onClick={handleCalculate} disabled={calculating} className="rounded-full shadow-sm">
-              <Icon name="calculate" className="mr-1.5" size={14}/> {calculating ? 'Calculating...' : 'Calculate month'}
+            <Button size="sm" variant="default" onClick={handleCalculate} disabled={calculating} className="rounded-2xl shadow-sm h-10 px-4">
+              <Icon name="calculate" className="mr-1.5" size={15}/> {calculating ? 'Calculating...' : 'Calculate month'}
             </Button>
           )}
         </div>
@@ -214,9 +208,9 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
           <div className="p-3 rounded-xl bg-muted/30 border border-border/60 flex flex-col justify-between">
             <div className="flex items-center justify-between gap-1">
               <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                <Icon name="beach_access" className="text-slate-500" size={15}/> Leave Utilization
+                <Icon name="beach_access" className="text-emerald-500" size={15}/> Leave Utilization
               </span>
-              <Badge variant="secondary" className="text-xs font-bold bg-slate-500/10 text-slate-600 border-slate-500/20">
+              <Badge variant="secondary" className="text-xs font-bold bg-emerald-500/10 text-emerald-600 border-emerald-500/20">
                 +{weights.leave_utilization || 10} pts
               </Badge>
             </div>
@@ -252,7 +246,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
                 className={`rounded-full px-4 justify-center ${selectedSortGrade !== 'A' ? 'text-muted-foreground hover:bg-muted hover:text-foreground' : ''}`}
                 onClick={() => isAdmin && setSelectedSortGrade(prev => prev === 'A' ? null : 'A')}
               >
-                Grade A (85 —œ 100 pts)
+                Grade A (85 - 100 pts)
               </Button>
               <Button
                 role="tab"
@@ -262,7 +256,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
                 className={`rounded-full px-4 justify-center ${selectedSortGrade !== 'B' ? 'text-muted-foreground hover:bg-muted hover:text-foreground' : ''}`}
                 onClick={() => isAdmin && setSelectedSortGrade(prev => prev === 'B' ? null : 'B')}
               >
-                Grade B (70 —œ 84 pts)
+                Grade B (70 - 84 pts)
               </Button>
               <Button
                 role="tab"
@@ -272,7 +266,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
                 className={`rounded-full px-4 justify-center ${selectedSortGrade !== 'C' ? 'text-muted-foreground hover:bg-muted hover:text-foreground' : ''}`}
                 onClick={() => isAdmin && setSelectedSortGrade(prev => prev === 'C' ? null : 'C')}
               >
-                Grade C (50 —œ 69 pts)
+                Grade C (50 - 69 pts)
               </Button>
               <Button
                 role="tab"
@@ -282,7 +276,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
                 className={`rounded-full px-4 justify-center ${selectedSortGrade !== 'D' ? 'text-muted-foreground hover:bg-muted hover:text-foreground' : ''}`}
                 onClick={() => isAdmin && setSelectedSortGrade(prev => prev === 'D' ? null : 'D')}
               >
-                Grade D (0 —œ 49 pts)
+                Grade D (0 - 49 pts)
               </Button>
             </div>
           </div>
@@ -312,14 +306,14 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
                     </div>
                   </div>
                   <Badge variant="outline" className={`text-base px-4 py-1 font-bold ${gradeTone[myScore.grade] || ''}`}>
-                    Grade {myScore.grade || '—'}
+                    Grade {myScore.grade || 'N/A'}
                   </Badge>
                 </CardContent>
               </Card>
 
               {/* Evaluation Breakdown */}
               <Card className="border border-border/80 shadow-sm rounded-2xl">
-                <CardHeader><CardTitle className="text-base font-bold">Score Breakdown — {month}</CardTitle></CardHeader>
+                <CardHeader><CardTitle className="text-base font-bold">Score Breakdown • {month}</CardTitle></CardHeader>
                 <CardContent className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-0">
                   <div className="p-4 rounded-xl bg-muted/40 border border-border flex flex-col justify-between">
                     <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">On-Time Attendance</span>
@@ -365,14 +359,12 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
                     ))}
                   </CardContent>
                 </Card>
-              )}
-
-              {/* Top Performers for Employee View */}
+              )}              {/* Top Performers for Employee View */}
               {topPerformers.length > 0 && (
                 <div className="grid grid-cols-1 gap-4 mt-2">
                   <Card className="border border-border/80 shadow-sm rounded-2xl">
                     <CardContent className="p-5">
-                      <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Top Performers — {month}</div>
+                      <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Top Performers • {month}</div>
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         {topPerformers.map((p, i) => (
                           <div key={p.employeeId || p.id} className="flex items-center justify-between p-3 rounded-xl bg-muted/30 border border-border/60">
@@ -419,7 +411,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
                     ))}
                   </div>
                 ) : (
-                  <div className="text-sm text-muted-foreground">—</div>
+                  <div className="text-sm text-muted-foreground">No top performers recorded yet</div>
                 )}
               </CardContent>
             </Card>
@@ -427,7 +419,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
 
           <Card className="border border-border/80 shadow-sm rounded-2xl">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-              <CardTitle className="text-base font-bold">Employee Performance Tracker — {month}</CardTitle>
+              <CardTitle className="text-base font-bold">Employee Performance Tracker • {month}</CardTitle>
               <Badge variant="secondary">{scores.length} employees evaluated</Badge>
             </CardHeader>
             <CardContent className="p-0">
@@ -460,7 +452,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
                         <TableRow key={s.employeeId || s.id}>
                           <TableCell>
                             <div className="font-medium text-sm text-foreground">{s.employeeName}</div>
-                            <div className="text-xs text-muted-foreground">{s.department || '—'}</div>
+                            <div className="text-xs text-muted-foreground">{s.department || 'General'}</div>
                           </TableCell>
                           <TableCell className="text-center font-bold tabular-nums text-base">{s.totalScore || s.score}</TableCell>
                           <TableCell className="text-center">

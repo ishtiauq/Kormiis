@@ -4,6 +4,7 @@ import { useModal } from '../services/useModal.js'
 import AdSlot from './AdSlot.jsx'
 import { formatDate } from '../services/date.js'
 import { provisionEmployeeAccount, revokeInvite } from '../services/auth.js'
+import { cascadeDeleteEmployees } from '../services/cascadeDeleteEmployee.js'
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -328,12 +329,17 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
 
   const handleDeleteEmployee = async (id, name) => {
     const emp = employees.find(e => e.id === id)
-    setEmployees(prev => prev.filter(emp => emp.id !== id))
+    setEmployees(prev => prev.filter(e => e.id !== id))
     addLog('Deleted employee record', `Removed ${name} (${id})`)
     if (addAuditLog) addAuditLog('DELETE', 'Employee', `Deleted employee profile for ${name} (${id})`)
     if (emp?.email) {
       await revokeInvite(emp.email)
       addLog('Access revoked', `Teammate invite for ${name} (${emp.email}) is no longer valid.`)
+    }
+    if (adminUid) {
+      cascadeDeleteEmployees(adminUid, [id], emp?.email ? [emp.email] : []).catch(err => {
+        console.error('Cascade employee cleanup error:', err)
+      })
     }
   }
 
@@ -362,10 +368,21 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
     const count = selectedIds.size
     if (count === 0) return
     setConfirmDelete(() => () => {
-      const deletedNames = employees.filter(emp => selectedIds.has(emp.id)).map(emp => emp.name).join(', ')
+      const selectedEmps = employees.filter(emp => selectedIds.has(emp.id))
+      const deletedIds = selectedEmps.map(emp => emp.id)
+      const deletedEmails = selectedEmps.map(emp => emp.email).filter(Boolean)
+      const deletedNames = selectedEmps.map(emp => emp.name).join(', ')
+
       setEmployees(prev => prev.filter(emp => !selectedIds.has(emp.id)))
       addLog('Bulk deleted employees', `Removed ${count} employees: ${deletedNames}`)
       if (addAuditLog) addAuditLog('DELETE_MANY', 'Employee', `Bulk deleted ${count} employee records`)
+
+      if (adminUid && deletedIds.length) {
+        cascadeDeleteEmployees(adminUid, deletedIds, deletedEmails).catch(err => {
+          console.error('Cascade bulk employee cleanup error:', err)
+        })
+      }
+
       clearSelection()
       setConfirmDelete(null)
     })

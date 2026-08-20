@@ -614,7 +614,6 @@ export default function useAppData({ user, addToast }) {
         }
         return true
       })
-      const balancesData = await fetchTableFromFirestore(adminUid, 'leave_balances') || {}
 
       // 3. Attendance Logs
       let logsData = await fetchTableFromFirestore(adminUid, 'attendance_logs') || {}
@@ -644,20 +643,80 @@ export default function useAppData({ user, addToast }) {
         .filter(exp => seenIds.has(exp.employeeId))
         .map(exp => ({ ...exp, amount: Math.max(0, exp.amount || 0) }))
 
+      // 6. Performance Scores & Burnout Risks
+      let scoresData = await fetchTableFromFirestore(adminUid, 'performance_scores') || []
+      const fixedScores = Array.isArray(scoresData) ? scoresData.filter(s => seenIds.has(s.employeeId)) : []
+
+      let risksData = await fetchTableFromFirestore(adminUid, 'burnout_risks') || []
+      const fixedRisks = Array.isArray(risksData) ? risksData.filter(r => seenIds.has(r.employeeId)) : []
+
+      // 7. Leave Balances & Skills
+      let balancesData = await fetchTableFromFirestore(adminUid, 'leave_balances') || {}
+      const fixedBalances = { ...balancesData }
+      Object.keys(fixedBalances).forEach(empId => {
+        if (!seenIds.has(empId)) delete fixedBalances[empId]
+      })
+
+      let skillsData = await fetchTableFromFirestore(adminUid, 'employee_skills') || {}
+      const fixedSkills = { ...skillsData }
+      Object.keys(fixedSkills).forEach(empId => {
+        if (!seenIds.has(empId)) delete fixedSkills[empId]
+      })
+
+      let contribsData = await fetchTableFromFirestore(adminUid, 'gig_contributions') || []
+      const fixedContribs = Array.isArray(contribsData) ? contribsData.filter(c => seenIds.has(c.employeeId)) : []
+
+      // 8. Tasks & Assets (Unassign deleted employees)
+      let tasksData = await fetchTableFromFirestore(adminUid, 'tasks') || []
+      const fixedTasks = Array.isArray(tasksData) ? tasksData.map(t => {
+        if (t.assigneeId && !seenIds.has(t.assigneeId)) {
+          return { ...t, assignee: 'Unassigned', assigneeId: null, assigneeEmail: null }
+        }
+        return t
+      }) : []
+
+      let assetsData = await fetchTableFromFirestore(adminUid, 'assets') || []
+      const fixedAssets = Array.isArray(assetsData) ? assetsData.map(a => {
+        if (a.assignedTo && !seenIds.has(a.assignedTo)) {
+          return { ...a, assignedTo: null, assignedToEmail: null, status: 'Available' }
+        }
+        return a
+      }) : []
+
+      // 9. Notifications
+      let notifsData = await fetchTableFromFirestore(adminUid, 'notifications') || []
+      const fixedNotifs = Array.isArray(notifsData) ? notifsData.filter(n => {
+        if (n.employeeId && !seenIds.has(n.employeeId)) return false
+        if (n.actorId && !seenIds.has(n.actorId)) return false
+        if (n.targetEmployeeId && !seenIds.has(n.targetEmployeeId)) return false
+        return true
+      }) : []
+
       // Save fixed data
       await Promise.all([
         writeToTable(adminUid, 'employees', uniqueEmps),
         writeToTable(adminUid, 'leave_requests', fixedLeaves),
         writeToTable(adminUid, 'attendance_logs', fixedLogs),
+        writeToTable(adminUid, 'leave_balances', fixedBalances),
         writeToTable(adminUid, 'payroll', fixedPayroll),
-        writeToTable(adminUid, 'expenses', fixedExpenses)
+        writeToTable(adminUid, 'expenses', fixedExpenses),
+        writeToTable(adminUid, 'performance_scores', fixedScores),
+        writeToTable(adminUid, 'burnout_risks', fixedRisks),
+        writeToTable(adminUid, 'employee_skills', fixedSkills),
+        writeToTable(adminUid, 'gig_contributions', fixedContribs),
+        writeToTable(adminUid, 'tasks', fixedTasks),
+        writeToTable(adminUid, 'assets', fixedAssets),
+        writeToTable(adminUid, 'notifications', fixedNotifs)
       ])
 
       // Update state
       setEmployeesRaw(uniqueEmps)
-      setAttendanceRaw(prev => ({ ...prev, leaves: fixedLeaves, dailyLogs: fixedLogs }))
+      setAttendanceRaw(prev => ({ ...prev, leaves: fixedLeaves, balances: fixedBalances, dailyLogs: fixedLogs }))
       setPayrollRaw(fixedPayroll)
       setExpensesRaw(fixedExpenses)
+      setTasksRaw(fixedTasks)
+      setAssetsRaw(fixedAssets)
+      setNotifications(fixedNotifs)
 
       // Re-validate
       const remainingIssues = validateDatabase(uniqueEmps, fixedLogs, fixedLeaves, fixedPayroll, fixedExpenses)
