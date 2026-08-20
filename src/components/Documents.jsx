@@ -64,12 +64,16 @@ export default function Documents({
   const [showCategoryModal, setShowCategoryModal] = useState(false)
   const [editingCategory, setEditingCategory] = useState(null)
   const [catFormName, setCatFormName] = useState('')
-
-  const { confirm, ConfirmDialog } = useConfirm()
-  const fileInputRef = useRef(null)
-  const categoryScrollRef = useRef(null)
+  const [formName, setFormName] = useState('')
+  const [formCategory, setFormCategory] = useState('hr-docs')
+  const [formDescription, setFormDescription] = useState('')
+  const [formFile, setFormFile] = useState(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
+
+  const fileInputRef = useRef(null)
+  const categoryScrollRef = useRef(null)
+  const { confirm, ConfirmDialog } = useConfirm()
 
   // Calculate Company Storage Usage
   const usedStorageBytes = useMemo(() => {
@@ -101,11 +105,6 @@ export default function Documents({
     }
   }, [categories])
 
-  const scrollCategory = (dir) => {
-    const el = categoryScrollRef.current
-    if (el) el.scrollBy({ left: dir * 200, behavior: 'smooth' })
-  }
-
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768)
@@ -114,12 +113,6 @@ export default function Documents({
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
   }, [])
-
-  // Upload Form States
-  const [formName, setFormName] = useState('')
-  const [formCategory, setFormCategory] = useState('hr-docs')
-  const [formDescription, setFormDescription] = useState('')
-  const [formFile, setFormFile] = useState(null)
 
   const resetForm = () => {
     setFormName('')

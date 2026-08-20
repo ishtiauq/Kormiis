@@ -694,7 +694,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
       )}
 
       {/* Directory Grid */}
-      <Card className="shadow-xs border-border bg-card overflow-hidden">
+      <div className="rounded-3xl border border-border/80 bg-muted/20 overflow-hidden shadow-xs">
         {/* Card header: search + actions */}
         <div className="p-4 border-b border-border flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center justify-between bg-muted/20">
           <div className="relative flex-1 w-full sm:w-auto sm:min-w-[280px] sm:max-w-md">
@@ -1101,7 +1101,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
             })}
           </div>
         )}
-      </Card>
+      </div>
 
       {/* Employee Detail Modal */}
       <Dialog open={!!viewingEmployee} onOpenChange={(open) => { if(!open) setViewingEmployee(null) }}>
