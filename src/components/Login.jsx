@@ -525,7 +525,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
   return (
     <div 
       ref={containerRef}
-      className="dark force-dark-mode aurora-mesh-dark min-h-dvh w-full text-foreground relative overflow-y-auto overflow-x-hidden font-sans scroll-smooth transition-colors duration-[1500ms] ease-[cubic-bezier(0.4,0,0.2,1)] touch-pan-y [overscroll-behavior-y:contain] [-webkit-overflow-scrolling:touch]"
+      className="dark force-dark-mode aurora-mesh-dark min-h-screen w-full text-foreground relative font-sans scroll-smooth transition-colors duration-[1500ms] ease-[cubic-bezier(0.4,0,0.2,1)] selection:bg-primary/30"
     >
       {/* Background Ambient Aurora & Glow Orbs (matching main app) */}
       <motion.div 
@@ -606,7 +606,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
       </div>
 
       {/* 2. Main Hero Showcase Section (Fluid responsive height across devices) */}
-      <main className="relative w-full min-h-[100dvh] lg:h-[100dvh] flex flex-col justify-between items-center pt-16 sm:pt-20 md:pt-24 lg:pt-28 xl:pt-32 pb-0 text-center overflow-hidden shrink-0 isolate">
+      <main className="relative w-full min-h-[92svh] sm:min-h-[94vh] lg:min-h-[100dvh] flex flex-col justify-between items-center pt-16 sm:pt-20 md:pt-24 lg:pt-28 xl:pt-32 pb-4 sm:pb-6 lg:pb-0 text-center shrink-0 isolate">
 
         {/* Fluid Container: Couples Headline & Image with Dynamic Gap */}
         <div className="w-full flex-1 min-h-0 flex flex-col justify-start lg:justify-between items-center gap-1 sm:gap-2 lg:gap-[clamp(0.25rem,1.5vh,1.25rem)] z-10">

@@ -211,7 +211,7 @@ html, body {
   width: 100%;
   margin: 0;
   padding: 0;
-  overscroll-behavior: none !important;
+  overflow-x: hidden;
 }
 
 .dark,
@@ -224,11 +224,11 @@ html.dark,
 #root,
 .app-shell,
 .dashboard-root,
-.dashboard-content,
-main {
+.dashboard-content {
   background: transparent !important;
   background-color: transparent !important;
-  overscroll-behavior: none !important;
+  min-height: 100%;
+  width: 100%;
 }
 
 /* ==============================================================
