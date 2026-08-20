@@ -47,13 +47,13 @@ export default function App() {
   const [selectedEmployeeId, setSelectedEmployeeId] = useState(null)
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsInitialLoading(false), 700)
+    const timer = setTimeout(() => setIsInitialLoading(false), 150)
     return () => clearTimeout(timer)
   }, [])
 
   useEffect(() => {
     localStorage.setItem('kormiis_current_view', currentView)
-    const timer = setTimeout(() => appData.setIsAppLoading(false), 500)
+    const timer = setTimeout(() => appData.setIsAppLoading(false), 150)
     return () => clearTimeout(timer)
   }, [currentView])
 

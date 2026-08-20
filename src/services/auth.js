@@ -2,17 +2,61 @@ import { auth, secondaryAuth, db, GoogleAuthProvider, signInWithPopup, signInWit
 
 /**
  * Parses an identifier (email or phone). If it looks like a phone number,
- * maps it to a dummy email to allow password-based login.
+ * normalizes it (including BD 01... numbers) and maps it to a dummy email
+ * to allow password-based login.
  */
 export const parseIdentifier = (identifier) => {
   const trimmed = (identifier || '').trim();
-  // Basic check: if it mostly contains numbers and +, consider it a phone
-  const isPhone = /^\+?[0-9\s-]+$/.test(trimmed) && trimmed.replace(/[^\d]/g, '').length >= 7;
+  const digitsOnly = trimmed.replace(/[^\d]/g, '');
+  
+  // Detect phone: contains mostly digits, or starts with +, or has 10-15 digits
+  const isPhone = (/^\+?[0-9\s-]+$/.test(trimmed) && digitsOnly.length >= 7) || (digitsOnly.length === 11 && digitsOnly.startsWith('01'));
   if (isPhone) {
-    const cleanPhone = trimmed.replace(/[^\d+]/g, '');
+    let cleanPhone = trimmed.replace(/[^\d+]/g, '');
+    if (!cleanPhone.startsWith('+')) {
+      if (cleanPhone.startsWith('01') && cleanPhone.length === 11) {
+        cleanPhone = '+88' + cleanPhone;
+      } else if (cleanPhone.startsWith('8801') && cleanPhone.length === 13) {
+        cleanPhone = '+' + cleanPhone;
+      } else {
+        cleanPhone = '+' + cleanPhone;
+      }
+    }
     return `${cleanPhone}@kormiis.local`;
   }
   return trimmed.toLowerCase();
+};
+
+/**
+ * Converts Firebase error codes into friendly user messages.
+ */
+export const formatAuthError = (err) => {
+  if (!err) return 'An unexpected error occurred. Please try again.';
+  const code = err.code || '';
+  const msg = err.message || '';
+
+  if (code === 'auth/invalid-credential' || code === 'auth/wrong-password' || code === 'auth/user-not-found') {
+    return 'Incorrect email/phone or password. Please verify and try again.';
+  }
+  if (code === 'auth/invalid-email') {
+    return 'Please enter a valid work email or phone number.';
+  }
+  if (code === 'auth/too-many-requests') {
+    return 'Too many attempts. Please wait a few seconds before trying again.';
+  }
+  if (code === 'auth/popup-closed-by-user') {
+    return 'Sign-in cancelled. Please select your Google account to proceed.';
+  }
+  if (code === 'auth/network-request-failed') {
+    return 'Network connection error. Please check your internet connection.';
+  }
+  if (code === 'auth/email-already-in-use') {
+    return 'An account with this email already exists. Try signing in.';
+  }
+  if (code === 'auth/weak-password') {
+    return 'Password is too weak. Please use at least 6 characters.';
+  }
+  return msg.replace(/^Firebase:\s*/, '').replace(/\s*\([a-z/-]+\)\.?$/, '');
 };
 
 /**
@@ -257,6 +301,10 @@ export const deleteEmployeeAccount = async (uid) => {
 export const loginWithGoogle = async () => {
   if (!auth) throw new Error('Firebase not configured');
   const provider = new GoogleAuthProvider();
+  // Ensure Google displays the account profile chooser so user can select their active profile
+  provider.setCustomParameters({
+    prompt: 'select_account'
+  });
   try {
     const result = await signInWithPopup(auth, provider);
     return { user: result.user, mode: 'popup' };

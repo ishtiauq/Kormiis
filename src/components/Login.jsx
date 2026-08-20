@@ -10,7 +10,8 @@ import {
   getInviteByEmail, 
   acceptInvite, 
   loginWithEmail, 
-  registerWithEmail 
+  registerWithEmail,
+  formatAuthError
 } from '../services/auth.js'
 import { auth } from '../services/firebase.js'
 import { Input } from '@/components/ui/input'
@@ -227,9 +228,15 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
   const [showAlreadyInSpace, setShowAlreadyInSpace] = useState(false)
   const [alreadyUser, setAlreadyUser] = useState(null)
   const [loadingMode, setLoadingMode] = useState(null)
-  const [emailOrPhone, setEmailOrPhone] = useState('')
+  const [emailOrPhone, setEmailOrPhone] = useState(() => localStorage.getItem('kormiis_last_identifier') || '')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+
+  const isPhoneInput = React.useMemo(() => {
+    const trimmed = (emailOrPhone || '').trim()
+    const digits = trimmed.replace(/[^\d]/g, '')
+    return (/^\+?[0-9\s-]+$/.test(trimmed) && digits.length >= 3) || digits.startsWith('01')
+  }, [emailOrPhone])
 
   const [showPassword, setShowPassword] = useState(false)
   const [legalModal, setLegalModal] = useState(null) // 'privacy' | 'terms' | null
@@ -438,17 +445,18 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
     try {
       let activeUser = pendingUser
       if (!activeUser) {
-        if (!emailOrPhone || !password) {
+        if (!emailOrPhone.trim() || !password) {
           setError('Please provide Email/Phone and Password.')
           setIsLoading(false)
           return
         }
         activeUser = await registerWithEmail(emailOrPhone, password)
       }
+      localStorage.setItem('kormiis_last_identifier', emailOrPhone.trim())
       const created = await createBusinessSpace(activeUser, { name: spaceName })
       completeAdminLogin(activeUser, created.companyName)
     } catch (err) {
-      setError('Could not create your Business Space: ' + err.message)
+      setError(formatAuthError(err))
       setIsLoading(false)
       setLoadingMode(null)
     }
@@ -456,7 +464,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
 
   const handleEmailSignIn = async (e) => {
     e.preventDefault()
-    if (!emailOrPhone || !password) {
+    if (!emailOrPhone.trim() || !password) {
       setError('Please provide Email/Phone and Password.')
       return
     }
@@ -464,10 +472,11 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
     setLoadingMode('join')
     setError('')
     try {
+      localStorage.setItem('kormiis_last_identifier', emailOrPhone.trim())
       const user = await loginWithEmail(emailOrPhone, password)
       await finishGoogleLogin(user, 'join')
     } catch (err) {
-      setError('Login failed: ' + err.message)
+      setError(formatAuthError(err))
       setIsLoading(false)
       setLoadingMode(null)
     }
@@ -490,7 +499,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
       }
       await finishGoogleLogin(user, mode)
     } catch (err) {
-      setError('Google Login failed: ' + err.message)
+      setError(formatAuthError(err))
       setIsLoading(false)
       setLoadingMode(null)
     }
@@ -940,14 +949,20 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
               <div className="flex flex-col gap-3">
                 <form onSubmit={handleEmailSignIn} className="flex flex-col gap-2.5 w-full">
                   <div className="relative flex items-center">
-                    <Icon name="mail" size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/60 z-10 pointer-events-none" />
+                    <Icon name={isPhoneInput ? "call" : "mail"} size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/60 z-10 pointer-events-none transition-all" />
                     <Input
                       type="text"
-                      placeholder="Work Email or Phone"
+                      placeholder={isPhoneInput ? "Phone number (e.g. 017...)" : "Work Email or Phone"}
                       value={emailOrPhone}
                       onChange={(e) => setEmailOrPhone(e.target.value)}
-                      className="h-11 rounded-xl text-xs sm:text-sm !pl-10.5 bg-black/40 border-white/20 text-white placeholder:text-white/45 focus:border-primary focus:bg-black/60 transition-colors backdrop-blur-sm shadow-inner"
+                      className="h-11 rounded-xl text-xs sm:text-sm !pl-10.5 !pr-16 bg-black/40 border-white/20 text-white placeholder:text-white/45 focus:border-primary focus:bg-black/60 transition-colors backdrop-blur-sm shadow-inner"
+                      autoFocus
                     />
+                    {emailOrPhone.trim() && (
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] uppercase font-semibold text-white/50 bg-white/10 px-2 py-0.5 rounded-full pointer-events-none tracking-wider">
+                        {isPhoneInput ? 'Phone' : 'Email'}
+                      </span>
+                    )}
                   </div>
                   <div className="relative flex items-center">
                     <Icon name="lock" size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/60 z-10 pointer-events-none" />
@@ -994,23 +1009,30 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                   onClick={() => handleFirebaseGoogleLogin('join')}
                   disabled={isLoading}
                   className="w-full flex items-center justify-center gap-2.5 py-2.5 bg-white/[0.08] hover:bg-white/[0.14] border border-white/12 rounded-full text-xs sm:text-sm font-bold text-white active:scale-[0.99] transition disabled:opacity-50 shadow-sm cursor-pointer backdrop-blur-md"
+                  title="Choose your Google Account"
                 >
                   <svg width="18" height="18" viewBox="0 0 48 48" className="shrink-0"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59a14.5 14.5 0 0 1 0-9.18l-7.98-6.19a24.01 24.01 0 0 0 0 21.56l7.98-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-                  <span>Continue with Google</span>
+                  <span>Choose Google Account</span>
                 </button>
               </div>
             ) : (
               <div className="flex flex-col gap-3">
                 <form onSubmit={(e) => { e.preventDefault(); setLoginMode('create'); setPendingUser(null); handleCreateBusinessSpace(e) }} className="flex flex-col gap-2.5 w-full">
                   <div className="relative flex items-center">
-                    <Icon name="mail" size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/60 z-10 pointer-events-none" />
+                    <Icon name={isPhoneInput ? "call" : "mail"} size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/60 z-10 pointer-events-none transition-all" />
                     <Input
                       type="text"
-                      placeholder="Work Email"
+                      placeholder={isPhoneInput ? "Mobile number" : "Work Email or Phone"}
                       value={emailOrPhone}
                       onChange={(e) => setEmailOrPhone(e.target.value)}
-                      className="h-11 rounded-xl text-xs sm:text-sm !pl-10.5 bg-black/40 border-white/20 text-white placeholder:text-white/45 focus:border-primary focus:bg-black/60 transition-colors backdrop-blur-sm shadow-inner"
+                      className="h-11 rounded-xl text-xs sm:text-sm !pl-10.5 !pr-16 bg-black/40 border-white/20 text-white placeholder:text-white/45 focus:border-primary focus:bg-black/60 transition-colors backdrop-blur-sm shadow-inner"
+                      autoFocus
                     />
+                    {emailOrPhone.trim() && (
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] uppercase font-semibold text-white/50 bg-white/10 px-2 py-0.5 rounded-full pointer-events-none tracking-wider">
+                        {isPhoneInput ? 'Phone' : 'Email'}
+                      </span>
+                    )}
                   </div>
                   <div className="relative flex items-center">
                     <Icon name="lock" size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/60 z-10 pointer-events-none" />
@@ -1067,9 +1089,10 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                   onClick={() => handleFirebaseGoogleLogin('create')}
                   disabled={isLoading}
                   className="w-full flex items-center justify-center gap-2.5 py-2.5 bg-white/[0.08] hover:bg-white/[0.14] border border-white/12 rounded-full text-xs sm:text-sm font-bold text-white active:scale-[0.99] transition disabled:opacity-50 shadow-sm cursor-pointer backdrop-blur-md"
+                  title="Choose your Google Account"
                 >
                   <svg width="18" height="18" viewBox="0 0 48 48" className="shrink-0"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59a14.5 14.5 0 0 1 0-9.18l-7.98-6.19a24.01 24.01 0 0 0 0 21.56l7.98-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-                  <span>Sign up with Google</span>
+                  <span>Choose Google Account</span>
                 </button>
               </div>
             )}
