@@ -115,3 +115,13 @@ Global fluid typography uses `clamp()` in `@layer base`:
   - Modals & Sheets: `600ms` (`--duration-modal`).
 - **Reduced Motion**:
   Under `@media (prefers-reduced-motion: reduce)`, spring physics are replaced by simple `150ms` linear opacity transitions with no scaling or bounce.
+
+---
+
+## 8. Device Breakpoint Standards (iPad Pro & Tablet Taxonomy)
+
+- **Mobile Handsets**: `< 640px` (`< sm`).
+- **Tablets & iPads (including iPad Pro 1024x1366)**: `640px` to `1024px` (`sm:` to `lg:` / `max-w-[1024px]`).
+  - **iPad Pro Requirement**: The iPad Pro screen size (`1024px × 1366px`) **MUST ALWAYS** be treated as a **Tablet screen**, NOT as a desktop.
+  - Tablet screens use the top unified navigation bar with viewport bottom-edge image anchoring (`h-[100dvh] pb-0`), single vertical feature marquee stream (`xl:hidden` / `< 1025px`), and tablet-proportional aspect scaling.
+- **Desktop & Widescreen Laptops**: `> 1024px` (`xl:` / `≥ 1025px`). Dual horizontal feature marquee streams and desktop widescreen layout.

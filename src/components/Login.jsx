@@ -527,41 +527,30 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
       ref={containerRef}
       className="dark force-dark-mode aurora-mesh-dark min-h-screen w-full text-foreground relative font-sans scroll-smooth transition-colors duration-[1500ms] ease-[cubic-bezier(0.4,0,0.2,1)] selection:bg-primary/30"
     >
-      {/* Background Ambient Aurora & Glow Orbs (matching main app) */}
+
+      {/* 1A. Mobile Top-Left Brand Logo (Compact on mobile: sm:hidden) */}
       <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1.2, ease: 'easeOut' }}
-        className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none"
+        initial={{ opacity: 0, y: -20, filter: 'blur(8px)' }}
+        animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+        transition={{ duration: 0.75, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+        className="sm:hidden absolute top-4 left-4 z-30 pointer-events-auto"
       >
-        {/* Top-Left Primary Orange Glow */}
-        <div 
-          className="absolute -top-[10%] -left-[10%] w-[65vw] h-[65vw] max-w-[800px] max-h-[800px] rounded-full bg-gradient-to-br from-primary/35 via-[#fe3501]/25 to-transparent blur-[120px] animate-pulse pointer-events-none" 
-          style={{ animationDuration: '6s' }} 
-        />
-        {/* Top-Right Electric Blue Glow */}
-        <div 
-          className="absolute -top-[8%] -right-[10%] w-[60vw] h-[60vw] max-w-[750px] max-h-[750px] rounded-full bg-gradient-to-bl from-blue-500/30 via-indigo-600/20 to-transparent blur-[130px] animate-pulse pointer-events-none" 
-          style={{ animationDuration: '8s' }} 
-        />
-        {/* Center Cosmic Purple Glow */}
-        <div 
-          className="absolute top-[30%] left-[15%] w-[55vw] h-[55vw] max-w-[700px] max-h-[700px] rounded-full bg-gradient-to-tr from-purple-600/28 via-fuchsia-600/18 to-transparent blur-[140px] animate-pulse pointer-events-none" 
-          style={{ animationDuration: '10s' }} 
-        />
-        {/* Bottom Emerald / Teal Glow */}
-        <div 
-          className="absolute -bottom-[10%] -right-[5%] w-[55vw] h-[55vw] max-w-[650px] max-h-[650px] rounded-full bg-gradient-to-tl from-emerald-500/25 via-teal-500/18 to-transparent blur-[120px] pointer-events-none" 
-        />
+        <a href="#" className="flex items-center hover:opacity-80 active:scale-95 transition-all">
+          <img 
+            src={kormiisWhiteLogo} 
+            alt="Kormiis Logo" 
+            className="h-5.5 w-auto object-contain drop-shadow-md" 
+          />
+        </a>
       </motion.div>
 
-      {/* 1. Floating Apple Liquid Glass Top Navigation Bar */}
-      <div className="fixed top-0 left-0 right-0 z-50 w-full pt-3 sm:pt-4 md:pt-5 px-3 sm:px-6 pointer-events-none transition-all duration-300">
+      {/* 1B. Desktop & Tablet Floating Apple Liquid Glass Top Navigation Bar (sm+ screens) */}
+      <div className="hidden sm:block fixed top-0 left-0 right-0 z-50 w-full pt-4 md:pt-5 px-4 sm:px-6 pointer-events-none transition-all duration-300">
         <motion.header 
           initial={{ opacity: 0, y: -24, filter: 'blur(8px)' }}
           animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
           transition={{ duration: 0.85, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-          className="pointer-events-auto max-w-6xl mx-auto h-13 sm:h-15 md:h-16 px-3.5 sm:px-5 md:px-6 flex items-center justify-between landing-glass-header text-white transition-all duration-300"
+          className="pointer-events-auto max-w-6xl mx-auto h-14 sm:h-15 md:h-16 px-4 sm:px-6 flex items-center justify-between landing-glass-header text-white transition-all duration-300"
         >
           {/* Brand Logo */}
           <a href="#" className="flex items-center gap-2 shrink-0 hover:opacity-85 active:scale-95 transition-all">
@@ -573,22 +562,22 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
           </a>
 
           {/* Right Action Group */}
-          <div className="flex items-center gap-1.5 sm:gap-2.5">
+          <div className="flex items-center gap-2 sm:gap-3">
             {/* Install App Button */}
             <button
               onClick={handleInstallClick}
-              className="apple-glass-btn flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-white/90 hover:text-white transition-all cursor-pointer shadow-sm active:scale-95"
+              className="apple-glass-btn flex items-center gap-1.5 px-3.5 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-white/90 hover:text-white transition-all cursor-pointer shadow-sm active:scale-95"
               title="Install App as PWA"
             >
               <Icon name="download" size={15} />
-              <span className="hidden sm:inline">Install App</span>
-              <span className="sm:hidden">Install</span>
+              <span className="hidden md:inline">Install App</span>
+              <span className="md:hidden">Install</span>
             </button>
 
             {/* Sign in Button */}
             <button
               onClick={() => openAuthModal('in')}
-              className="apple-glass-btn hidden sm:flex items-center px-3.5 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-bold text-white/90 hover:text-white transition-all cursor-pointer active:scale-95"
+              className="apple-glass-btn flex items-center px-3.5 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-bold text-white/90 hover:text-white transition-all cursor-pointer active:scale-95"
             >
               Sign in
             </button>
@@ -596,7 +585,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
             {/* Start for Free CTA */}
             <button
               onClick={() => openAuthModal('up')}
-              className="liquid-glass-btn bg-primary text-primary-foreground px-3.5 sm:px-5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold shadow-lg shadow-primary/30 hover:opacity-95 active:scale-95 transition-all flex items-center gap-1 sm:gap-1.5 cursor-pointer"
+              className="liquid-glass-btn bg-primary text-primary-foreground px-4 sm:px-5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold shadow-lg shadow-primary/30 hover:opacity-95 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
             >
               <span>Start for free</span>
               <Icon name="arrow_forward" size={15} />
@@ -605,8 +594,45 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
         </motion.header>
       </div>
 
+      {/* 1C. Mobile Floating Apple Liquid Glass Bottom Bar (visible on < sm screens) */}
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.9, y: 24, filter: 'blur(8px)' }}
+        animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
+        transition={{ duration: 0.85, delay: 0.25, type: 'spring', damping: 20, stiffness: 260 }}
+        className="sm:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-40 pointer-events-auto w-max max-w-[calc(100vw-1.5rem)]"
+      >
+        <nav className="h-12 px-2.5 flex items-center gap-1.5 rounded-full landing-glass-header text-white transition-all duration-300">
+          {/* Install App Button */}
+          <button
+            onClick={handleInstallClick}
+            className="apple-glass-btn flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white/90 hover:text-white transition-all cursor-pointer shadow-sm active:scale-95"
+            title="Install App as PWA"
+          >
+            <Icon name="download" size={14} />
+            <span>Install</span>
+          </button>
+
+          {/* Sign In Button */}
+          <button
+            onClick={() => openAuthModal('in')}
+            className="apple-glass-btn flex items-center px-3.5 py-1.5 text-xs font-bold text-white/90 hover:text-white transition-all cursor-pointer active:scale-95"
+          >
+            Sign in
+          </button>
+
+          {/* Start for Free CTA */}
+          <button
+            onClick={() => openAuthModal('up')}
+            className="liquid-glass-btn bg-primary text-primary-foreground px-4 py-1.5 rounded-full text-xs font-bold shadow-lg shadow-primary/30 hover:opacity-95 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
+          >
+            <span>Start for free</span>
+            <Icon name="arrow_forward" size={14} />
+          </button>
+        </nav>
+      </motion.div>
+
       {/* 2. Main Hero Showcase Section (Fluid responsive height across devices) */}
-      <main className="relative w-full min-h-[92svh] sm:min-h-[94vh] lg:min-h-[100dvh] flex flex-col justify-between items-center pt-16 sm:pt-20 md:pt-24 lg:pt-28 xl:pt-32 pb-4 sm:pb-6 lg:pb-0 text-center shrink-0 isolate">
+      <main className="relative w-full min-h-[100dvh] sm:h-[100dvh] lg:h-[100dvh] flex flex-col justify-between items-center pt-12 sm:pt-20 md:pt-24 lg:pt-28 xl:pt-32 pb-16 sm:pb-0 lg:pb-0 text-center shrink-0 isolate">
 
         {/* Fluid Container: Couples Headline & Image with Dynamic Gap */}
         <div className="w-full flex-1 min-h-0 flex flex-col justify-start lg:justify-between items-center gap-1 sm:gap-2 lg:gap-[clamp(0.25rem,1.5vh,1.25rem)] z-10">
@@ -647,21 +673,21 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
           </motion.div>
 
           {/* Hero Artwork Image Container with Infinite Background Feature Streams & Character Foreground */}
-          <div className="relative w-full flex-1 min-h-0 flex items-end justify-center z-0 pb-16 sm:pb-18 md:pb-20 lg:pb-0 translate-y-0">
+          <div className="relative w-full flex-1 min-h-0 flex items-end justify-center z-0 pb-0 translate-y-0">
             
-            {/* 1. MOBILE & TABLET/IPAD ONLY: Single Vertical Infinite Marquee Stream behind character (< lg) */}
+            {/* 1. MOBILE & TABLET/IPAD ONLY: Single Vertical Infinite Marquee Stream behind character (< xl / up to iPad Pro 1024x1366) */}
             {/* Anchored at top-0 of this flex-1 section = EXACTLY flush with the bottom of the Subheading across all devices */}
             <motion.div 
               initial={{ opacity: 0, scale: 0.92, filter: 'blur(8px)' }}
               animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
               transition={{ duration: 1.0, delay: 0.45, ease: [0.16, 1, 0.3, 1] }}
-              className="lg:hidden absolute top-0 sm:top-0.5 bottom-[22%] sm:bottom-[25%] md:bottom-[28%] left-1/2 -translate-x-1/2 w-max max-w-[94vw] flex justify-center z-0 pointer-events-none marquee-mask-vertical select-none overflow-hidden"
+              className="xl:hidden absolute top-0 sm:top-0.5 bottom-[22%] sm:bottom-[16%] md:bottom-[14%] lg:bottom-[12%] left-1/2 -translate-x-1/2 w-max max-w-[94vw] flex justify-center z-0 pointer-events-none marquee-mask-vertical select-none overflow-hidden"
             >
               <div className="animate-marquee-vertical flex flex-col items-center gap-2 sm:gap-2.5 py-1">
                 {[...ALL_HERO_FEATURES, ...ALL_HERO_FEATURES].map((item, idx) => (
                   <div 
                     key={`vert-${idx}`}
-                    className={`relative w-[265px] xs:w-[285px] sm:w-[315px] flex items-center justify-between gap-2 px-3 sm:px-4 py-1.5 sm:py-2.5 rounded-full bg-gradient-to-r ${item.pillBg} shadow-2xl backdrop-blur-2xl shrink-0 overflow-hidden border border-white/10`}
+                    className={`relative w-[265px] xs:w-[285px] sm:w-[315px] md:w-[335px] flex items-center justify-between gap-2 px-3 sm:px-4 py-1.5 sm:py-2.5 rounded-full bg-gradient-to-r ${item.pillBg} shadow-2xl backdrop-blur-2xl shrink-0 overflow-hidden border border-white/10`}
                   >
                     {/* Top Edge Specular Rim Light */}
                     <div className={`absolute top-0 inset-x-2 h-[1px] sm:h-[1.5px] bg-gradient-to-r ${item.rimLight} pointer-events-none rounded-full blur-[0.2px] z-20`} />
@@ -694,14 +720,14 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
             </motion.div>
 
             {/* Aspect-Ratio Synchronized Character & Desktop Marquee Wrapper */}
-            <div className="relative h-full aspect-[2502/1682] max-h-[46vh] sm:max-h-[50vh] md:max-h-[53vh] lg:max-h-[44vh] xl:max-h-[48vh] max-w-[90vw] sm:max-w-[82vw] md:max-w-[76vw] lg:max-w-full flex items-end justify-center z-10">
+            <div className="relative h-full aspect-[2502/1682] max-h-[46vh] sm:max-h-[52vh] md:max-h-[56vh] lg:max-h-[56vh] xl:max-h-[44vh] 2xl:max-h-[48vh] max-w-[90vw] sm:max-w-[86vw] md:max-w-[80vw] lg:max-w-[78vw] xl:max-w-full flex items-end justify-center z-10">
 
-              {/* 2. DESKTOP & LAPTOP ONLY: Dual Horizontal Infinite Marquee Streams (lg:flex) */}
+              {/* 2. DESKTOP & LAPTOP ONLY: Dual Horizontal Infinite Marquee Streams (xl:flex) */}
               <motion.div 
                 initial={{ opacity: 0, scale: 0.94, filter: 'blur(8px)' }}
                 animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
                 transition={{ duration: 1.0, delay: 0.45, ease: [0.16, 1, 0.3, 1] }}
-                className="hidden lg:flex absolute top-[-10%] xl:top-[-8%] left-1/2 -translate-x-1/2 w-screen flex-col gap-2.5 xl:gap-3.5 z-0 pointer-events-none marquee-mask select-none"
+                className="hidden xl:flex absolute top-[-10%] 2xl:top-[-8%] left-1/2 -translate-x-1/2 w-screen flex-col gap-2.5 xl:gap-3.5 z-0 pointer-events-none marquee-mask select-none"
               >
                 
                 {/* Stream Row 1: Smooth Infinite Loop Scrolling Left */}
