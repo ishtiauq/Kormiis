@@ -300,7 +300,7 @@ export default function App() {
         <div className="w-10 h-1 rounded-full bg-foreground/20 mx-auto mt-2 mb-0.5 shrink-0" />
 
         <div className="px-5 py-2 border-b border-border/80 dark:border-white/10 shrink-0 flex items-center justify-between">
-          <h2 className="text-left text-fluid-sm font-bold text-foreground m-0 leading-none">Navigation Menu</h2>
+          <h2 className="text-left text-fluid-sm font-bold text-foreground m-0 leading-none">Menu</h2>
           <button 
             className="rounded-full size-7 apple-glass-btn flex items-center justify-center text-muted-foreground hover:text-foreground cursor-pointer" 
             onClick={() => setShowMobileMenu(false)}
@@ -335,7 +335,7 @@ export default function App() {
           <div className="h-px bg-border/80 dark:bg-white/10 my-2.5 shrink-0" />
           
           <button 
-            className="liquid-glass-btn w-full flex items-center justify-center gap-2 h-9.5 rounded-xl bg-destructive/15 hover:bg-destructive/25 text-destructive dark:text-red-400 border border-destructive/25 font-bold text-xs cursor-pointer shadow-sm active:scale-[0.97] transition-all"
+            className="w-full flex items-center justify-center gap-2 h-9.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs cursor-pointer shadow-sm active:scale-[0.97] transition-all"
             onClick={() => { handleLogout(); setShowMobileMenu(false) }}
           >
             <Icon name="logout" size={16}/>

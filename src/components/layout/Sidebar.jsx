@@ -204,7 +204,7 @@ export default function Sidebar({
             setIsOpen(false);
             if (handleLogout) handleLogout();
           }}
-          className="liquid-glass-btn w-full flex items-center justify-center gap-2 px-2.5 rounded-2xl bg-destructive/10 hover:bg-destructive/20 text-destructive dark:text-red-400 border border-destructive/20 dark:border-destructive/30 font-semibold text-xs active:scale-[0.97] transition-all cursor-pointer h-9.5 box-border shadow-sm"
+          className="w-full flex items-center justify-center gap-2 px-2.5 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-semibold text-xs active:scale-[0.97] transition-all cursor-pointer h-9.5 box-border shadow-sm"
         >
           <Icon name="logout" size={16}/>
           <span className="font-semibold text-xs">Logout</span>
