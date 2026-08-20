@@ -49,11 +49,8 @@ export default function LandingHero({ onOpenAuth, headingOpacity, headingY, scro
   return (
     <section className="relative min-h-screen w-full flex flex-col items-center justify-center pt-28 pb-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
       
-      {/* Background Architectural Blueprint Grid & Radial Ambience */}
-      <div className="absolute inset-0 pointer-events-none -z-10 flex items-center justify-center">
-        <div className="w-[800px] h-[800px] rounded-full bg-primary/5 blur-[140px] -top-40" />
-        <div className="w-[600px] h-[600px] rounded-full bg-foreground/[0.02] blur-[100px] bottom-0" />
-      </div>
+      {/* Background Architectural Blueprint Grid */}
+      <div className="absolute inset-0 pointer-events-none -z-10" />
 
       <div className="max-w-6xl mx-auto w-full flex flex-col items-center text-center gap-8 relative z-10">
         

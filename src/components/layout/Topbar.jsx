@@ -69,9 +69,9 @@ export default function Topbar({
 
   return (
     <>
-{/* Mobile: Liquid Glass Top Bar */}
+      {/* Mobile: Liquid Glass Top Bar */}
       {isMobile ? (
-        <header aria-label="Top bar" className="topbar topbar-bar pointer-events-auto w-full h-14 px-4 flex items-center justify-between glass-apple text-foreground transition-all duration-300">
+        <header aria-label="Top bar" className="topbar topbar-mobile-bar pointer-events-auto w-full h-14 px-4 flex items-center justify-between glass-apple text-foreground transition-all duration-300 rounded-none border-x-0 border-t-0 border-b border-border/80 dark:border-white/12">
           <div className="flex items-center shrink-0">
             <a
               href="#"

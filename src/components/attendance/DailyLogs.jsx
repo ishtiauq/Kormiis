@@ -104,7 +104,7 @@ export default function DailyLogs({ employees, attendance, setAttendance, addToa
                   </Avatar>
                   <div className="flex flex-col">
                     <span className="text-base font-bold text-foreground">{emp.name}</span>
-                    <span className="text-xs font-semibold text-muted-foreground mt-0.5 tracking-wider uppercase">{emp.role}</span>
+                    <span className="text-xs font-semibold text-muted-foreground mt-0.5 tracking-wider uppercase">{emp.designation && emp.designation.toLowerCase() !== 'teammate' ? emp.designation : (emp.role && emp.role.toLowerCase() !== 'teammate' ? emp.role : '')}</span>
                   </div>
                 </div>
 

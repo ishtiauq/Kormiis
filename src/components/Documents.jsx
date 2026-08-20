@@ -96,6 +96,11 @@ export default function Documents({
     }
   }
 
+  const scrollCategory = (dir) => {
+    const el = categoryScrollRef.current
+    if (el) el.scrollBy({ left: dir * 200, behavior: 'smooth' })
+  }
+
   useEffect(() => {
     checkCategoryScroll()
     const el = categoryScrollRef.current
@@ -326,11 +331,8 @@ export default function Documents({
         <div>
           <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
             <Icon name="folder_open" className="text-primary" size={24}/>
-            Company Documents
+            Documents
           </h1>
-          <p className="text-fluid-xs text-muted-foreground mt-1">
-            Real-time centralized cloud document hub with instant collaboration and live backup.
-          </p>
         </div>
 
         <div className="flex items-center gap-2.5">
@@ -356,7 +358,7 @@ export default function Documents({
             
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2.5 flex-wrap">
-                <span className="font-bold text-fluid text-foreground">Backend Cloud Storage</span>
+                <span className="font-bold text-fluid text-foreground">Cloud Storage</span>
                 <Badge 
                   variant="outline" 
                   className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full ${
@@ -422,7 +424,7 @@ export default function Documents({
       <div className="flex flex-col gap-3">
         <div className="flex gap-2">
           <div className="relative flex-1 flex items-center">
-            <Icon name="search" className="absolute left-3.5 text-muted-foreground" size={16}/>
+            <Icon name="search" className="absolute left-3.5 text-muted-foreground z-10 pointer-events-none" size={18}/>
             <Input
               type="text"
               value={search}

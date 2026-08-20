@@ -123,13 +123,13 @@ html.dark,
   --sidebar-border: var(--border);
 
   /* Apple Ultra-Liquid Glass Tokens (Dark Mode) */
-  --glass-bg: linear-gradient(135deg, rgba(30, 30, 42, 0.45) 0%, rgba(14, 14, 20, 0.32) 100%);
-  --glass-border: rgba(255, 255, 255, 0.14);
+  --glass-bg: linear-gradient(135deg, rgba(28, 28, 40, 0.42) 0%, rgba(14, 14, 22, 0.30) 100%);
+  --glass-border: rgba(255, 255, 255, 0.15);
   --glass-shadow: 
-    0 16px 32px -14px rgba(0, 0, 0, 0.35),
-    0 1px 4px 0 rgba(0, 0, 0, 0.2),
-    inset 0 1px 1px 0 rgba(255, 255, 255, 0.12),
-    inset 1px 0 1px 0 rgba(255, 255, 255, 0.06);
+    0 24px 50px -12px rgba(0, 0, 0, 0.75),
+    0 3px 8px 0 rgba(0, 0, 0, 0.45),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.15),
+    inset 1px 0 1px 0 rgba(255, 255, 255, 0.08);
   
   --glass-btn-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.03) 100%);
   --glass-btn-border: rgba(255, 255, 255, 0.16);
@@ -265,10 +265,7 @@ html.dark .glass-kormiis,
   border: 1px solid rgba(255, 255, 255, 0.18) !important;
   box-shadow: 
     0 24px 50px -12px rgba(0, 0, 0, 0.65),
-    0 6px 16px -2px rgba(0, 0, 0, 0.40),
-    inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.35),
-    inset 1px 0 1px 0 rgba(255, 255, 255, 0.15),
-    inset 0 -1px 1px 0 rgba(0, 0, 0, 0.35) !important;
+    0 6px 16px -2px rgba(0, 0, 0, 0.40) !important;
   border-radius: 9999px !important;
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
@@ -283,10 +280,7 @@ html.dark .glass-kormiis,
   border: 1px solid rgba(255, 255, 255, 0.18) !important;
   box-shadow: 
     0 24px 50px -12px rgba(0, 0, 0, 0.75),
-    0 6px 18px -4px rgba(0, 0, 0, 0.50),
-    inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.35),
-    inset 1px 0 1px 0 rgba(255, 255, 255, 0.15),
-    inset 0 -1px 1px 0 rgba(0, 0, 0, 0.40) !important;
+    0 6px 18px -4px rgba(0, 0, 0, 0.50) !important;
   border-radius: 9999px !important;
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
@@ -299,9 +293,7 @@ html.dark .glass-kormiis,
   -webkit-backdrop-filter: saturate(190%) blur(32px) brightness(105%) !important;
   backdrop-filter: saturate(190%) blur(32px) !important;
   border-top: 1px solid rgba(255, 255, 255, 0.16) !important;
-  box-shadow: 
-    0 -12px 32px -8px rgba(0, 0, 0, 0.45),
-    inset 0 1px 1px 0 rgba(255, 255, 255, 0.28) !important;
+  box-shadow: 0 -12px 32px -8px rgba(0, 0, 0, 0.45) !important;
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
   will-change: backdrop-filter, transform;
@@ -636,7 +628,7 @@ html.dark .glass-floating-sidebar,
 @layer components {
   /* Apple-style True Liquid Glass */
   .glass-apple {
-    @apply bg-white/10 dark:bg-white/5 backdrop-blur-2xl backdrop-saturate-[1.8] shadow-[inset_0_1px_1px_rgba(255,255,255,0.35),0_4px_12px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.15),0_3px_10px_rgba(0,0,0,0.12)];
+    @apply bg-white/10 dark:bg-white/5 backdrop-blur-2xl backdrop-saturate-[1.8] shadow-[0_4px_12px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_16px_rgba(0,0,0,0.4)];
   }
 
   /* Dark Liquid Glass — for modals that need white text over any backdrop */
@@ -644,16 +636,52 @@ html.dark .glass-floating-sidebar,
     background: rgba(12, 14, 18, 0.6) !important;
     -webkit-backdrop-filter: blur(28px) saturate(1.8) !important;
     backdrop-filter: blur(28px) saturate(1.8) !important;
-    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.15), 0 12px 32px rgba(0, 0, 0, 0.25) !important;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35) !important;
     color: #ffffff !important;
   }
 
-  /* Floating pill-shaped top and bottom bars */
-  .topbar {
-    border-radius: 9999px !important;
-  }
+  /* Floating pill-shaped top and bottom bars (Ultra-Liquid Glass Standard) */
+  .topbar,
   .bottom-bar.bottom-bar-pill {
     border-radius: 9999px !important;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.10) 100%) !important;
+    -webkit-backdrop-filter: blur(22px) saturate(150%) !important;
+    backdrop-filter: blur(22px) saturate(150%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.40) !important;
+    box-shadow:
+      0 8px 24px -10px rgba(0, 0, 0, 0.06),
+      0 2px 6px 0 rgba(0, 0, 0, 0.03),
+      inset 0 1px 1px 0 rgba(255, 255, 255, 0.25),
+      inset 1px 0 1px 0 rgba(255, 255, 255, 0.10) !important;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    will-change: backdrop-filter, transform;
+  }
+
+  .dark .topbar,
+  .dark .bottom-bar.bottom-bar-pill {
+    background: var(--glass-bg) !important;
+    -webkit-backdrop-filter: blur(32px) saturate(190%) brightness(105%) !important;
+    backdrop-filter: blur(32px) saturate(190%) brightness(105%) !important;
+    border: 1px solid var(--glass-border) !important;
+    box-shadow: var(--glass-shadow) !important;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    will-change: backdrop-filter, transform;
+  }
+
+  /* Full-width mobile screen Topbar (Edge-to-Edge Glass Standard) */
+  .topbar.topbar-mobile-bar {
+    border-radius: 0 !important;
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--glass-border) !important;
+    box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.05) !important;
+  }
+
+  .dark .topbar.topbar-mobile-bar {
+    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.45) !important;
   }
 
   /* Menu bar — equal-width tabs/buttons sized to the widest item, responsive on all screens */

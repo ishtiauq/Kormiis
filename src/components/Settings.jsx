@@ -525,11 +525,11 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                 <label className="text-sm font-medium text-muted-foreground uppercase tracking-wider text-[11px]">Interactive Map Picker</label>
                 
                 <form onSubmit={handleMapSearch} className="flex gap-2 mb-2">
-                  <div className="relative flex-1">
-                    <Icon name="search" className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" size={16}/>
+                  <div className="relative flex-1 flex items-center">
+                    <Icon name="search" className="absolute left-3.5 text-muted-foreground z-10 pointer-events-none" size={18}/>
                     <Input 
                       placeholder="Search for a city, building, or address..." 
-                      className="pl-9"
+                      className="!pl-10.5 h-11 rounded-2xl"
                       value={mapSearchQuery}
                       onChange={(e) => setMapSearchQuery(e.target.value)}
                     />

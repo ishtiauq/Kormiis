@@ -67,7 +67,8 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
     employees.forEach(emp => {
       if (emp.status === 'Terminated') return
       const log = todayLogs[emp.id]
-      const entry = { id: emp.id, name: emp.name, avatar: emp.avatar, role: emp.role, time: log?.checkIn || null }
+      const designation = emp.designation && emp.designation.toLowerCase() !== 'teammate' ? emp.designation : (emp.role && emp.role.toLowerCase() !== 'teammate' ? emp.role : '')
+      const entry = { id: emp.id, name: emp.name, avatar: emp.avatar, role: designation, designation, time: log?.checkIn || null }
       if (log) {
         if (log.status === 'Present' || log.status === 'Late') {
           presentList.push(entry)

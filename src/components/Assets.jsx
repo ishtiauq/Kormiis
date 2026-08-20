@@ -68,9 +68,9 @@ function AssetInventory({ filteredAssets, stats, assets, search, setSearch, filt
 
       <Card className="shadow-xs border-border bg-card overflow-hidden">
         <div className="p-4 border-b border-border flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center justify-between bg-muted/20">
-          <div className="relative flex-1 w-full sm:w-auto sm:min-w-[280px] sm:max-w-md">
-            <Icon name="search" className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" size={16}/>
-            <Input type="text" placeholder="Search by name or serial number..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9 bg-background border-input shadow-sm w-full" />
+          <div className="relative flex-1 w-full sm:w-auto sm:min-w-[280px] sm:max-w-md flex items-center">
+            <Icon name="search" className="absolute left-3.5 text-muted-foreground z-10 pointer-events-none" size={18}/>
+            <Input type="text" placeholder="Search by name or serial number..." value={search} onChange={e => setSearch(e.target.value)} className="!pl-10.5 h-11 rounded-2xl bg-background border-input shadow-xs w-full" />
           </div>
           <div className="flex gap-3 flex-wrap">
             <Button variant="outline" onClick={triggerFileInput} className="shadow-sm flex-1 sm:flex-none">

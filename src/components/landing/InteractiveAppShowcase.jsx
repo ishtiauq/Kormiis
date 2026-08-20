@@ -434,15 +434,15 @@ export default function InteractiveAppShowcase() {
               >
                 {/* Search & Filter Bar */}
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pb-3 border-b border-border">
-                  <div className="relative w-full sm:w-72">
+                  <div className="relative w-full sm:w-72 flex items-center">
+                    <Icon name="search" size={18} className="absolute left-3.5 text-muted-foreground z-10 pointer-events-none" />
                     <input
                       type="text"
                       placeholder="Search hardware by name or ID..."
                       value={assetSearch}
                       onChange={(e) => setAssetSearch(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2 rounded-full bg-muted/50 border border-border text-xs text-foreground focus:outline-none focus:border-primary"
+                      className="w-full !pl-10.5 pr-3 h-10 rounded-full bg-muted/50 border border-border text-xs text-foreground focus:outline-none focus:border-primary"
                     />
-                    <Icon name="search" size={16} className="absolute left-3 top-2.5 text-muted-foreground" />
                   </div>
 
                   <div className="flex items-center gap-1.5 w-full sm:w-auto">

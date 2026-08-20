@@ -210,13 +210,13 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
       
       <div className="flex flex-wrap gap-4 mb-4 items-center w-full justify-between">
         <div className="relative flex-1 min-w-[250px] lg:max-w-md w-full flex items-center">
-          <Icon name="search" className="absolute left-3 text-muted-foreground" size={16}/>
+          <Icon name="search" className="absolute left-3.5 text-muted-foreground z-10 pointer-events-none" size={18}/>
           <Input 
             placeholder="Search tasks or assignees..." 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             aria-label="Search tasks"
-            className="pl-9 w-full bg-muted/40"
+            className="!pl-10.5 h-11 rounded-2xl w-full bg-muted/40"
           />
         </div>
         

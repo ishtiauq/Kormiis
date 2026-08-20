@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useModal } from '../services/useModal.js'
 import Icon from "@/components/ui/Icon.jsx"
 import { useConfirm } from '../hooks/useConfirm'
@@ -26,6 +27,7 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
   const [currentMonth, setCurrentMonth] = useState(today.getMonth())
   const [currentYear, setCurrentYear] = useState(today.getFullYear())
   const [selectedDate, setSelectedDate] = useState(null)
+  const [hoveredDay, setHoveredDay] = useState(null)
   const [showEventModal, setShowEventModal] = useState(false)
   const [editingEvent, setEditingEvent] = useState(null)
   const [viewMode, setViewMode] = useState('month')
@@ -178,12 +180,12 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
           )}
         </div>
 
-        <div role="grid" aria-label="Calendar" className="grid grid-cols-7 gap-1 text-center">
+        <div role="grid" aria-label="Calendar" className="grid grid-cols-7 gap-1.5 sm:gap-2 text-center">
           {DAYS.map(d => (
             <div key={d} role="columnheader" className="py-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">{d}</div>
           ))}
           {Array.from({ length: firstDayOfMonth }).map((_, i) => (
-            <div key={`empty-${i}`} />
+            <div key={`empty-${i}`} className="min-h-[56px] sm:min-h-[72px]" />
           ))}
           {Array.from({ length: daysInMonth }).map((_, i) => {
             const day = i + 1
@@ -197,22 +199,76 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
                 aria-label={`${MONTHS[currentMonth]} ${day}, ${currentYear}`}
                 onClick={() => setSelectedDate(dateStr)}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedDate(dateStr) } }}
-                tabIndex={0}
-                className={`flex flex-col items-center gap-1 p-1 sm:p-2 cursor-pointer min-h-[48px] sm:min-h-[64px] rounded-lg transition-colors
-                  ${isSelected ? 'bg-primary text-primary-foreground' : isToday ? 'bg-accent' : 'hover:bg-accent/50'}`}
-                style={{
-                  border: isToday && !isSelected ? '1px solid hsl(var(--primary))' : 'none',
+                onMouseEnter={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect()
+                  setHoveredDay({
+                    dateStr,
+                    events: dayEvents,
+                    isToday,
+                    rect: {
+                      top: rect.top,
+                      bottom: rect.bottom,
+                      left: rect.left,
+                      right: rect.right,
+                      width: rect.width,
+                      height: rect.height,
+                    }
+                  })
                 }}
+                onMouseLeave={() => setHoveredDay(null)}
+                tabIndex={0}
+                className={`group relative flex flex-col items-center justify-between p-1.5 sm:p-2 cursor-pointer min-h-[56px] sm:min-h-[72px] rounded-2xl transition-all duration-200 select-none ${
+                  isSelected 
+                    ? 'bg-primary text-primary-foreground shadow-md shadow-primary/25 scale-[1.02] z-10' 
+                    : isToday 
+                    ? 'bg-primary/10 dark:bg-primary/15 border-2 border-primary text-foreground shadow-sm shadow-primary/20 ring-2 ring-primary/20' 
+                    : 'bg-black/[0.02] dark:bg-white/[0.02] hover:bg-black/5 dark:hover:bg-white/5 border border-border/40 hover:border-primary/30 hover:scale-[1.02]'
+                }`}
               >
-                <span className="text-sm" style={{ fontWeight: isToday ? 800 : 600 }}>{day}</span>
-                {dayEvents.length > 0 && (
-                  <div className="flex gap-0.5 flex-wrap justify-center">
-                    {dayEvents.slice(0, 3).map(ev => {
-                      return <div key={ev.id} className="w-1.5 h-1.5 rounded-full bg-muted-foreground" />
-                    })}
-                    {dayEvents.length > 3 && <span className="text-[0.6rem] text-muted-foreground">+{dayEvents.length - 3}</span>}
-                  </div>
-                )}
+                {/* Top Section: Day Number & Today indicator */}
+                <div className="w-full flex items-center justify-between px-0.5 sm:px-1">
+                  <span className={`text-xs sm:text-sm transition-all ${
+                    isToday && !isSelected 
+                      ? 'size-6 sm:size-7 rounded-full bg-primary text-primary-foreground font-extrabold flex items-center justify-center shadow-xs' 
+                      : isSelected 
+                      ? 'font-bold text-primary-foreground' 
+                      : 'font-semibold text-foreground'
+                  }`}>
+                    {day}
+                  </span>
+
+                  {isToday && (
+                    <span className={`text-[9px] font-extrabold uppercase tracking-wider px-1.5 py-0.2 rounded-full hidden sm:inline-block ${
+                      isSelected ? 'bg-white/25 text-white' : 'bg-primary/20 text-primary'
+                    }`}>
+                      Today
+                    </span>
+                  )}
+                </div>
+
+                {/* Bottom Section: Color-Coded Event Dots */}
+                <div className="w-full flex items-center justify-center gap-1 min-h-[14px] mt-1 flex-wrap">
+                  {dayEvents.length > 0 && dayEvents.slice(0, 3).map((ev) => {
+                    const typeInfo = getTypeInfo(ev.type)
+                    return (
+                      <span
+                        key={ev.id}
+                        className="size-1.5 sm:size-2 rounded-full transition-transform group-hover:scale-125 shadow-xs shrink-0"
+                        style={{
+                          backgroundColor: isSelected ? '#ffffff' : typeInfo.color
+                        }}
+                        title={ev.title}
+                      />
+                    )
+                  })}
+                  {dayEvents.length > 3 && (
+                    <span className={`text-[9px] sm:text-[10px] font-bold ${
+                      isSelected ? 'text-primary-foreground' : 'text-primary'
+                    }`}>
+                      +{dayEvents.length - 3}
+                    </span>
+                  )}
+                </div>
               </div>
             )
           })}
@@ -362,6 +418,78 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
 
       <ConfirmDialog />
       <AdSlot />
+
+      {/* Floating Liquid Glass Day Events Hover Popover */}
+      {hoveredDay && typeof document !== 'undefined' && createPortal(
+        <div 
+          className="fixed z-[9999] pointer-events-none transition-all duration-150 animate-in fade-in zoom-in-95"
+          style={{
+            top: hoveredDay.rect.top > 260 
+              ? `${hoveredDay.rect.top - 10}px` 
+              : `${hoveredDay.rect.bottom + 10}px`,
+            left: `${Math.max(12, Math.min(window.innerWidth - 310, hoveredDay.rect.left + (hoveredDay.rect.width / 2) - 145))}px`,
+            transform: hoveredDay.rect.top > 260 ? 'translateY(-100%)' : 'translateY(0)',
+            width: '290px'
+          }}
+        >
+          <div className="glass-popover glass-kormiis rounded-3xl p-3.5 shadow-2xl border border-white/30 dark:border-white/15 backdrop-blur-3xl text-foreground flex flex-col gap-2.5">
+            {/* Header: Date + Today / Count */}
+            <div className="flex items-center justify-between gap-2 border-b border-border/80 dark:border-white/12 pb-2">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <Icon name="calendar_month" size={15} className="text-primary shrink-0"/>
+                <span className="text-xs font-bold text-foreground truncate">
+                  {formatDate(hoveredDay.dateStr)}
+                </span>
+              </div>
+              <div className="flex items-center gap-1 shrink-0">
+                {hoveredDay.isToday && (
+                  <Badge className="bg-primary text-primary-foreground text-[10px] px-1.5 py-0 rounded-full font-bold shadow-xs">
+                    Today
+                  </Badge>
+                )}
+                <span className="text-[10px] font-semibold text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full">
+                  {hoveredDay.events.length} {hoveredDay.events.length === 1 ? 'Event' : 'Events'}
+                </span>
+              </div>
+            </div>
+
+            {/* Event List */}
+            {hoveredDay.events.length === 0 ? (
+              <div className="py-2.5 px-2 text-center flex flex-col items-center gap-1">
+                <Icon name="event_busy" size={20} className="text-muted-foreground/60"/>
+                <p className="text-xs text-muted-foreground font-medium m-0">No events scheduled</p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2 max-h-[220px] overflow-y-auto pr-0.5">
+                {hoveredDay.events.map(ev => {
+                  const typeInfo = getTypeInfo(ev.type)
+                  return (
+                    <div key={ev.id} className="flex items-start gap-2.5 p-2 rounded-2xl bg-black/5 dark:bg-white/5 border border-border/40">
+                      <div 
+                        className="size-6 rounded-xl flex items-center justify-center shrink-0 text-white mt-0.5 shadow-xs"
+                        style={{ backgroundColor: typeInfo.color }}
+                      >
+                        {typeInfo.icon}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs font-bold text-foreground truncate">{ev.title}</div>
+                        <div className="flex items-center gap-2 mt-0.5 text-[10px] font-medium text-muted-foreground flex-wrap">
+                          <span className="capitalize">{typeInfo.label}</span>
+                          {ev.time && <span>• {ev.time}</span>}
+                        </div>
+                        {ev.description && (
+                          <p className="text-[11px] text-muted-foreground/80 line-clamp-2 mt-1 leading-snug">{ev.description}</p>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   )
 }

@@ -697,9 +697,9 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
       <div className="rounded-3xl border border-border/80 bg-muted/20 overflow-hidden shadow-xs">
         {/* Card header: search + actions */}
         <div className="p-4 border-b border-border flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center justify-between bg-muted/20">
-          <div className="relative flex-1 w-full sm:w-auto sm:min-w-[280px] sm:max-w-md">
-            <Icon name="search" className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" size={16}/>
-            <Input type="text" placeholder="Search by name, role, email..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-9 bg-background border-input shadow-sm w-full" />
+          <div className="relative flex-1 w-full sm:w-auto sm:min-w-[280px] sm:max-w-md flex items-center">
+            <Icon name="search" className="absolute left-3.5 text-muted-foreground z-10 pointer-events-none" size={18}/>
+            <Input type="text" placeholder="Search by name, role, email..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="!pl-10.5 h-11 rounded-2xl bg-background border-input shadow-xs w-full" />
           </div>
           <div className="flex gap-3 items-center flex-wrap">
             <div className="hidden sm:flex items-center gap-2 pr-3 sm:pr-4 border-r border-border shrink-0">
@@ -1023,7 +1023,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
                                       {emp.name}
                                     </h4>
                                     <p className="text-fluid-xs font-semibold text-muted-foreground truncate mt-1">
-                                      {emp.designation || emp.role}
+                                      {emp.designation && emp.designation.toLowerCase() !== 'teammate' ? emp.designation : (emp.role && emp.role.toLowerCase() !== 'teammate' ? emp.role : '')}
                                     </p>
                                   </div>
                                 </div>
@@ -1118,7 +1118,9 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
                   </AvatarFallback>
                 </Avatar>
                 <h3 className="text-xl font-bold text-foreground text-center">{viewingEmployee.name}</h3>
-                <p className="text-fluid-sm text-muted-foreground text-center mt-1">{viewingEmployee.designation || viewingEmployee.role}</p>
+                <p className="text-fluid-sm text-muted-foreground text-center mt-1">
+                  {viewingEmployee.designation && viewingEmployee.designation.toLowerCase() !== 'teammate' ? viewingEmployee.designation : (viewingEmployee.role && viewingEmployee.role.toLowerCase() !== 'teammate' ? viewingEmployee.role : '')}
+                </p>
                 <Badge variant={viewingEmployee.status === 'Active' ? 'default' : 'secondary'} className="mt-3">
                   {viewingEmployee.status}
                 </Badge>

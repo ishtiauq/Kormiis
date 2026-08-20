@@ -741,9 +741,9 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
               <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">Select All</span>
             </div>
             
-            <div className="relative flex-1 min-w-[200px] max-w-[350px]">
-              <Icon name="search" className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" size={16}/>
-              <Input placeholder="Search employee or role..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-9" />
+            <div className="relative flex-1 min-w-[200px] max-w-[350px] flex items-center">
+              <Icon name="search" className="absolute left-3.5 text-muted-foreground z-10 pointer-events-none" size={18}/>
+              <Input placeholder="Search employee or role..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="!pl-10.5 h-11 rounded-2xl w-full" />
             </div>
 
             <div className="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground">
@@ -802,10 +802,18 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
                         </Avatar>
                         <div className="flex flex-col">
                           <span className="font-semibold text-base leading-tight">{emp.name}</span>
-                          <span className="text-xs text-muted-foreground">{emp.role}</span>
+                          <span className="text-xs text-muted-foreground">{emp.designation && emp.designation.toLowerCase() !== 'teammate' ? emp.designation : (emp.role && emp.role.toLowerCase() !== 'teammate' ? emp.role : '')}</span>
                         </div>
                       </div>
-                      <Badge variant={isPaid ? 'default' : 'destructive'} className={`${isPaid ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600'}`}>
+                      <Badge 
+                        variant="outline" 
+                        className={`font-semibold px-2.5 py-0.5 rounded-full text-xs flex items-center gap-1.5 shrink-0 ${
+                          isPaid 
+                            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30' 
+                            : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30'
+                        }`}
+                      >
+                        <span className={`size-1.5 rounded-full ${isPaid ? 'bg-emerald-500' : 'bg-amber-500'}`} />
                         {entry.status}
                       </Badge>
                     </div>
