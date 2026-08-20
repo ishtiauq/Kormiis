@@ -21,6 +21,57 @@ export default function useAppData({ user, addToast }) {
     { id: 'audit-1', timestamp: new Date(Date.now() - 86400000).toISOString(), user: 'System', action: 'CREATE', entity: 'System', details: 'Initialized audit logging.', ip: 'N/A' }
   ])
 
+  /* ─── Data state initialisers ─── */
+  const loadSaved = (key) => {
+    const saved = localStorage.getItem(key)
+    if (saved) { try { return JSON.parse(saved) } catch (e) { console.error(`parse ${key}:`, e) } }
+    return null
+  }
+
+  const [employees, setEmployeesRaw] = useState(() => {
+    const plain = localStorage.getItem(EMPLOYEES_STORAGE_KEY + '_plain')
+    if (plain) { try { const p = JSON.parse(plain); if (Array.isArray(p) && p.length > 0) return p } catch (e) {} }
+    return []
+  })
+  const [payroll, setPayrollRaw] = useState(() => loadSaved('kormiis_payroll') || {})
+  const [attendance, setAttendanceRaw] = useState(() => loadSaved('kormiis_attendance') || { leaves: [], dailyLogs: {}, balances: {} })
+  const [expenses, setExpensesRaw] = useState(() => loadSaved('kormiis_expenses') || [])
+  const [events, setEvents] = useState(() => loadSaved('kormiis_events') || [])
+  const [documents, setDocuments] = useState(() => loadSaved('kormiis_documents') || [])
+  const [roster, setRoster] = useState(() => loadSaved('kormiis_roster') || [])
+  const [shiftSwaps, setShiftSwaps] = useState(() => loadSaved('kormiis_shift_swaps') || [])
+  const [overtimeClaims, setOvertimeClaims] = useState(() => loadSaved('kormiis_overtime_claims') || [])
+  const [announcements, setAnnouncements] = useState(() => {
+    const saved = loadSaved('kormiis_announcements')
+    if (saved) return saved
+    return []
+  })
+  const [tasks, setTasks] = useState(() => loadSaved('kormiis_tasks') || [])
+  const [notes, setNotesRaw] = useState(() => loadSaved('kormiis_notes') || [])
+  const [assets, setAssets] = useState(() => loadSaved('kormiis_assets') || [])
+  const [assetRequests, setAssetRequests] = useState(() => loadSaved('kormiis_asset_requests') || [])
+  const [assetCategories, setAssetCategories] = useState(() => loadSaved('kormiis_asset_categories') || ['Laptop', 'Phone', 'Monitor', 'Peripherals', 'Access Card'])
+  const [settings, setSettingsRaw] = useState(() => loadSaved('kormiis_settings') || { currency: '৳', officeLocation: { lat: 23.8103, lng: 90.4125, radius: 100 }, salaryStructure: [{ id: 'basic', name: 'Basic Salary', percentage: 50, type: 'earning' }, { id: 'hra', name: 'House Rent Allowance (HRA)', percentage: 25, type: 'earning' }, { id: 'medical', name: 'Medical Allowance', percentage: 10, type: 'earning' }, { id: 'conveyance', name: 'Conveyance Allowance', percentage: 10, type: 'earning' }, { id: 'pf', name: 'Provident Fund (PF)', percentage: 5, type: 'deduction' }], company: { name: 'Kormiis Ltd.', email: 'hr@kormiis.io', website: 'www.kormiis.io', logo: '', logoX: 0, logoY: 0, logoZoom: 1 }, shiftTemplates: [{ id: 'st-1', name: 'Morning Shift', start: '09:00', end: '18:00', break: 60 }, { id: 'st-2', name: 'Night Shift', start: '22:00', end: '07:00', break: 60 }], overtimeRules: { multiplierWeekday: 1.5, multiplierWeekend: 2.0 }, notifications: { syncAlerts: true, emailDigests: false } })
+  const [syncLogs, setSyncLogs] = useState(() => loadSaved('kormiis_sync_logs') || [])
+
+  /* ─── Notifications ─── */
+  const [notifications, setNotifications] = useState(() => {
+    const saved = localStorage.getItem('kormiis_notifications')
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved)
+        const fortyEightHoursAgo = Date.now() - (48 * 60 * 60 * 1000)
+        return parsed.filter(n => (n.timestamp || Date.now()) > fortyEightHoursAgo)
+      } catch (e) {
+        return []
+      }
+    }
+    return []
+  })
+  const [showNotifications, setShowNotifications] = useState(false)
+  const notificationsRef = useRef(notifications)
+  useEffect(() => { notificationsRef.current = notifications }, [notifications])
+
   const addAuditLog = (action, entity, details) => {
     const newLog = {
       id: `audit-${Date.now()}`,
@@ -47,29 +98,9 @@ export default function useAppData({ user, addToast }) {
     return false
   }
 
-  /* ─── Notifications ─── */
-  const [notifications, setNotifications] = useState(() => {
-    const saved = localStorage.getItem('kormiis_notifications')
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved)
-        const fortyEightHoursAgo = Date.now() - (48 * 60 * 60 * 1000)
-        return parsed.filter(n => (n.timestamp || Date.now()) > fortyEightHoursAgo)
-      } catch (e) {
-        return []
-      }
-    }
-    return []
-  })
-  
   useEffect(() => {
     localStorage.setItem('kormiis_notifications', JSON.stringify(notifications))
   }, [notifications])
-
-  const [showNotifications, setShowNotifications] = useState(false)
-
-  const notificationsRef = useRef(notifications)
-  useEffect(() => { notificationsRef.current = notifications }, [notifications])
 
   useEffect(() => {
     initPushSync(() => notificationsRef.current.filter(n => !n.read).length)
@@ -127,40 +158,6 @@ export default function useAppData({ user, addToast }) {
     updateBadge(0)
     broadcast({ type: 'badge', count: 0 })
   }
-
-  /* ─── Data state initialisers ─── */
-  const loadSaved = (key) => {
-    const saved = localStorage.getItem(key)
-    if (saved) { try { return JSON.parse(saved) } catch (e) { console.error(`parse ${key}:`, e) } }
-    return null
-  }
-
-  const [employees, setEmployeesRaw] = useState(() => {
-    const plain = localStorage.getItem(EMPLOYEES_STORAGE_KEY + '_plain')
-    if (plain) { try { const p = JSON.parse(plain); if (Array.isArray(p) && p.length > 0) return p } catch (e) {} }
-    return []
-  })
-  const [payroll, setPayrollRaw] = useState(() => loadSaved('kormiis_payroll') || {})
-
-  const [attendance, setAttendanceRaw] = useState(() => loadSaved('kormiis_attendance') || { leaves: [], dailyLogs: {}, balances: {} })
-  const [expenses, setExpensesRaw] = useState(() => loadSaved('kormiis_expenses') || [])
-  const [events, setEvents] = useState(() => loadSaved('kormiis_events') || [])
-  const [documents, setDocuments] = useState(() => loadSaved('kormiis_documents') || [])
-  const [roster, setRoster] = useState(() => loadSaved('kormiis_roster') || [])
-  const [shiftSwaps, setShiftSwaps] = useState(() => loadSaved('kormiis_shift_swaps') || [])
-  const [overtimeClaims, setOvertimeClaims] = useState(() => loadSaved('kormiis_overtime_claims') || [])
-  const [announcements, setAnnouncements] = useState(() => {
-    const saved = loadSaved('kormiis_announcements')
-    if (saved) return saved
-    return []
-  })
-  const [tasks, setTasks] = useState(() => loadSaved('kormiis_tasks') || [])
-  const [notes, setNotesRaw] = useState(() => loadSaved('kormiis_notes') || [])
-  const [assets, setAssets] = useState(() => loadSaved('kormiis_assets') || [])
-  const [assetRequests, setAssetRequests] = useState(() => loadSaved('kormiis_asset_requests') || [])
-  const [assetCategories, setAssetCategories] = useState(() => loadSaved('kormiis_asset_categories') || ['Laptop', 'Phone', 'Monitor', 'Peripherals', 'Access Card'])
-  const [settings, setSettingsRaw] = useState(() => loadSaved('kormiis_settings') || { currency: '৳', officeLocation: { lat: 23.8103, lng: 90.4125, radius: 100 }, salaryStructure: [{ id: 'basic', name: 'Basic Salary', percentage: 50, type: 'earning' }, { id: 'hra', name: 'House Rent Allowance (HRA)', percentage: 25, type: 'earning' }, { id: 'medical', name: 'Medical Allowance', percentage: 10, type: 'earning' }, { id: 'conveyance', name: 'Conveyance Allowance', percentage: 10, type: 'earning' }, { id: 'pf', name: 'Provident Fund (PF)', percentage: 5, type: 'deduction' }], company: { name: 'Kormiis Ltd.', email: 'hr@kormiis.io', website: 'www.kormiis.io', logo: '', logoX: 0, logoY: 0, logoZoom: 1 }, shiftTemplates: [{ id: 'st-1', name: 'Morning Shift', start: '09:00', end: '18:00', break: 60 }, { id: 'st-2', name: 'Night Shift', start: '22:00', end: '07:00', break: 60 }], overtimeRules: { multiplierWeekday: 1.5, multiplierWeekend: 2.0 }, notifications: { syncAlerts: true, emailDigests: false } })
-  const [syncLogs, setSyncLogs] = useState(() => loadSaved('kormiis_sync_logs') || [])
 
   /* ─── addLog ─── */
   const addLog = (action, details, status = 'success') => {
