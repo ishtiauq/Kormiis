@@ -525,51 +525,99 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
   return (
     <div 
       ref={containerRef}
-      className="dark force-dark-mode h-dvh bg-[#090a0f] text-foreground relative overflow-y-auto overflow-x-hidden font-sans scroll-smooth snap-y snap-mandatory transition-colors duration-[1500ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
+      className="dark force-dark-mode aurora-mesh-dark min-h-dvh w-full text-foreground relative overflow-y-auto overflow-x-hidden font-sans scroll-smooth transition-colors duration-[1500ms] ease-[cubic-bezier(0.4,0,0.2,1)] touch-pan-y [overscroll-behavior-y:contain] [-webkit-overflow-scrolling:touch]"
     >
-      
-      {/* Top-Left Brand Logo (Compact on mobile, standard on tablet/desktop) */}
-      <div className="absolute top-4 sm:top-6 md:top-8 left-4 sm:left-6 md:left-8 z-30 pointer-events-auto">
-        <a href="#" className="flex items-center hover:opacity-80 transition-opacity">
-          <img 
-            src={kormiisWhiteLogo} 
-            alt="Kormiis Logo" 
-            className="h-5 sm:h-7 md:h-8 w-auto object-contain drop-shadow-md" 
-          />
-        </a>
+      {/* Background Ambient Aurora & Glow Orbs (matching main app) */}
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1.2, ease: 'easeOut' }}
+        className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none"
+      >
+        {/* Top-Left Primary Orange Glow */}
+        <div 
+          className="absolute -top-[10%] -left-[10%] w-[65vw] h-[65vw] max-w-[800px] max-h-[800px] rounded-full bg-gradient-to-br from-primary/35 via-[#fe3501]/25 to-transparent blur-[120px] animate-pulse pointer-events-none" 
+          style={{ animationDuration: '6s' }} 
+        />
+        {/* Top-Right Electric Blue Glow */}
+        <div 
+          className="absolute -top-[8%] -right-[10%] w-[60vw] h-[60vw] max-w-[750px] max-h-[750px] rounded-full bg-gradient-to-bl from-blue-500/30 via-indigo-600/20 to-transparent blur-[130px] animate-pulse pointer-events-none" 
+          style={{ animationDuration: '8s' }} 
+        />
+        {/* Center Cosmic Purple Glow */}
+        <div 
+          className="absolute top-[30%] left-[15%] w-[55vw] h-[55vw] max-w-[700px] max-h-[700px] rounded-full bg-gradient-to-tr from-purple-600/28 via-fuchsia-600/18 to-transparent blur-[140px] animate-pulse pointer-events-none" 
+          style={{ animationDuration: '10s' }} 
+        />
+        {/* Bottom Emerald / Teal Glow */}
+        <div 
+          className="absolute -bottom-[10%] -right-[5%] w-[55vw] h-[55vw] max-w-[650px] max-h-[650px] rounded-full bg-gradient-to-tl from-emerald-500/25 via-teal-500/18 to-transparent blur-[120px] pointer-events-none" 
+        />
+      </motion.div>
+
+      {/* 1. Floating Apple Liquid Glass Top Navigation Bar */}
+      <div className="fixed top-0 left-0 right-0 z-50 w-full pt-3 sm:pt-4 md:pt-5 px-3 sm:px-6 pointer-events-none transition-all duration-300">
+        <motion.header 
+          initial={{ opacity: 0, y: -24, filter: 'blur(8px)' }}
+          animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+          transition={{ duration: 0.85, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+          className="pointer-events-auto max-w-6xl mx-auto h-13 sm:h-15 md:h-16 px-3.5 sm:px-5 md:px-6 flex items-center justify-between landing-glass-header text-white transition-all duration-300"
+        >
+          {/* Brand Logo */}
+          <a href="#" className="flex items-center gap-2 shrink-0 hover:opacity-85 active:scale-95 transition-all">
+            <img 
+              src={kormiisWhiteLogo} 
+              alt="Kormiis Logo" 
+              className="h-6 sm:h-7 md:h-8 w-auto object-contain drop-shadow-md" 
+            />
+          </a>
+
+          {/* Right Action Group */}
+          <div className="flex items-center gap-1.5 sm:gap-2.5">
+            {/* Install App Button */}
+            <button
+              onClick={handleInstallClick}
+              className="apple-glass-btn flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-white/90 hover:text-white transition-all cursor-pointer shadow-sm active:scale-95"
+              title="Install App as PWA"
+            >
+              <Icon name="download" size={15} />
+              <span className="hidden sm:inline">Install App</span>
+              <span className="sm:hidden">Install</span>
+            </button>
+
+            {/* Sign in Button */}
+            <button
+              onClick={() => openAuthModal('in')}
+              className="apple-glass-btn hidden sm:flex items-center px-3.5 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-bold text-white/90 hover:text-white transition-all cursor-pointer active:scale-95"
+            >
+              Sign in
+            </button>
+
+            {/* Start for Free CTA */}
+            <button
+              onClick={() => openAuthModal('up')}
+              className="liquid-glass-btn bg-primary text-primary-foreground px-3.5 sm:px-5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold shadow-lg shadow-primary/30 hover:opacity-95 active:scale-95 transition-all flex items-center gap-1 sm:gap-1.5 cursor-pointer"
+            >
+              <span>Start for free</span>
+              <Icon name="arrow_forward" size={15} />
+            </button>
+          </div>
+        </motion.header>
       </div>
 
-<div className="fixed bottom-4 sm:bottom-5 lg:bottom-auto lg:top-6 left-1/2 -translate-x-1/2 z-40 pointer-events-auto w-max max-w-[calc(100vw-2rem)]">
-        <nav className="flex items-center gap-1 sm:gap-2 px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded-full glass-kormiis shadow-2xl text-white">
-          {/* Install App Button */}
-          <button
-            onClick={handleInstallClick}
-            className="flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold text-white/90 hover:text-white hover:bg-white/10 active:scale-95 transition-all cursor-pointer"
-            title="Install App as PWA"
-          >
-            <Icon name="download" size={15} />
-            <span>Install App</span>
-          </button>
-
-          {/* Start for Free CTA */}
-          <button
-            onClick={() => openAuthModal('up')}
-            className="bg-primary text-primary-foreground px-3.5 sm:px-5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold shadow-md shadow-primary/25 hover:opacity-95 active:scale-95 transition-all flex items-center gap-1 sm:gap-1.5 cursor-pointer"
-          >
-            <span>Start for free</span>
-            <Icon name="arrow_forward" size={15} />
-          </button>
-        </nav>
-      </div>
-
-      {/* 2. Main Hero Showcase Section (Strict 100dvh full viewport height across all devices) */}
-      <main className="relative w-full h-[100dvh] min-h-[100dvh] max-h-[100dvh] flex flex-col justify-between items-center pt-16 sm:pt-20 md:pt-24 lg:pt-28 xl:pt-32 pb-0 text-center overflow-hidden shrink-0 isolate">
+      {/* 2. Main Hero Showcase Section (Fluid responsive height across devices) */}
+      <main className="relative w-full min-h-[100dvh] lg:h-[100dvh] flex flex-col justify-between items-center pt-16 sm:pt-20 md:pt-24 lg:pt-28 xl:pt-32 pb-0 text-center overflow-hidden shrink-0 isolate">
 
         {/* Fluid Container: Couples Headline & Image with Dynamic Gap */}
         <div className="w-full flex-1 min-h-0 flex flex-col justify-start lg:justify-between items-center gap-1 sm:gap-2 lg:gap-[clamp(0.25rem,1.5vh,1.25rem)] z-10">
           
           {/* Top Content Block: Bold Fluid Responsive Headline (3-lines on mobile, 2-lines on desktop) + Subtitle */}
-          <div className="flex flex-col items-center justify-center text-center shrink-0 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 z-10 w-full">
+          <motion.div 
+            initial={{ opacity: 0, y: 32, filter: 'blur(12px)' }}
+            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            transition={{ duration: 0.9, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            className="flex flex-col items-center justify-center text-center shrink-0 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 z-10 w-full"
+          >
             <h1 className="text-fluid-display-xl font-black tracking-tight text-white leading-[1.1] text-center w-full uppercase">
               <span>MANAGE YOUR</span>
               <br className="sm:hidden" />{' '}
@@ -584,21 +632,31 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
               <br />
               <span>WITH EASE</span>
             </h1>
-            <div className="mt-2 sm:mt-2.5 lg:mt-[clamp(0.4rem,1.2vh,1rem)] flex items-center justify-center">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 16 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.35, type: 'spring', damping: 20, stiffness: 280 }}
+              className="mt-2 sm:mt-2.5 lg:mt-[clamp(0.4rem,1.2vh,1rem)] flex items-center justify-center"
+            >
               <div className="inline-flex items-center justify-center px-4 sm:px-5.5 py-1.5 sm:py-2 rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/25">
                 <p className="text-fluid-xs sm:text-fluid-sm font-semibold tracking-wide text-center leading-snug">
                   The only HRM app you need for your workspace.
                 </p>
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
 
           {/* Hero Artwork Image Container with Infinite Background Feature Streams & Character Foreground */}
           <div className="relative w-full flex-1 min-h-0 flex items-end justify-center z-0 pb-16 sm:pb-18 md:pb-20 lg:pb-0 translate-y-0">
             
             {/* 1. MOBILE & TABLET/IPAD ONLY: Single Vertical Infinite Marquee Stream behind character (< lg) */}
             {/* Anchored at top-0 of this flex-1 section = EXACTLY flush with the bottom of the Subheading across all devices */}
-            <div className="lg:hidden absolute top-0 sm:top-0.5 bottom-[22%] sm:bottom-[25%] md:bottom-[28%] left-1/2 -translate-x-1/2 w-max max-w-[94vw] flex justify-center z-0 pointer-events-none marquee-mask-vertical select-none overflow-hidden">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.92, filter: 'blur(8px)' }}
+              animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+              transition={{ duration: 1.0, delay: 0.45, ease: [0.16, 1, 0.3, 1] }}
+              className="lg:hidden absolute top-0 sm:top-0.5 bottom-[22%] sm:bottom-[25%] md:bottom-[28%] left-1/2 -translate-x-1/2 w-max max-w-[94vw] flex justify-center z-0 pointer-events-none marquee-mask-vertical select-none overflow-hidden"
+            >
               <div className="animate-marquee-vertical flex flex-col items-center gap-2 sm:gap-2.5 py-1">
                 {[...ALL_HERO_FEATURES, ...ALL_HERO_FEATURES].map((item, idx) => (
                   <div 
@@ -633,13 +691,18 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                   </div>
                 ))}
               </div>
-            </div>
+            </motion.div>
 
             {/* Aspect-Ratio Synchronized Character & Desktop Marquee Wrapper */}
             <div className="relative h-full aspect-[2502/1682] max-h-[46vh] sm:max-h-[50vh] md:max-h-[53vh] lg:max-h-[44vh] xl:max-h-[48vh] max-w-[90vw] sm:max-w-[82vw] md:max-w-[76vw] lg:max-w-full flex items-end justify-center z-10">
 
               {/* 2. DESKTOP & LAPTOP ONLY: Dual Horizontal Infinite Marquee Streams (lg:flex) */}
-              <div className="hidden lg:flex absolute top-[-10%] xl:top-[-8%] left-1/2 -translate-x-1/2 w-screen flex-col gap-2.5 xl:gap-3.5 z-0 pointer-events-none marquee-mask select-none">
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.94, filter: 'blur(8px)' }}
+                animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+                transition={{ duration: 1.0, delay: 0.45, ease: [0.16, 1, 0.3, 1] }}
+                className="hidden lg:flex absolute top-[-10%] xl:top-[-8%] left-1/2 -translate-x-1/2 w-screen flex-col gap-2.5 xl:gap-3.5 z-0 pointer-events-none marquee-mask select-none"
+              >
                 
                 {/* Stream Row 1: Smooth Infinite Loop Scrolling Left */}
                 <div className="w-full overflow-hidden flex">
@@ -717,21 +780,28 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                   </div>
                 </div>
 
-              </div>
+              </motion.div>
 
             {/* FOREGROUND: Main Character Artwork (Strict 100% fit of aspect container) */}
-            <picture>
-              <source srcSet="/hero.webp" type="image/webp" />
-              <img 
-                src="/Hero%20Assets.png" 
-                alt="Manage your Team with Ease" 
-                width={1600}
-                height={1076}
-                fetchPriority="high"
-                decoding="async"
-                className="relative z-10 w-full h-full object-contain object-bottom drop-shadow-[0_25px_60px_rgba(0,0,0,0.95)] select-none pointer-events-none"
-              />
-            </picture>
+            <motion.div
+              initial={{ opacity: 0, y: 50, scale: 0.94, filter: 'blur(10px)' }}
+              animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
+              transition={{ duration: 1.1, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+              className="relative z-10 w-full h-full flex items-end justify-center pointer-events-none"
+            >
+              <picture className="w-full h-full flex items-end justify-center">
+                <source srcSet="/hero.webp" type="image/webp" />
+                <img 
+                  src="/Hero%20Assets.png" 
+                  alt="Manage your Team with Ease" 
+                  width={1600}
+                  height={1076}
+                  fetchPriority="high"
+                  decoding="async"
+                  className="relative z-10 w-full h-full object-contain object-bottom select-none pointer-events-none"
+                />
+              </picture>
+            </motion.div>
 
           </div>
 
