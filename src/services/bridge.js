@@ -69,14 +69,41 @@ export const downloadFromFirebaseStorage = async (adminUid, path) => {
 };
 
 /**
- * Deletes a file from Firebase Storage.
+ * Uploads a company document to Firebase Storage (with offline base64 fallback).
  */
-export const deleteFromFirebaseStorage = async (adminUid, path) => {
-  if (!storage) return;
-  const storageRef = ref(storage, `companies/${adminUid}/pending_uploads/${path}`);
+export const uploadDocumentFile = async (adminUid, file, docId) => {
+  const cleanFileName = (file.name || 'document').replace(/[^a-zA-Z0-9._-]/g, '_');
+  const path = `companies/${adminUid || 'general'}/documents/${docId}_${cleanFileName}`;
+
+  if (storage) {
+    try {
+      const storageRef = ref(storage, path);
+      const snapshot = await uploadBytesResumable(storageRef, file);
+      const downloadUrl = await getDownloadURL(snapshot.ref);
+      return { downloadUrl, storagePath: path };
+    } catch (err) {
+      console.warn('Firebase Storage upload failed, using local fallback:', err);
+    }
+  }
+
+  // Resilient fallback (data URL) for offline or non-cloud instances
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve({ downloadUrl: reader.result, storagePath: path });
+    reader.onerror = (e) => reject(e);
+    reader.readAsDataURL(file);
+  });
+};
+
+/**
+ * Deletes a company document from Firebase Storage.
+ */
+export const deleteDocumentFile = async (storagePath) => {
+  if (!storage || !storagePath) return;
   try {
+    const storageRef = ref(storage, storagePath);
     await deleteObject(storageRef);
   } catch (error) {
-    console.error('Failed to delete file from Firebase Storage:', error);
+    console.warn('Storage file deletion skipped or not found:', error?.message || error);
   }
 };

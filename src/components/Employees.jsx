@@ -910,7 +910,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
                             return (
                               <div 
                                 key={emp.id} 
-                                className="relative group rounded-[28px] p-5 sm:p-6 glass-kormiis glass-apple text-foreground border border-white/30 dark:border-white/14 hover:border-primary/50 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between overflow-hidden isolate"
+                                className="relative group rounded-3xl p-5 sm:p-6 glass-card text-foreground border border-white/30 dark:border-white/12 shadow-xl hover:border-primary/50 transition-all duration-300 flex flex-col justify-between overflow-hidden isolate"
                               >
                                 {/* 1. Top Header: Checkbox & Quick Action Glass Icon Buttons */}
                                 <div className="flex items-center justify-between gap-2 mb-3.5 relative z-10">
