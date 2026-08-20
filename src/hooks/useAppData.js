@@ -3,8 +3,7 @@ import { validateDatabase } from '../services/validator.js'
 import { encryptJson, decryptJson } from '../services/crypto.js'
 import { EMPLOYEES_STORAGE_KEY, timestampArrayChanges, getDeviceInfo } from '../utils/helpers.js'
 import { subscribeToTable, writeToTable, fetchTableFromFirestore } from '../services/bridge.js'
-import { initPushSync, broadcast, updateBadge, notifyOnHidden, showSystemNotification } from '../services/pushNotifications.js'
-import { ensurePushSetup } from '../services/fcm.js'
+import { initPushSync, broadcast, updateBadge, notifyOnHidden } from '../services/pushNotifications.js'
 
 export default function useAppData({ user, addToast }) {
   /* ─── DB state ─── */
@@ -106,21 +105,6 @@ export default function useAppData({ user, addToast }) {
     initPushSync(() => notificationsRef.current.filter(n => !n.read).length)
     updateBadge(notificationsRef.current.filter(n => !n.read).length)
   }, [])
-
-  useEffect(() => {
-    if (!user) return
-    let unsubscribe = null
-    ensurePushSetup({
-      enabled: settings?.notifications?.pushEnabled,
-      onMessage: (msg) => {
-        const view = String(msg.url || '').replace(/^\//, '').split(/[?#]/)[0].trim() || null
-        addNotification(msg.body || msg.title, view, { title: msg.title, category: msg.category || 'system' })
-        showSystemNotification({ title: msg.title, body: msg.body, url: msg.url })
-      },
-    }).then((res) => { unsubscribe = res.unsubscribe })
-    return () => { if (unsubscribe) unsubscribe() }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, settings?.notifications?.pushEnabled])
 
   const addNotification = (text, view = null, opts = {}) => {
     const category = opts.category || (typeof view === 'string' && view !== 'dashboard' ? view : 'system')

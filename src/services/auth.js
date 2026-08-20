@@ -1,4 +1,13 @@
-import { auth, secondaryAuth, db, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, createUserWithEmailAndPassword, signInWithEmailAndPassword, updatePassword, deleteUser, signOut, doc, setDoc, getDoc, getDocFromServer, serverTimestamp, RecaptchaVerifier, signInWithPhoneNumber, EmailAuthProvider, reauthenticateWithCredential } from './firebase.js';
+import { auth, secondaryAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, createUserWithEmailAndPassword, signInWithEmailAndPassword, updatePassword, deleteUser, signOut, RecaptchaVerifier, signInWithPhoneNumber, EmailAuthProvider, reauthenticateWithCredential, setPersistence, browserLocalPersistence, browserSessionPersistence } from './firebaseCore.js';
+
+// Firestore/Storage are loaded on demand (after sign-in) so the login screen
+// never downloads the Firestore bundle. This module can be reached from the
+// app entry, so it must not statically pull Firestore in.
+let _fb = null;
+async function getFirebase() {
+  if (!_fb) _fb = await import('./firebase.js');
+  return _fb;
+}
 
 /**
  * Parses an identifier (email or phone). If it looks like a phone number,
@@ -65,7 +74,9 @@ export const formatAuthError = (err) => {
  * have it set at provisioning time. Returns null when no user doc exists.
  */
 export const getCompanyForUser = async (uid) => {
-  if (!db || !uid) return null;
+  if (!uid) return null;
+  const { db, doc, getDocFromServer } = await getFirebase();
+  if (!db) return null;
   const userRef = doc(db, 'users', uid);
   try {
     const snap = await getDocFromServer(userRef);
@@ -94,6 +105,7 @@ export const getCompanyForUser = async (uid) => {
  * (admin) status — an unknown Google user is never auto-promoted.
  */
 export const createBusinessSpace = async (user, { name }) => {
+  const { db, doc, setDoc, getDocFromServer, serverTimestamp } = await getFirebase();
   if (!db || !user) throw new Error('Firebase not configured');
   const companyName = (name || '').trim();
   if (!companyName) throw new Error('Business space name is required.');
@@ -137,6 +149,7 @@ export const createBusinessSpace = async (user, { name }) => {
  * a brand-new Google user discover and auto-link to the company.
  */
 export const getInviteByEmail = async (email) => {
+  const { db, doc, getDoc } = await getFirebase();
   if (!db || !email) return null;
   const key = email.trim().toLowerCase();
   try {
@@ -157,6 +170,7 @@ export const getInviteByEmail = async (email) => {
  * them in companies/{ownerUid}/members/{uid}.
  */
 export const acceptInvite = async (user, invite) => {
+  const { db, doc, setDoc, serverTimestamp } = await getFirebase();
   if (!db || !user) throw new Error('Firebase not configured');
   if (!invite?.companyUid) throw new Error('This invite is invalid or already used.');
   const email = (user.email || '').trim().toLowerCase();
@@ -196,6 +210,7 @@ export const acceptInvite = async (user, invite) => {
  * without signing out the admin.
  */
 export const provisionEmployeeAccount = async ({ email, password, name, role, companyUid, employeeId, department, avatar }) => {
+  const { db, doc, setDoc, serverTimestamp } = await getFirebase();
   if (!db || !secondaryAuth) throw new Error('Firebase not configured');
   if (!email) throw new Error('Teammate identifier is required.');
   if (!companyUid) throw new Error('Missing company ID.');
@@ -249,6 +264,7 @@ export const provisionEmployeeAccount = async ({ email, password, name, role, co
  * Marks a teammate's email invite as revoked so they can no longer auto-link.
  */
 export const revokeInvite = async (email) => {
+  const { db, doc, setDoc, serverTimestamp } = await getFirebase();
   if (!db || !email) return;
   const key = email.trim().toLowerCase();
   try {
@@ -295,11 +311,156 @@ export const deleteEmployeeAccount = async (uid) => {
   }
 };
 
+/**
+ * Completely deletes the current user account:
+ * 1. Removes their Firestore record from users/{uid}
+ * 2. Removes from companies/{companyUid}/members/{uid} if present
+ * 3. Deletes the Firebase Auth account
+ * 4. Cleans up session and signs out
+ */
+export const deleteCurrentUserAccount = async ({ uid, companyUid, employeeId } = {}) => {
+  if (!auth) throw new Error('Firebase not configured');
+  const user = auth.currentUser;
+  const targetUid = uid || user?.uid;
+  const { db, doc, deleteDoc } = await getFirebase();
+
+  // 1. Clean up Firestore user doc
+  if (db && targetUid) {
+    try {
+      await deleteDoc(doc(db, 'users', targetUid));
+    } catch (e) {
+      console.warn('Failed to delete users doc:', e);
+    }
+  }
+
+  // 2. Clean up company member doc
+  if (db && companyUid && targetUid) {
+    try {
+      await deleteDoc(doc(db, 'companies', companyUid, 'members', targetUid));
+    } catch (e) {
+      console.warn('Failed to delete company member doc:', e);
+    }
+  }
+
+  // 3. Delete from Firebase Auth if currentUser matches
+  if (user && user.uid === targetUid) {
+    try {
+      await deleteUser(user);
+    } catch (err) {
+      if (err.code === 'auth/requires-recent-login') {
+        throw new Error('For security, please log out and log in again before deleting your account.');
+      }
+      console.warn('Could not delete Firebase Auth user:', err);
+    }
+  }
+
+  // 4. Clear local auth state
+  try {
+    await signOut(auth);
+  } catch {}
+  
+  localStorage.removeItem('kormiis_user');
+  localStorage.removeItem('kormiis_last_identifier');
+  return true;
+};
+
+/**
+ * Transfers/promotes another teammate to Admin role in the company.
+ */
+export const transferAdminship = async (companyUid, targetTeammate) => {
+  if (!companyUid || !targetTeammate) throw new Error('Invalid arguments for admin transfer');
+  const targetUid = targetTeammate.uid || targetTeammate.id;
+  const { db, doc, setDoc } = await getFirebase();
+
+  if (db && targetUid) {
+    try {
+      await setDoc(doc(db, 'companies', companyUid, 'members', targetUid), {
+        role: 'Admin',
+        systemRole: 'Admin'
+      }, { merge: true });
+    } catch (e) {
+      console.warn('Failed to update company member role:', e);
+    }
+
+    try {
+      await setDoc(doc(db, 'users', targetUid), {
+        role: 'Admin',
+        companyUid
+      }, { merge: true });
+    } catch (e) {
+      console.warn('Failed to update user doc role:', e);
+    }
+  }
+
+  return true;
+};
+
+/**
+ * Schedules workspace for permanent deletion in 7 days (1 week).
+ * Saves deletion status to Firestore companies/{companyUid}.
+ */
+export const scheduleWorkspaceDeletion = async ({ companyUid, adminUid, requestedBy, scheduledDate }) => {
+  if (!companyUid) throw new Error('Company ID missing.');
+  const { db, doc, setDoc, serverTimestamp } = await getFirebase();
+
+  if (db && companyUid) {
+    try {
+      await setDoc(doc(db, 'companies', companyUid), {
+        deletionStatus: {
+          isPending: true,
+          scheduledDeletionDate: scheduledDate,
+          requestedAt: serverTimestamp(),
+          requestedBy: {
+            name: requestedBy?.name || 'Administrator',
+            email: requestedBy?.email || '',
+            uid: requestedBy?.uid || adminUid || ''
+          }
+        }
+      }, { merge: true });
+    } catch (err) {
+      console.warn('Failed to update company deletionStatus:', err);
+    }
+  }
+
+  return true;
+};
+
+/**
+ * Cancels a scheduled workspace deletion.
+ */
+export const cancelWorkspaceDeletion = async ({ companyUid }) => {
+  if (!companyUid) throw new Error('Company ID missing.');
+  const { db, doc, setDoc } = await getFirebase();
+
+  if (db && companyUid) {
+    try {
+      await setDoc(doc(db, 'companies', companyUid), {
+        deletionStatus: null
+      }, { merge: true });
+    } catch (err) {
+      console.warn('Failed to clear company deletionStatus:', err);
+    }
+  }
+
+  return true;
+};
+
+export const setAuthPersistence = async (remember = true) => {
+  if (!auth) return;
+  try {
+    const persistenceType = remember ? browserLocalPersistence : browserSessionPersistence;
+    await setPersistence(auth, persistenceType);
+  } catch (err) {
+    console.warn('Failed to set auth persistence:', err);
+  }
+};
+
 // Tries popup sign-in first (works on all browsers). Falls back to
 // redirect-based sign-in only when the popup is blocked (e.g. strict popup
 // blockers). Redirect is deprecated on Chrome, so it's only a last resort.
-export const loginWithGoogle = async () => {
+export const loginWithGoogle = async (remember = true) => {
   if (!auth) throw new Error('Firebase not configured');
+  await setAuthPersistence(remember);
   const provider = new GoogleAuthProvider();
   // Ensure Google displays the account profile chooser so user can select their active profile
   provider.setCustomParameters({
@@ -323,15 +484,17 @@ export const getGoogleRedirectResult = async () => {
   return result?.user || null;
 };
 
-export const loginWithEmail = async (email, password) => {
+export const loginWithEmail = async (email, password, remember = true) => {
   if (!auth) throw new Error('Firebase not configured');
+  await setAuthPersistence(remember);
   const parsedEmail = parseIdentifier(email);
   const result = await signInWithEmailAndPassword(auth, parsedEmail, password);
   return result.user;
 };
 
-export const registerWithEmail = async (email, password) => {
+export const registerWithEmail = async (email, password, remember = true) => {
   if (!auth) throw new Error('Firebase not configured');
+  await setAuthPersistence(remember);
   const parsedEmail = parseIdentifier(email);
   const result = await createUserWithEmailAndPassword(auth, parsedEmail, password);
   return result.user;

@@ -53,6 +53,7 @@ export default function EmployeePortal({
   isDarkMode,
   toggleTheme,
   employees, 
+  setEmployees,
   attendance, 
   payroll, 
   expenses, 
@@ -83,6 +84,8 @@ export default function EmployeePortal({
   assetRequests,
   setAssetRequests,
   settings,
+  setSettings,
+  addNotification,
   notes,
   setNotes,
   handleLogout,
@@ -240,7 +243,13 @@ export default function EmployeePortal({
           addToast={addToast} 
           addLog={addLog} 
           settings={settings} 
+          setSettings={setSettings}
           employees={employees} 
+          setEmployees={setEmployees}
+          handleLogout={handleLogout}
+          announcements={announcements}
+          setAnnouncements={setAnnouncements}
+          addNotification={addNotification}
         />
       case 'my-assets':
         return <MyAssetsView

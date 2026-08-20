@@ -6,7 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { formatDate } from '../services/date.js'
-import { changeEmployeePassword } from '../services/auth.js'
+import { changeEmployeePassword, deleteCurrentUserAccount, scheduleWorkspaceDeletion, cancelWorkspaceDeletion } from '../services/auth.js'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 
 export default function ProfileView({ 
   currentUser, 
@@ -16,8 +17,12 @@ export default function ProfileView({
   addLog, 
   settings, 
   setSettings, 
-  employees, 
-  setEmployees 
+  employees = [], 
+  setEmployees,
+  handleLogout,
+  announcements = [],
+  setAnnouncements,
+  addNotification
 }) {
   const [activeTab, setActiveTab] = useState('personal') // 'personal' | 'work' | 'security'
   const [editMode, setEditMode] = useState(false)
@@ -30,6 +35,12 @@ export default function ProfileView({
   const [showPwNew, setShowPwNew] = useState(false)
   const [showPwConfirm, setShowPwConfirm] = useState(false)
   const [pwLoading, setPwLoading] = useState(false)
+
+  // Account Deletion State
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+  const [deleteConfirmText, setDeleteConfirmText] = useState('')
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [isCancellingDeletion, setIsCancellingDeletion] = useState(false)
 
   // Edit form state
   const [formData, setFormData] = useState({
@@ -146,9 +157,169 @@ export default function ProfileView({
     addToast?.(`${label} copied to clipboard!`, 'success')
   }
 
-  const empId = currentUser?.id || currentUser?.employeeId || 'N/A'
+  const empId = currentUser?.id || currentUser?.employeeId || currentUser?.uid || 'N/A'
   const workEmail = currentUser?.email || currentUser?.workEmail || currentUser?.personalEmail || 'N/A'
   const companyId = currentUser?.companyUid || currentUser?.adminUid || currentUser?.uid || currentUser?.id
+
+  // Determine admin roles
+  const isCurrentAdmin = currentUser?.role === 'Admin' || currentUser?.isWorkspaceOwner || (currentUser?.companyUid && currentUser?.companyUid === currentUser?.uid)
+
+  const otherAdmins = (employees || []).filter(e => {
+    const isSelf = (e.id === empId || e.uid === currentUser?.uid || (currentUser?.email && e.email === currentUser?.email))
+    return !isSelf && (e.role === 'Admin' || e.systemRole === 'Admin')
+  })
+
+  // Sole admin: current user is Admin and no other admins exist in the workspace
+  const isSoleAdmin = isCurrentAdmin && otherAdmins.length === 0
+
+  // Check if workspace deletion is currently pending
+  const isDeletionPending = !!settings?.deletionStatus?.isPending
+  const scheduledDate = settings?.deletionStatus?.scheduledDeletionDate
+
+  const handleDeleteClick = () => {
+    setDeleteConfirmText('')
+    setDeleteModalOpen(true)
+  }
+
+  const handleExecuteDeleteAccount = async () => {
+    if (deleteConfirmText.trim().toUpperCase() !== 'DELETE') {
+      addToast?.('Please type DELETE to confirm.', 'warning')
+      return
+    }
+    setIsDeleting(true)
+    try {
+      const uid = currentUser?.uid || currentUser?.id
+      const companyUid = currentUser?.companyUid || currentUser?.uid
+      const currentId = currentUser?.id || currentUser?.employeeId
+
+      if (isSoleAdmin) {
+        // Sole Admin: Schedule entire workspace for deletion in 7 days (1 week grace period)
+        const targetScheduledDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+        const targetDateFormatted = new Date(targetScheduledDate).toLocaleDateString(undefined, {
+          weekday: 'short',
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric'
+        })
+
+        // 1. Update settings with deletion status
+        const updatedSettings = {
+          ...(settings || {}),
+          deletionStatus: {
+            isPending: true,
+            scheduledDeletionDate: targetScheduledDate,
+            requestedAt: new Date().toISOString(),
+            requestedBy: {
+              name: currentUser.name || 'Administrator',
+              email: currentUser.email || '',
+              uid: currentUser.uid || currentId
+            }
+          }
+        }
+        setSettings?.(updatedSettings)
+
+        // 2. Post high-priority announcement to all employees
+        const deletionAnnouncement = {
+          id: `announcement-del-${Date.now()}`,
+          title: '⚠️ Workspace Scheduled for Permanent Deletion in 7 Days',
+          content: `The workspace administrator has scheduled this entire workspace for permanent deletion on ${targetDateFormatted} (in 7 days). All company data, member accounts, and records will be deleted on that date. Please export or backup any necessary documents before then.`,
+          author: currentUser.name || 'Administrator',
+          authorId: currentUser.uid || currentId,
+          date: new Date().toISOString().split('T')[0],
+          category: 'Company',
+          pinned: true,
+          urgent: true,
+          target: 'all'
+        }
+        setAnnouncements?.(prev => [deletionAnnouncement, ...(prev || [])])
+
+        // 3. Dispatch system notification to all employees
+        addNotification?.(
+          `⚠️ Workspace has been scheduled for permanent deletion in 7 days (on ${targetDateFormatted}).`, 
+          'announcements', 
+          { title: 'Workspace Deletion Scheduled', category: 'system' }
+        )
+
+        // 4. Save to Firestore
+        await scheduleWorkspaceDeletion({
+          companyUid,
+          adminUid: uid,
+          requestedBy: {
+            name: currentUser.name || 'Administrator',
+            email: currentUser.email || '',
+            uid
+          },
+          scheduledDate: targetScheduledDate
+        })
+
+        addLog?.('Workspace Deletion Scheduled', `Administrator scheduled workspace deletion for ${targetDateFormatted} (1-week notice).`, 'warning')
+        addToast?.(`Workspace scheduled for deletion on ${targetDateFormatted}. All employees have been notified.`, 'warning')
+
+        setDeleteModalOpen(false)
+      } else {
+        // Multi-Admin (>1 Admin) or Regular Employee: Delete account IMMEDIATELY without notifying all employees
+        if (setEmployees) {
+          setEmployees(prev => (prev || []).filter(e => e.id !== currentId && e.uid !== uid && e.email !== currentUser?.email))
+        }
+
+        await deleteCurrentUserAccount({ uid, companyUid, employeeId: currentId })
+
+        addLog?.('Account Deleted', `${currentUser.name || 'User'} (${currentUser.email || 'N/A'}) deleted their account.`, 'warning')
+        addToast?.('Your account has been deleted successfully.', 'info')
+
+        setDeleteModalOpen(false)
+        if (handleLogout) {
+          await handleLogout()
+        }
+      }
+    } catch (err) {
+      addToast?.('Failed to process deletion: ' + (err.message || 'Unknown error'), 'danger')
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  const handleCancelScheduledDeletion = async () => {
+    setIsCancellingDeletion(true)
+    try {
+      const companyUid = currentUser?.companyUid || currentUser?.uid
+      const currentId = currentUser?.id || currentUser?.employeeId
+
+      // 1. Clear deletion status from settings
+      const updatedSettings = {
+        ...(settings || {}),
+        deletionStatus: null
+      }
+      setSettings?.(updatedSettings)
+
+      // 2. Post cancellation announcement
+      const cancelAnnouncement = {
+        id: `announcement-cancel-${Date.now()}`,
+        title: '✅ Workspace Deletion Cancelled',
+        content: `The workspace administrator has cancelled the scheduled deletion. Workspace operations will continue normally.`,
+        author: currentUser.name || 'Administrator',
+        authorId: currentUser.uid || currentId,
+        date: new Date().toISOString().split('T')[0],
+        category: 'Company',
+        pinned: false,
+        target: 'all'
+      }
+      setAnnouncements?.(prev => [cancelAnnouncement, ...(prev || [])])
+
+      // 3. Send notification
+      addNotification?.('✅ Scheduled workspace deletion has been cancelled.', 'announcements', { title: 'Deletion Cancelled', category: 'system' })
+
+      // 4. Update Firestore
+      await cancelWorkspaceDeletion({ companyUid })
+
+      addLog?.('Deletion Cancelled', 'Administrator cancelled scheduled workspace deletion.', 'info')
+      addToast?.('Scheduled workspace deletion has been cancelled.', 'success')
+    } catch (err) {
+      addToast?.('Failed to cancel deletion: ' + (err.message || 'Unknown error'), 'danger')
+    } finally {
+      setIsCancellingDeletion(false)
+    }
+  }
 
   return (
     <div className="flex flex-col gap-6 max-w-[920px] mx-auto pb-12 w-full animate-in fade-in duration-300">
@@ -613,122 +784,307 @@ export default function ProfileView({
 
       {/* TAB 3: Account Security & Password Change */}
       {activeTab === 'security' && (
-        <Card className="glass-card rounded-3xl border border-white/30 dark:border-white/10 shadow-sm overflow-hidden">
-          <CardHeader className="p-6 sm:p-8 pb-4 border-b border-border/40 dark:border-white/5">
-            <CardTitle className="text-fluid-lg font-bold flex items-center gap-2">
-              <Icon name="lock" size={20} className="text-primary" />
-              Account Security
-            </CardTitle>
-            <CardDescription className="text-fluid-xs text-muted-foreground mt-1">
-              Update your account password. Sign-in credentials are secured with end-to-end encryption.
-            </CardDescription>
-          </CardHeader>
+        <>
+          <Card className="glass-card rounded-3xl border border-white/30 dark:border-white/10 shadow-sm overflow-hidden">
+            <CardHeader className="p-6 sm:p-8 pb-4 border-b border-border/40 dark:border-white/5">
+              <CardTitle className="text-fluid-lg font-bold flex items-center gap-2">
+                <Icon name="lock" size={20} className="text-primary" />
+                Account Security
+              </CardTitle>
+              <CardDescription className="text-fluid-xs text-muted-foreground mt-1">
+                Update your account password. Sign-in credentials are secured with end-to-end encryption.
+              </CardDescription>
+            </CardHeader>
 
-          <CardContent className="p-6 sm:p-8 pt-6">
-            <form onSubmit={handleChangePassword} className="max-w-[560px] space-y-5">
-              <div className="space-y-2">
-                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Current Password
-                </label>
-                <div className="relative">
-                  <Icon name="lock" size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
-                  <Input
-                    type={showPwCurrent ? 'text' : 'password'}
-                    placeholder="Enter current password"
-                    value={pwCurrent}
-                    onChange={e => setPwCurrent(e.target.value)}
-                    required
-                    className="h-11 !pl-11 pr-11 rounded-2xl bg-white/70 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:ring-2 focus:ring-primary/20"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPwCurrent(v => !v)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer p-0.5"
-                    tabIndex={-1}
-                  >
-                    <Icon name={showPwCurrent ? 'visibility_off' : 'visibility'} size={18} />
-                  </button>
+            <CardContent className="p-6 sm:p-8 pt-6">
+              <form onSubmit={handleChangePassword} className="max-w-[560px] space-y-5">
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Current Password
+                  </label>
+                  <div className="relative">
+                    <Icon name="lock" size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                    <Input
+                      type={showPwCurrent ? 'text' : 'password'}
+                      placeholder="Enter current password"
+                      value={pwCurrent}
+                      onChange={e => setPwCurrent(e.target.value)}
+                      required
+                      className="h-11 !pl-11 pr-11 rounded-2xl bg-white/70 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:ring-2 focus:ring-primary/20"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPwCurrent(v => !v)}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer p-0.5"
+                      tabIndex={-1}
+                    >
+                      <Icon name={showPwCurrent ? 'visibility_off' : 'visibility'} size={18} />
+                    </button>
+                  </div>
                 </div>
-              </div>
 
-              <div className="space-y-2">
-                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  New Password
-                </label>
-                <div className="relative">
-                  <Icon name="vpn_key" size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
-                  <Input
-                    type={showPwNew ? 'text' : 'password'}
-                    placeholder="Enter at least 6 characters"
-                    value={pwNew}
-                    onChange={e => setPwNew(e.target.value)}
-                    required
-                    minLength={6}
-                    className="h-11 !pl-11 pr-11 rounded-2xl bg-white/70 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:ring-2 focus:ring-primary/20"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPwNew(v => !v)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer p-0.5"
-                    tabIndex={-1}
-                  >
-                    <Icon name={showPwNew ? 'visibility_off' : 'visibility'} size={18} />
-                  </button>
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    New Password
+                  </label>
+                  <div className="relative">
+                    <Icon name="vpn_key" size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                    <Input
+                      type={showPwNew ? 'text' : 'password'}
+                      placeholder="Enter at least 6 characters"
+                      value={pwNew}
+                      onChange={e => setPwNew(e.target.value)}
+                      required
+                      minLength={6}
+                      className="h-11 !pl-11 pr-11 rounded-2xl bg-white/70 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:ring-2 focus:ring-primary/20"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPwNew(v => !v)}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer p-0.5"
+                      tabIndex={-1}
+                    >
+                      <Icon name={showPwNew ? 'visibility_off' : 'visibility'} size={18} />
+                    </button>
+                  </div>
+                  <p className="text-fluid-xs text-muted-foreground">
+                    Must be at least 6 characters. Use letters, numbers, and symbols for better security.
+                  </p>
                 </div>
-                <p className="text-fluid-xs text-muted-foreground">
-                  Must be at least 6 characters. Use letters, numbers, and symbols for better security.
-                </p>
-              </div>
 
-              <div className="space-y-2">
-                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Confirm New Password
-                </label>
-                <div className="relative">
-                  <Icon name="check_circle" size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
-                  <Input
-                    type={showPwConfirm ? 'text' : 'password'}
-                    placeholder="Re-type new password"
-                    value={pwConfirm}
-                    onChange={e => setPwConfirm(e.target.value)}
-                    required
-                    minLength={6}
-                    className="h-11 !pl-11 pr-11 rounded-2xl bg-white/70 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:ring-2 focus:ring-primary/20"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPwConfirm(v => !v)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer p-0.5"
-                    tabIndex={-1}
-                  >
-                    <Icon name={showPwConfirm ? 'visibility_off' : 'visibility'} size={18} />
-                  </button>
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Confirm New Password
+                  </label>
+                  <div className="relative">
+                    <Icon name="check_circle" size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                    <Input
+                      type={showPwConfirm ? 'text' : 'password'}
+                      placeholder="Re-type new password"
+                      value={pwConfirm}
+                      onChange={e => setPwConfirm(e.target.value)}
+                      required
+                      minLength={6}
+                      className="h-11 !pl-11 pr-11 rounded-2xl bg-white/70 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:ring-2 focus:ring-primary/20"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPwConfirm(v => !v)}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer p-0.5"
+                      tabIndex={-1}
+                    >
+                      <Icon name={showPwConfirm ? 'visibility_off' : 'visibility'} size={18} />
+                    </button>
+                  </div>
                 </div>
-              </div>
 
-              <div className="pt-2">
-                <Button 
-                  type="submit" 
-                  disabled={pwLoading}
-                  className="h-11 px-6 rounded-2xl font-semibold shadow-md bg-primary hover:bg-primary/90 text-primary-foreground flex items-center gap-2"
-                >
-                  {pwLoading ? (
-                    <>
-                      <Icon name="progress_activity" size={18} className="animate-spin" />
-                      <span>Updating Password...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Icon name="lock_reset" size={18} />
-                      <span>Update Password</span>
-                    </>
+                <div className="pt-2">
+                  <Button 
+                    type="submit" 
+                    disabled={pwLoading}
+                    className="h-11 px-6 rounded-2xl font-semibold shadow-md bg-primary hover:bg-primary/90 text-primary-foreground flex items-center gap-2"
+                  >
+                    {pwLoading ? (
+                      <>
+                        <Icon name="progress_activity" size={18} className="animate-spin" />
+                        <span>Updating Password...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Icon name="lock_reset" size={18} />
+                        <span>Update Password</span>
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+
+          {/* Danger Zone: Account Deletion */}
+          <Card className="glass-card rounded-3xl border border-destructive/25 shadow-sm overflow-hidden mt-6 bg-destructive/[0.02] dark:bg-destructive/[0.05]">
+            <CardHeader className="p-6 sm:p-8 pb-4 border-b border-destructive/15">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <CardTitle className="text-fluid-lg font-bold flex items-center gap-2 text-destructive">
+                    <Icon name="delete_forever" size={20} className="text-destructive" />
+                    Danger Zone
+                  </CardTitle>
+                  <CardDescription className="text-fluid-xs text-muted-foreground mt-1">
+                    Irreversible account and workspace management actions.
+                  </CardDescription>
+                </div>
+                <Badge variant="destructive" className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full">
+                  Permanent
+                </Badge>
+              </div>
+            </CardHeader>
+
+            <CardContent className="p-6 sm:p-8 pt-6">
+              {isDeletionPending ? (
+                /* Active Scheduled Deletion Banner */
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4.5 rounded-2xl bg-amber-500/[0.1] border border-amber-500/30">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <Icon name="schedule" size={18} className="text-amber-600 dark:text-amber-400 shrink-0" />
+                      <h4 className="text-fluid-sm font-bold text-foreground m-0">Workspace Deletion Pending</h4>
+                    </div>
+                    <p className="text-fluid-xs text-muted-foreground m-0 max-w-[540px]">
+                      This workspace is scheduled for permanent deletion on <strong className="text-foreground">{scheduledDate ? new Date(scheduledDate).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }) : 'in 7 days'}</strong> (1-week notice period). All employees have been notified.
+                    </p>
+                  </div>
+                  {isCurrentAdmin && (
+                    <Button 
+                      type="button" 
+                      onClick={handleCancelScheduledDeletion}
+                      disabled={isCancellingDeletion}
+                      className="h-11 px-5 rounded-2xl font-bold shrink-0 shadow-sm bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-2 active:scale-95 transition-all cursor-pointer"
+                    >
+                      {isCancellingDeletion ? (
+                        <>
+                          <Icon name="progress_activity" size={17} className="animate-spin" />
+                          <span>Cancelling...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Icon name="undo" size={17} />
+                          <span>Cancel Deletion</span>
+                        </>
+                      )}
+                    </Button>
                   )}
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+                </div>
+              ) : (
+                /* Delete Action Box */
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4.5 rounded-2xl bg-destructive/[0.06] border border-destructive/20">
+                  <div className="space-y-1">
+                    <h4 className="text-fluid-sm font-bold text-foreground m-0">
+                      {isSoleAdmin ? 'Schedule Workspace Deletion (1-Week Notice)' : 'Delete Account'}
+                    </h4>
+                    <p className="text-fluid-xs text-muted-foreground m-0 max-w-[520px]">
+                      {isSoleAdmin 
+                        ? 'You are the only Administrator. Deleting your account will schedule the entire workspace for permanent deletion in 7 days, and all employees will be notified with 1-week notice.' 
+                        : isCurrentAdmin 
+                          ? 'There are other administrators managing this workspace. Your admin account will be deleted immediately without deleting the workspace or notifying teammates.'
+                          : 'Permanently delete your employee account and revoke access to this workspace.'}
+                    </p>
+                  </div>
+                  <Button 
+                    type="button" 
+                    variant="destructive"
+                    onClick={handleDeleteClick}
+                    className="h-11 px-5 rounded-2xl font-bold shrink-0 shadow-sm flex items-center gap-2 active:scale-95 transition-all cursor-pointer"
+                  >
+                    <Icon name={isSoleAdmin ? "schedule" : "delete"} size={17} />
+                    <span>{isSoleAdmin ? 'Schedule Deletion' : 'Delete Account'}</span>
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </>
       )}
+
+      {/* Account Deletion Confirmation Modal */}
+      <Dialog open={deleteModalOpen} onOpenChange={setDeleteModalOpen}>
+        <DialogContent className="sm:max-w-[480px]">
+          <DialogHeader className="pb-3 border-b border-border/80 dark:border-white/12 space-y-0">
+            <div className="flex items-center gap-2.5">
+              <div className={`size-9 rounded-2xl flex items-center justify-center shrink-0 shadow-inner ${
+                isSoleAdmin 
+                  ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400' 
+                  : 'bg-destructive/15 text-destructive'
+              }`}>
+                <Icon name={isSoleAdmin ? "warning" : "delete_forever"} size={20} />
+              </div>
+              <div>
+                <DialogTitle className={`text-fluid-base font-bold m-0 ${isSoleAdmin ? 'text-foreground' : 'text-destructive'}`}>
+                  {isSoleAdmin ? 'Schedule Workspace Deletion' : 'Delete Account Permanently'}
+                </DialogTitle>
+                <DialogDescription className="text-fluid-xs text-muted-foreground m-0 mt-0.5">
+                  {isSoleAdmin ? '7-day grace period notice' : 'This action is final and immediate'}
+                </DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+
+          <div className="py-3 flex flex-col gap-3.5">
+            <div className={`p-3.5 rounded-2xl border text-fluid-xs leading-relaxed flex items-start gap-2.5 ${
+              isSoleAdmin 
+                ? 'bg-amber-500/[0.08] dark:bg-amber-500/[0.14] border-amber-500/30 text-foreground' 
+                : 'bg-destructive/[0.08] dark:bg-destructive/[0.14] border-destructive/30 text-foreground'
+            }`}>
+              <Icon 
+                name={isSoleAdmin ? "info" : "error_outline"} 
+                size={16} 
+                className={`${isSoleAdmin ? 'text-amber-600 dark:text-amber-400' : 'text-destructive'} shrink-0 mt-0.5`} 
+              />
+              <span>
+                {isSoleAdmin ? (
+                  <>
+                    You are currently the <strong>only Administrator</strong>. Confirming this will schedule the <strong>entire workspace and all accounts for permanent deletion in 7 days</strong>. An announcement and notification will be sent to all employees so they can export their records.
+                  </>
+                ) : isCurrentAdmin ? (
+                  <>
+                    Other administrators exist in this workspace. Your administrator account will be <strong>deleted immediately</strong>. The workspace will remain active under the other administrators, and no notification will be sent to teammates.
+                  </>
+                ) : (
+                  <>
+                    Your employee account, profile details, and access to this workspace will be <strong>deleted immediately</strong>.
+                  </>
+                )}
+              </span>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-semibold text-foreground">
+                To confirm, please type <span className="font-mono font-black text-destructive px-1.5 py-0.5 rounded bg-destructive/10">DELETE</span> below:
+              </label>
+              <Input
+                type="text"
+                placeholder="Type DELETE to confirm"
+                value={deleteConfirmText}
+                onChange={e => setDeleteConfirmText(e.target.value)}
+                autoFocus
+                className="h-11 rounded-2xl font-mono text-sm tracking-wider uppercase border-destructive/30 focus:border-destructive focus:ring-2 focus:ring-destructive/20"
+              />
+            </div>
+          </div>
+
+          <DialogFooter className="pt-3 border-t border-border/80 dark:border-white/12 flex items-center justify-end gap-2.5">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setDeleteModalOpen(false)}
+              disabled={isDeleting}
+              className="h-10 rounded-2xl font-semibold"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant={isSoleAdmin ? "default" : "destructive"}
+              onClick={handleExecuteDeleteAccount}
+              disabled={isDeleting || deleteConfirmText.trim().toUpperCase() !== 'DELETE'}
+              className={`h-10 px-5 rounded-2xl font-bold flex items-center gap-2 cursor-pointer shadow-sm disabled:opacity-50 ${
+                isSoleAdmin ? 'bg-amber-600 hover:bg-amber-700 text-white' : ''
+              }`}
+            >
+              {isDeleting ? (
+                <>
+                  <Icon name="progress_activity" size={16} className="animate-spin" />
+                  <span>Processing...</span>
+                </>
+              ) : (
+                <>
+                  <Icon name={isSoleAdmin ? "schedule" : "delete_forever"} size={16} />
+                  <span>{isSoleAdmin ? 'Schedule Deletion (7 Days)' : 'Permanently Delete'}</span>
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

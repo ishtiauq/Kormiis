@@ -91,7 +91,7 @@ export default function AppContent({ currentView, setCurrentView, isAppLoading, 
       view = <Settings settings={data.settings} setSettings={data.handleSetSettings} addLog={data.addLog} addToast={data.addToast} auditLogs={data.auditLogs} themeMode={themeMode} toggleTheme={toggleTheme} employees={data.employees} setEmployees={data.handleSetEmployees} currentUser={user} />
       break
     case 'profile':
-      view = <ProfileView currentUser={user} pendingProfileEdits={data.pendingProfileEdits} setPendingProfileEdits={data.setPendingProfileEdits} addToast={data.addToast} addLog={data.addLog} settings={data.settings} setSettings={data.handleSetSettings} employees={data.employees} setEmployees={data.handleSetEmployees} />
+      view = <ProfileView currentUser={user} pendingProfileEdits={data.pendingProfileEdits} setPendingProfileEdits={data.setPendingProfileEdits} addToast={data.addToast} addLog={data.addLog} settings={data.settings} setSettings={data.handleSetSettings} employees={data.employees} setEmployees={data.handleSetEmployees} handleLogout={data.handleLogout} announcements={data.announcements} setAnnouncements={data.setAnnouncements} addNotification={data.addNotification} />
       break
     case 'notes':
       view = <Notes notes={data.notes} setNotes={data.handleSetNotes} currentUser={user} addToast={data.addToast} />

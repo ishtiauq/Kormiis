@@ -11,7 +11,6 @@ import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, A
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectItem } from "@/components/ui/select"
 import { requestPushPermission, showSystemNotification, getPushPermission } from "../services/pushNotifications.js"
-import { sendTestPush, isFcmAvailable } from "../services/fcm.js"
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
 
 export default function Settings({ settings, setSettings, addLog, addToast, auditLogs, themeMode, toggleTheme, employees, setEmployees, currentUser }) {
@@ -641,13 +640,8 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                     )}
                     <Button variant="outline" size="sm" disabled={isPushTesting} onClick={async () => {
                       setIsPushTesting(true)
-                      const fcmRes = await sendTestPush()
-                      if (fcmRes.ok) {
-                        if (addToast) addToast('Test push alert triggered.', 'success')
-                      } else {
-                        await showSystemNotification({ title: 'Kormiis Test Alert', body: 'Push notifications are working properly! 🎉', url: '' })
-                        if (addToast) addToast('Test notification sent.', 'success')
-                      }
+                      await showSystemNotification({ title: 'Kormiis Test Alert', body: 'Push notifications are working properly! 🎉', url: '' })
+                      if (addToast) addToast('Test notification sent.', 'success')
                       setIsPushTesting(false)
                     }} className="h-9 rounded-xl text-xs font-bold gap-1.5">
                       <Icon name="send" size={14}/> Send Test Alert
@@ -657,8 +651,8 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
 
                 {pushEnabled && (
                   <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-muted/40 dark:bg-white/5 border border-border/60 dark:border-white/10 text-xs text-muted-foreground">
-                    <Icon name={isFcmAvailable() ? 'cloud_done' : 'cloud_off'} size={16} className={isFcmAvailable() ? 'text-emerald-500' : 'text-amber-500'} />
-                    <span>{isFcmAvailable() ? 'Firebase Cloud Messaging online.' : 'Web push channel active on this device.'}</span>
+                    <Icon name="notifications_active" size={16} className="text-emerald-500" />
+                    <span>Web push channel active on this device.</span>
                   </div>
                 )}
               </div>

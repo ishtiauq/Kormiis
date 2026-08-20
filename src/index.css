@@ -302,15 +302,15 @@ html.dark .glass-kormiis,
 /* Modals & Popovers (iOS 26 Ultra-Liquid Glass) */
 .glass-kormiis-modal,
 .glass-popover {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.88) 0%, rgba(255, 255, 255, 0.72) 100%) !important;
-  -webkit-backdrop-filter: saturate(190%) blur(36px) brightness(104%) !important;
-  backdrop-filter: saturate(190%) blur(36px) brightness(104%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.80) !important;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.52) 0%, rgba(255, 255, 255, 0.25) 100%) !important;
+  -webkit-backdrop-filter: saturate(190%) blur(32px) brightness(103%) !important;
+  backdrop-filter: saturate(190%) blur(32px) brightness(103%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.35) !important;
   box-shadow: 
-    0 28px 60px -12px rgba(0, 0, 0, 0.14),
-    0 8px 20px -4px rgba(0, 0, 0, 0.05),
-    inset 0 1px 1px 0 rgba(255, 255, 255, 0.90),
-    inset 1px 0 1px 0 rgba(255, 255, 255, 0.50) !important;
+    0 24px 48px -12px rgba(0, 0, 0, 0.12),
+    0 4px 12px 0 rgba(0, 0, 0, 0.04),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.50),
+    inset 1px 0 1px 0 rgba(255, 255, 255, 0.20) !important;
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
   will-change: backdrop-filter, transform;
@@ -326,15 +326,15 @@ html.dark .glass-kormiis-modal,
 .dark .glass-popover,
 html.dark .glass-popover,
 [data-theme="dark"] .glass-popover {
-  background: linear-gradient(135deg, rgba(24, 24, 34, 0.82) 0%, rgba(12, 12, 18, 0.72) 100%) !important;
-  -webkit-backdrop-filter: saturate(190%) blur(36px) brightness(105%) !important;
-  backdrop-filter: saturate(190%) blur(36px) brightness(105%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  background: linear-gradient(135deg, rgba(28, 28, 40, 0.45) 0%, rgba(14, 14, 22, 0.30) 100%) !important;
+  -webkit-backdrop-filter: saturate(190%) blur(32px) brightness(105%) !important;
+  backdrop-filter: saturate(190%) blur(32px) brightness(105%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
   box-shadow: 
-    0 24px 48px -16px rgba(0, 0, 0, 0.6),
-    0 8px 18px -4px rgba(0, 0, 0, 0.4),
-    inset 0 1px 1px 0 rgba(255, 255, 255, 0.25),
-    inset 1px 0 1px 0 rgba(255, 255, 255, 0.15),
+    0 24px 50px -12px rgba(0, 0, 0, 0.75),
+    0 3px 8px 0 rgba(0, 0, 0, 0.45),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.15),
+    inset 1px 0 1px 0 rgba(255, 255, 255, 0.08),
     inset 0 -1px 1px 0 rgba(0, 0, 0, 0.4) !important;
 }
 

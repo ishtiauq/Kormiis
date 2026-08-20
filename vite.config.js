@@ -77,11 +77,11 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
+            if (id.includes('firebase/firestore') || id.includes('firebase/storage') || id.includes('webchannel-wrapper')) {
+              return 'vendor-firestore'
+            }
             if (id.includes('firebase')) {
               return 'vendor-firebase'
-            }
-            if (id.includes('react') || id.includes('react-dom')) {
-              return 'vendor-react'
             }
             if (id.includes('framer-motion')) {
               return 'vendor-motion'

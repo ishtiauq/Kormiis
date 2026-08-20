@@ -13,7 +13,7 @@ import {
   registerWithEmail,
   formatAuthError
 } from '../services/auth.js'
-import { auth } from '../services/firebase.js'
+import { auth } from '../services/firebaseCore.js'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { 
@@ -24,7 +24,6 @@ import {
   DialogDescription, 
   DialogFooter 
 } from '@/components/ui/dialog'
-import { recordLoginActivity } from '../services/hr.js'
 
 // Landing Page Header & Footer
 import LandingFooter from './landing/LandingFooter.jsx'
@@ -228,7 +227,21 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
   const [showAlreadyInSpace, setShowAlreadyInSpace] = useState(false)
   const [alreadyUser, setAlreadyUser] = useState(null)
   const [loadingMode, setLoadingMode] = useState(null)
-  const [emailOrPhone, setEmailOrPhone] = useState(() => localStorage.getItem('kormiis_last_identifier') || '')
+  const [rememberMe, setRememberMe] = useState(() => {
+    try {
+      return localStorage.getItem('kormiis_remember_me') !== 'false'
+    } catch {
+      return true
+    }
+  })
+  const [emailOrPhone, setEmailOrPhone] = useState(() => {
+    try {
+      const isRemembered = localStorage.getItem('kormiis_remember_me') !== 'false'
+      return isRemembered ? (localStorage.getItem('kormiis_last_identifier') || '') : ''
+    } catch {
+      return ''
+    }
+  })
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
 
@@ -421,7 +434,15 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
     setLoginMode(null)
     setPendingUser(null)
     setSpaceName('')
-    setEmailOrPhone('')
+    if (tab === 'in' && rememberMe) {
+      try {
+        setEmailOrPhone(localStorage.getItem('kormiis_last_identifier') || '')
+      } catch {
+        setEmailOrPhone('')
+      }
+    } else {
+      setEmailOrPhone('')
+    }
     setPassword('')
     setError('')
   }
@@ -443,6 +464,13 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
     setIsLoading(true)
     setError('')
     try {
+      if (rememberMe) {
+        localStorage.setItem('kormiis_last_identifier', emailOrPhone.trim())
+        localStorage.setItem('kormiis_remember_me', 'true')
+      } else {
+        localStorage.removeItem('kormiis_last_identifier')
+        localStorage.setItem('kormiis_remember_me', 'false')
+      }
       let activeUser = pendingUser
       if (!activeUser) {
         if (!emailOrPhone.trim() || !password) {
@@ -450,9 +478,8 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
           setIsLoading(false)
           return
         }
-        activeUser = await registerWithEmail(emailOrPhone, password)
+        activeUser = await registerWithEmail(emailOrPhone, password, rememberMe)
       }
-      localStorage.setItem('kormiis_last_identifier', emailOrPhone.trim())
       const created = await createBusinessSpace(activeUser, { name: spaceName })
       completeAdminLogin(activeUser, created.companyName)
     } catch (err) {
@@ -472,8 +499,14 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
     setLoadingMode('join')
     setError('')
     try {
-      localStorage.setItem('kormiis_last_identifier', emailOrPhone.trim())
-      const user = await loginWithEmail(emailOrPhone, password)
+      if (rememberMe) {
+        localStorage.setItem('kormiis_last_identifier', emailOrPhone.trim())
+        localStorage.setItem('kormiis_remember_me', 'true')
+      } else {
+        localStorage.removeItem('kormiis_last_identifier')
+        localStorage.setItem('kormiis_remember_me', 'false')
+      }
+      const user = await loginWithEmail(emailOrPhone, password, rememberMe)
       await finishGoogleLogin(user, 'join')
     } catch (err) {
       setError(formatAuthError(err))
@@ -488,9 +521,10 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
     setLoadingMode(mode)
     setLoginMode(mode)
     try {
+      localStorage.setItem('kormiis_remember_me', rememberMe ? 'true' : 'false')
       let user = auth?.currentUser
       if (!user) {
-        const result = await loginWithGoogle()
+        const result = await loginWithGoogle(rememberMe)
         if (result.mode === 'redirect') {
           sessionStorage.setItem('kormiis_login_mode', mode)
           return
@@ -982,6 +1016,26 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                       <Icon name={showPassword ? "visibility_off" : "visibility"} size={18} />
                     </button>
                   </div>
+
+                  {/* Remember Me Checkbox */}
+                  <div className="flex items-center justify-between px-1 py-0.5 select-none">
+                    <label 
+                      onClick={() => setRememberMe(prev => !prev)}
+                      className="flex items-center gap-2.5 cursor-pointer group py-1"
+                    >
+                      <div className={`size-4.5 rounded-md flex items-center justify-center border transition-all duration-200 ${
+                        rememberMe 
+                          ? 'bg-primary border-primary text-primary-foreground shadow-xs' 
+                          : 'bg-white/10 border-white/25 group-hover:border-white/40'
+                      }`}>
+                        {rememberMe && <Icon name="check" size={13} className="font-bold stroke-[3]" />}
+                      </div>
+                      <span className="text-[12px] font-medium text-white/80 group-hover:text-white transition-colors">
+                        Remember me
+                      </span>
+                    </label>
+                  </div>
+
                   <button
                     type="submit"
                     disabled={isLoading}
@@ -1062,6 +1116,26 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                       className="h-11 rounded-xl text-xs sm:text-sm !pl-10.5 bg-black/40 border-white/20 text-white placeholder:text-white/45 focus:border-primary focus:bg-black/60 transition-colors backdrop-blur-sm shadow-inner"
                     />
                   </div>
+
+                  {/* Remember Me Checkbox */}
+                  <div className="flex items-center justify-between px-1 py-0.5 select-none">
+                    <label 
+                      onClick={() => setRememberMe(prev => !prev)}
+                      className="flex items-center gap-2.5 cursor-pointer group py-1"
+                    >
+                      <div className={`size-4.5 rounded-md flex items-center justify-center border transition-all duration-200 ${
+                        rememberMe 
+                          ? 'bg-primary border-primary text-primary-foreground shadow-xs' 
+                          : 'bg-white/10 border-white/25 group-hover:border-white/40'
+                      }`}>
+                        {rememberMe && <Icon name="check" size={13} className="font-bold stroke-[3]" />}
+                      </div>
+                      <span className="text-[12px] font-medium text-white/80 group-hover:text-white transition-colors">
+                        Remember me
+                      </span>
+                    </label>
+                  </div>
+
                   <button
                     type="submit"
                     disabled={isLoading}
