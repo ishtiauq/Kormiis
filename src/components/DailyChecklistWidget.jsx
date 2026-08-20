@@ -23,9 +23,7 @@ export default function DailyChecklistWidget({ notes = [], setNotes, ownerId = '
     <Card className={`flex flex-col p-0 h-full ${cardClass}`}>
       <CardHeader className="flex-row items-center justify-between pb-3.5 space-y-0">
         <div className="flex items-center gap-3">
-          <div className="size-8.5 rounded-xl flex items-center justify-center shrink-0 bg-primary/10 text-primary border border-primary/20">
-            <Icon name="task_alt" size={18}/>
-          </div>
+          <Icon name="task_alt" className="text-primary shrink-0" size={26}/>
           <CardTitle className="text-fluid-lg font-bold text-foreground m-0">
             {checklistNote?.title || "Daily Checklist"}
           </CardTitle>

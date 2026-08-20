@@ -365,9 +365,7 @@ export default function EmployeePortal({
           </DialogHeader>
 
           <div className="flex flex-col items-center gap-2 py-3 text-center">
-            <div className={`size-16 rounded-full flex items-center justify-center ${isPunchedIn ? 'bg-emerald-500/10 text-emerald-600' : 'bg-primary/10 text-primary'}`}>
-              {isPunchedIn ? <Icon name="login" size={28}/> : <Icon name="schedule" size={28}/>}
-            </div>
+            <Icon name={isPunchedIn ? "login" : "schedule"} className={isPunchedIn ? "text-emerald-500 shrink-0" : "text-primary shrink-0"} size={48}/>
             <div className="text-fluid-display font-black tabular-nums tracking-tight text-foreground" aria-live="polite">
               {punchClock.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
             </div>
@@ -406,97 +404,92 @@ export default function EmployeePortal({
       {/* Bottom Tab Bar (Mobile) — Floating Pill */}
       {isMobile && (
 <div className={`fixed bottom-0 left-0 right-0 z-40 flex justify-center pointer-events-none px-4 pb-3.5 sm:pb-4 transition-all duration-300 ${isScrollingDown && !showMobileMenu ? 'translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
-          <nav className="bottom-bar bottom-bar-pill pointer-events-auto w-full max-w-[260px] flex items-center justify-around px-2.5 h-15 transition-all duration-300 rounded-full glass-kormiis text-foreground border border-white/30 dark:border-white/14 shadow-2xl backdrop-blur-3xl" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
+          <nav className="bottom-bar bottom-bar-pill pointer-events-auto w-full max-w-[210px] flex items-center justify-around px-2 h-15 transition-all duration-300 rounded-full glass-kormiis text-foreground border border-white/30 dark:border-white/14 shadow-2xl backdrop-blur-3xl" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
             <MobileTabButton
               active={activeTab === 'dashboard'}
               label="Home"
               onClick={() => { setActiveTab('dashboard'); setShowMobileMenu(false) }}
             >
-              <Icon name="home" size={22}/>
+              <Icon name="home" size={24}/>
             </MobileTabButton>
             <MobileTabButton
               active={activeTab === 'announcements'}
               label="Announcements"
               onClick={() => { setActiveTab('announcements'); setShowMobileMenu(false) }}
             >
-              <Icon name="rss_feed" size={22}/>
-            </MobileTabButton>
-            <MobileTabButton
-              active={false}
-              label="Notifications"
-              onClick={() => { setShowNotifications(true); markNotificationsRead() }}
-              badge={(notifications || []).filter(n => !n.read).length > 0 ? (
-                <span className="absolute top-1.5 right-1.5 flex size-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
-                  <span className="relative inline-flex rounded-full size-2.5 bg-destructive"></span>
-                </span>
-              ) : null}
-            >
-              <Icon name="notifications_active" size={22}/>
+              <Icon name="rss_feed" size={24}/>
             </MobileTabButton>
             <MobileTabButton
               active={showMobileMenu}
-              label="Menu"
+              label={showMobileMenu ? "Close Menu" : "Menu"}
               onClick={() => setShowMobileMenu(!showMobileMenu)}
             >
-              <Icon name="menu" size={22}/>
+              <Icon 
+                name={showMobileMenu ? "close" : "menu"} 
+                size={24}
+                className={`transition-transform duration-300 ${showMobileMenu ? 'rotate-90 text-primary' : 'rotate-0'}`}
+              />
             </MobileTabButton>
           </nav>
         </div>
       )}
 
-      {/* Mobile Menu Drawer */}
-      <div 
-        className={`fixed inset-0 z-50 backdrop-blur-md bg-black/60 transition-opacity duration-300 md:hidden ${showMobileMenu ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
-        onClick={() => setShowMobileMenu(false)}
-        aria-hidden={!showMobileMenu}
-      />
+      {/* Mobile Menu Backdrop Click Catcher (Zero visual overlay) */}
+      {showMobileMenu && (
+        <div 
+          className="fixed inset-0 z-40 md:hidden bg-transparent pointer-events-auto"
+          onClick={() => setShowMobileMenu(false)}
+          aria-hidden="true"
+        />
+      )}
       
       <div 
-        className={`fixed bottom-0 left-0 right-0 z-50 flex flex-col glass-kormiis-modal rounded-t-[32px] shadow-2xl border-t border-x border-white/30 dark:border-white/14 transition-transform duration-350 ease-[cubic-bezier(0.34,1.56,0.64,1)] sm:w-[420px] sm:mx-auto max-h-[85vh] md:hidden overflow-hidden ${showMobileMenu ? 'translate-y-0' : 'translate-y-full'}`}
+        className={`fixed bottom-0 left-0 right-0 w-full z-50 flex flex-col glass-mobile-drawer shadow-2xl transition-transform duration-350 ease-[cubic-bezier(0.16,1,0.3,1)] md:hidden overflow-hidden ${showMobileMenu ? 'translate-y-0' : 'translate-y-full pointer-events-none'}`}
         aria-hidden={!showMobileMenu}
       >
         {/* Pull handle indicator */}
-        <div className="w-12 h-1.5 rounded-full bg-foreground/20 mx-auto mt-3 mb-1 shrink-0" />
+        <div className="w-10 h-1 rounded-full bg-foreground/20 mx-auto mt-2 mb-0.5 shrink-0" />
 
-        <div className="px-6 py-3.5 border-b border-border/80 dark:border-white/10 shrink-0 flex items-center justify-between">
-          <h2 className="text-left text-fluid-lg font-bold text-foreground m-0 leading-none">Navigation Menu</h2>
+        <div className="px-5 py-2 border-b border-border/80 dark:border-white/10 shrink-0 flex items-center justify-between">
+          <h2 className="text-left text-fluid-sm font-bold text-foreground m-0 leading-none">Navigation Menu</h2>
           <button 
-            className="rounded-full size-8 apple-glass-btn flex items-center justify-center text-muted-foreground hover:text-foreground cursor-pointer" 
+            className="rounded-full size-7 apple-glass-btn flex items-center justify-center text-muted-foreground hover:text-foreground cursor-pointer" 
             onClick={() => setShowMobileMenu(false)}
             aria-label="Close menu"
           >
-            <Icon name="close" size={18}/>
+            <Icon name="close" size={16}/>
           </button>
         </div>
-        <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-1.5 pb-24" style={{ scrollbarWidth: 'thin' }}>
-          {navItems.filter(i => !['dashboard', 'announcements', 'profile'].includes(i.id)).map(item => {
-            const active = activeTab === item.id
-            return (
-              <button
-                key={item.id}
-                className={`w-full flex items-center gap-3.5 h-12 px-4 rounded-2xl transition-all cursor-pointer select-none active:scale-[0.98] ${
-                  active 
-                    ? 'bg-primary/15 dark:bg-primary/25 text-primary font-semibold border border-primary/30 shadow-xs' 
-                    : 'text-foreground font-medium hover:bg-white/20 dark:hover:bg-white/[0.08] border border-transparent'
-                }`}
-                onClick={() => { setActiveTab(item.id); setShowMobileMenu(false) }}
-              >
-                <div className={`size-6 flex items-center justify-center shrink-0 ${active ? 'text-primary' : 'text-muted-foreground'}`}>
-                  {item.icon}
-                </div>
-                <span className="text-sm font-medium">{item.label}</span>
-              </button>
-            )
-          })}
+        <div className="px-3.5 pt-2.5 pb-7 sm:pb-8">
+          <div className="grid grid-cols-2 gap-1.5">
+            {navItems.filter(i => !['dashboard', 'announcements', 'profile'].includes(i.id)).map(item => {
+              const active = activeTab === item.id
+              return (
+                <button
+                  key={item.id}
+                  className={`flex items-center gap-2 h-9 px-2.5 rounded-xl transition-all cursor-pointer select-none active:scale-[0.97] min-w-0 ${
+                    active 
+                      ? 'bg-primary/15 dark:bg-primary/25 text-primary font-bold border border-primary/35 shadow-xs' 
+                      : 'text-foreground font-medium hover:bg-white/20 dark:hover:bg-white/[0.08] border border-white/20 dark:border-white/8 bg-white/10 dark:bg-white/[0.03]'
+                  }`}
+                  onClick={() => { setActiveTab(item.id); setShowMobileMenu(false) }}
+                >
+                  <div className={`shrink-0 flex items-center justify-center ${active ? 'text-primary' : 'text-foreground/80'}`}>
+                    {item.icon}
+                  </div>
+                  <span className="text-[12px] font-semibold truncate leading-tight text-left">{item.label}</span>
+                </button>
+              )
+            })}
+          </div>
           
-          <div className="h-px bg-border/80 dark:bg-white/10 my-3 mx-1 shrink-0" />
+          <div className="h-px bg-border/80 dark:bg-white/10 my-2.5 shrink-0" />
           
           <button 
-            className="liquid-glass-btn w-full flex items-center justify-center gap-2.5 h-12 rounded-2xl bg-destructive/15 hover:bg-destructive/25 text-destructive dark:text-red-400 border border-destructive/25 font-bold text-sm cursor-pointer shadow-sm active:scale-[0.97] transition-all"
+            className="liquid-glass-btn w-full flex items-center justify-center gap-2 h-9.5 rounded-xl bg-destructive/15 hover:bg-destructive/25 text-destructive dark:text-red-400 border border-destructive/25 font-bold text-xs cursor-pointer shadow-sm active:scale-[0.97] transition-all"
             onClick={() => { handleLogout(); setShowMobileMenu(false) }}
           >
-            <Icon name="logout" size={18}/>
+            <Icon name="logout" size={16}/>
             <span>Logout</span>
           </button>
         </div>
@@ -533,7 +526,7 @@ function DashboardView({ currentUser, attendance, setAttendance, addToast, expen
   return (
     <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[1200px] mx-auto">
       <div className="flex items-center justify-between">
-        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
+        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
           <Icon name="dashboard" className="text-foreground" size={20}/>
           Dashboard
         </h1>
@@ -767,7 +760,7 @@ function AttendanceView({
   return (
     <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[1000px] mx-auto pb-10">
       <div className="flex items-center justify-between">
-        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
+        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
           <Icon name="schedule" className="text-foreground" size={20}/>
           Attendance
         </h1>
@@ -913,9 +906,7 @@ function AttendanceView({
         <Card className="max-w-[600px] overflow-hidden p-0 shadow-sm">
           <div className="bg-muted/30 px-5 py-4 border-b border-border flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <span className="size-8 rounded-lg bg-muted text-foreground flex items-center justify-center shrink-0">
-                <Icon name="swap_horiz" size={16}/>
-              </span>
+              <Icon name="swap_horiz" className="text-foreground shrink-0" size={24}/>
               <CardTitle className="text-base m-0 modal-title-solid">Request Shift Swap</CardTitle>
             </div>
           </div>
@@ -958,9 +949,7 @@ function AttendanceView({
         <Card className="max-w-[600px] overflow-hidden p-0 shadow-sm">
           <div className="bg-muted/30 px-5 py-4 border-b border-border flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <span className="size-8 rounded-lg bg-muted text-foreground flex items-center justify-center shrink-0">
-                <Icon name="event_busy" size={16}/>
-              </span>
+              <Icon name="event_busy" className="text-foreground shrink-0" size={24}/>
               <CardTitle className="text-base m-0 modal-title-solid">Request Alternative Offday</CardTitle>
             </div>
           </div>
@@ -1011,9 +1000,7 @@ function AttendanceView({
         <Card className="max-w-[600px] overflow-hidden p-0 shadow-sm">
           <div className="bg-muted/30 px-5 py-4 border-b border-border flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <span className="size-8 rounded-lg bg-muted text-foreground flex items-center justify-center shrink-0">
-                <Icon name="memory" size={16}/>
-              </span>
+              <Icon name="memory" className="text-foreground shrink-0" size={24}/>
               <CardTitle className="text-base m-0 modal-title-solid">Log Overtime</CardTitle>
             </div>
           </div>
@@ -1130,7 +1117,7 @@ function PayslipsView({ currentUser, payroll, addToast, settings }) {
   return (
     <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[1000px] mx-auto pb-10">
       <div className="flex items-center justify-between">
-        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
+        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
           <Icon name="account_balance" className="text-foreground" size={20}/>
           Payslips
         </h1>
@@ -1216,7 +1203,7 @@ function LeaveView({ currentUser, attendance, setAttendance, addToast, addLog, s
   return (
     <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[1000px] mx-auto pb-10">
       <div className="flex items-center justify-between">
-        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
+        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
           <Icon name="calendar_month" className="text-foreground" size={20}/>
           Leave
         </h1>
@@ -1237,9 +1224,7 @@ function LeaveView({ currentUser, attendance, setAttendance, addToast, addLog, s
       <Card className="overflow-hidden p-0 shadow-sm">
         <div className="bg-muted/30 px-5 py-4 border-b border-border flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <span className="size-8 rounded-lg bg-muted text-foreground flex items-center justify-center shrink-0">
-              <Icon name="calendar_month" size={16}/>
-            </span>
+            <Icon name="calendar_month" className="text-foreground shrink-0" size={24}/>
             <CardTitle className="text-base m-0 modal-title-solid">Apply for Leave</CardTitle>
           </div>
           <Badge variant="secondary" className="shrink-0 text-xs">
@@ -1480,7 +1465,7 @@ function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetR
   return (
     <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[900px] mx-auto pb-10">
       <div className="flex items-center justify-between">
-        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
+        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
           <Icon name="monitor" className="text-foreground" size={20}/>
           Assets
         </h1>
@@ -1514,9 +1499,7 @@ function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetR
               <Card key={asset.id}>
                 <CardContent className="p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                   <div className="flex items-center gap-4">
-                    <div className="h-12 w-12 rounded-xl flex items-center justify-center bg-primary/10">
-                      <Icon name="monitor" className="h-6 w-6 text-primary" size={24}/>
-                    </div>
+                    <Icon name="monitor" className="text-primary shrink-0" size={36}/>
                     <div>
                       <div className="font-bold text-lg">{asset.name}</div>
                       <div className="text-sm text-muted-foreground">{asset.category} &middot; SN: {asset.serialNumber}</div>

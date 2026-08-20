@@ -312,7 +312,7 @@ export default function GigBoardPage({ adminUid, currentUser, addToast }) {
   return (
     <div className="animate-fade-in flex flex-col gap-5 max-w-[1200px] mx-auto w-full">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-1">
-        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient m-0">
+        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground m-0">
           <Icon name="handshake" className="text-foreground" size={22}/> Help Hub
         </h1>
         <Button onClick={openCreateModal} className="hidden sm:inline-flex rounded-full shadow-sm">
@@ -525,9 +525,7 @@ export default function GigBoardPage({ adminUid, currentUser, addToast }) {
         <DialogContent className="sm:max-w-md rounded-2xl p-4 sm:p-5 border border-border/80 bg-card text-card-foreground shadow-xl">
           <DialogHeader className="pb-2 border-b border-border/50">
             <div className="flex items-center gap-2.5">
-              <div className="size-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                <Icon name={editingGigId ? "edit_note" : "handshake"} size={18}/>
-              </div>
+              <Icon name={editingGigId ? "edit_note" : "handshake"} className="text-primary shrink-0" size={28}/>
               <div>
                 <DialogTitle className="text-base font-bold">
                   {editingGigId ? 'Edit Help Request' : 'Post a Help Request'}

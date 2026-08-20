@@ -169,7 +169,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
 
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
+        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
           <Icon name="wallet" className="text-foreground" size={20}/>
           Expenses
         </h1>

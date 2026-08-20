@@ -629,7 +629,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
 
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient"><Icon name="group" className="text-foreground" size={20}/>Employees</h1>
+        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground"><Icon name="group" className="text-foreground" size={20}/>Employees</h1>
       </div>
 
       {/* Pending Profile Updates Queue */}
@@ -891,9 +891,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
                     onClick={() => toggleDept(group.key)}
                   >
                     <Icon name={isOpen ? 'expand_more' : 'chevron_right'} className="text-muted-foreground shrink-0 transition-transform" size={20}/>
-                    <span className="p-1.5 bg-primary/10 rounded-md text-primary flex items-center justify-center">
-                      <Icon name="apartment" size={16}/>
-                    </span>
+                    <Icon name="apartment" className="text-primary shrink-0" size={22}/>
                     <span className="flex-1 font-semibold text-foreground truncate">{group.key}</span>
                     <Badge variant="secondary" className="text-xs shrink-0">{group.items.length}</Badge>
                   </button>

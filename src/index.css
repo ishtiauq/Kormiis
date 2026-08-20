@@ -337,6 +337,52 @@ html.dark .glass-kormiis-modal,
     inset 0 -1px 1px 0 rgba(0, 0, 0, 0.4) !important;
 }
 
+/* Mobile Bottom Sheet Drawer (Emerges directly from bottom of screen with iOS 26 Ultra-Liquid Glass) */
+.glass-mobile-drawer {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.58) 0%, rgba(255, 255, 255, 0.32) 100%) !important;
+  -webkit-backdrop-filter: saturate(190%) blur(36px) brightness(104%) !important;
+  backdrop-filter: saturate(190%) blur(36px) brightness(104%) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.45) !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-bottom: none !important;
+  border-top-left-radius: 28px !important;
+  border-top-right-radius: 28px !important;
+  border-bottom-left-radius: 0px !important;
+  border-bottom-right-radius: 0px !important;
+  box-shadow: 
+    0 -16px 48px -8px rgba(0, 0, 0, 0.16),
+    0 -4px 12px -2px rgba(0, 0, 0, 0.06),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.55),
+    inset 1px 0 1px 0 rgba(255, 255, 255, 0.20) !important;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  will-change: backdrop-filter, transform;
+  isolation: isolate;
+}
+
+.dark .glass-mobile-drawer,
+html.dark .glass-mobile-drawer,
+[data-theme="dark"] .glass-mobile-drawer {
+  background: linear-gradient(135deg, rgba(24, 24, 34, 0.60) 0%, rgba(10, 10, 16, 0.45) 100%) !important;
+  -webkit-backdrop-filter: saturate(190%) blur(36px) brightness(105%) !important;
+  backdrop-filter: saturate(190%) blur(36px) brightness(105%) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.18) !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-bottom: none !important;
+  border-top-left-radius: 28px !important;
+  border-top-right-radius: 28px !important;
+  border-bottom-left-radius: 0px !important;
+  border-bottom-right-radius: 0px !important;
+  box-shadow: 
+    0 -20px 50px -10px rgba(0, 0, 0, 0.75),
+    0 -6px 14px -2px rgba(0, 0, 0, 0.45),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.25),
+    inset 1px 0 1px 0 rgba(255, 255, 255, 0.15),
+    inset 0 -1px 1px 0 rgba(0, 0, 0, 0.4) !important;
+}
+
 /* Liquid Glass Cards (20–32px corners) */
 .glass-card,
 .bg-card {
@@ -722,15 +768,16 @@ html.dark .glass-floating-sidebar,
   border-color: hsl(210 15% 25%) !important;
 }
 
-/* Vertical Gradient for all Headlines */
+/* Simple Solid Headline Styling */
 .headline-gradient {
-  background-image: linear-gradient(to bottom, #1f2937, #9ca3af) !important;
-  -webkit-background-clip: text !important;
-  background-clip: text !important;
-  color: transparent !important;
+  color: hsl(var(--foreground)) !important;
+  background-image: none !important;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
 }
 .dark .headline-gradient {
-  background-image: linear-gradient(to bottom, #f3f4f6, #9ca3af) !important;
+  color: hsl(var(--foreground)) !important;
+  background-image: none !important;
 }
 
 /* Solid Foreground Text for Modal/Form Headers (overrides headline-gradient) */

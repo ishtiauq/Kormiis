@@ -237,7 +237,7 @@ export default function Notes({ notes = [], setNotes, currentUser, addToast }) {
   return (
     <div className="animate-fade-in pb-10 flex flex-col gap-6 w-full max-w-full overflow-x-hidden">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
+        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
           <Icon name="sticky_note_2" className="text-foreground" size={24}/>
           Notes
         </h1>
@@ -252,9 +252,7 @@ export default function Notes({ notes = [], setNotes, currentUser, addToast }) {
 
       {myNotes.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center px-4">
-          <div className="size-20 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-4">
-            <Icon name="edit_note" size={40}/>
-          </div>
+          <Icon name="edit_note" className="text-primary mb-4" size={56}/>
           <h3 className="text-xl font-bold text-foreground mb-2">No notes yet</h3>
           <p className="text-muted-foreground max-w-sm mb-6">Create your first note to capture ideas, to-dos, or voice memos!</p>
           <Button onClick={() => setShowModal(true)} variant="outline" className="rounded-xl">Create Note</Button>

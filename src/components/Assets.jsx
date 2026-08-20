@@ -112,8 +112,8 @@ function AssetInventory({ filteredAssets, stats, assets, search, setSearch, filt
                   onClick={() => toggleCategory(group.key)}
                 >
                   <Icon name={isOpen ? 'expand_more' : 'chevron_right'} className="text-muted-foreground shrink-0 transition-transform" size={20}/>
-                  <span className="p-1.5 bg-primary/10 rounded-md text-primary flex items-center justify-center">
-                    {categoryIcons[group.key] || <Icon name="monitor" size={16}/>}
+                  <span className="text-primary flex items-center justify-center shrink-0">
+                    {categoryIcons[group.key] || <Icon name="monitor" size={22}/>}
                   </span>
                   <span className="flex-1 font-semibold text-foreground truncate">{group.label}</span>
                   <Badge variant="secondary" className="text-xs shrink-0">{group.items.length}</Badge>
@@ -1071,7 +1071,7 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
   return (
     <div className="animate-fade-in pb-10 flex flex-col gap-6 w-full max-w-full overflow-x-hidden">
       <div className="flex items-center justify-between">
-        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
+        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
           <Icon name="devices_other" className="text-foreground" size={20}/>
           Assets
         </h1>

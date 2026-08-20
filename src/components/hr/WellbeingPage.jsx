@@ -62,7 +62,7 @@ export default function WellbeingPage({ adminUid, currentUser, addToast }) {
   return (
     <div className="animate-fade-in flex flex-col gap-5 max-w-[1200px] mx-auto w-full">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient m-0">
+        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground m-0">
           <Icon name="favorite" className="text-foreground" size={20}/> Well-being Alerts
         </h1>
         <div className="flex items-center gap-2">

@@ -502,7 +502,7 @@ export default function Documents({
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
+          <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
             <Icon name="folder_open" className="text-primary" size={24}/>
             Documents
           </h1>
@@ -536,9 +536,7 @@ export default function Documents({
           
           {/* Storage Meter Info */}
           <div className="flex items-start gap-3.5 flex-1 min-w-0">
-            <div className="size-11 rounded-2xl bg-primary/10 text-primary border border-primary/20 flex items-center justify-center shrink-0 shadow-inner">
-              <Icon name="cloud_sync" size={22} className="animate-pulse"/>
-            </div>
+            <Icon name="cloud_sync" size={32} className="text-primary shrink-0 animate-pulse"/>
             
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2.5 flex-wrap">
@@ -742,9 +740,7 @@ export default function Documents({
       {/* 3. Real-Time Documents List / Cards */}
       {filteredDocs.length === 0 ? (
         <div className="text-center py-16 px-4 rounded-[28px] glass-kormiis border border-dashed border-border/80 dark:border-white/14">
-          <div className="size-16 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-4">
-            <Icon name="description" size={32}/>
-          </div>
+          <Icon name="description" size={54} className="text-primary mx-auto mb-4"/>
           <h3 className="text-fluid-lg font-bold text-foreground">No documents found</h3>
           <p className="text-fluid-xs text-muted-foreground mt-1 max-w-md mx-auto">
             {search || selectedCategory !== 'all' || filterFormat !== 'all' || filterDate !== 'all'
@@ -774,9 +770,7 @@ export default function Documents({
               >
                 {/* Left Document Details */}
                 <div className="flex items-start gap-3.5 flex-1 min-w-0">
-                  <div className="size-11 sm:size-12 rounded-2xl bg-primary/10 text-primary border border-primary/20 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 transition-transform">
-                    <Icon name={fileIcon} size={22}/>
-                  </div>
+                  <Icon name={fileIcon} size={32} className="text-primary shrink-0 group-hover:scale-105 transition-transform"/>
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
@@ -856,9 +850,7 @@ export default function Documents({
         <DialogContent className="sm:max-w-[540px] glass-kormiis-modal">
           <DialogHeader className="mb-4">
             <DialogTitle className="flex items-center gap-3 text-xl sm:text-2xl font-bold">
-              <div className="flex items-center justify-center rounded-2xl size-11 bg-primary/10 text-primary border border-primary/20 shadow-inner">
-                <Icon name={editingDoc ? "edit" : "cloud_upload"} size={22}/>
-              </div>
+              <Icon name={editingDoc ? "edit" : "cloud_upload"} className="text-primary shrink-0" size={32}/>
               <span>{editingDoc ? 'Edit Document Details' : 'Upload to Cloud Storage'}</span>
             </DialogTitle>
           </DialogHeader>
@@ -923,9 +915,7 @@ export default function Documents({
                 >
                   {formFile ? (
                     <div className="relative z-10 flex flex-col items-center animate-in zoom-in-95 duration-300">
-                      <div className="size-13 rounded-2xl inline-flex items-center justify-center mb-2.5 bg-emerald-500/15 text-emerald-500 shadow-sm ring-4 ring-emerald-500/10">
-                        <Icon name="check_circle" size={26}/>
-                      </div>
+                      <Icon name="check_circle" className="text-emerald-500 mb-2.5" size={44}/>
                       <p className="font-bold text-foreground text-sm truncate max-w-[280px]">{formFile.name}</p>
                       <p className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold bg-emerald-500/10 px-2.5 py-0.5 rounded-full mt-1">
                         {formatFileSize(formFile.size)}
@@ -933,9 +923,7 @@ export default function Documents({
                     </div>
                   ) : (
                     <div className="relative z-10 flex flex-col items-center">
-                      <div className="size-13 rounded-2xl inline-flex items-center justify-center mb-3 bg-primary/10 text-primary shadow-sm group-hover/drop:scale-110 transition-transform">
-                        <Icon name="cloud_upload" size={26}/>
-                      </div>
+                      <Icon name="cloud_upload" size={44} className="text-primary mb-3 group-hover/drop:scale-110 transition-transform"/>
                       <p className="text-sm text-foreground font-bold group-hover/drop:text-primary transition-colors">
                         Click to browse or drop file here
                       </p>
@@ -1080,9 +1068,7 @@ export default function Documents({
         <DialogContent className="sm:max-w-[540px] glass-kormiis-modal">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2.5">
-              <div className="p-2 rounded-xl bg-primary/10 text-primary">
-                <Icon name="assignment" size={20}/>
-              </div>
+              <Icon name="assignment" className="text-primary shrink-0" size={28}/>
               <span>Generate Official HR Document</span>
             </DialogTitle>
           </DialogHeader>

@@ -467,7 +467,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
   return (
     <div className="fade-in pb-10 max-w-5xl mx-auto">
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
+        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
           <Icon name="rss_feed" className="text-foreground" size={20}/>
           {headline}
         </h1>

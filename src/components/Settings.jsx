@@ -230,10 +230,8 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
     <div className="animate-fade-in flex flex-col gap-6 w-full pb-14 max-w-[1100px] mx-auto">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="size-11 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0 shadow-inner">
-          <Icon name="settings" size={22}/>
-        </div>
-        <h1 className="text-fluid-xl font-extrabold tracking-tight headline-gradient">
+        <Icon name="settings" className="text-foreground shrink-0" size={36}/>
+        <h1 className="text-fluid-xl font-extrabold tracking-tight text-foreground">
           Settings
         </h1>
       </div>
@@ -255,9 +253,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
             className="w-full py-2.5 px-4 sm:px-5 flex items-center justify-between gap-4 text-left transition-colors hover:bg-black/[0.02] dark:hover:bg-white/[0.03] cursor-pointer select-none border-0 outline-none"
           >
             <div className="flex items-center gap-3.5 min-w-0">
-              <div className="size-11 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0 shadow-xs">
-                <Icon name="apartment" size={22}/>
-              </div>
+              <Icon name="apartment" className="text-primary shrink-0" size={32}/>
               <h3 className="font-bold text-fluid text-foreground tracking-tight">Company Profile</h3>
             </div>
 
@@ -376,9 +372,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
             className="w-full py-2.5 px-4 sm:px-5 flex items-center justify-between gap-4 text-left transition-colors hover:bg-black/[0.02] dark:hover:bg-white/[0.03] cursor-pointer select-none border-0 outline-none"
           >
             <div className="flex items-center gap-3.5 min-w-0">
-              <div className="size-11 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 shadow-xs">
-                <Icon name="account_balance" size={22}/>
-              </div>
+              <Icon name="account_balance" className="text-emerald-500 shrink-0" size={32}/>
               <h3 className="font-bold text-fluid text-foreground tracking-tight">Payroll & Currency</h3>
             </div>
 
@@ -399,17 +393,17 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                 </div>
                 <div className="w-full sm:w-[220px] shrink-0">
                   <Select value={currency} onChange={setCurrency} placeholder="$ (USD)">
-                    <SelectItem id="$">$ (USD - United States Dollar)</SelectItem>
-                    <SelectItem id="৳">৳ (BDT - Bangladeshi Taka)</SelectItem>
-                    <SelectItem id="€">€ (EUR - Euro)</SelectItem>
-                    <SelectItem id="£">£ (GBP - British Pound)</SelectItem>
-                    <SelectItem id="₹">₹ (INR - Indian Rupee)</SelectItem>
-                    <SelectItem id="¥">¥ (JPY - Japanese Yen)</SelectItem>
-                    <SelectItem id="AED">AED (United Arab Emirates Dirham)</SelectItem>
-                    <SelectItem id="SAR">SAR (Saudi Riyal)</SelectItem>
-                    <SelectItem id="SGD">SGD (Singapore Dollar)</SelectItem>
-                    <SelectItem id="CAD">CAD (Canadian Dollar)</SelectItem>
-                    <SelectItem id="AUD">AUD (Australian Dollar)</SelectItem>
+                    <SelectItem id="$">$ (USD)</SelectItem>
+                    <SelectItem id="৳">৳ (BDT)</SelectItem>
+                    <SelectItem id="€">€ (EUR)</SelectItem>
+                    <SelectItem id="£">£ (GBP)</SelectItem>
+                    <SelectItem id="₹">₹ (INR)</SelectItem>
+                    <SelectItem id="¥">¥ (JPY)</SelectItem>
+                    <SelectItem id="د.إ">د.إ (AED)</SelectItem>
+                    <SelectItem id="﷼">﷼ (SAR)</SelectItem>
+                    <SelectItem id="S$">S$ (SGD)</SelectItem>
+                    <SelectItem id="C$">C$ (CAD)</SelectItem>
+                    <SelectItem id="A$">A$ (AUD)</SelectItem>
                   </Select>
                 </div>
               </div>
@@ -526,9 +520,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
             className="w-full py-2.5 px-4 sm:px-5 flex items-center justify-between gap-4 text-left transition-colors hover:bg-black/[0.02] dark:hover:bg-white/[0.03] cursor-pointer select-none border-0 outline-none"
           >
             <div className="flex items-center gap-3.5 min-w-0">
-              <div className="size-11 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 shadow-xs">
-                <Icon name="wallet" size={22}/>
-              </div>
+              <Icon name="wallet" className="text-indigo-500 shrink-0" size={32}/>
               <h3 className="font-bold text-fluid text-foreground tracking-tight">Expense Policies</h3>
             </div>
 
@@ -573,9 +565,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
             className="w-full py-2.5 px-4 sm:px-5 flex items-center justify-between gap-4 text-left transition-colors hover:bg-black/[0.02] dark:hover:bg-white/[0.03] cursor-pointer select-none border-0 outline-none"
           >
             <div className="flex items-center gap-3.5 min-w-0">
-              <div className="size-11 rounded-2xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0 shadow-xs">
-                <Icon name="notifications_active" size={22}/>
-              </div>
+              <Icon name="notifications_active" className="text-purple-500 shrink-0" size={32}/>
               <h3 className="font-bold text-fluid text-foreground tracking-tight">Notifications & Alerts</h3>
             </div>
 
@@ -690,9 +680,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
             className="w-full py-2.5 px-4 sm:px-5 flex items-center justify-between gap-4 text-left transition-colors hover:bg-black/[0.02] dark:hover:bg-white/[0.03] cursor-pointer select-none border-0 outline-none"
           >
             <div className="flex items-center gap-3.5 min-w-0">
-              <div className="size-11 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 shadow-xs">
-                <Icon name="verified_user" size={22}/>
-              </div>
+              <Icon name="verified_user" className="text-emerald-500 shrink-0" size={32}/>
               <h3 className="font-bold text-fluid text-foreground tracking-tight">Security & Sessions</h3>
             </div>
 
@@ -708,9 +696,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
               {userDevices.length === 0 ? (
                 <div className="p-5 rounded-2xl bg-black/[0.02] dark:bg-white/[0.02] border border-border/60 dark:border-white/10 flex justify-between items-center gap-4 flex-wrap">
                   <div className="flex items-center gap-3.5">
-                    <div className="p-2.5 rounded-2xl bg-primary/10 text-primary">
-                      <Icon name="laptop_mac" size={22}/>
-                    </div>
+                    <Icon name="laptop_mac" className="text-primary shrink-0" size={32}/>
                     <div>
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-sm text-foreground">Current Active Session</span>
@@ -738,9 +724,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                       }`}
                     >
                       <div className="flex items-center gap-3.5">
-                        <div className={`p-2.5 rounded-2xl ${device.isBlocked ? 'bg-destructive/10 text-destructive' : 'bg-primary/10 text-primary'}`}>
-                          <Icon name={isMobile ? 'smartphone' : 'computer'} size={22}/>
-                        </div>
+                        <Icon name={isMobile ? 'smartphone' : 'computer'} className={`shrink-0 ${device.isBlocked ? 'text-destructive' : 'text-primary'}`} size={32}/>
                         <div>
                           <div className="flex items-center gap-2">
                             <span className="font-bold text-sm text-foreground">{device.label || 'Web Browser'}</span>
@@ -803,9 +787,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
             className="w-full py-2.5 px-4 sm:px-5 flex items-center justify-between gap-4 text-left transition-colors hover:bg-black/[0.02] dark:hover:bg-white/[0.03] cursor-pointer select-none border-0 outline-none"
           >
             <div className="flex items-center gap-3.5 min-w-0">
-              <div className="size-11 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 shadow-xs">
-                <Icon name="list" size={22}/>
-              </div>
+              <Icon name="list" className="text-blue-500 shrink-0" size={32}/>
               <h3 className="font-bold text-fluid text-foreground tracking-tight">System Audit Logs</h3>
             </div>
 

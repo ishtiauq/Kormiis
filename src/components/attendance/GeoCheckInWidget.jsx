@@ -193,14 +193,8 @@ export default function GeoCheckInWidget({ currentUser, attendance, setAttendanc
       <Dialog open={!!successMsg} onOpenChange={(open) => { if (!open) setSuccessMsg(null) }}>
         <DialogContent className="max-w-[400px] border-border/50 bg-popover shadow-lg flex flex-col items-center justify-center p-5 sm:p-8 gap-4 rounded-[1rem] outline-none">
           <DialogTitle className="sr-only">Check In Successful</DialogTitle>
-          <div className="size-16 sm:size-24 rounded-full bg-primary/10 flex items-center justify-center animate-bounce mt-2 sm:mt-4 shadow-inner">
-            {successMsg?.type === 'Check-in' ? (
-              <Icon name="celebration" className="text-primary" size={40}/>
-            ) : (
-              <Icon name="check_circle" className="text-primary" size={40}/>
-            )}
-          </div>
-          <h2 className="text-2xl sm:text-3xl font-black headline-gradient text-center">
+          <Icon name={successMsg?.type === 'Check-in' ? "celebration" : "check_circle"} className="text-primary animate-bounce mt-2 sm:mt-4" size={64}/>
+          <h2 className="text-2xl sm:text-3xl font-black text-foreground text-center">
             {successMsg?.type} Successful!
           </h2>
           <div className="text-center flex flex-col sm:flex-row sm:flex-nowrap gap-2 w-full mt-1 sm:mt-2">
@@ -225,16 +219,14 @@ export default function GeoCheckInWidget({ currentUser, attendance, setAttendanc
       <Card className="col-span-full xl:col-span-12 border-primary/20 bg-card overflow-hidden shadow-sm mb-6">
         <CardHeader className="bg-primary/5 pb-4 border-b border-border">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-md bg-primary/10 text-primary shrink-0">
-              <Icon name="event_available" size={20}/>
-            </div>
+            <Icon name="event_available" className="text-primary shrink-0" size={28}/>
             <CardTitle className="text-fluid-xl font-extrabold m-0 truncate">Mark Attendance</CardTitle>
           </div>
         </CardHeader>
       
       <CardContent className="p-4 sm:p-5 flex flex-col gap-5">
         <div className="flex flex-col items-center gap-1 text-center">
-          <div className="text-fluid-display font-black tabular-nums tracking-tight font-sans headline-gradient" aria-live="polite">{timeStr}</div>
+          <div className="text-fluid-display font-black tabular-nums tracking-tight font-sans text-foreground" aria-live="polite">{timeStr}</div>
           <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}</div>
           {elapsed && (
             <div className="mt-1 flex items-center gap-2 bg-primary/5 border border-primary/20 rounded-full px-4 py-2">

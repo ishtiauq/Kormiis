@@ -124,7 +124,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
   return (
     <div className="animate-fade-in flex flex-col gap-5 max-w-[1200px] mx-auto w-full">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient m-0">
+        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground m-0">
           <Icon name="insights" className="text-foreground" size={20}/> Performance Tracker
         </h1>
         <div className="flex items-center gap-2">
@@ -483,9 +483,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
         <DialogContent className="sm:max-w-md rounded-2xl p-5 border border-border/80 bg-card text-card-foreground shadow-xl">
           <DialogHeader>
             <div className="flex items-center gap-2.5">
-              <div className="size-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                <Icon name="tune" size={18}/>
-              </div>
+              <Icon name="tune" className="text-primary shrink-0" size={28}/>
               <div>
                 <DialogTitle className="text-base font-bold">Configure Evaluation Criteria</DialogTitle>
                 <DialogDescription className="text-xs text-muted-foreground mt-0.5">

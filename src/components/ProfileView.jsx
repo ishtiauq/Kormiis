@@ -85,7 +85,7 @@ export default function ProfileView({ currentUser, pendingProfileEdits, setPendi
   return (
     <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[800px] mx-auto pb-10">
       <div className="flex items-center justify-between">
-        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
+        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
           <Icon name="person" className="text-foreground" size={20}/>
           Profile
         </h1>

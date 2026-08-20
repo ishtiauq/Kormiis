@@ -66,7 +66,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
   const [scrollTop, setScrollTop] = useState(0)
 
   const currency = settings?.currency || '$'
-  const pdfCurrency = { '৳': 'BDT', '€': 'EUR', '£': 'GBP', '₹': 'INR', '¥': 'JPY', '$': 'USD' }[currency] || currency
+  const pdfCurrency = { '৳': 'BDT', '€': 'EUR', '£': 'GBP', '₹': 'INR', '¥': 'JPY', '$': 'USD', 'د.إ': 'AED', '﷼': 'SAR', 'S$': 'SGD', 'C$': 'CAD', 'A$': 'AUD' }[currency] || currency
   const structure = settings?.salaryStructure || [
     { id: 'basic', name: 'Basic Salary', percentage: 50, type: 'earning' },
     { id: 'hra', name: 'House Rent Allowance (HRA)', percentage: 25, type: 'earning' },
@@ -677,7 +677,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
       
       {/* Header and Month Selector */}
       <div className="flex items-center justify-between">
-        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
+        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
           <Icon name="account_balance" className="text-foreground" size={20}/>
           Payroll
         </h1>
