@@ -54,13 +54,13 @@ export default function useAppData({ user, addToast }) {
   const [syncLogs, setSyncLogs] = useState(() => loadSaved('kormiis_sync_logs') || [])
 
   /* ─── Notifications ─── */
-  const [notifications, setNotifications] = useState(() => {
+  const [allNotifications, setAllNotifications] = useState(() => {
     const saved = localStorage.getItem('kormiis_notifications')
     if (saved) {
       try {
         const parsed = JSON.parse(saved)
-        const fortyEightHoursAgo = Date.now() - (48 * 60 * 60 * 1000)
-        return parsed.filter(n => (n.timestamp || Date.now()) > fortyEightHoursAgo)
+        const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000)
+        return Array.isArray(parsed) ? parsed.filter(n => (n.timestamp || Date.now()) > sevenDaysAgo) : []
       } catch (e) {
         return []
       }
@@ -68,8 +68,54 @@ export default function useAppData({ user, addToast }) {
     return []
   })
   const [showNotifications, setShowNotifications] = useState(false)
-  const notificationsRef = useRef(notifications)
-  useEffect(() => { notificationsRef.current = notifications }, [notifications])
+
+  // Visible notifications for the current logged-in user:
+  // Rule 1: User's OWN activities NEVER show in their own notification panel
+  // Rule 2: All workspace events from OTHER users appear in real-time
+  // Rule 3: Targeted notifications only appear for intended recipient(s) or Admin/HR
+  const visibleNotifications = useMemo(() => {
+    const currentId = user?.id || user?.employeeId || user?.uid
+    const currentEmail = user?.email?.toLowerCase()
+    const currentRole = user?.role || (user?.isEmployee ? 'Teammate' : 'Admin')
+
+    return (allNotifications || []).filter(notif => {
+      // 1. Filter out own activities (never show to the actor)
+      if (notif.actorId && (notif.actorId === currentId || (currentEmail && notif.actorEmail && notif.actorEmail.toLowerCase() === currentEmail))) {
+        return false
+      }
+
+      // 2. Targeted employees filter (e.g. task assigned to specific person)
+      if (Array.isArray(notif.targetEmployeeIds) && notif.targetEmployeeIds.length > 0) {
+        const isTargeted = notif.targetEmployeeIds.includes(currentId)
+        const isAdminOrOwner = currentRole === 'Admin' || user?.isWorkspaceOwner
+        if (!isTargeted && !isAdminOrOwner) return false
+      }
+
+      if (notif.targetId && notif.targetId !== currentId && currentRole !== 'Admin') {
+        return false
+      }
+
+      // 3. Targeted roles filter (e.g. ['Admin', 'HR'])
+      if (Array.isArray(notif.targetRoles) && notif.targetRoles.length > 0) {
+        if (!notif.targetRoles.includes(currentRole)) return false
+      }
+
+      return true
+    })
+  }, [allNotifications, user])
+
+  const notificationsRef = useRef(visibleNotifications)
+  useEffect(() => { notificationsRef.current = visibleNotifications }, [visibleNotifications])
+
+  useEffect(() => {
+    localStorage.setItem('kormiis_notifications', JSON.stringify(allNotifications))
+  }, [allNotifications])
+
+  useEffect(() => {
+    const unread = visibleNotifications.filter(n => !n.read).length
+    initPushSync(() => unread)
+    updateBadge(unread)
+  }, [visibleNotifications])
 
   const addAuditLog = (action, entity, details) => {
     const newLog = {
@@ -97,50 +143,64 @@ export default function useAppData({ user, addToast }) {
     return false
   }
 
-  useEffect(() => {
-    localStorage.setItem('kormiis_notifications', JSON.stringify(notifications))
-  }, [notifications])
-
-  useEffect(() => {
-    initPushSync(() => notificationsRef.current.filter(n => !n.read).length)
-    updateBadge(notificationsRef.current.filter(n => !n.read).length)
-  }, [])
-
   const addNotification = (text, view = null, opts = {}) => {
+    const currentActorId = opts.actorId || user?.id || user?.employeeId || user?.uid || user?.email || 'system'
+    const currentActorName = opts.actorName || user?.name || 'Someone'
+    const currentActorEmail = opts.actorEmail || user?.email || ''
     const category = opts.category || (typeof view === 'string' && view !== 'dashboard' ? view : 'system')
+    
     const notif = {
-      id: `notif-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      id: opts.id || `notif-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
       text,
       title: opts.title || text,
       category,
       read: false,
-      timestamp: Date.now(),
+      timestamp: opts.timestamp || Date.now(),
       time: 'Just now',
-      view
+      view: view || opts.view || null,
+      actorId: currentActorId,
+      actorName: currentActorName,
+      actorEmail: currentActorEmail,
+      targetEmployeeIds: opts.targetEmployeeIds || null,
+      targetId: opts.targetId || null,
+      targetRoles: opts.targetRoles || null,
     }
-    setNotifications(prev => [notif, ...prev])
-    notifyOnHidden(notif, settings?.notifications?.pushEnabled)
-    const count = notificationsRef.current.filter(n => !n.read).length + 1
-    updateBadge(count)
-    broadcast({ type: 'badge', count })
+
+    setAllNotifications(prev => {
+      const next = [notif, ...(prev || []).filter(n => n.id !== notif.id)].slice(0, 100)
+      if (adminUid) {
+        writeToTable(adminUid, 'notifications', next).catch(e => console.error('Notification write error:', e))
+      }
+      return next
+    })
+
+    // If current device user is not the actor, trigger hidden push notification
+    if (currentActorId !== (user?.id || user?.employeeId || user?.uid)) {
+      notifyOnHidden(notif, settings?.notifications?.pushEnabled)
+    }
   }
 
   const markNotificationsRead = (id = null) => {
-    setNotifications(prev => {
+    setAllNotifications(prev => {
       const next = id
         ? prev.map(n => n.id === id ? { ...n, read: true } : n)
         : prev.map(n => ({ ...n, read: true }))
-      const count = next.filter(n => !n.read).length
-      updateBadge(count)
-      broadcast({ type: 'badge', count })
+      if (adminUid) {
+        writeToTable(adminUid, 'notifications', next).catch(e => console.error(e))
+      }
       return next
     })
   }
 
   const clearNotifications = () => {
-    setNotifications([])
-    updateBadge(0)
-    broadcast({ type: 'badge', count: 0 })
+    setAllNotifications(prev => {
+      const visibleIds = new Set(visibleNotifications.map(n => n.id))
+      const next = prev.filter(n => !visibleIds.has(n.id))
+      if (adminUid) {
+        writeToTable(adminUid, 'notifications', next).catch(e => console.error(e))
+      }
+      return next
+    })
   }
 
   /* ─── addLog ─── */
@@ -242,6 +302,7 @@ export default function useAppData({ user, addToast }) {
     const unsubAssets = subscribeToTable(adminUid, 'assets', (data, lastUpdated) => applyUpdate(setAssets, 'assets', data, lastUpdated));
     const unsubAssetRequests = subscribeToTable(adminUid, 'asset_requests', (data, lastUpdated) => applyUpdate(setAssetRequests, 'asset_requests', data, lastUpdated));
     const unsubAssetCategories = subscribeToTable(adminUid, 'asset_categories', (data, lastUpdated) => applyUpdate(setAssetCategories, 'asset_categories', data, lastUpdated));
+    const unsubNotifications = subscribeToTable(adminUid, 'notifications', (data, lastUpdated) => applyUpdate(setAllNotifications, 'notifications', data, lastUpdated));
 
     const handleAttUpdate = (key, data, lastUpdated) => {
       if(data) {
@@ -268,7 +329,7 @@ export default function useAppData({ user, addToast }) {
     return () => {
       unsubEmployees(); unsubPayroll(); unsubSettings(); unsubTasks(); unsubNotes(); unsubExpenses(); unsubEvents();
       unsubDocuments(); unsubRoster(); unsubShiftSwaps(); unsubOvertime(); unsubAnnouncements(); unsubAssets();
-      unsubAssetRequests(); unsubAssetCategories(); unsubLeaves(); unsubBalances(); unsubLogs();
+      unsubAssetRequests(); unsubAssetCategories(); unsubNotifications(); unsubLeaves(); unsubBalances(); unsubLogs();
     };
   }, [adminUid, user]);
 
@@ -448,6 +509,11 @@ export default function useAppData({ user, addToast }) {
 
         let overtimeClaimsData = await loadTable('overtime_claims', 'kormiis_overtime_claims')
         setOvertimeClaims(overtimeClaimsData || [])
+
+        let notifsData = await loadTable('notifications', 'kormiis_notifications')
+        if (Array.isArray(notifsData)) {
+          setAllNotifications(notifsData)
+        }
 
         const issues = validateDatabase(empData || [], logsData || {}, leavesData || [], payrollData || {}, expensesData || [])
         setDataIntegrityIssues(issues)
@@ -698,7 +764,7 @@ export default function useAppData({ user, addToast }) {
 
     pendingProfileEdits, setPendingProfileEdits,
     auditLogs,
-    notifications, showNotifications, setShowNotifications,
+    notifications: visibleNotifications, showNotifications, setShowNotifications,
 
     /* Data */
     employees, payroll, attendance, expenses, events, documents, tasks, notes,

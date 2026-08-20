@@ -67,7 +67,7 @@ export default function AppContent({ currentView, setCurrentView, isAppLoading, 
       view = <Attendance employees={data.employees} attendance={data.attendance} setAttendance={data.handleSetAttendance} roster={data.roster} setRoster={data.setRoster} shiftSwaps={data.shiftSwaps} setShiftSwaps={data.setShiftSwaps} shiftTemplates={data.settings?.shiftTemplates} overtimeClaims={data.overtimeClaims} setOvertimeClaims={data.setOvertimeClaims} addLog={data.addLog} addToast={data.addToast} addNotification={data.addNotification} addAuditLog={data.addAuditLog} settings={data.settings} setSettings={data.handleSetSettings} />
       break
     case 'leaves':
-      view = <Leaves employees={data.employees} attendance={data.attendance} setAttendance={data.handleSetAttendance} addLog={data.addLog} addToast={data.addToast} settings={data.settings} setSettings={data.handleSetSettings} addAuditLog={data.addAuditLog} />
+      view = <Leaves employees={data.employees} attendance={data.attendance} setAttendance={data.handleSetAttendance} addLog={data.addLog} addToast={data.addToast} settings={data.settings} setSettings={data.handleSetSettings} addAuditLog={data.addAuditLog} addNotification={data.addNotification} />
       break
     case 'announcements':
       view = <Announcements employees={data.employees} announcements={data.announcements} setAnnouncements={data.setAnnouncements} addLog={data.addLog} addToast={data.addToast} currentUser={user} addNotification={data.addNotification} />
@@ -85,7 +85,7 @@ export default function AppContent({ currentView, setCurrentView, isAppLoading, 
       view = <Tasks tasks={data.tasks} setTasks={data.handleSetTasks} employees={data.employees} currentUser={user} addToast={data.addToast} addLog={data.addLog} addNotification={data.addNotification} />
       break
     case 'expenses':
-      view = <Expenses employees={data.employees} expenses={data.expenses} setExpenses={data.handleSetExpenses} settings={data.settings} addLog={data.addLog} addToast={data.addToast} addAuditLog={data.addAuditLog} currentUser={user} />
+      view = <Expenses employees={data.employees} expenses={data.expenses} setExpenses={data.handleSetExpenses} settings={data.settings} addLog={data.addLog} addToast={data.addToast} addAuditLog={data.addAuditLog} currentUser={user} addNotification={data.addNotification} />
       break
     case 'settings':
       view = <Settings settings={data.settings} setSettings={data.handleSetSettings} addLog={data.addLog} addToast={data.addToast} auditLogs={data.auditLogs} themeMode={themeMode} toggleTheme={toggleTheme} employees={data.employees} setEmployees={data.handleSetEmployees} currentUser={user} />

@@ -12,7 +12,7 @@ import { Select, SelectItem } from "@/components/ui/select"
 import AdSlot from './AdSlot'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 
-export default function Expenses({ employees, expenses, setExpenses, settings, addLog, addToast, addAuditLog, currentUser }) {
+export default function Expenses({ employees, expenses, setExpenses, settings, addLog, addToast, addAuditLog, currentUser, addNotification }) {
   const [activeTab, setActiveTab] = useState('submit')
 
   // Employee Submission States
@@ -55,10 +55,11 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
       return
     }
 
+    const expCategory = category === 'Add New...' ? customCategory : category
     const newExpense = {
       id: `EXP-${Date.now()}`,
       employeeId: currentUser?.employeeId || currentUser?.id || 'SYS-ADMIN',
-      category: category === 'Add New...' ? customCategory : category,
+      category: expCategory,
       amount: Number(amount),
       currency,
       usdAmount: Number(amount) * exchangeRates[currency],
@@ -70,8 +71,16 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
     }
 
     setExpenses(prev => [newExpense, ...prev])
-    addAuditLog('CREATE', 'Expense', `Submitted ${currency} ${amount} for ${category}`)
+    addAuditLog('CREATE', 'Expense', `Submitted ${currency} ${amount} for ${expCategory}`)
     setShowSuccessDialog(true)
+
+    if (addNotification) {
+      addNotification(
+        `${currentUser?.name || 'Teammate'} submitted an expense claim of ${currency} ${amount} for "${expCategory}"`, 
+        'expenses', 
+        { title: 'Expense Claim Submitted', category: 'expense', targetRoles: ['Admin', 'HR'] }
+      )
+    }
 
     setAmount('')
     setDescription('')
@@ -82,23 +91,56 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
   }
 
   const handleApprove = (id) => {
+    const targetExp = expenses.find(exp => exp.id === id)
     setExpenses(prev => prev.map(exp => exp.id === id ? { ...exp, status: 'Approved', approvedBy: currentUser?.role || 'Admin', actionDate: new Date().toISOString() } : exp))
     addToast('Expense approved.', 'success')
     addAuditLog('UPDATE', 'Expense', `Approved expense ${id}`)
+
+    if (addNotification && targetExp) {
+      addNotification(
+        `Your expense claim for "${targetExp.category || 'Expense'}" (${targetExp.currency || ''} ${targetExp.amount}) was approved`, 
+        'expenses', 
+        { title: 'Expense Approved', category: 'expense', targetEmployeeIds: [targetExp.employeeId] }
+      )
+    }
   }
 
   const handleReject = () => {
+    const targetExp = expenses.find(exp => exp.id === rejectReasonModal.id)
     setExpenses(prev => prev.map(exp => exp.id === rejectReasonModal.id ? { ...exp, status: 'Rejected', rejectReason: rejectReasonModal.reason, rejectedBy: currentUser?.role || 'Admin', actionDate: new Date().toISOString() } : exp))
     addToast('Expense rejected.', 'success')
     addAuditLog('UPDATE', 'Expense', `Rejected expense ${rejectReasonModal.id}`)
+
+    if (addNotification && targetExp) {
+      addNotification(
+        `Your expense claim for "${targetExp.category || 'Expense'}" was rejected`, 
+        'expenses', 
+        { title: 'Expense Rejected', category: 'expense', targetEmployeeIds: [targetExp.employeeId] }
+      )
+    }
+
     setRejectReasonModal({ open: false, id: null, reason: '' })
   }
 
   const handleBulkApprove = () => {
-    setExpenses(prev => prev.map(exp => selectedExpenses.includes(exp.id) ? { ...exp, status: 'Approved', approvedBy: currentUser?.role || 'Admin', actionDate: new Date().toISOString() } : exp))
+    const targetIds = [...selectedExpenses]
+    setExpenses(prev => prev.map(exp => targetIds.includes(exp.id) ? { ...exp, status: 'Approved', approvedBy: currentUser?.role || 'Admin', actionDate: new Date().toISOString() } : exp))
     setSelectedExpenses([])
-    addToast(`${selectedExpenses.length} expenses approved.`, 'success')
-    addAuditLog('UPDATE', 'Expense', `Bulk approved ${selectedExpenses.length} expenses`)
+    addToast(`${targetIds.length} expenses approved.`, 'success')
+    addAuditLog('UPDATE', 'Expense', `Bulk approved ${targetIds.length} expenses`)
+
+    if (addNotification) {
+      targetIds.forEach(id => {
+        const exp = expenses.find(e => e.id === id)
+        if (exp) {
+          addNotification(
+            `Your expense claim for "${exp.category || 'Expense'}" (${exp.currency || ''} ${exp.amount}) was approved`, 
+            'expenses', 
+            { title: 'Expense Approved', category: 'expense', targetEmployeeIds: [exp.employeeId] }
+          )
+        }
+      })
+    }
   }
 
   const handleToggleSelect = (id) => {
@@ -108,9 +150,18 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
   const handleMarkReimbursed = (id) => {
     const ref = prompt("Enter bank transaction reference:")
     if (ref) {
+      const targetExp = expenses.find(exp => exp.id === id)
       setExpenses(prev => prev.map(exp => exp.id === id ? { ...exp, status: 'Reimbursed', transactionRef: ref, reimbursedBy: currentUser?.role || 'Admin', actionDate: new Date().toISOString() } : exp))
       addToast('Expense marked as reimbursed.', 'success')
       addAuditLog('UPDATE', 'Expense', `Reimbursed expense ${id} (Ref: ${ref})`)
+
+      if (addNotification && targetExp) {
+        addNotification(
+          `Your expense claim for "${targetExp.category || 'Expense'}" (${targetExp.currency || ''} ${targetExp.amount}) has been reimbursed`, 
+          'expenses', 
+          { title: 'Expense Reimbursed', category: 'expense', targetEmployeeIds: [targetExp.employeeId] }
+        )
+      }
     }
   }
 

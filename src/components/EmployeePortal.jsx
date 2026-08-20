@@ -207,6 +207,7 @@ export default function EmployeePortal({
       case 'dashboard':
         return <DashboardView currentUser={currentUser} attendance={attendance} setAttendance={setAttendance} addToast={addToast} expenses={expenses} announcements={announcements} setActiveTab={setActiveTab} setShowPunchModal={setShowPunchModal} settings={settings} notes={notes} setNotes={setNotes} />
       case 'attendance':
+      case 'schedule':
         return <AttendanceView 
                  currentUser={currentUser} 
                  employees={employees}
@@ -219,6 +220,7 @@ export default function EmployeePortal({
                  setOvertimeClaims={setOvertimeClaims}
                  settings={settings}
                  addToast={addToast} 
+                 addNotification={addNotification}
                />
       case 'announcements':
         return <Announcements 
@@ -228,13 +230,13 @@ export default function EmployeePortal({
                  setAnnouncements={setAnnouncements} 
                  addToast={addToast}
                  addLog={addLog}
-                
+                 addNotification={addNotification}
                  headline="Feed"
                />
       case 'payslips':
         return <PayslipsView currentUser={currentUser} payroll={payroll} addToast={addToast} settings={settings} />
       case 'leave':
-        return <LeaveView currentUser={currentUser} attendance={attendance} setAttendance={setAttendance} addToast={addToast} addLog={addLog} settings={settings} />
+        return <LeaveView currentUser={currentUser} attendance={attendance} setAttendance={setAttendance} addToast={addToast} addLog={addLog} settings={settings} addNotification={addNotification} />
       case 'profile':
         return <ProfileView 
           currentUser={currentUser} 
@@ -261,15 +263,16 @@ export default function EmployeePortal({
                  assetCategories={assetCategories}
                  setAssetCategories={setAssetCategories}
                  addToast={addToast}
+                 addNotification={addNotification}
                />
       case 'my-tasks':
-        return <div className="max-w-[1200px] mx-auto w-full"><Tasks tasks={tasks} setTasks={setTasks} employees={employees} currentUser={currentUser} addToast={addToast} addLog={addLog} /></div>
+        return <div className="max-w-[1200px] mx-auto w-full"><Tasks tasks={tasks} setTasks={setTasks} employees={employees} currentUser={currentUser} addToast={addToast} addLog={addLog} addNotification={addNotification} /></div>
       case 'events':
-        return <div className="max-w-[1200px] mx-auto w-full"><Calendar events={events} setEvents={setEvents} employees={employees} addLog={addLog} addToast={addToast} currentUser={currentUser} /></div>
+        return <div className="max-w-[1200px] mx-auto w-full"><Calendar events={events} setEvents={setEvents} employees={employees} addLog={addLog} addToast={addToast} currentUser={currentUser} addNotification={addNotification} /></div>
       case 'expenses':
-        return <div className="max-w-[1200px] mx-auto w-full"><Expenses employees={employees} expenses={expenses} setExpenses={setExpenses} settings={settings} addLog={addLog} addToast={addToast} addAuditLog={addLog} currentUser={currentUser} /></div>
+        return <div className="max-w-[1200px] mx-auto w-full"><Expenses employees={employees} expenses={expenses} setExpenses={setExpenses} settings={settings} addLog={addLog} addToast={addToast} addAuditLog={addLog} currentUser={currentUser} addNotification={addNotification} /></div>
       case 'documents':
-        return <div className="max-w-[1200px] mx-auto w-full"><Documents documents={documents} setDocuments={setDocuments} addLog={addLog} addToast={addToast} currentUser={currentUser} /></div>
+        return <div className="max-w-[1200px] mx-auto w-full"><Documents documents={documents} setDocuments={setDocuments} addLog={addLog} addToast={addToast} currentUser={currentUser} addNotification={addNotification} /></div>
       case 'notes':
         return <div className="max-w-[1200px] mx-auto w-full"><Notes notes={notes} setNotes={setNotes} currentUser={currentUser} addToast={addToast} /></div>
       case 'gigs':
@@ -293,6 +296,7 @@ export default function EmployeePortal({
             setOvertimeClaims={setOvertimeClaims} 
             addLog={addLog} 
             addToast={addToast} 
+            addNotification={addNotification}
             settings={settings}
             headline="Team Attendance"
           />
@@ -692,7 +696,8 @@ function AttendanceView({
   overtimeClaims,
   setOvertimeClaims,
   settings,
-  addToast 
+  addToast,
+  addNotification
 }) {
   const currentMonth = formatMonthYear(new Date().toISOString().split('T')[0])
   const [activeSubTab, setActiveSubTab] = useState('history') // 'history', 'roster', 'swap', 'overtime', 'offday'
@@ -734,6 +739,14 @@ function AttendanceView({
     }
     
     setShiftSwaps(prev => [...prev, newSwap])
+    if (addNotification) {
+      addNotification(
+        `${currentUser.name || 'Teammate'} requested a shift swap for ${swapDate}`, 
+        'attendance', 
+        { title: 'Shift Swap Requested', category: 'attendance', targetRoles: ['Admin', 'HR'], targetEmployeeIds: swapColleague ? [swapColleague] : null }
+      )
+    }
+
     setSwapDate('')
     setSwapColleague('')
     setSwapReason('')
@@ -775,6 +788,14 @@ function AttendanceView({
     }
 
     setOvertimeClaims(prev => [...prev, newClaim])
+    if (addNotification) {
+      addNotification(
+        `${currentUser.name || 'Teammate'} submitted an overtime claim of ${otHours} hours for ${otDate}`, 
+        'attendance', 
+        { title: 'Overtime Claim Submitted', category: 'attendance', targetRoles: ['Admin', 'HR'] }
+      )
+    }
+
     setOtDate('')
     setOtHours('')
     setOtReason('')
@@ -1190,7 +1211,7 @@ function PayslipsView({ currentUser, payroll, addToast, settings }) {
   )
 }
 
-function LeaveView({ currentUser, attendance, setAttendance, addToast, addLog, settings }) {
+function LeaveView({ currentUser, attendance, setAttendance, addToast, addLog, settings, addNotification }) {
   const myLeaves = (attendance?.leaves || []).filter(l => l.employeeId === currentUser.id)
   
   const defaultPolicies = settings?.leavePolicies || { Annual: 14, Sick: 7, Casual: 3, Unpaid: 0 }
@@ -1223,6 +1244,15 @@ function LeaveView({ currentUser, attendance, setAttendance, addToast, addLog, s
     setAttendance(prev => ({ ...prev, leaves: [newLeave, ...(prev.leaves || [])] }))
     addToast('Leave request submitted successfully!', 'success')
     addLog('Leave Requested', `${currentUser.name} requested ${type} leave.`, 'info')
+
+    if (addNotification) {
+      addNotification(
+        `${currentUser.name || 'Teammate'} requested ${type} leave (${startDate} to ${endDate})`,
+        'leaves',
+        { title: 'New Leave Request', category: 'leave', targetRoles: ['Admin', 'HR'] }
+      )
+    }
+
     setStartDate(''); setEndDate(''); setReason(''); setReceipt(null); setReceiptName('')
   }
 
@@ -1384,7 +1414,7 @@ function LeaveView({ currentUser, attendance, setAttendance, addToast, addLog, s
 
 // My Assets View (Employee)
 // ----------------------------------------------------------------------
-function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetRequests, addToast, assetCategories, setAssetCategories }) {
+function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetRequests, addToast, assetCategories, setAssetCategories, addNotification }) {
   const [activeTab, setActiveTab] = useState('assigned') // 'assigned', 'request', 'maintenance'
   const [requestForm, setRequestForm] = useState({ name: '', category: 'Laptop', justification: '', urgency: 'Medium' })
   const [showCategoryModal, setShowCategoryModal] = useState(false)
@@ -1433,18 +1463,37 @@ function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetR
       }
       return a
     }))
+
+    if (addNotification) {
+      addNotification(
+        `${currentUser.name || 'Teammate'} reported an issue for asset: "${issueAsset?.name || 'Asset'}"`, 
+        'assets', 
+        { title: 'Asset Issue Reported', category: 'asset', targetRoles: ['Admin', 'HR'] }
+      )
+    }
+
     setIssueText('')
     setShowIssueModal(false)
     addToast('Issue reported. IT will follow up shortly.', 'success')
   }
 
   const handleRequestReturn = (assetId) => {
+    const targetAsset = (assets || []).find(a => a.id === assetId)
     setAssets(prev => prev.map(a => {
       if (a.id === assetId) {
         return { ...a, status: 'Available', assignedTo: null, assignmentDate: null }
       }
       return a
     }))
+
+    if (addNotification && targetAsset) {
+      addNotification(
+        `${currentUser.name || 'Teammate'} requested return for asset: "${targetAsset.name || 'Asset'}"`, 
+        'assets', 
+        { title: 'Asset Return Request', category: 'asset', targetRoles: ['Admin', 'HR'] }
+      )
+    }
+
     addToast('Return request submitted. Please hand over the device to IT/HR.', 'info')
   }
 
@@ -1462,6 +1511,15 @@ function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetR
       date: new Date().toISOString()
     }
     setAssetRequests(prev => [newReq, ...prev])
+
+    if (addNotification) {
+      addNotification(
+        `${currentUser.name || 'Teammate'} requested asset: "${requestForm.name || requestForm.category}"`, 
+        'assets', 
+        { title: 'New Asset Request', category: 'asset', targetRoles: ['Admin', 'HR'] }
+      )
+    }
+
     setRequestForm({ name: '', category: 'Laptop', justification: '', urgency: 'Medium' })
     setSuccessDialog('equipment')
     addToast('Asset request submitted to IT/HR', 'success')
@@ -1483,6 +1541,15 @@ function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetR
       date: new Date().toISOString()
     }
     setAssetRequests(prev => [newReq, ...prev])
+
+    if (addNotification) {
+      addNotification(
+        `${currentUser.name || 'Teammate'} requested maintenance for asset: "${asset?.name || 'Asset'}"`, 
+        'assets', 
+        { title: 'Asset Maintenance Request', category: 'asset', targetRoles: ['Admin', 'HR'] }
+      )
+    }
+
     setMaintenanceForm({ assetId: '', urgency: 'Medium', description: '' })
     setSuccessDialog('maintenance')
     addToast('Maintenance request submitted to IT/HR', 'success')

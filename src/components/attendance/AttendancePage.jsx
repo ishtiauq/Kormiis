@@ -91,6 +91,7 @@ export default function AttendancePage({
             setAttendance={setAttendance}
             addLog={addLog}
             addToast={addToast}
+            addNotification={addNotification}
             settings={settings}
           />
           <LeaveBalanceCard employees={employees} balances={attendance.leaveBalances || {}} leaves={attendance.leaves || []} settings={settings} />

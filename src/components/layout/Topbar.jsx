@@ -5,8 +5,8 @@ import kormiisLogo from '../../Assets/Kormiis Logo Final.svg'
 import kormiisWhiteLogo from '../../Assets/Kormiis white Logo.svg'
 
 import { useState, useEffect, useRef } from 'react'
-import { createPortal } from 'react-dom'
 import { Badge } from "@/components/ui/badge"
+import { getRelativeTime } from '../../services/date.js'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 export default function Topbar({ 
   isDarkMode, 
@@ -457,7 +457,7 @@ export default function Topbar({
 
                       <div className="flex items-center gap-1.5 mt-1 text-[10px] font-medium text-muted-foreground">
                         <Icon name="schedule" size={12} className="opacity-70" />
-                        <span>{n.time}</span>
+                        <span>{getRelativeTime(n.timestamp || n.time) || n.time || 'Just now'}</span>
                       </div>
                     </div>
                   </div>
