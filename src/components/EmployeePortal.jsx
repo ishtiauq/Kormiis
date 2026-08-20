@@ -230,7 +230,15 @@ export default function EmployeePortal({
       case 'leave':
         return <LeaveView currentUser={currentUser} attendance={attendance} setAttendance={setAttendance} addToast={addToast} addLog={addLog} settings={settings} />
       case 'profile':
-        return <ProfileView currentUser={currentUser} pendingProfileEdits={pendingProfileEdits} setPendingProfileEdits={setPendingProfileEdits} addToast={addToast} addLog={addLog} />
+        return <ProfileView 
+          currentUser={currentUser} 
+          pendingProfileEdits={pendingProfileEdits} 
+          setPendingProfileEdits={setPendingProfileEdits} 
+          addToast={addToast} 
+          addLog={addLog} 
+          settings={settings} 
+          employees={employees} 
+        />
       case 'my-assets':
         return <MyAssetsView
                  currentUser={currentUser}

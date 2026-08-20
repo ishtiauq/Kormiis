@@ -2,55 +2,113 @@ import { useState } from 'react'
 import Icon from "@/components/ui/Icon.jsx"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+import { formatDate } from '../services/date.js'
 import { changeEmployeePassword } from '../services/auth.js'
 
-const getInitialsAvatar = (name) => {
-  const parts = name.split(' ')
-  const initials = parts.length > 1 ? parts[0][0] + parts[1][0] : parts[0][0]
-
-  let hash = 0
-  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash)
-  const h = hash % 360
-
-  return (
-    <div className="flex items-center justify-center size-10 rounded-full font-bold text-base shrink-0" style={{
-      background: `hsl(${h}, 70%, 80%)`, color: `hsl(${h}, 70%, 20%)`,
-    }}>
-      {initials.toUpperCase()}
-    </div>
-  )
-}
-
-export default function ProfileView({ currentUser, pendingProfileEdits, setPendingProfileEdits, addToast, addLog, settings, setSettings, employees, setEmployees }) {
+export default function ProfileView({ 
+  currentUser, 
+  pendingProfileEdits, 
+  setPendingProfileEdits, 
+  addToast, 
+  addLog, 
+  settings, 
+  setSettings, 
+  employees, 
+  setEmployees 
+}) {
+  const [activeTab, setActiveTab] = useState('personal') // 'personal' | 'work' | 'security'
   const [editMode, setEditMode] = useState(false)
+  
+  // Password change state
   const [pwCurrent, setPwCurrent] = useState('')
   const [pwNew, setPwNew] = useState('')
   const [pwConfirm, setPwConfirm] = useState('')
+  const [showPwCurrent, setShowPwCurrent] = useState(false)
+  const [showPwNew, setShowPwNew] = useState(false)
+  const [showPwConfirm, setShowPwConfirm] = useState(false)
   const [pwLoading, setPwLoading] = useState(false)
+
+  // Edit form state
   const [formData, setFormData] = useState({
-    personalEmail: currentUser.personalEmail || '',
-    phone: currentUser.phone || '',
-    address: currentUser.address || '',
-    emergencyContact: currentUser.emergencyContact || ''
+    personalEmail: currentUser?.personalEmail || '',
+    phone: currentUser?.phone || '',
+    address: currentUser?.address || '',
+    emergencyContact: currentUser?.emergencyContact || ''
   })
 
-  const hasPending = pendingProfileEdits?.some(e => e.employeeId === currentUser.id)
+  // Pending edits check
+  const pendingEdit = pendingProfileEdits?.find(e => e.employeeId === (currentUser?.id || currentUser?.employeeId))
+  const hasPending = !!pendingEdit
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    if (hasPending) return addToast('You already have a pending edit request.', 'warning')
+  // Name initials for avatar fallback
+  const getInitials = (name = '') => {
+    const parts = name.trim().split(' ').filter(Boolean)
+    if (parts.length === 0) return 'U'
+    return parts.length > 1 
+      ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+      : parts[0].slice(0, 2).toUpperCase()
+  }
 
-    setPendingProfileEdits(prev => [...(prev || []), {
-      id: `edit-${Date.now()}`,
-      employeeId: currentUser.id,
-      timestamp: new Date().toISOString(),
-      changes: formData
-    }])
+  const handleStartEdit = () => {
+    setFormData({
+      personalEmail: currentUser?.personalEmail || '',
+      phone: currentUser?.phone || '',
+      address: currentUser?.address || '',
+      emergencyContact: currentUser?.emergencyContact || ''
+    })
+    setEditMode(true)
+    setActiveTab('personal')
+  }
 
+  const handleCancelEdit = () => {
     setEditMode(false)
-    addToast('Profile update submitted for HR review.', 'success')
-    addLog('Profile Edit Requested', `${currentUser.name} requested to update their profile info.`, 'info')
+    setFormData({
+      personalEmail: currentUser?.personalEmail || '',
+      phone: currentUser?.phone || '',
+      address: currentUser?.address || '',
+      emergencyContact: currentUser?.emergencyContact || ''
+    })
+  }
+
+  const handleSubmitProfileEdit = (e) => {
+    e.preventDefault()
+    const empId = currentUser?.id || currentUser?.employeeId
+    if (!empId) {
+      addToast?.('Could not identify current employee account.', 'danger')
+      return
+    }
+
+    if (hasPending) {
+      addToast?.('You already have a pending edit request under review.', 'warning')
+      return
+    }
+
+    const newEdit = {
+      id: `edit-${Date.now()}`,
+      employeeId: empId,
+      timestamp: new Date().toISOString(),
+      changes: {
+        personalEmail: formData.personalEmail.trim(),
+        phone: formData.phone.trim(),
+        address: formData.address.trim(),
+        emergencyContact: formData.emergencyContact.trim()
+      }
+    }
+
+    setPendingProfileEdits?.(prev => [...(prev || []), newEdit])
+    setEditMode(false)
+    addToast?.('Profile update submitted for HR review.', 'success')
+    addLog?.('Profile Edit Requested', `${currentUser.name || 'Employee'} requested to update profile information.`, 'info')
+  }
+
+  const handleCancelPendingRequest = () => {
+    const empId = currentUser?.id || currentUser?.employeeId
+    setPendingProfileEdits?.(prev => (prev || []).filter(e => e.employeeId !== empId))
+    addToast?.('Pending profile update request cancelled.', 'info')
+    addLog?.('Profile Request Cancelled', `${currentUser.name || 'Employee'} cancelled their pending profile change request.`, 'info')
   }
 
   const handleChangePassword = async (e) => {
@@ -58,163 +116,613 @@ export default function ProfileView({ currentUser, pendingProfileEdits, setPendi
     setPwLoading(true)
     try {
       if (!pwCurrent) {
-        addToast('Please enter your current password.', 'warning')
+        addToast?.('Please enter your current password.', 'warning')
         return
       }
       if (pwNew.length < 6) {
-        addToast('New password must be at least 6 characters.', 'warning')
+        addToast?.('New password must be at least 6 characters long.', 'warning')
         return
       }
       if (pwNew !== pwConfirm) {
-        addToast('New passwords do not match.', 'warning')
+        addToast?.('New passwords do not match.', 'warning')
         return
       }
       await changeEmployeePassword(pwCurrent, pwNew)
       setPwCurrent('')
       setPwNew('')
       setPwConfirm('')
-      addToast('Password changed successfully.', 'success')
-      if (addLog) addLog('Password Changed', `${currentUser.name} changed their password.`, 'info')
+      addToast?.('Password updated successfully.', 'success')
+      addLog?.('Password Changed', `${currentUser.name || 'User'} updated their account password.`, 'info')
     } catch (err) {
-      addToast('Failed to change password: ' + err.message, 'danger')
+      addToast?.('Failed to change password: ' + (err.message || 'Unknown error'), 'danger')
     } finally {
       setPwLoading(false)
     }
   }
 
+  const copyToClipboard = (text, label) => {
+    if (!text) return
+    navigator.clipboard.writeText(text)
+    addToast?.(`${label} copied to clipboard!`, 'success')
+  }
+
+  const empId = currentUser?.id || currentUser?.employeeId || 'N/A'
+  const workEmail = currentUser?.email || currentUser?.workEmail || currentUser?.personalEmail || 'N/A'
+  const companyId = currentUser?.companyUid || currentUser?.adminUid || currentUser?.uid || currentUser?.id
+
   return (
-    <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[800px] mx-auto pb-10">
-      <div className="flex items-center justify-between">
-        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
-          <Icon name="person" className="text-foreground" size={20}/>
-          Profile
-        </h1>
-        {!editMode && !hasPending && (
-          <Button variant="outline" onClick={() => setEditMode(true)}>Edit Details</Button>
+    <div className="flex flex-col gap-6 max-w-[920px] mx-auto pb-12 w-full animate-in fade-in duration-300">
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
+            <div className="size-9 rounded-2xl bg-primary/10 text-primary flex items-center justify-center border border-primary/20 shadow-xs">
+              <Icon name="person" size={20}/>
+            </div>
+            My Profile
+          </h1>
+          <p className="text-fluid-xs sm:text-fluid-sm text-muted-foreground mt-1">
+            Manage your personal profile, workplace credentials, and security settings.
+          </p>
+        </div>
+
+        {!editMode && (
+          <div className="flex items-center gap-2">
+            {!hasPending ? (
+              <Button 
+                variant="outline" 
+                onClick={handleStartEdit}
+                className="rounded-2xl liquid-glass-btn h-11 px-5 font-medium flex items-center gap-2"
+              >
+                <Icon name="edit" size={18} />
+                <span>Edit Profile</span>
+              </Button>
+            ) : (
+              <Badge variant="warning" className="px-3 py-1.5 rounded-full text-xs flex items-center gap-1.5 shadow-xs">
+                <span className="size-2 rounded-full bg-amber-500 animate-pulse" />
+                Pending HR Review
+              </Badge>
+            )}
+          </div>
         )}
       </div>
-      <div className="border-t border-border border-headline" />
 
+      {/* Pending Update Alert Banner */}
       {hasPending && (
-        <div className="p-4 rounded-md flex gap-3 items-center bg-amber-500/10 border-l-4 border-l-amber-500 text-foreground">
-          <Icon name="error" className="h-5 w-5 text-amber-500" size={20}/>
-          <span className="text-sm font-medium">You have pending profile updates waiting for HR approval.</span>
+        <div className="glass-card rounded-3xl p-4 sm:p-5 border border-amber-500/30 bg-amber-500/10 dark:bg-amber-500/15 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
+          <div className="flex items-start sm:items-center gap-3.5">
+            <div className="size-10 rounded-2xl bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 border border-amber-500/30">
+              <Icon name="pending_actions" size={22} />
+            </div>
+            <div>
+              <div className="text-sm font-semibold text-foreground flex items-center gap-2">
+                Pending Profile Updates
+                <span className="text-xs font-normal text-muted-foreground">
+                  ({pendingEdit?.timestamp ? formatDate(pendingEdit.timestamp) : 'Recently submitted'})
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Your submitted contact information changes are currently awaiting HR administrator approval.
+              </p>
+            </div>
+          </div>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={handleCancelPendingRequest}
+            className="text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-xl shrink-0 self-end sm:self-center h-8"
+          >
+            Cancel Request
+          </Button>
         </div>
       )}
 
-      <Card>
-        <CardContent className="p-6 flex flex-col sm:flex-row gap-6 items-start">
-          <div className="mx-auto sm:mx-0">
-            {getInitialsAvatar(currentUser.name)}
-          </div>
-          <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-6 w-full">
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground uppercase">Full Name</label>
-              <div className="font-medium text-fluid-lg">{currentUser.name}</div>
-            </div>
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground uppercase">Employee ID</label>
-              <div className="font-medium text-fluid-lg">{currentUser.id || currentUser.employeeId || 'N/A'}</div>
-            </div>
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground uppercase">Department</label>
-              <div className="font-medium text-fluid-lg">{currentUser.department || 'Management'}</div>
-            </div>
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground uppercase">Role</label>
-              <div className="font-medium text-fluid-lg">{currentUser.role}</div>
-            </div>
-            <div className="sm:col-span-2">
-              <label className="text-xs font-semibold text-muted-foreground uppercase">Company ID</label>
-              <div className="font-medium text-fluid-lg flex items-center gap-2">
-                <span className="font-sans bg-muted px-2 py-0.5 rounded">{currentUser.adminUid || currentUser.uid || currentUser.id}</span>
-                <Button variant="ghost" size="icon" className="size-8" onClick={() => {
-                  navigator.clipboard.writeText(currentUser.adminUid || currentUser.uid || currentUser.id);
-                  addToast('Company ID copied to clipboard!', 'success');
-                }} aria-label="Copy Company ID">
-                  <Icon name="content_copy" size={16}/>
-                </Button>
-                <p className="text-fluid-xs text-muted-foreground font-normal ml-2">Share this with employees to log in from other devices.</p>
-              </div>
+      {/* Hero Profile Glass Card */}
+      <div className="glass-kormiis rounded-3xl p-6 sm:p-8 border border-white/25 dark:border-white/10 shadow-lg relative overflow-hidden">
+        {/* Subtle Ambient Background Flare */}
+        <div className="absolute top-0 right-0 w-72 h-72 bg-primary/5 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
+        
+        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center gap-6">
+          {/* Avatar with Status Ring */}
+          <div className="relative shrink-0 group">
+            <Avatar className="size-22 sm:size-24 rounded-3xl border-2 border-white/40 dark:border-white/15 shadow-md ring-4 ring-primary/10">
+              {currentUser?.avatar ? (
+                <AvatarImage src={currentUser.avatar} alt={currentUser.name} className="object-cover" />
+              ) : null}
+              <AvatarFallback className="bg-gradient-to-br from-primary/80 to-primary text-primary-foreground font-bold text-2xl sm:text-3xl rounded-3xl">
+                {getInitials(currentUser?.name)}
+              </AvatarFallback>
+            </Avatar>
+            <div 
+              className="absolute -bottom-1 -right-1 size-5 rounded-full bg-emerald-500 border-2 border-background flex items-center justify-center shadow-xs" 
+              title="Active User"
+            >
+              <div className="size-2 rounded-full bg-white animate-ping opacity-75" />
             </div>
           </div>
-        </CardContent>
-      </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Contact & Personal Information</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {editMode ? (
-            <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <div className="space-y-2">
-                <label className="text-sm font-medium leading-none">Personal Email</label>
-                <Input type="email" value={formData.personalEmail} onChange={e => setFormData(p => ({...p, personalEmail: e.target.value}))} />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium leading-none">Phone Number</label>
-                <Input type="tel" value={formData.phone} onChange={e => setFormData(p => ({...p, phone: e.target.value}))} />
-              </div>
-              <div className="space-y-2 sm:col-span-2">
-                <label className="text-sm font-medium leading-none">Address</label>
-                <Input type="text" value={formData.address} onChange={e => setFormData(p => ({...p, address: e.target.value}))} />
-              </div>
-              <div className="space-y-2 sm:col-span-2">
-                <label className="text-sm font-medium leading-none">Emergency Contact</label>
-                <Input type="text" value={formData.emergencyContact} onChange={e => setFormData(p => ({...p, emergencyContact: e.target.value}))} />
-              </div>
-              <div className="sm:col-span-2 flex gap-3 mt-4">
-                <Button type="submit">Submit for Approval</Button>
-                <Button type="button" variant="outline" onClick={() => setEditMode(false)}>Cancel</Button>
-              </div>
-            </form>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div>
-                <label className="text-xs font-semibold text-muted-foreground uppercase">Personal Email</label>
-                <div className="font-medium">{currentUser.personalEmail || '-'}</div>
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-muted-foreground uppercase">Phone Number</label>
-                <div className="font-medium">{currentUser.phone || '-'}</div>
-              </div>
-              <div className="sm:col-span-2">
-                <label className="text-xs font-semibold text-muted-foreground uppercase">Address</label>
-                <div className="font-medium">{currentUser.address || '-'}</div>
-              </div>
-              <div className="sm:col-span-2">
-                <label className="text-xs font-semibold text-muted-foreground uppercase">Emergency Contact</label>
-                <div className="font-medium">{currentUser.emergencyContact || '-'}</div>
-              </div>
+          {/* User Details & Badges */}
+          <div className="flex-1 space-y-3 min-w-0">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <h2 className="text-fluid-xl sm:text-fluid-2xl font-bold tracking-tight text-foreground truncate">
+                {currentUser?.name || 'User Profile'}
+              </h2>
+              <Badge variant="default" className="rounded-full px-3 py-0.5 text-xs font-semibold shadow-xs">
+                {currentUser?.role || 'Teammate'}
+              </Badge>
+              {currentUser?.status && (
+                <Badge variant="success" className="rounded-full px-2.5 py-0.5 text-xs">
+                  {currentUser.status}
+                </Badge>
+              )}
             </div>
-          )}
-        </CardContent>
-      </Card>
 
-      {currentUser.isEmployee && currentUser.uid && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Change Password</CardTitle>
-            <p className="text-fluid-sm text-muted-foreground">Update the password you use to sign in. Your sign-in email is managed by your HR administrator.</p>
+            <p className="text-fluid font-medium text-muted-foreground flex items-center gap-2">
+              <Icon name="work" size={16} className="text-muted-foreground/80 shrink-0" />
+              <span>{currentUser?.designation || currentUser?.role || 'Team Member'}</span>
+              <span className="text-border dark:text-white/20">•</span>
+              <span className="text-foreground/80">{currentUser?.department || 'General'}</span>
+            </p>
+
+            {/* Quick Metadata Chips */}
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              <button 
+                onClick={() => copyToClipboard(empId, 'Employee ID')}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/40 dark:bg-white/5 border border-white/40 dark:border-white/10 text-fluid-xs font-medium text-foreground hover:bg-white/60 dark:hover:bg-white/10 transition-all cursor-pointer shadow-xs group"
+                title="Click to copy Employee ID"
+              >
+                <Icon name="badge" size={14} className="text-muted-foreground group-hover:text-primary transition-colors" />
+                <span className="text-muted-foreground">ID:</span>
+                <span className="font-mono">{empId}</span>
+                <Icon name="content_copy" size={12} className="text-muted-foreground/60 group-hover:text-foreground ml-0.5" />
+              </button>
+
+              {workEmail && workEmail !== 'N/A' && (
+                <button 
+                  onClick={() => copyToClipboard(workEmail, 'Email')}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/40 dark:bg-white/5 border border-white/40 dark:border-white/10 text-fluid-xs font-medium text-foreground hover:bg-white/60 dark:hover:bg-white/10 transition-all cursor-pointer shadow-xs group"
+                  title="Click to copy Email"
+                >
+                  <Icon name="mail" size={14} className="text-muted-foreground group-hover:text-primary transition-colors" />
+                  <span className="truncate max-w-[200px]">{workEmail}</span>
+                  <Icon name="content_copy" size={12} className="text-muted-foreground/60 group-hover:text-foreground ml-0.5" />
+                </button>
+              )}
+
+              {(currentUser?.joiningDate || currentUser?.createdAt) && (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/30 dark:bg-white/5 border border-white/30 dark:border-white/10 text-fluid-xs font-medium text-muted-foreground">
+                  <Icon name="calendar_today" size={14} />
+                  <span>Joined {formatDate(currentUser.joiningDate || currentUser.createdAt)}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Segmented Section Navigation */}
+      <div className="flex items-center gap-1.5 p-1.5 rounded-2xl glass-card border border-white/30 dark:border-white/10 w-fit max-w-full overflow-x-auto shadow-xs">
+        <button
+          onClick={() => { setActiveTab('personal'); setEditMode(false); }}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all cursor-pointer ${
+            activeTab === 'personal'
+              ? 'bg-background dark:bg-white/15 text-foreground shadow-xs font-semibold'
+              : 'text-muted-foreground hover:text-foreground hover:bg-white/30 dark:hover:bg-white/5'
+          }`}
+        >
+          <Icon name="contact_mail" size={16} />
+          <span>Contact & Personal</span>
+        </button>
+
+        <button
+          onClick={() => { setActiveTab('work'); setEditMode(false); }}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all cursor-pointer ${
+            activeTab === 'work'
+              ? 'bg-background dark:bg-white/15 text-foreground shadow-xs font-semibold'
+              : 'text-muted-foreground hover:text-foreground hover:bg-white/30 dark:hover:bg-white/5'
+          }`}
+        >
+          <Icon name="domain" size={16} />
+          <span>Work Details</span>
+        </button>
+
+        <button
+          onClick={() => { setActiveTab('security'); setEditMode(false); }}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all cursor-pointer ${
+            activeTab === 'security'
+              ? 'bg-background dark:bg-white/15 text-foreground shadow-xs font-semibold'
+              : 'text-muted-foreground hover:text-foreground hover:bg-white/30 dark:hover:bg-white/5'
+          }`}
+        >
+          <Icon name="shield" size={16} />
+          <span>Security & Login</span>
+        </button>
+      </div>
+
+      {/* TAB 1: Personal & Contact Information */}
+      {activeTab === 'personal' && (
+        <Card className="glass-card rounded-3xl border border-white/30 dark:border-white/10 shadow-sm overflow-hidden">
+          <CardHeader className="p-6 sm:p-8 pb-4 flex flex-row items-center justify-between border-b border-border/40 dark:border-white/5">
+            <div>
+              <CardTitle className="text-fluid-lg font-bold flex items-center gap-2">
+                <Icon name="contact_phone" size={20} className="text-primary" />
+                Personal Information
+              </CardTitle>
+              <CardDescription className="text-fluid-xs text-muted-foreground mt-1">
+                Your private contact info and emergency communication details.
+              </CardDescription>
+            </div>
+
+            {!editMode && !hasPending && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={handleStartEdit}
+                className="rounded-xl text-xs font-medium gap-1.5 text-primary hover:text-primary hover:bg-primary/10"
+              >
+                <Icon name="edit" size={15} />
+                Edit
+              </Button>
+            )}
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleChangePassword} className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <div className="space-y-2">
-                <label className="text-sm font-medium leading-none">Current Password</label>
-                <Input type="password" value={pwCurrent} onChange={e => setPwCurrent(e.target.value)} />
+
+          <CardContent className="p-6 sm:p-8 pt-6">
+            {editMode ? (
+              <form onSubmit={handleSubmitProfileEdit} className="space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Personal Email
+                    </label>
+                    <div className="relative">
+                      <Icon name="mail" size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                      <Input
+                        type="email"
+                        placeholder="you@example.com"
+                        value={formData.personalEmail}
+                        onChange={e => setFormData(p => ({ ...p, personalEmail: e.target.value }))}
+                        className="h-11 !pl-11 rounded-2xl bg-white/70 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:ring-2 focus:ring-primary/20"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Phone Number
+                    </label>
+                    <div className="relative">
+                      <Icon name="call" size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                      <Input
+                        type="tel"
+                        placeholder="+880 1..."
+                        value={formData.phone}
+                        onChange={e => setFormData(p => ({ ...p, phone: e.target.value }))}
+                        className="h-11 !pl-11 rounded-2xl bg-white/70 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:ring-2 focus:ring-primary/20"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 sm:col-span-2">
+                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Residential Address
+                    </label>
+                    <div className="relative">
+                      <Icon name="home" size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                      <Input
+                        type="text"
+                        placeholder="House, Street, City, Country"
+                        value={formData.address}
+                        onChange={e => setFormData(p => ({ ...p, address: e.target.value }))}
+                        className="h-11 !pl-11 rounded-2xl bg-white/70 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:ring-2 focus:ring-primary/20"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 sm:col-span-2">
+                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Emergency Contact Info
+                    </label>
+                    <div className="relative">
+                      <Icon name="emergency" size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                      <Input
+                        type="text"
+                        placeholder="Name, Relationship & Phone number"
+                        value={formData.emergencyContact}
+                        onChange={e => setFormData(p => ({ ...p, emergencyContact: e.target.value }))}
+                        className="h-11 !pl-11 rounded-2xl bg-white/70 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:ring-2 focus:ring-primary/20"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 pt-2">
+                  <Button 
+                    type="submit" 
+                    className="h-11 px-6 rounded-2xl font-semibold shadow-md bg-primary hover:bg-primary/90 text-primary-foreground flex items-center gap-2"
+                  >
+                    <Icon name="send" size={18} />
+                    Submit for Approval
+                  </Button>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={handleCancelEdit}
+                    className="h-11 px-5 rounded-2xl liquid-glass-btn"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="p-4.5 rounded-2xl bg-white/40 dark:bg-white/5 border border-white/30 dark:border-white/10 space-y-1.5 shadow-xs">
+                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    <Icon name="mail" size={15} className="text-primary" />
+                    Personal Email
+                  </div>
+                  <div className="font-medium text-foreground text-sm break-all">
+                    {currentUser?.personalEmail || <span className="text-muted-foreground italic">Not provided</span>}
+                  </div>
+                </div>
+
+                <div className="p-4.5 rounded-2xl bg-white/40 dark:bg-white/5 border border-white/30 dark:border-white/10 space-y-1.5 shadow-xs">
+                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    <Icon name="call" size={15} className="text-emerald-500" />
+                    Phone Number
+                  </div>
+                  <div className="font-medium text-foreground text-sm">
+                    {currentUser?.phone || <span className="text-muted-foreground italic">Not provided</span>}
+                  </div>
+                </div>
+
+                <div className="p-4.5 rounded-2xl bg-white/40 dark:bg-white/5 border border-white/30 dark:border-white/10 space-y-1.5 shadow-xs sm:col-span-2">
+                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    <Icon name="home" size={15} className="text-blue-500" />
+                    Residential Address
+                  </div>
+                  <div className="font-medium text-foreground text-sm">
+                    {currentUser?.address || <span className="text-muted-foreground italic">Not provided</span>}
+                  </div>
+                </div>
+
+                <div className="p-4.5 rounded-2xl bg-white/40 dark:bg-white/5 border border-white/30 dark:border-white/10 space-y-1.5 shadow-xs sm:col-span-2">
+                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    <Icon name="contact_phone" size={15} className="text-amber-500" />
+                    Emergency Contact
+                  </div>
+                  <div className="font-medium text-foreground text-sm">
+                    {currentUser?.emergencyContact || <span className="text-muted-foreground italic">Not provided</span>}
+                  </div>
+                </div>
               </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium leading-none">New Password</label>
-                <Input type="password" value={pwNew} onChange={e => setPwNew(e.target.value)} />
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* TAB 2: Work & Workplace Details */}
+      {activeTab === 'work' && (
+        <Card className="glass-card rounded-3xl border border-white/30 dark:border-white/10 shadow-sm overflow-hidden">
+          <CardHeader className="p-6 sm:p-8 pb-4 border-b border-border/40 dark:border-white/5">
+            <CardTitle className="text-fluid-lg font-bold flex items-center gap-2">
+              <Icon name="domain" size={20} className="text-primary" />
+              Work & Organization Details
+            </CardTitle>
+            <CardDescription className="text-fluid-xs text-muted-foreground mt-1">
+              Official company role, departmental assignment, and workspace metadata.
+            </CardDescription>
+          </CardHeader>
+
+          <CardContent className="p-6 sm:p-8 pt-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="p-4.5 rounded-2xl bg-white/40 dark:bg-white/5 border border-white/30 dark:border-white/10 space-y-1.5 shadow-xs">
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  <Icon name="badge" size={15} className="text-primary" />
+                  Full Name
+                </div>
+                <div className="font-semibold text-foreground text-sm">
+                  {currentUser?.name || 'N/A'}
+                </div>
               </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium leading-none">Confirm New Password</label>
-                <Input type="password" value={pwConfirm} onChange={e => setPwConfirm(e.target.value)} />
+
+              <div className="p-4.5 rounded-2xl bg-white/40 dark:bg-white/5 border border-white/30 dark:border-white/10 space-y-1.5 shadow-xs">
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  <Icon name="fingerprint" size={15} className="text-purple-500" />
+                  Employee ID
+                </div>
+                <div className="font-mono font-medium text-foreground text-sm flex items-center justify-between">
+                  <span>{empId}</span>
+                  <button
+                    onClick={() => copyToClipboard(empId, 'Employee ID')}
+                    className="text-muted-foreground hover:text-foreground text-xs p-1 cursor-pointer"
+                    title="Copy ID"
+                  >
+                    <Icon name="content_copy" size={14} />
+                  </button>
+                </div>
               </div>
-              <div className="sm:col-span-2 flex gap-3 mt-4">
-                <Button type="submit" disabled={pwLoading}>
-                  {pwLoading ? 'Updating...' : 'Update Password'}
+
+              <div className="p-4.5 rounded-2xl bg-white/40 dark:bg-white/5 border border-white/30 dark:border-white/10 space-y-1.5 shadow-xs">
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  <Icon name="apartment" size={15} className="text-blue-500" />
+                  Department
+                </div>
+                <div className="font-semibold text-foreground text-sm">
+                  {currentUser?.department || 'General'}
+                </div>
+              </div>
+
+              <div className="p-4.5 rounded-2xl bg-white/40 dark:bg-white/5 border border-white/30 dark:border-white/10 space-y-1.5 shadow-xs">
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  <Icon name="shield" size={15} className="text-emerald-500" />
+                  Role & Permissions
+                </div>
+                <div className="font-semibold text-foreground text-sm">
+                  {currentUser?.role || 'Teammate'}
+                </div>
+              </div>
+
+              <div className="p-4.5 rounded-2xl bg-white/40 dark:bg-white/5 border border-white/30 dark:border-white/10 space-y-1.5 shadow-xs">
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  <Icon name="work_outline" size={15} className="text-amber-500" />
+                  Job Designation
+                </div>
+                <div className="font-medium text-foreground text-sm">
+                  {currentUser?.designation || currentUser?.role || 'Employee'}
+                </div>
+              </div>
+
+              <div className="p-4.5 rounded-2xl bg-white/40 dark:bg-white/5 border border-white/30 dark:border-white/10 space-y-1.5 shadow-xs">
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  <Icon name="mail" size={15} className="text-primary" />
+                  Sign-In / Work Email
+                </div>
+                <div className="font-medium text-foreground text-sm break-all">
+                  {workEmail}
+                </div>
+              </div>
+
+              {/* Workspace Identifier */}
+              <div className="p-4.5 rounded-2xl bg-white/40 dark:bg-white/5 border border-white/30 dark:border-white/10 space-y-2 shadow-xs sm:col-span-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    <Icon name="corporate_fare" size={15} className="text-primary" />
+                    Company Workspace ID
+                  </div>
+                  <button 
+                    onClick={() => copyToClipboard(companyId, 'Workspace ID')}
+                    className="text-xs text-primary hover:underline flex items-center gap-1 font-medium cursor-pointer"
+                  >
+                    <Icon name="content_copy" size={13} />
+                    Copy ID
+                  </button>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="font-mono text-xs px-2.5 py-1 rounded-lg bg-black/5 dark:bg-white/10 text-foreground font-semibold">
+                    {companyId || 'N/A'}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    Organization reference ID for device authorization and workspace syncing.
+                  </span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* TAB 3: Account Security & Password Change */}
+      {activeTab === 'security' && (
+        <Card className="glass-card rounded-3xl border border-white/30 dark:border-white/10 shadow-sm overflow-hidden">
+          <CardHeader className="p-6 sm:p-8 pb-4 border-b border-border/40 dark:border-white/5">
+            <CardTitle className="text-fluid-lg font-bold flex items-center gap-2">
+              <Icon name="lock" size={20} className="text-primary" />
+              Account Security
+            </CardTitle>
+            <CardDescription className="text-fluid-xs text-muted-foreground mt-1">
+              Update your account password. Sign-in credentials are secured with end-to-end encryption.
+            </CardDescription>
+          </CardHeader>
+
+          <CardContent className="p-6 sm:p-8 pt-6">
+            <form onSubmit={handleChangePassword} className="max-w-[560px] space-y-5">
+              <div className="space-y-2">
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Current Password
+                </label>
+                <div className="relative">
+                  <Icon name="lock" size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                  <Input
+                    type={showPwCurrent ? 'text' : 'password'}
+                    placeholder="Enter current password"
+                    value={pwCurrent}
+                    onChange={e => setPwCurrent(e.target.value)}
+                    required
+                    className="h-11 !pl-11 pr-11 rounded-2xl bg-white/70 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:ring-2 focus:ring-primary/20"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPwCurrent(v => !v)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer p-0.5"
+                    tabIndex={-1}
+                  >
+                    <Icon name={showPwCurrent ? 'visibility_off' : 'visibility'} size={18} />
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  New Password
+                </label>
+                <div className="relative">
+                  <Icon name="vpn_key" size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                  <Input
+                    type={showPwNew ? 'text' : 'password'}
+                    placeholder="Enter at least 6 characters"
+                    value={pwNew}
+                    onChange={e => setPwNew(e.target.value)}
+                    required
+                    minLength={6}
+                    className="h-11 !pl-11 pr-11 rounded-2xl bg-white/70 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:ring-2 focus:ring-primary/20"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPwNew(v => !v)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer p-0.5"
+                    tabIndex={-1}
+                  >
+                    <Icon name={showPwNew ? 'visibility_off' : 'visibility'} size={18} />
+                  </button>
+                </div>
+                <p className="text-fluid-xs text-muted-foreground">
+                  Must be at least 6 characters. Use letters, numbers, and symbols for better security.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Confirm New Password
+                </label>
+                <div className="relative">
+                  <Icon name="check_circle" size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                  <Input
+                    type={showPwConfirm ? 'text' : 'password'}
+                    placeholder="Re-type new password"
+                    value={pwConfirm}
+                    onChange={e => setPwConfirm(e.target.value)}
+                    required
+                    minLength={6}
+                    className="h-11 !pl-11 pr-11 rounded-2xl bg-white/70 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:ring-2 focus:ring-primary/20"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPwConfirm(v => !v)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer p-0.5"
+                    tabIndex={-1}
+                  >
+                    <Icon name={showPwConfirm ? 'visibility_off' : 'visibility'} size={18} />
+                  </button>
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <Button 
+                  type="submit" 
+                  disabled={pwLoading}
+                  className="h-11 px-6 rounded-2xl font-semibold shadow-md bg-primary hover:bg-primary/90 text-primary-foreground flex items-center gap-2"
+                >
+                  {pwLoading ? (
+                    <>
+                      <Icon name="progress_activity" size={18} className="animate-spin" />
+                      <span>Updating Password...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Icon name="lock_reset" size={18} />
+                      <span>Update Password</span>
+                    </>
+                  )}
                 </Button>
               </div>
             </form>
@@ -224,3 +732,4 @@ export default function ProfileView({ currentUser, pendingProfileEdits, setPendi
     </div>
   )
 }
+
