@@ -246,7 +246,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
     const link = document.createElement('link')
     link.rel = 'preload'
     link.as = 'image'
-    link.href = '/hero.webp'
+    link.href = '/Hero%20Asset.webp'
     link.type = 'image/webp'
     link.fetchPriority = 'high'
     document.head.appendChild(link)
@@ -817,12 +817,10 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
               className="relative z-10 w-full h-full flex items-end justify-center pointer-events-none"
             >
               <picture className="w-full h-full flex items-end justify-center">
-                <source srcSet="/hero.webp" type="image/webp" />
+                <source srcSet="/Hero%20Asset.webp" type="image/webp" />
                 <img 
-                  src="/Hero%20Assets.png" 
+                  src="/Hero%20Asset.webp" 
                   alt="Manage your Team with Ease" 
-                  width={1600}
-                  height={1076}
                   fetchPriority="high"
                   decoding="async"
                   className="relative z-10 w-full h-full object-contain object-bottom select-none pointer-events-none"
