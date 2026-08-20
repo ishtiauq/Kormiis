@@ -599,9 +599,10 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
         initial={{ opacity: 0, scale: 0.9, y: 24, filter: 'blur(8px)' }}
         animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
         transition={{ duration: 0.85, delay: 0.25, type: 'spring', damping: 20, stiffness: 260 }}
-        className="sm:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-40 pointer-events-auto w-max max-w-[calc(100vw-1.5rem)]"
+        style={{ left: '50%', x: '-50%' }}
+        className="sm:hidden fixed bottom-4 z-40 pointer-events-auto w-max max-w-[calc(100vw-1.5rem)] landing-glass-bottom-bar h-12 px-2.5 flex items-center gap-1.5 rounded-full text-white transition-all duration-300"
       >
-        <nav className="h-12 px-2.5 flex items-center gap-1.5 rounded-full landing-glass-header text-white transition-all duration-300">
+        <nav className="flex items-center gap-1.5 w-full">
           {/* Install App Button */}
           <button
             onClick={handleInstallClick}
@@ -662,10 +663,10 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
               initial={{ opacity: 0, scale: 0.9, y: 16 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.35, type: 'spring', damping: 20, stiffness: 280 }}
-              className="mt-2 sm:mt-2.5 lg:mt-[clamp(0.4rem,1.2vh,1rem)] flex items-center justify-center"
+              className="mt-2 sm:mt-2.5 lg:mt-[clamp(0.4rem,1.2vh,1rem)] flex items-center justify-center pointer-events-none select-none"
             >
-              <div className="inline-flex items-center justify-center px-4 sm:px-5.5 py-1.5 sm:py-2 rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/25">
-                <p className="text-fluid-xs sm:text-fluid-sm font-semibold tracking-wide text-center leading-snug">
+              <div className="inline-flex items-center justify-center px-4 sm:px-5.5 py-1.5 sm:py-2 rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/25 pointer-events-none select-none cursor-default">
+                <p className="text-fluid-xs sm:text-fluid-sm font-semibold tracking-wide text-center leading-snug select-none">
                   The only HRM app you need for your workspace.
                 </p>
               </div>
