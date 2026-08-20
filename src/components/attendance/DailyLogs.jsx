@@ -118,7 +118,7 @@ export default function DailyLogs({ employees, attendance, setAttendance, addToa
                       <span className="truncate">{log.checkIn}</span>
                     </button>
                     
-                    <span className="text-muted-foreground/80 font-bold flex justify-center w-full sm:w-auto shrink-0">â†’</span>
+                    <span className="text-muted-foreground/60 font-semibold flex justify-center w-full sm:w-auto shrink-0 mx-auto text-sm select-none">-</span>
                     
                     <button
                       onClick={() => setActivePicker({ empId: emp.id, field: 'checkOut', current: log.checkOut })}
