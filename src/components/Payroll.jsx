@@ -366,6 +366,8 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
     const loanDeduction = Math.min(entry.loan.remaining, entry.loan.installment)
     const net = entry.baseSalary + entry.allowance - entry.deductions - entry.advance - loanDeduction
     const grossVal = entry.grossSalary
+    const companyName = settings?.company?.name || 'Kormiis'
+    const companyLogo = settings?.company?.logo
 
     const doc = new jsPDF({ unit: 'mm', format: 'a4' })
     const pageW = doc.internal.pageSize.getWidth()
@@ -373,14 +375,42 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
     const contentW = pageW - margin * 2
     let y = margin
 
-    // Header bar
-    doc.setFillColor(0, 0, 0)
-    doc.rect(margin, y, contentW, 14, 'F')
-    doc.setTextColor(255, 255, 255)
-    doc.setFontSize(11)
-    doc.setFont('helvetica', 'bold')
-    doc.text('KORMIIS — PAYSLIP RECEIPT', pageW / 2, y + 9, { align: 'center' })
-    y += 22
+    // Header bar with Company Branding
+    if (companyLogo) {
+      try {
+        let format = 'PNG'
+        if (companyLogo.startsWith('data:image/jpeg') || companyLogo.startsWith('data:image/jpg')) format = 'JPEG'
+        else if (companyLogo.startsWith('data:image/webp')) format = 'WEBP'
+        doc.addImage(companyLogo, format, margin, y, 16, 16)
+        
+        doc.setTextColor(20, 20, 20)
+        doc.setFontSize(13)
+        doc.setFont('helvetica', 'bold')
+        doc.text(companyName.toUpperCase(), margin + 22, y + 6)
+        
+        doc.setFontSize(9)
+        doc.setFont('helvetica', 'normal')
+        doc.setTextColor(100, 100, 100)
+        doc.text(`OFFICIAL PAYSLIP RECEIPT • ${selectedMonth}`, margin + 22, y + 12)
+        y += 22
+      } catch (err) {
+        doc.setFillColor(0, 0, 0)
+        doc.rect(margin, y, contentW, 14, 'F')
+        doc.setTextColor(255, 255, 255)
+        doc.setFontSize(11)
+        doc.setFont('helvetica', 'bold')
+        doc.text(`${companyName.toUpperCase()} — PAYSLIP RECEIPT`, pageW / 2, y + 9, { align: 'center' })
+        y += 22
+      }
+    } else {
+      doc.setFillColor(0, 0, 0)
+      doc.rect(margin, y, contentW, 14, 'F')
+      doc.setTextColor(255, 255, 255)
+      doc.setFontSize(11)
+      doc.setFont('helvetica', 'bold')
+      doc.text(`${companyName.toUpperCase()} — PAYSLIP RECEIPT`, pageW / 2, y + 9, { align: 'center' })
+      y += 22
+    }
 
     // Employee info
     doc.setTextColor(30, 30, 30)
@@ -569,10 +599,12 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
     if (!entries) return
     const doc = new jsPDF()
     
-    doc.setFontSize(18)
-    doc.text('Payroll Sheet', 14, 22)
+    doc.setFontSize(16)
+    doc.setFont('helvetica', 'bold')
+    doc.text(`${settings?.company?.name || 'Kormiis'} — Payroll Summary Sheet`, 14, 22)
     
-    doc.setFontSize(11)
+    doc.setFontSize(10)
+    doc.setFont('helvetica', 'normal')
     doc.setTextColor(100)
     doc.text(`Pay Period: ${monthLabel}`, 14, 30)
 

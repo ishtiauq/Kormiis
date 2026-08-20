@@ -113,8 +113,8 @@ export default function Sidebar({
       aria-label="Floating navigation sidebar"
       className={`hidden md:flex flex-col fixed left-3 md:left-5 top-1/2 -translate-y-1/2 z-50 glass-kormiis text-sidebar-foreground rounded-3xl border border-white/30 dark:border-white/14 shadow-2xl transition-all duration-350 ease-[cubic-bezier(0.34,1.56,0.64,1)] overflow-hidden ${
         isOpen
-          ? 'h-[calc(100vh-4rem)] max-h-[660px] p-2.5 shadow-2xl'
-          : 'w-[50px] h-auto p-1 cursor-pointer shadow-xl'
+          ? 'h-[calc(100vh-4rem)] max-h-[660px] p-3 pt-3.5 pb-3 shadow-2xl'
+          : 'w-[54px] h-auto py-3 px-1.5 cursor-pointer shadow-xl'
       }`}
       style={{ width: isOpen ? `${expandedWidth}px` : undefined }}
     >
@@ -122,7 +122,7 @@ export default function Sidebar({
       <nav 
         aria-label="Main navigation" 
         className={`sidebar-nav-scroll flex-1 flex flex-col gap-1.5 items-center ${
-          isOpen ? 'overflow-y-auto py-1 pr-0.5' : 'overflow-hidden justify-center'
+          isOpen ? 'overflow-y-auto py-1.5 pr-0.5' : 'overflow-hidden justify-center py-1'
         }`}
       >
         {(isOpen ? visibleNavItems.filter(item => item.id !== 'profile') : top4Items).map(item => {

@@ -877,18 +877,18 @@ input:hover, select:hover, textarea:hover, .border-input:hover {
 [data-theme="dark"] [role="dialog"] input,
 [data-theme="dark"] [role="dialog"] select,
 [data-theme="dark"] [role="dialog"] textarea {
-  background: rgba(255, 255, 255, 0.07) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
   -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
   backdrop-filter: blur(16px) saturate(180%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.14) !important;
-  box-shadow: inset 0 1px 1.5px rgba(0, 0, 0, 0.3) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.45) !important;
   color: var(--foreground) !important;
 }
 
 .dark input:hover, .dark select:hover, .dark textarea:hover,
 [data-theme="dark"] input:hover, [data-theme="dark"] select:hover, [data-theme="dark"] textarea:hover {
-  border-color: rgba(255, 255, 255, 0.25) !important;
-  background: rgba(255, 255, 255, 0.10) !important;
+  border-color: rgba(255, 255, 255, 0.32) !important;
+  background: rgba(255, 255, 255, 0.12) !important;
 }
 
 input:focus, select:focus, textarea:focus {
@@ -903,23 +903,19 @@ input:focus, select:focus, textarea:focus {
 .force-dark-mode input:focus, .force-dark-mode select:focus, .force-dark-mode textarea:focus,
 .dark [role="dialog"] input:focus,
 [data-theme="dark"] [role="dialog"] input:focus {
-  background: rgba(255, 255, 255, 0.12) !important;
-  box-shadow: 0 0 0 3px rgba(254, 53, 1, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.15) !important;
+  background: rgba(255, 255, 255, 0.14) !important;
+  box-shadow: 0 0 0 3px rgba(254, 53, 1, 0.4), inset 0 1px 2px rgba(0, 0, 0, 0.5) !important;
   border-color: var(--primary) !important;
   color: #ffffff !important;
 }
 
-/* Explicit transparent input overrides */
-input.bg-transparent,
-input.bg-transparent:focus,
-input.bg-transparent:hover,
-.dark input.bg-transparent,
-.dark input.bg-transparent:focus,
-.dark input.bg-transparent:hover,
-[role="dialog"] input.bg-transparent,
-.dark [role="dialog"] input.bg-transparent,
-[role="dialog"] input.bg-transparent:focus,
-.dark [role="dialog"] input.bg-transparent:focus {
+/* Explicit transparent input overrides for specialized inline elements */
+input.plain-time-input,
+input.plain-time-input:focus,
+input.plain-time-input:hover,
+.dark input.plain-time-input,
+.dark input.plain-time-input:focus,
+.dark input.plain-time-input:hover {
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;

@@ -11,7 +11,7 @@ import { exportDailyAttendancePDF, exportMonthlyAttendancePDF } from '../../util
 
 const z = (v) => v < 10 ? `0${v}` : `${v}`
 
-export default function DailyLogs({ employees, attendance, setAttendance, addToast }) {
+export default function DailyLogs({ employees, attendance, setAttendance, addToast, settings }) {
   const {
     selectedDate, setSelectedDate, showDatePicker, setShowDatePicker,
     calYear, setCalYear, calMonth, setCalMonth,
@@ -64,7 +64,7 @@ export default function DailyLogs({ employees, attendance, setAttendance, addToa
                 </div>
                 <div className="grid grid-cols-7 gap-1 text-center mb-1">
                   {['Su','Mo','Tu','We','Th','Fr','Sa'].map(d => (
-                    <span key={d} className="font-medium text-[10px] py-1 text-muted-foreground uppercase tracking-widest">{d}</span>
+                     <span key={d} className="font-medium text-[10px] py-1 text-muted-foreground uppercase tracking-widest">{d}</span>
                   ))}
                   {calGrid.map((d, i) => (
                     d === null ? <div key={i} /> : (
@@ -82,10 +82,10 @@ export default function DailyLogs({ employees, attendance, setAttendance, addToa
             )}
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => exportDailyAttendancePDF(employees, logs, selectedDate)} className="rounded-full text-xs font-semibold hover:text-primary hover:border-primary/50 transition-colors shadow-sm">
+            <Button variant="outline" size="sm" onClick={() => exportDailyAttendancePDF(employees, logs, selectedDate, settings)} className="rounded-full text-xs font-semibold hover:text-primary hover:border-primary/50 transition-colors shadow-sm">
               <Icon name="picture_as_pdf" size={16} className="mr-1.5" /> Daily PDF
             </Button>
-            <Button variant="outline" size="sm" onClick={() => exportMonthlyAttendancePDF(employees, attendance, calMonth, calYear)} className="rounded-full text-xs font-semibold hover:text-primary hover:border-primary/50 transition-colors shadow-sm">
+            <Button variant="outline" size="sm" onClick={() => exportMonthlyAttendancePDF(employees, attendance, calMonth, calYear, settings)} className="rounded-full text-xs font-semibold hover:text-primary hover:border-primary/50 transition-colors shadow-sm">
               <Icon name="picture_as_pdf" size={16} className="mr-1.5" /> Monthly PDF
             </Button>
           </div>

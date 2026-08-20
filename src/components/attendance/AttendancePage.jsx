@@ -8,6 +8,8 @@ import RosterPlanner from './RosterPlanner.jsx'
 import ShiftSwaps from './ShiftSwaps.jsx'
 import OvertimeRulesEditor from './OvertimeRulesEditor.jsx'
 import OvertimeClaims from './OvertimeClaims.jsx'
+import GeofenceSettings from './GeofenceSettings.jsx'
+import LeavePoliciesEditor from './LeavePoliciesEditor.jsx'
 
 export default function AttendancePage({ 
   employees, 
@@ -79,7 +81,7 @@ export default function AttendancePage({
         </div>
       </div>
 
-      {tab === 'daily' && <DailyLogs employees={employees} attendance={attendance} setAttendance={setAttendance} addToast={addToast} />}
+      {tab === 'daily' && <DailyLogs employees={employees} attendance={attendance} setAttendance={setAttendance} addToast={addToast} settings={settings} />}
       {tab === 'leave' && (
         <div className="grid gap-6">
           <LeaveRequests 
@@ -105,6 +107,12 @@ export default function AttendancePage({
           <OvertimeRulesEditor overtimeRules={overtimeRules} setOvertimeRules={updateOvertimeRules} />
           <OvertimeClaims employees={employees} overtimeClaims={overtimeClaims} setOvertimeClaims={setOvertimeClaims} addToast={addToast} />
         </div>
+      )}
+      {tab === 'geofence' && (
+        <GeofenceSettings settings={settings} setSettings={setSettings} addToast={addToast} addLog={addLog} />
+      )}
+      {tab === 'policies' && (
+        <LeavePoliciesEditor settings={settings} setSettings={setSettings} addToast={addToast} addLog={addLog} />
       )}
     </div>
   )

@@ -159,20 +159,28 @@ export function GlassTimePicker({ time, onTimeChange, isOpen, setIsOpen, label }
   const [h, setH] = useState('09')
   const [m, setM] = useState('00')
   const [ampm, setAmpm] = useState('AM')
-  const [manualInput, setManualInput] = useState('')
+  const [timeInput, setTimeInput] = useState('09:00')
 
   useEffect(() => {
     if (isOpen) {
       if (time && time !== '--') {
-        const [t, p] = time.split(' ')
-        const [hh, mm] = (t || '').split(':')
-        const finalH = hh ? hh.padStart(2, '0') : '09'
-        const finalM = mm ? mm.padStart(2, '0') : '00'
-        const finalP = p || 'AM'
-        setH(finalH)
-        setM(finalM)
-        setAmpm(finalP)
-        setManualInput(`${finalH}:${finalM} ${finalP}`)
+        const parsed = parseTimeString(time)
+        if (parsed) {
+          setH(parsed.h)
+          setM(parsed.m)
+          setAmpm(parsed.ampm)
+          setTimeInput(`${parsed.h}:${parsed.m}`)
+        } else {
+          const [t, p] = time.split(' ')
+          const [hh, mm] = (t || '').split(':')
+          const finalH = hh ? hh.padStart(2, '0') : '09'
+          const finalM = mm ? mm.padStart(2, '0') : '00'
+          const finalP = p || 'AM'
+          setH(finalH)
+          setM(finalM)
+          setAmpm(finalP)
+          setTimeInput(`${finalH}:${finalM}`)
+        }
       } else {
         const now = new Date()
         let hr = now.getHours()
@@ -183,37 +191,63 @@ export function GlassTimePicker({ time, onTimeChange, isOpen, setIsOpen, label }
         setH(hrStr)
         setM(min)
         setAmpm(period)
-        setManualInput(`${hrStr}:${min} ${period}`)
+        setTimeInput(`${hrStr}:${min}`)
       }
     }
   }, [time, isOpen])
 
   const handleWheelChange = (type, val) => {
-    let newH = h
-    let newM = m
-    let newAmpm = ampm
+    let nextH = h
+    let nextM = m
 
-    if (type === 'h') newH = val
-    if (type === 'm') newM = val
-    if (type === 'ampm') newAmpm = val
+    if (type === 'h') {
+      nextH = val
+      setH(val)
+    }
+    if (type === 'm') {
+      nextM = val
+      setM(val)
+    }
+    if (type === 'ampm') {
+      setAmpm(val)
+    }
 
-    if (type === 'h') setH(val)
-    if (type === 'm') setM(val)
-    if (type === 'ampm') setAmpm(val)
-
-    setManualInput(`${newH}:${newM} ${newAmpm}`)
+    setTimeInput(`${nextH}:${nextM}`)
   }
 
-  const handleManualChange = (e) => {
+  const handleTimeInputChange = (e) => {
     const val = e.target.value
-    setManualInput(val)
+    setTimeInput(val)
 
-    const parsed = parseTimeString(val)
-    if (parsed) {
-      setH(parsed.h)
-      setM(parsed.m)
-      setAmpm(parsed.ampm)
+    // Parse HH:MM or H:MM
+    const match = val.trim().match(/^(\d{1,2}):?(\d{0,2})$/)
+    if (match) {
+      const hours = parseInt(match[1], 10)
+      if (!isNaN(hours) && hours >= 0 && hours <= 23) {
+        if (hours === 0) {
+          setH('12')
+          setAmpm('AM')
+        } else if (hours >= 13) {
+          setH((hours - 12).toString().padStart(2, '0'))
+          setAmpm('PM')
+        } else if (hours === 12) {
+          setH('12')
+        } else {
+          setH(hours.toString().padStart(2, '0'))
+        }
+      }
+
+      if (match[2] && match[2].length > 0) {
+        const minutes = parseInt(match[2], 10)
+        if (!isNaN(minutes) && minutes >= 0 && minutes <= 59) {
+          setM(minutes.toString().padStart(2, '0'))
+        }
+      }
     }
+  }
+
+  const handleTimeInputBlur = () => {
+    setTimeInput(`${h}:${m}`)
   }
 
   const handleSetCurrentTime = () => {
@@ -226,22 +260,16 @@ export function GlassTimePicker({ time, onTimeChange, isOpen, setIsOpen, label }
     setH(hrStr)
     setM(min)
     setAmpm(period)
-    setManualInput(`${hrStr}:${min} ${period}`)
+    setTimeInput(`${hrStr}:${min}`)
   }
 
   const handleSave = () => {
-    const parsed = parseTimeString(manualInput)
-    if (parsed) {
-      onTimeChange(`${parsed.h}:${parsed.m} ${parsed.ampm}`)
-    } else {
-      onTimeChange(`${h}:${m} ${ampm}`)
-    }
+    onTimeChange(`${h}:${m} ${ampm}`)
     setIsOpen(false)
   }
 
   const hoursList = Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, '0'))
   const minutesList = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'))
-  const ampmList = ['AM', 'PM']
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -250,48 +278,79 @@ export function GlassTimePicker({ time, onTimeChange, isOpen, setIsOpen, label }
           <Icon name="schedule" className="text-primary" size={20}/> {label || 'Select Time'}
         </DialogTitle>
 
-        {/* Wheel Columns */}
+        {/* Wheel & Period Columns */}
         <div className="bg-muted/20 dark:bg-white/[0.02] border border-border/80 dark:border-white/10 rounded-2xl p-3.5 mb-4 flex items-center gap-2 shadow-inner">
           <Wheel items={hoursList} value={h} onChange={(val) => handleWheelChange('h', val)} label="Hour" />
           <div className="text-2xl font-black text-muted-foreground/40 dark:text-white/30 flex items-center justify-center mt-5 mb-0 select-none">:</div>
           <Wheel items={minutesList} value={m} onChange={(val) => handleWheelChange('m', val)} label="Minute" />
-          <div className="w-px h-24 bg-border/60 dark:bg-white/10 mt-5 mx-1" />
-          <Wheel items={ampmList} value={ampm} onChange={(val) => handleWheelChange('ampm', val)} label="Period" />
+          <div className="w-px h-24 bg-border/60 dark:border-white/10 mt-5 mx-1" />
+          
+          {/* Apple Segmented Squircle AM / PM Selector */}
+          <div className="flex flex-col items-center flex-1 relative min-w-0">
+            <span className="text-[11px] text-muted-foreground dark:text-white/60 uppercase tracking-wider font-bold mb-2 select-none">
+              Period
+            </span>
+            <div className="flex flex-col gap-2 w-full h-[132px] justify-between p-1.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-border/40 dark:border-white/10">
+              <button
+                type="button"
+                onClick={() => handleWheelChange('ampm', 'AM')}
+                className={`h-[54px] w-full rounded-2xl text-sm font-black transition-all duration-150 flex items-center justify-center cursor-pointer border-0 select-none ${
+                  ampm === 'AM'
+                    ? 'bg-primary text-primary-foreground font-black shadow-xs'
+                    : 'text-muted-foreground hover:text-foreground dark:text-white/60 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 font-bold'
+                }`}
+              >
+                AM
+              </button>
+              <button
+                type="button"
+                onClick={() => handleWheelChange('ampm', 'PM')}
+                className={`h-[54px] w-full rounded-2xl text-sm font-black transition-all duration-150 flex items-center justify-center cursor-pointer border-0 select-none ${
+                  ampm === 'PM'
+                    ? 'bg-primary text-primary-foreground font-black shadow-xs'
+                    : 'text-muted-foreground hover:text-foreground dark:text-white/60 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 font-bold'
+                }`}
+              >
+                PM
+              </button>
+            </div>
+          </div>
         </div>
         
-        {/* Direct Interactive Time Input Box */}
-        <div className="flex justify-between items-center gap-2 mb-6 p-2.5 px-3.5 rounded-2xl bg-primary/5 dark:bg-white/[0.04] border border-primary/20 dark:border-white/12 transition-all shadow-xs">
-          <div className="flex items-center gap-2 flex-1 min-w-0">
-            <Icon name="edit" size={16} className="text-primary/70 dark:text-primary shrink-0" />
+        {/* Seamless Interactive Manual Time Edit & Now Button */}
+        <div className="flex flex-nowrap items-center justify-between gap-2 mb-6 p-2.5 px-3.5 min-h-[52px] rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] border border-border/60 dark:border-white/10 transition-all focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 shadow-xs overflow-hidden">
+          <div className="flex flex-nowrap items-center gap-1.5 shrink-0">
             <input
               type="text"
-              value={manualInput}
-              onChange={handleManualChange}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault()
-                  handleSave()
-                }
-              }}
-              placeholder="09:00 AM"
-              title="Click to type time directly (e.g. 09:30 AM or 17:00)"
-              aria-label="Direct time input"
-              className="w-full !bg-transparent text-2xl font-black font-sans tracking-tight text-foreground dark:!text-white tabular-nums !border-none !outline-none !shadow-none p-0 m-0 bg-transparent"
+              value={timeInput}
+              onChange={handleTimeInputChange}
+              onBlur={handleTimeInputBlur}
+              maxLength={5}
+              placeholder="09:00"
+              title="Type time (e.g. 09:30 or 14:00)"
+              aria-label="Time (HH:MM)"
+              className="w-[78px] h-9 shrink-0 !bg-transparent text-2xl font-black font-sans tracking-tight text-foreground dark:text-white tabular-nums !border-none !outline-none !shadow-none p-0 m-0 leading-none"
             />
+            <button
+              type="button"
+              onClick={() => handleWheelChange('ampm', ampm === 'AM' ? 'PM' : 'AM')}
+              title="Click or use buttons above to toggle AM/PM"
+              className="text-2xl font-black font-sans tracking-tight text-foreground dark:text-white uppercase cursor-pointer hover:text-primary transition-colors select-none p-0 m-0 bg-transparent border-0 shrink-0 leading-none h-9 flex items-center"
+            >
+              {ampm}
+            </button>
           </div>
 
-          <div className="flex items-center gap-1.5 shrink-0">
-            <Button 
-              type="button" 
-              variant="ghost" 
-              size="sm" 
-              onClick={handleSetCurrentTime}
-              className="h-8 px-2.5 rounded-xl text-xs font-bold text-muted-foreground dark:text-white/70 hover:text-primary dark:hover:text-primary hover:bg-primary/10 gap-1"
-              title="Set to Current Time"
-            >
-              <Icon name="history" size={14} /> Now
-            </Button>
-          </div>
+          <Button 
+            type="button" 
+            variant="ghost" 
+            size="sm" 
+            onClick={handleSetCurrentTime}
+            className="h-8 px-2.5 rounded-xl text-xs font-bold text-muted-foreground dark:text-white/70 hover:text-primary dark:hover:text-primary hover:bg-primary/10 gap-1 shrink-0 whitespace-nowrap"
+            title="Set to Current Time"
+          >
+            <Icon name="history" size={14} /> Now
+          </Button>
         </div>
 
         {/* Actions */}

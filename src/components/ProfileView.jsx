@@ -53,35 +53,6 @@ export default function ProfileView({ currentUser, pendingProfileEdits, setPendi
     addLog('Profile Edit Requested', `${currentUser.name} requested to update their profile info.`, 'info')
   }
 
-  // Handle device toggling
-  const userDevices = currentUser.isEmployee 
-    ? (employees?.find(e => e.id === currentUser.id)?.devices || [])
-    : (settings?.adminDevices || [])
-
-  const handleToggleDevice = (deviceId, currentStatus) => {
-    if (currentUser.isEmployee) {
-      if (!setEmployees) return
-      const updatedEmployees = employees.map(emp => {
-        if (emp.id === currentUser.id) {
-          const updatedDevices = (emp.devices || []).map(d => 
-            d.deviceId === deviceId ? { ...d, isBlocked: !currentStatus } : d
-          )
-          return { ...emp, devices: updatedDevices }
-        }
-        return emp
-      })
-      setEmployees(updatedEmployees)
-      addToast(currentStatus ? 'Device access restored.' : 'Device access revoked.', 'success')
-    } else {
-      if (!setSettings) return
-      const updatedDevices = (settings.adminDevices || []).map(d => 
-        d.deviceId === deviceId ? { ...d, isBlocked: !currentStatus } : d
-      )
-      setSettings({ ...settings, adminDevices: updatedDevices })
-      addToast(currentStatus ? 'Device access restored.' : 'Device access revoked.', 'success')
-    }
-  }
-
   const handleChangePassword = async (e) => {
     e.preventDefault()
     setPwLoading(true)
@@ -250,54 +221,6 @@ export default function ProfileView({ currentUser, pendingProfileEdits, setPendi
           </CardContent>
         </Card>
       )}
-
-      {/* Connected Devices Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Connected Devices</CardTitle>
-          <p className="text-fluid-sm text-muted-foreground">Manage devices that are currently logged into your account.</p>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col gap-4">
-            {userDevices.length === 0 && (
-              <p className="text-fluid-sm text-muted-foreground">No devices found.</p>
-            )}
-            {userDevices.map(device => {
-              const currentDeviceId = localStorage.getItem('kormiis_device_id')
-              const isCurrent = device.deviceId === currentDeviceId
-              return (
-                <div key={device.deviceId} className="flex items-center justify-between p-4 rounded-xl border border-border bg-card">
-                  <div className="flex items-center gap-4">
-                    <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                      <Icon name={device.label.includes('iOS') || device.label.includes('Android') ? 'smartphone' : 'computer'} size={20}/>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-sm flex items-center gap-2">
-                        {device.label}
-                        {isCurrent && <span className="text-[10px] uppercase font-bold bg-primary/20 text-primary px-2 py-0.5 rounded-full">Current</span>}
-                      </h4>
-                      <p className="text-fluid-xs text-muted-foreground">
-                        Last Active: {new Date(device.lastLogin).toLocaleString()}
-                      </p>
-                    </div>
-                  </div>
-                  <div>
-                    {!isCurrent && (
-                      <Button 
-                        variant={device.isBlocked ? "default" : "destructive"} 
-                        size="sm"
-                        onClick={() => handleToggleDevice(device.deviceId, device.isBlocked)}
-                      >
-                        {device.isBlocked ? "Restore Access" : "Revoke Access"}
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </CardContent>
-      </Card>
     </div>
   )
 }

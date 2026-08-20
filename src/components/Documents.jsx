@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
 import Icon from "@/components/ui/Icon.jsx"
 import { uploadDocumentFile, deleteDocumentFile } from '../services/bridge.js'
 import { Card, CardContent } from "@/components/ui/card"
@@ -49,7 +51,9 @@ export default function Documents({
   addToast, 
   currentUser, 
   adminUid, 
-  addNotification 
+  addNotification,
+  settings,
+  employees = []
 }) {
   const [search, setSearch] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
@@ -71,9 +75,178 @@ export default function Documents({
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
 
+  // Official HR Letter Generator State
+  const [showLetterModal, setShowLetterModal] = useState(false)
+  const [letterEmpId, setLetterEmpId] = useState(employees[0]?.id || '')
+  const [letterType, setLetterType] = useState('experience')
+  const [letterNotes, setLetterNotes] = useState('')
+
   const fileInputRef = useRef(null)
   const categoryScrollRef = useRef(null)
   const { confirm, ConfirmDialog } = useConfirm()
+
+  const generateOfficialHRLetter = (e) => {
+    e?.preventDefault()
+    const emp = (employees || []).find(e => e.id === letterEmpId) || employees[0]
+    if (!emp) {
+      addToast('Please select an employee.', 'warning')
+      return
+    }
+
+    try {
+      const doc = new jsPDF({ unit: 'mm', format: 'a4' })
+      const companyName = settings?.company?.name || 'Kormiis Ltd.'
+      const companyLogo = settings?.company?.logo
+      const companyEmail = settings?.company?.email || 'hr@kormiis.io'
+      const companyPhone = settings?.company?.phone || ''
+      const companyWebsite = settings?.company?.website || 'www.kormiis.io'
+      const currency = settings?.currency || '৳'
+      const todayStr = formatDate(new Date().toISOString().split('T')[0])
+      const refNo = `REF: ${companyName.substring(0, 3).toUpperCase()}/HR/${new Date().getFullYear()}/${Math.floor(1000 + Math.random() * 9000)}`
+
+      let startY = 20
+
+      // Letterhead
+      const contactLine = [companyPhone, companyEmail, companyWebsite].filter(Boolean).join(' • ')
+
+      if (companyLogo) {
+        try {
+          let format = 'PNG'
+          if (companyLogo.startsWith('data:image/jpeg') || companyLogo.startsWith('data:image/jpg')) format = 'JPEG'
+          else if (companyLogo.startsWith('data:image/webp')) format = 'WEBP'
+          doc.addImage(companyLogo, format, 20, 16, 20, 20)
+          
+          doc.setFontSize(16)
+          doc.setFont('helvetica', 'bold')
+          doc.setTextColor(20, 20, 20)
+          doc.text(companyName.toUpperCase(), 46, 23)
+          
+          doc.setFontSize(9)
+          doc.setFont('helvetica', 'normal')
+          doc.setTextColor(100, 100, 100)
+          doc.text(contactLine, 46, 29)
+          startY = 44
+        } catch (err) {
+          doc.setFontSize(18)
+          doc.setFont('helvetica', 'bold')
+          doc.text(companyName.toUpperCase(), 20, 24)
+          startY = 34
+        }
+      } else {
+        doc.setFontSize(18)
+        doc.setFont('helvetica', 'bold')
+        doc.text(companyName.toUpperCase(), 20, 24)
+        doc.setFontSize(9)
+        doc.setFont('helvetica', 'normal')
+        doc.setTextColor(100, 100, 100)
+        doc.text(contactLine, 20, 30)
+        startY = 40
+      }
+
+      // Separator Line
+      doc.setDrawColor(254, 53, 1)
+      doc.setLineWidth(0.8)
+      doc.line(20, startY, 190, startY)
+      startY += 10
+
+      // Metadata
+      doc.setFontSize(9.5)
+      doc.setFont('helvetica', 'normal')
+      doc.setTextColor(80, 80, 80)
+      doc.text(refNo, 20, startY)
+      doc.text(`Date: ${todayStr}`, 190, startY, { align: 'right' })
+      startY += 12
+
+      // Title & Recipient
+      let docTitle = 'EXPERIENCE CERTIFICATE'
+      if (letterType === 'salary') docTitle = 'SALARY & EMPLOYMENT CERTIFICATE'
+      else if (letterType === 'noc') docTitle = 'NO OBJECTION CERTIFICATE (NOC)'
+      else if (letterType === 'verification') docTitle = 'EMPLOYMENT VERIFICATION LETTER'
+
+      doc.setFontSize(13)
+      doc.setFont('helvetica', 'bold')
+      doc.setTextColor(20, 20, 20)
+      doc.text(docTitle, 105, startY, { align: 'center' })
+      startY += 10
+
+      doc.setFontSize(10.5)
+      doc.setFont('helvetica', 'bold')
+      doc.text('TO WHOM IT MAY CONCERN', 20, startY)
+      startY += 8
+
+      // Body text based on type
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(10)
+      doc.setTextColor(40, 40, 40)
+
+      let bodyParagraphs = []
+      const empRole = emp.designation || emp.role || 'Team Member'
+      const empDept = emp.department || 'General'
+      const joinDate = emp.joiningDate ? formatDate(emp.joiningDate) : 'their official joining date'
+      const salaryAmount = emp.salary ? `${currency} ${Number(emp.salary).toLocaleString()}` : `${currency} --`
+
+      if (letterType === 'experience') {
+        bodyParagraphs = [
+          `This is to certify that ${emp.name} (Employee ID: ${emp.id}) has been actively employed with ${companyName} as a ${empRole} in the ${empDept} department since ${joinDate}.`,
+          `During their tenure with us, we have found ${emp.name} to be hardworking, dedicated, and professional in performing their duties and responsibilities.`,
+          letterNotes ? `Additional Remarks: ${letterNotes}` : 'We appreciate their valuable contributions to our organization and wish them all the best in their future endeavors.'
+        ]
+      } else if (letterType === 'salary') {
+        bodyParagraphs = [
+          `This is to certify that ${emp.name} (Employee ID: ${emp.id}) is a full-time regular employee of ${companyName}, currently holding the position of ${empRole} in the ${empDept} department since ${joinDate}.`,
+          `As per our company records, their current gross monthly compensation is ${salaryAmount}, disbursed on a monthly basis via direct company payroll.`,
+          letterNotes ? `Purpose/Notes: ${letterNotes}` : 'This certificate is issued upon the employee\'s request for official verification purposes without any financial liability on part of the company.'
+        ]
+      } else if (letterType === 'noc') {
+        bodyParagraphs = [
+          `This is to confirm that ${emp.name} (Employee ID: ${emp.id}) is employed with ${companyName} as ${empRole} in the ${empDept} department since ${joinDate}.`,
+          `${companyName} has no objection regarding ${emp.name}'s official applications or travel requirements as requested.`,
+          letterNotes ? `Specified Purpose: ${letterNotes}` : 'The employee is expected to resume their normal employment duties upon conclusion of the specified period.'
+        ]
+      } else {
+        bodyParagraphs = [
+          `This letter serves to verify that ${emp.name} (Employee ID: ${emp.id}) is currently employed with ${companyName} in good standing as a ${empRole} in the ${empDept} department since ${joinDate}.`,
+          `Their employment status is active and verified as per current HR records.`,
+          letterNotes ? `Notes: ${letterNotes}` : 'Should you require any further information or employment confirmation, please feel free to reach out to our HR department.'
+        ]
+      }
+
+      bodyParagraphs.forEach(p => {
+        const lines = doc.splitTextToSize(p, 170)
+        doc.text(lines, 20, startY)
+        startY += (lines.length * 5.5) + 4
+      })
+
+      startY += 12
+      doc.setFont('helvetica', 'normal')
+      doc.text('Sincerely,', 20, startY)
+      startY += 16
+
+      doc.setFont('helvetica', 'bold')
+      doc.text('HR Department / Authorized Signatory', 20, startY)
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(9)
+      doc.setTextColor(100, 100, 100)
+      doc.text(`${companyName}`, 20, startY + 5)
+      doc.text(`Official Contact: ${[companyPhone, companyEmail].filter(Boolean).join(' | ')}`, 20, startY + 10)
+
+      // Official Footer
+      doc.setDrawColor(220, 220, 220)
+      doc.setLineWidth(0.4)
+      doc.line(20, 275, 190, 275)
+      doc.setFontSize(8)
+      doc.setTextColor(140, 140, 140)
+      doc.text(`Official Document issued by ${companyName} • Confidential`, 105, 280, { align: 'center' })
+
+      doc.save(`${companyName.replace(/\s+/g, '_')}_${docTitle.replace(/\s+/g, '_')}_${emp.name.replace(/\s+/g, '_')}.pdf`)
+      addToast(`${docTitle} generated & downloaded successfully!`, 'success')
+      if (addLog) addLog('HR Document Generated', `${docTitle} for ${emp.name}`)
+      setShowLetterModal(false)
+    } catch (err) {
+      console.error(err)
+      addToast('Failed to generate document: ' + err.message, 'danger')
+    }
+  }
 
   // Calculate Company Storage Usage
   const usedStorageBytes = useMemo(() => {
@@ -335,11 +508,22 @@ export default function Documents({
           </h1>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2.5 flex-wrap">
+          {employees.length > 0 && (
+            <Button 
+              variant="outline" 
+              onClick={() => setShowLetterModal(true)} 
+              className="rounded-2xl h-11 px-4 text-xs font-semibold gap-1.5 border-border/80 dark:border-white/12 flex-1 sm:flex-none shadow-sm"
+            >
+              <Icon name="assignment" size={16} className="text-primary"/>
+              <span>Generate HR Letter</span>
+            </Button>
+          )}
+
           <Button 
             variant="default" 
             onClick={handleOpenUploadModal} 
-            className="shadow-sm shadow-primary/20 flex-1 sm:flex-none"
+            className="rounded-2xl h-11 px-5 font-bold shadow-sm shadow-primary/20 flex-1 sm:flex-none"
           >
             <Icon name="upload" className="mr-2 h-4 w-4" size={16}/> Upload Document
           </Button>
@@ -358,7 +542,7 @@ export default function Documents({
             
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2.5 flex-wrap">
-                <span className="font-bold text-fluid text-foreground">Cloud Storage</span>
+                <span className="font-bold text-fluid text-foreground">{settings?.company?.name ? `${settings.company.name} Cloud Storage` : 'Company Cloud Storage'}</span>
                 <Badge 
                   variant="outline" 
                   className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full ${
@@ -888,6 +1072,78 @@ export default function Documents({
               </div>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Official HR Letter & Certificate Generator Modal */}
+      <Dialog open={showLetterModal} onOpenChange={setShowLetterModal}>
+        <DialogContent className="sm:max-w-[540px] glass-kormiis-modal">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2.5">
+              <div className="p-2 rounded-xl bg-primary/10 text-primary">
+                <Icon name="assignment" size={20}/>
+              </div>
+              <span>Generate Official HR Document</span>
+            </DialogTitle>
+          </DialogHeader>
+
+          <form onSubmit={generateOfficialHRLetter} className="flex flex-col gap-4 py-2">
+            <div className="p-3.5 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] border border-border/60 dark:border-white/10 flex items-center gap-3">
+              {settings?.company?.logo ? (
+                <img src={settings.company.logo} alt="Company Logo" className="size-10 object-contain rounded-xl p-1 bg-white/10 border border-border/40 shrink-0" />
+              ) : (
+                <div className="size-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold text-sm shrink-0">
+                  {settings?.company?.name ? settings.company.name.substring(0, 2).toUpperCase() : 'CO'}
+                </div>
+              )}
+              <div className="min-w-0 flex-1">
+                <p className="font-bold text-sm text-foreground truncate">{settings?.company?.name || 'Kormiis Ltd.'}</p>
+                <p className="text-[11px] text-muted-foreground truncate">{settings?.company?.email || 'hr@company.com'} • Letterhead Brand Active</p>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-bold text-foreground uppercase tracking-wider">Select Employee</label>
+              <Select value={letterEmpId} onChange={setLetterEmpId}>
+                {employees.map(emp => (
+                  <SelectItem key={emp.id} value={emp.id}>
+                    {emp.name} — {emp.designation || emp.role || 'Employee'} ({emp.department || 'General'})
+                  </SelectItem>
+                ))}
+              </Select>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-bold text-foreground uppercase tracking-wider">Document Type</label>
+              <Select value={letterType} onChange={setLetterType}>
+                <SelectItem value="experience">Experience Certificate</SelectItem>
+                <SelectItem value="salary">Salary & Employment Certificate</SelectItem>
+                <SelectItem value="noc">No Objection Certificate (NOC)</SelectItem>
+                <SelectItem value="verification">Employment Verification Letter</SelectItem>
+              </Select>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-bold text-foreground uppercase tracking-wider">Special Purpose / Custom Remarks (Optional)</label>
+              <Input
+                type="text"
+                value={letterNotes}
+                onChange={e => setLetterNotes(e.target.value)}
+                placeholder="e.g. For Embassy Visa Application / Bank Loan"
+                className="h-11 rounded-2xl"
+              />
+            </div>
+
+            <DialogFooter className="mt-2 gap-2">
+              <Button type="button" variant="outline" onClick={() => setShowLetterModal(false)} className="rounded-2xl h-11 px-5">
+                Cancel
+              </Button>
+              <Button type="submit" className="rounded-2xl h-11 px-6 font-bold shadow-md shadow-primary/20">
+                <Icon name="download" className="mr-2" size={16}/>
+                Generate & Download PDF
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
 

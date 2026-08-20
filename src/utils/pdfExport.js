@@ -3,18 +3,58 @@ import autoTable from 'jspdf-autotable'
 
 const z = (v) => v < 10 ? `0${v}` : `${v}`
 
-export function exportDailyAttendancePDF(employees, logs, selectedDate) {
+function addCompanyBranding(doc, settings, startY = 14) {
+  const companyName = settings?.company?.name || 'Kormiis'
+  const logo = settings?.company?.logo
+  let currentY = startY
+
+  if (logo) {
+    try {
+      let format = 'PNG'
+      if (logo.startsWith('data:image/jpeg') || logo.startsWith('data:image/jpg')) format = 'JPEG'
+      else if (logo.startsWith('data:image/webp')) format = 'WEBP'
+      doc.addImage(logo, format, 14, currentY, 20, 20)
+      doc.setFontSize(16)
+      doc.setFont('helvetica', 'bold')
+      doc.setTextColor(20, 20, 20)
+      doc.text(companyName, 38, currentY + 8)
+      doc.setFontSize(9)
+      doc.setFont('helvetica', 'normal')
+      const contactInfo = [settings?.company?.phone, settings?.company?.email, settings?.company?.website].filter(Boolean).join(' • ')
+      if (contactInfo) {
+        doc.text(contactInfo, 38, currentY + 14)
+      }
+      return currentY + 24
+    } catch (e) {
+      console.warn('Could not add logo to PDF:', e)
+    }
+  }
+
+  doc.setFontSize(18)
+  doc.setFont('helvetica', 'bold')
+  doc.setTextColor(20, 20, 20)
+  doc.text(companyName, 14, currentY + 8)
+  return currentY + 14
+}
+
+export function exportDailyAttendancePDF(employees, logs, selectedDate, settings = {}) {
   const doc = new jsPDF()
+  const companyName = settings?.company?.name || 'Kormiis'
+  
+  const headerY = addCompanyBranding(doc, settings, 14)
   
   // Title
-  doc.setFontSize(18)
-  doc.text('Kormiis - Daily Attendance Report', 14, 22)
+  doc.setFontSize(14)
+  doc.setFont('helvetica', 'bold')
+  doc.setTextColor(40, 40, 40)
+  doc.text(`${companyName} — Daily Attendance Report`, 14, headerY + 4)
   
-  doc.setFontSize(11)
+  doc.setFontSize(10)
+  doc.setFont('helvetica', 'normal')
   doc.setTextColor(100)
   const dateObj = new Date(selectedDate + 'T12:00:00')
   const dateString = dateObj.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
-  doc.text(`Date: ${dateString}`, 14, 30)
+  doc.text(`Report Date: ${dateString}`, 14, headerY + 11)
 
   const tableColumn = ["Employee Name", "Role", "Check In", "Check Out", "Total Hours", "Status"]
   const tableRows = []
@@ -33,29 +73,34 @@ export function exportDailyAttendancePDF(employees, logs, selectedDate) {
   })
 
   autoTable(doc, {
-    startY: 35,
+    startY: headerY + 16,
     head: [tableColumn],
     body: tableRows,
     theme: 'striped',
     headStyles: { fillColor: [254, 53, 1] }, // Kormiis primary orange
-    styles: { fontSize: 10, cellPadding: 3 },
+    styles: { fontSize: 9.5, cellPadding: 3.5 },
   })
 
-  doc.save(`Attendance_${selectedDate}.pdf`)
+  doc.save(`${companyName.replace(/\s+/g, '_')}_Attendance_${selectedDate}.pdf`)
 }
 
-export function exportMonthlyAttendancePDF(employees, attendance, calMonth, calYear) {
+export function exportMonthlyAttendancePDF(employees, attendance, calMonth, calYear, settings = {}) {
   const doc = new jsPDF()
+  const companyName = settings?.company?.name || 'Kormiis'
   
+  const headerY = addCompanyBranding(doc, settings, 14)
   const monthName = new Date(calYear, calMonth).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
   
   // Title
-  doc.setFontSize(18)
-  doc.text('Kormiis - Monthly Attendance Summary', 14, 22)
+  doc.setFontSize(14)
+  doc.setFont('helvetica', 'bold')
+  doc.setTextColor(40, 40, 40)
+  doc.text(`${companyName} — Monthly Attendance Summary`, 14, headerY + 4)
   
-  doc.setFontSize(11)
+  doc.setFontSize(10)
+  doc.setFont('helvetica', 'normal')
   doc.setTextColor(100)
-  doc.text(`Month: ${monthName}`, 14, 30)
+  doc.text(`Month: ${monthName}`, 14, headerY + 11)
 
   const tableColumn = ["Employee Name", "Role", "Present", "Absent", "Leave", "Total Hours"]
   const tableRows = []
@@ -81,12 +126,9 @@ export function exportMonthlyAttendancePDF(employees, attendance, calMonth, calY
         
         totalHours += parseFloat(log.hours || 0)
       } else {
-        // By default, if no log exists, we might consider it absent if it's a weekday, but for summary we'll just count recorded absences or ignore it.
-        // Let's count them as absent if they have no log, to match default daily view behavior.
-        // (Optional: You can skip weekends here if you have a holiday/weekend list)
         const dateObj = new Date(calYear, calMonth, day)
         const dayOfWeek = dateObj.getDay()
-        if (dayOfWeek !== 0 && dayOfWeek !== 6) { // ignoring weekends for absent default
+        if (dayOfWeek !== 0 && dayOfWeek !== 6) {
           absent++
         }
       }
@@ -104,13 +146,13 @@ export function exportMonthlyAttendancePDF(employees, attendance, calMonth, calY
   })
 
   autoTable(doc, {
-    startY: 35,
+    startY: headerY + 16,
     head: [tableColumn],
     body: tableRows,
     theme: 'striped',
-    headStyles: { fillColor: [254, 53, 1] }, // Kormiis primary orange
-    styles: { fontSize: 10, cellPadding: 3 },
+    headStyles: { fillColor: [254, 53, 1] },
+    styles: { fontSize: 9.5, cellPadding: 3.5 },
   })
 
-  doc.save(`Monthly_Attendance_${monthName.replace(' ', '_')}.pdf`)
+  doc.save(`${companyName.replace(/\s+/g, '_')}_Monthly_Attendance_${monthName.replace(/\s+/g, '_')}.pdf`)
 }

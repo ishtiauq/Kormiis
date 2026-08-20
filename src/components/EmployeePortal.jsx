@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
 import Icon from "@/components/ui/Icon.jsx"
 import DailyChecklistWidget from './DailyChecklistWidget.jsx'
 import { useModal } from '../services/useModal.js'
@@ -224,7 +226,7 @@ export default function EmployeePortal({
                  headline="Feed"
                />
       case 'payslips':
-        return <PayslipsView currentUser={currentUser} payroll={payroll} addToast={addToast} />
+        return <PayslipsView currentUser={currentUser} payroll={payroll} addToast={addToast} settings={settings} />
       case 'leave':
         return <LeaveView currentUser={currentUser} attendance={attendance} setAttendance={setAttendance} addToast={addToast} addLog={addLog} settings={settings} />
       case 'profile':
@@ -1050,8 +1052,80 @@ function AttendanceView({
   )
 }
 
-function PayslipsView({ currentUser, payroll, addToast }) {
+function PayslipsView({ currentUser, payroll, addToast, settings }) {
   const myPayslips = (payroll?.history || []).filter(p => p.employeeId === currentUser.id)
+
+  const downloadSlipPDF = (slip) => {
+    try {
+      const doc = new jsPDF()
+      const companyName = settings?.company?.name || 'Kormiis'
+      const companyLogo = settings?.company?.logo
+      const pdfCurrency = settings?.currency || '৳'
+      let startY = 20
+
+      if (companyLogo) {
+        try {
+          let format = 'PNG'
+          if (companyLogo.startsWith('data:image/jpeg') || companyLogo.startsWith('data:image/jpg')) format = 'JPEG'
+          else if (companyLogo.startsWith('data:image/webp')) format = 'WEBP'
+          doc.addImage(companyLogo, format, 14, 14, 18, 18)
+          
+          doc.setFontSize(14)
+          doc.setFont('helvetica', 'bold')
+          doc.setTextColor(20, 20, 20)
+          doc.text(companyName.toUpperCase(), 36, 21)
+          
+          doc.setFontSize(9)
+          doc.setFont('helvetica', 'normal')
+          doc.setTextColor(100, 100, 100)
+          doc.text(`OFFICIAL PAYSLIP • ${slip.date}`, 36, 28)
+          startY = 38
+        } catch (e) {
+          doc.setFontSize(18)
+          doc.setFont('helvetica', 'bold')
+          doc.text(`${companyName.toUpperCase()} — PAYSLIP`, 14, 22)
+          startY = 32
+        }
+      } else {
+        doc.setFontSize(18)
+        doc.setFont('helvetica', 'bold')
+        doc.text(`${companyName.toUpperCase()} — PAYSLIP`, 14, 22)
+        startY = 32
+      }
+
+      doc.setFontSize(10)
+      doc.setFont('helvetica', 'normal')
+      doc.setTextColor(40, 40, 40)
+      doc.text(`Employee Name: ${currentUser.name}`, 14, startY)
+      doc.text(`Role: ${currentUser.role || 'Employee'}`, 14, startY + 6)
+      doc.text(`Pay Period / Date: ${slip.date}`, 14, startY + 12)
+
+      autoTable(doc, {
+        startY: startY + 18,
+        head: [['Component', 'Amount']],
+        body: [
+          ['Gross Pay', `${pdfCurrency} ${Number(slip.gross || 0).toFixed(2)}`],
+          ['Total Deductions', `-${pdfCurrency} ${Number(slip.deductions || 0).toFixed(2)}`],
+          ['Net Disbursed Salary', `${pdfCurrency} ${Number(slip.net || 0).toFixed(2)}`]
+        ],
+        theme: 'striped',
+        headStyles: { fillColor: [254, 53, 1] },
+        styles: { fontSize: 10, cellPadding: 4 }
+      })
+
+      const finalY = (doc.lastAutoTable?.finalY ?? (startY + 45)) + 15
+      doc.setFontSize(8)
+      doc.setFont('helvetica', 'italic')
+      doc.setTextColor(120, 120, 120)
+      doc.text(`This is a computer-generated payslip for ${currentUser.name}. Issued by ${companyName}.`, 14, finalY)
+
+      doc.save(`Payslip_${currentUser.name.replace(/\s+/g, '_')}_${slip.date}.pdf`)
+      addToast('Payslip PDF downloaded successfully', 'success')
+    } catch (err) {
+      console.error(err)
+      addToast('Failed to download PDF', 'error')
+    }
+  }
 
   return (
     <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[1000px] mx-auto pb-10">
@@ -1085,11 +1159,11 @@ function PayslipsView({ currentUser, payroll, addToast }) {
               {myPayslips.map((slip, i) => (
                 <TableRow key={i}>
                   <TableCell>{slip.date}</TableCell>
-                  <TableCell>${slip.gross}</TableCell>
-                  <TableCell>${slip.deductions}</TableCell>
-                  <TableCell className="font-semibold text-green-600 dark:text-green-400">${slip.net}</TableCell>
+                  <TableCell>{settings?.currency || '$'}{slip.gross}</TableCell>
+                  <TableCell>{settings?.currency || '$'}{slip.deductions}</TableCell>
+                  <TableCell className="font-semibold text-green-600 dark:text-green-400">{settings?.currency || '$'}{slip.net}</TableCell>
                   <TableCell>
-                    <Button variant="outline" size="sm" onClick={() => addToast('Downloading PDF...', 'info')}>
+                    <Button variant="outline" size="sm" onClick={() => downloadSlipPDF(slip)}>
                       <Icon name="download" className="h-4 w-4 mr-2" size={16}/> PDF
                     </Button>
                   </TableCell>

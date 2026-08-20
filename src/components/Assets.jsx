@@ -759,7 +759,7 @@ function AddAssetModal({ showAddModal, setShowAddModal, newAsset, setNewAsset, h
   )
 }
 
-export default function Assets({ employees, assets, setAssets, assetRequests, setAssetRequests, assetCategories, setAssetCategories, addLog, addToast, currentUser, addNotification }) {
+export default function Assets({ employees, assets, setAssets, assetRequests, setAssetRequests, assetCategories, setAssetCategories, addLog, addToast, currentUser, addNotification, settings }) {
   // SETTING DEFAULT TO INVENTORY AS DASHBOARD IS REMOVED
   const [activeView, setActiveView] = useState('inventory')
   const [search, setSearch] = useState('')
@@ -907,35 +907,77 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
   const generateAgreementPDF = (asset, employee, notes = 'Good condition') => {
     try {
       const doc = new jsPDF()
-      doc.setFontSize(22)
-      doc.text('Asset Assignment Agreement', 20, 20)
+      const companyName = settings?.company?.name || 'Kormiis Ltd.'
+      const companyLogo = settings?.company?.logo
+      let startY = 20
 
-      doc.setFontSize(12)
-      doc.text(`Date: ${formatDate(new Date().toISOString().split('T')[0])}`, 20, 30)
-      doc.text(`Employee Name: ${employee.name} (${employee.department})`, 20, 40)
-      doc.text('This document confirms the assignment of the following company property:', 20, 55)
+      if (companyLogo) {
+        try {
+          let format = 'PNG'
+          if (companyLogo.startsWith('data:image/jpeg') || companyLogo.startsWith('data:image/jpg')) format = 'JPEG'
+          else if (companyLogo.startsWith('data:image/webp')) format = 'WEBP'
+          doc.addImage(companyLogo, format, 20, 16, 18, 18)
+          
+          doc.setFontSize(16)
+          doc.setFont('helvetica', 'bold')
+          doc.setTextColor(20, 20, 20)
+          doc.text(companyName, 44, 23)
+          
+          doc.setFontSize(11)
+          doc.setFont('helvetica', 'normal')
+          doc.setTextColor(100, 100, 100)
+          doc.text('Asset Assignment Agreement', 44, 30)
+          startY = 42
+        } catch (e) {
+          doc.setFontSize(20)
+          doc.setFont('helvetica', 'bold')
+          doc.text(`${companyName} — Asset Assignment Agreement`, 20, 22)
+          startY = 32
+        }
+      } else {
+        doc.setFontSize(20)
+        doc.setFont('helvetica', 'bold')
+        doc.text(`${companyName} — Asset Assignment Agreement`, 20, 22)
+        startY = 32
+      }
+
+      doc.setFontSize(11)
+      doc.setFont('helvetica', 'normal')
+      doc.setTextColor(40, 40, 40)
+      doc.text(`Date: ${formatDate(new Date().toISOString().split('T')[0])}`, 20, startY)
+      doc.text(`Employee Name: ${employee.name} (${employee.department || 'General'})`, 20, startY + 8)
+      doc.text('This document confirms the assignment of the following company property:', 20, startY + 18)
 
       autoTable(doc, {
-        startY: 60,
+        startY: startY + 24,
         head: [['Asset ID', 'Name', 'Category', 'Serial Number', 'Condition']],
         body: [
-          [asset.id, asset.name, asset.category, asset.serialNumber, notes]
-        ]
+          [asset.id, asset.name, asset.category, asset.serialNumber || 'N/A', notes]
+        ],
+        theme: 'striped',
+        headStyles: { fillColor: [254, 53, 1] },
+        styles: { fontSize: 9.5, cellPadding: 3.5 },
       })
 
-      const finalY = (doc.lastAutoTable?.finalY ?? 90) + 20
+      const finalY = (doc.lastAutoTable?.finalY ?? (startY + 50)) + 15
 
+      doc.setFontSize(11)
+      doc.setFont('helvetica', 'bold')
       doc.text('Terms and Conditions:', 20, finalY)
-      doc.setFontSize(10)
-      doc.text('1. The asset remains the property of Kormiis Ltd.', 20, finalY + 10)
-      doc.text('2. The employee agrees to keep the asset in good condition.', 20, finalY + 20)
-      doc.text('3. The employee must return the asset upon termination of employment.', 20, finalY + 30)
+      
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(9.5)
+      doc.setTextColor(60, 60, 60)
+      doc.text(`1. The asset remains the sole property of ${companyName}.`, 20, finalY + 8)
+      doc.text('2. The employee agrees to maintain the asset in proper working condition.', 20, finalY + 16)
+      doc.text('3. The employee must return the asset upon request or employment termination.', 20, finalY + 24)
 
-      doc.text('Employee Signature: _______________________', 20, finalY + 60)
-      doc.text('Date: ________________', 120, finalY + 60)
+      doc.setTextColor(30, 30, 30)
+      doc.text('Employee Signature: _______________________', 20, finalY + 48)
+      doc.text('Date: ________________', 130, finalY + 48)
 
-      doc.text('HR Signature: _______________________', 20, finalY + 80)
-      doc.text('Date: ________________', 120, finalY + 80)
+      doc.text(`${companyName} HR Signature: _______________________`, 20, finalY + 66)
+      doc.text('Date: ________________', 130, finalY + 66)
 
       doc.save(`Asset_Agreement_${employee.id}_${asset.id}.pdf`)
       addToast('Agreement PDF generated', 'info')
