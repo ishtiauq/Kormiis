@@ -27,7 +27,6 @@ import {
 
 // Landing Page Header & Footer
 import LandingFooter from './landing/LandingFooter.jsx'
-import LivingAuroraBackground from './layout/LivingAuroraBackground.jsx'
 
 const HERO_FEATURE_ROWS = [
   // Row 1: Core Operations & Productivity
@@ -619,9 +618,6 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
       ref={containerRef}
       className="dark force-dark-mode aurora-mesh-dark min-h-screen w-full text-foreground relative font-sans scroll-smooth transition-colors duration-[1500ms] ease-[cubic-bezier(0.4,0,0.2,1)] selection:bg-primary/30 overflow-x-hidden"
     >
-      {/* 0. Dynamic Animated Living Aurora Orbs (Cyclic Place-Swapping Orbital Mesh) */}
-      <LivingAuroraBackground isDarkMode={true} />
-
       {/* 1A. Mobile Top-Left Brand Logo (Compact on mobile: sm:hidden) */}
       <motion.div 
         initial={{ opacity: 0, y: -20, filter: 'blur(8px)' }}

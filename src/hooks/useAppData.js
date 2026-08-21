@@ -13,7 +13,7 @@ export default function useAppData({ user, addToast }) {
   const [dbStatus, setDbStatus] = useState('healthy')
   const [dataIntegrityIssues, setDataIntegrityIssues] = useState([])
   const [showCorruptionModal, setShowCorruptionModal] = useState(false)
-  const [isAppLoading, setIsAppLoading] = useState(true)
+  const [isAppLoading, setIsAppLoading] = useState(false)
   const syncRef = useRef(null)
   const syncedForUser = useRef(null)
 

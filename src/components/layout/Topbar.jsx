@@ -173,9 +173,13 @@ export default function Topbar({
   }, [])
 
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768)
+    let resizeTimer
+    const handleResize = () => {
+      clearTimeout(resizeTimer)
+      resizeTimer = setTimeout(() => setIsMobile(window.innerWidth < 768), 150)
+    }
     window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
+    return () => { clearTimeout(resizeTimer); window.removeEventListener('resize', handleResize) }
   }, [])
 
   useEffect(() => {

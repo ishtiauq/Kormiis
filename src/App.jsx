@@ -13,8 +13,6 @@ export default function App() {
   const { user, handleLogin, handleLogout } = useAuth()
   const { toasts, addToast, removeToast } = useToast()
 
-  const [isInitialLoading, setIsInitialLoading] = useState(true)
-  
   // Read initial view from URL hash or localStorage
   const [currentView, setCurrentViewState] = useState(() => {
     const hash = window.location.hash.replace(/^#\/?/, '').trim()
@@ -68,19 +66,14 @@ export default function App() {
   }, [currentView])
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsInitialLoading(false), 150)
-    return () => clearTimeout(timer)
-  }, [])
-
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768)
+    let resizeTimer
+    const handleResize = () => {
+      clearTimeout(resizeTimer)
+      resizeTimer = setTimeout(() => setIsMobile(window.innerWidth < 768), 150)
+    }
     window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
+    return () => { clearTimeout(resizeTimer); window.removeEventListener('resize', handleResize) }
   }, [])
-
-  if (isInitialLoading) {
-    return <LoadingScreen isDarkMode={isDarkMode} message="Welcome to Kormiis..." />
-  }
 
   if (!user) {
     return (
