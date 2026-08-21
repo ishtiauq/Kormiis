@@ -125,11 +125,31 @@ export default function useAppData({ user, addToast }) {
     }
   }, [user, adminUid])
 
-  const addAuditLog = (action, entity, details) => {
+  const resolveUserName = (actor) => {
+    if (typeof actor === 'string' && actor.trim() && actor !== 'Admin' && actor !== 'Teammate') {
+      return actor.trim()
+    }
+    if (user) {
+      if (user.name && user.name !== 'Admin' && user.name !== 'Teammate') return user.name
+      if (user.displayName && user.displayName !== 'Admin' && user.displayName !== 'Teammate') return user.displayName
+      if (user.isEmployee && user.employeeId) {
+        const emp = employees?.find?.(e => e.id === user.employeeId || e.email === user.email)
+        if (emp?.name) return emp.name
+      }
+      if (user.email) {
+        const emailName = user.email.split('@')[0]
+        return emailName.charAt(0).toUpperCase() + emailName.slice(1)
+      }
+    }
+    return 'User'
+  }
+
+  const addAuditLog = (action, entity, details, customUser) => {
+    const actorName = customUser ? resolveUserName(customUser) : resolveUserName()
     const newLog = {
       id: `audit-${Date.now()}`,
       timestamp: new Date().toISOString(),
-      user: 'Admin',
+      user: actorName,
       action,
       entity,
       details,

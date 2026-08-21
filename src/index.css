@@ -938,31 +938,33 @@ html.dark .glass-floating-sidebar,
     background: transparent;
   }
 
-  /* Default State: Invisible / Hidden with ultra-smooth Apple transition curve */
+  /* Default State: Completely Invisible / Hidden */
   ::-webkit-scrollbar-thumb {
     background: transparent;
     border-radius: 9999px;
     border: 1px solid transparent;
     background-clip: padding-box;
-    transition: background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: none !important;
   }
 
-  /* Hover State on Desktop (Light Mode) */
+  /* Instant Hover State on Desktop (Light Mode) */
   *:hover::-webkit-scrollbar-thumb,
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 0, 0, 0.20);
+    background: rgba(0, 0, 0, 0.28);
     border: 1px solid rgba(255, 255, 255, 0.65);
     background-clip: padding-box;
+    transition: none !important;
   }
 
-  /* Hover State on Desktop (Dark Mode) */
+  /* Instant Hover State on Desktop (Dark Mode) */
   .dark *:hover::-webkit-scrollbar-thumb,
   .dark ::-webkit-scrollbar-thumb:hover,
   [data-theme="dark"] *:hover::-webkit-scrollbar-thumb,
   [data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.24);
+    background: rgba(255, 255, 255, 0.32);
     border: 1px solid rgba(255, 255, 255, 0.18);
     background-clip: padding-box;
+    transition: none !important;
   }
 
   /* Press / Drag State: Solid Brand Color (#FE3501) with Zero Glow */
@@ -975,6 +977,7 @@ html.dark .glass-floating-sidebar,
     background: #FE3501 !important;
     border: 1px solid rgba(255, 255, 255, 0.35) !important;
     background-clip: padding-box !important;
+    transition: none !important;
   }
 }
 

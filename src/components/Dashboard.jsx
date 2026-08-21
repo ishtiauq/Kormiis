@@ -52,12 +52,11 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
 
   const [todayStats, setTodayStats] = useState({ present: 0, absent: 0, onLeave: 0 })
   const [attendanceLists, setAttendanceLists] = useState({ present: [], absent: [], onLeave: [] })
-  const [showAttDropdown, setShowAttDropdown] = useState(false)
   const [attFilter, setAttFilter] = useState(null)
 
   useEffect(() => {
-    const todayStr = '2026-07-17' 
-    const todayLogs = attendance?.dailyLogs?.[todayStr] || {}
+    const todayIso = new Date().toISOString().split('T')[0]
+    const todayLogs = attendance?.dailyLogs?.[todayIso] || attendance?.dailyLogs?.['2026-07-17'] || {}
     
     const presentList = []
     const absentList = []
@@ -67,7 +66,15 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
       if (emp.status === 'Terminated') return
       const log = todayLogs[emp.id]
       const designation = emp.designation && emp.designation.toLowerCase() !== 'teammate' ? emp.designation : (emp.role && emp.role.toLowerCase() !== 'teammate' ? emp.role : '')
-      const entry = { id: emp.id, name: emp.name, avatar: emp.avatar, role: designation, designation, time: log?.checkIn || null }
+      const entry = { 
+        id: emp.id, 
+        name: emp.name, 
+        avatar: emp.avatar, 
+        role: designation, 
+        designation, 
+        time: log?.checkIn || null,
+        status: log?.status || (emp.status === 'On Leave' ? 'On Leave' : 'Absent')
+      }
       if (log) {
         if (log.status === 'Present' || log.status === 'Late') {
           presentList.push(entry)
@@ -265,47 +272,225 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
 
         {canViewAttendance && (
           <DashboardWidget
-          id="w2"
-          title="Today's Attendance"
-          icon={<Icon name="group" className="text-emerald-500 shrink-0" size={22}/>}
-          action={<button onClick={() => setCurrentView && setCurrentView('attendance')} className="apple-glass-btn text-xs font-semibold px-3.5 h-7 rounded-full cursor-pointer">View All</button>}
-          contentClass="flex flex-col justify-between pt-4"
-          {...wProps}
-        >
-          <div className="grid grid-cols-3 gap-2.5 sm:gap-3 py-1">
-            <div className="flex flex-col items-center justify-center p-3 rounded-2xl bg-emerald-500/[0.08] dark:bg-emerald-500/[0.14] border border-emerald-500/20 shadow-xs">
-              <span className="text-fluid-xl font-black text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 tabular-nums">
-                <span className="pulse-dot pulse-dot-green m-0"></span>
-                {todayStats.present}
-              </span>
-              <span className="text-[11px] font-semibold text-muted-foreground mt-1">Present</span>
-            </div>
-            <div className="flex flex-col items-center justify-center p-3 rounded-2xl bg-destructive/[0.08] dark:bg-destructive/[0.14] border border-destructive/20 shadow-xs">
-              <span className="text-fluid-xl font-black text-destructive flex items-center gap-1.5 tabular-nums">
-                <span className="pulse-dot pulse-dot-red m-0"></span>
-                {todayStats.absent}
-              </span>
-              <span className="text-[11px] font-semibold text-muted-foreground mt-1">Absent</span>
-            </div>
-            <div className="flex flex-col items-center justify-center p-3 rounded-2xl bg-primary/[0.08] dark:bg-primary/[0.14] border border-primary/20 shadow-xs">
-              <span className="text-fluid-xl font-black text-primary flex items-center gap-1.5 tabular-nums">
-                <span className="pulse-dot pulse-dot-orange m-0"></span>
-                {todayStats.onLeave}
-              </span>
-              <span className="text-[11px] font-semibold text-muted-foreground mt-1">Leave</span>
-            </div>
-          </div>
+            id="w2"
+            title="Today's Attendance"
+            icon={<Icon name="group" className="text-emerald-500 shrink-0" size={22}/>}
+            action={
+              <div className="flex items-center gap-2">
+                {attFilter && (
+                  <button 
+                    onClick={() => setAttFilter(null)}
+                    className="text-[11px] font-semibold text-muted-foreground hover:text-foreground px-2 py-0.5 rounded-lg transition-colors cursor-pointer"
+                  >
+                    Reset
+                  </button>
+                )}
+                <button 
+                  onClick={() => setCurrentView && setCurrentView('attendance')} 
+                  className="apple-glass-btn text-xs font-semibold px-3 h-7 rounded-full cursor-pointer flex items-center gap-1"
+                >
+                  <span>Roll Call</span>
+                  <Icon name="arrow_forward" size={12} />
+                </button>
+              </div>
+            }
+            contentClass="flex flex-col justify-between pt-2"
+            {...wProps}
+          >
+            {/* 1. Interactive KPI Cards / Status Filters */}
+            <div className="grid grid-cols-3 gap-2 sm:gap-2.5">
+              {/* Present Tab */}
+              <button
+                type="button"
+                onClick={() => setAttFilter(attFilter === 'present' ? null : 'present')}
+                className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all cursor-pointer select-none text-left relative overflow-hidden group ${
+                  attFilter === 'present'
+                    ? 'bg-emerald-500/20 dark:bg-emerald-500/25 border-2 border-emerald-500 shadow-md shadow-emerald-500/10 scale-[1.02]'
+                    : 'bg-emerald-500/[0.08] dark:bg-emerald-500/[0.12] border border-emerald-500/20 hover:border-emerald-500/40 hover:bg-emerald-500/[0.12]'
+                }`}
+              >
+                <div className="flex items-center gap-1.5">
+                  <span className="pulse-dot pulse-dot-green m-0"></span>
+                  <span className="text-fluid-xl font-black text-emerald-600 dark:text-emerald-400 tabular-nums">
+                    {todayStats.present}
+                  </span>
+                </div>
+                <span className="text-[11px] font-bold text-foreground/90 mt-1">Present</span>
+                <span className="text-[10px] text-emerald-600/80 dark:text-emerald-400/80 font-semibold">
+                  {totalTracked > 0 ? `${Math.round((todayStats.present / totalTracked) * 100)}%` : '0%'}
+                </span>
+              </button>
 
-          <div className="mt-3.5 pt-3 border-t border-border/80 dark:border-white/10 flex flex-col gap-1.5">
-            <div className="flex justify-between items-center text-xs font-semibold text-muted-foreground">
-              <span>Attendance Rate</span>
-              <span className="font-extrabold text-sm text-foreground tabular-nums">{attendanceRate}%</span>
+              {/* Absent Tab */}
+              <button
+                type="button"
+                onClick={() => setAttFilter(attFilter === 'absent' ? null : 'absent')}
+                className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all cursor-pointer select-none text-left relative overflow-hidden group ${
+                  attFilter === 'absent'
+                    ? 'bg-destructive/20 dark:bg-destructive/25 border-2 border-destructive shadow-md shadow-destructive/10 scale-[1.02]'
+                    : 'bg-destructive/[0.08] dark:bg-destructive/[0.12] border border-destructive/20 hover:border-destructive/40 hover:bg-destructive/[0.12]'
+                }`}
+              >
+                <div className="flex items-center gap-1.5">
+                  <span className="pulse-dot pulse-dot-red m-0"></span>
+                  <span className="text-fluid-xl font-black text-destructive tabular-nums">
+                    {todayStats.absent}
+                  </span>
+                </div>
+                <span className="text-[11px] font-bold text-foreground/90 mt-1">Absent</span>
+                <span className="text-[10px] text-destructive/80 font-semibold">
+                  {totalTracked > 0 ? `${Math.round((todayStats.absent / totalTracked) * 100)}%` : '0%'}
+                </span>
+              </button>
+
+              {/* On Leave Tab */}
+              <button
+                type="button"
+                onClick={() => setAttFilter(attFilter === 'onLeave' ? null : 'onLeave')}
+                className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all cursor-pointer select-none text-left relative overflow-hidden group ${
+                  attFilter === 'onLeave'
+                    ? 'bg-amber-500/20 dark:bg-amber-500/25 border-2 border-amber-500 shadow-md shadow-amber-500/10 scale-[1.02]'
+                    : 'bg-amber-500/[0.08] dark:bg-amber-500/[0.12] border border-amber-500/20 hover:border-amber-500/40 hover:bg-amber-500/[0.12]'
+                }`}
+              >
+                <div className="flex items-center gap-1.5">
+                  <span className="pulse-dot pulse-dot-orange m-0"></span>
+                  <span className="text-fluid-xl font-black text-amber-600 dark:text-amber-400 tabular-nums">
+                    {todayStats.onLeave}
+                  </span>
+                </div>
+                <span className="text-[11px] font-bold text-foreground/90 mt-1">Leave</span>
+                <span className="text-[10px] text-amber-600/80 dark:text-amber-400/80 font-semibold">
+                  {totalTracked > 0 ? `${Math.round((todayStats.onLeave / totalTracked) * 100)}%` : '0%'}
+                </span>
+              </button>
             </div>
-            <div className="w-full bg-black/[0.06] dark:bg-white/10 rounded-full h-2 overflow-hidden shadow-inner p-0.5">
-              <div className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-500 shadow-xs" style={{ width: `${attendanceRate}%` }}></div>
+
+            {/* 2. Segmented Liquid Progress Bar */}
+            <div className="mt-3 pt-3 border-t border-border/80 dark:border-white/10 flex flex-col gap-1.5">
+              <div className="flex justify-between items-center text-xs">
+                <span className="font-semibold text-muted-foreground">
+                  Turnout: <span className="font-bold text-foreground tabular-nums">{todayStats.present}</span> of <span className="font-bold text-foreground tabular-nums">{totalTracked}</span> Active
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-muted-foreground font-medium">Rate:</span>
+                  <span className="font-black text-sm text-foreground tabular-nums">{attendanceRate}%</span>
+                </div>
+              </div>
+
+              <div className="w-full bg-black/[0.06] dark:bg-white/10 rounded-full h-2.5 overflow-hidden flex gap-0.5 p-0.5 shadow-inner">
+                {todayStats.present > 0 && (
+                  <div 
+                    className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-500 shadow-xs" 
+                    style={{ width: `${(todayStats.present / (totalTracked || 1)) * 100}%` }}
+                    title={`Present: ${todayStats.present}`}
+                  />
+                )}
+                {todayStats.onLeave > 0 && (
+                  <div 
+                    className="bg-gradient-to-r from-amber-500 to-orange-400 h-full rounded-full transition-all duration-500 shadow-xs" 
+                    style={{ width: `${(todayStats.onLeave / (totalTracked || 1)) * 100}%` }}
+                    title={`On Leave: ${todayStats.onLeave}`}
+                  />
+                )}
+                {todayStats.absent > 0 && (
+                  <div 
+                    className="bg-gradient-to-r from-rose-500 to-red-600 h-full rounded-full transition-all duration-500 shadow-xs" 
+                    style={{ width: `${(todayStats.absent / (totalTracked || 1)) * 100}%` }}
+                    title={`Absent: ${todayStats.absent}`}
+                  />
+                )}
+              </div>
             </div>
-          </div>
-        </DashboardWidget>
+
+            {/* 3. Interactive Personnel Stream or Avatar Showcase */}
+            {attFilter ? (
+              <div className="mt-3 p-3 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-border/60 dark:border-white/8 flex flex-col gap-2 animate-in fade-in-50 duration-200">
+                <div className="flex items-center justify-between px-1">
+                  <span className="text-xs font-bold text-foreground capitalize flex items-center gap-1.5">
+                    <Icon 
+                      name={attFilter === 'present' ? 'check_circle' : attFilter === 'absent' ? 'cancel' : 'event_busy'} 
+                      size={14} 
+                      className={attFilter === 'present' ? 'text-emerald-500' : attFilter === 'absent' ? 'text-destructive' : 'text-amber-500'} 
+                    />
+                    {attFilter === 'present' ? 'Present Today' : attFilter === 'absent' ? 'Absent Today' : 'On Leave Today'} ({attendanceLists[attFilter]?.length || 0})
+                  </span>
+                  <button
+                    onClick={() => setAttFilter(null)}
+                    className="text-[11px] font-semibold text-primary hover:underline cursor-pointer"
+                  >
+                    Hide
+                  </button>
+                </div>
+
+                <div className="max-h-36 overflow-y-auto pr-1 flex flex-col divide-y divide-border/40 dark:divide-white/6 custom-scrollbar">
+                  {attendanceLists[attFilter]?.length === 0 ? (
+                    <p className="text-center py-3 text-xs text-muted-foreground">No teammates in this category today.</p>
+                  ) : (
+                    attendanceLists[attFilter].map((emp) => (
+                      <div key={emp.id} className="flex items-center justify-between py-1.5 first:pt-0.5 last:pb-0.5">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <Avatar className="size-7 rounded-xl border border-white/40 dark:border-white/10 shrink-0">
+                            {emp.avatar ? <AvatarImage src={emp.avatar} alt={emp.name} className="object-cover" /> : null}
+                            <AvatarFallback className="bg-primary/10 text-primary rounded-xl text-[10px] font-bold">
+                              {emp.name?.slice(0, 2).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex flex-col min-w-0">
+                            <span className="text-xs font-bold text-foreground truncate">{emp.name}</span>
+                            <span className="text-[10px] text-muted-foreground truncate">{emp.role || 'Teammate'}</span>
+                          </div>
+                        </div>
+                        {emp.time ? (
+                          <span className="text-[11px] font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-lg border border-emerald-500/20 shrink-0">
+                            {emp.time}
+                          </span>
+                        ) : (
+                          <Badge variant="outline" className="text-[10px] px-2 py-0.5 rounded-md font-semibold shrink-0">
+                            {emp.status || (attFilter === 'absent' ? 'Absent' : 'Leave')}
+                          </Badge>
+                        )}
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            ) : (
+              /* Default State: Present Teammates Avatar Stack & Quick Status */
+              <div className="mt-3 pt-2.5 border-t border-border/80 dark:border-white/10 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="flex -space-x-2 overflow-hidden shrink-0">
+                    {attendanceLists.present?.slice(0, 5).map((emp, i) => (
+                      <Avatar key={emp.id || i} className="size-7 rounded-full border-2 border-background ring-1 ring-black/5 dark:ring-white/10" title={emp.name}>
+                        {emp.avatar ? <AvatarImage src={emp.avatar} alt={emp.name} className="object-cover" /> : null}
+                        <AvatarFallback className="bg-primary/20 text-primary text-[10px] font-bold">
+                          {emp.name?.slice(0, 1)}
+                        </AvatarFallback>
+                      </Avatar>
+                    ))}
+                    {attendanceLists.present?.length > 5 && (
+                      <div className="size-7 rounded-full bg-muted border-2 border-background flex items-center justify-center text-[10px] font-bold text-muted-foreground ring-1 ring-black/5">
+                        +{attendanceLists.present.length - 5}
+                      </div>
+                    )}
+                  </div>
+                  <span className="text-fluid-xs font-medium text-muted-foreground truncate">
+                    {attendanceLists.present?.length > 0 
+                      ? `${attendanceLists.present.length} checked in` 
+                      : 'No check-ins today'}
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setAttFilter('present')}
+                  className="text-xs font-bold text-primary hover:underline shrink-0 cursor-pointer"
+                >
+                  View Details →
+                </button>
+              </div>
+            )}
+          </DashboardWidget>
         )}
 
         <DailyChecklistWidget notes={notes} setNotes={setNotes} ownerId={currentUser?.id || currentUser?.uid || ''} setCurrentView={setCurrentView} cardClass="" />
@@ -437,55 +622,6 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
             </div>
           )}
         </DashboardWidget>
-        )}
-
-        {showAttDropdown && canViewAttendance && (
-          <Card className="col-span-full overflow-hidden p-0">
-            <div className="px-6 py-3.5 border-b border-border/80 dark:border-white/10 font-bold text-xs uppercase tracking-wider text-muted-foreground">
-              Today's Attendance Roster Breakdowns
-            </div>
-            {[
-              { key: 'present', label: 'Present', count: todayStats.present, dot: 'pulse-dot-green' },
-              { key: 'absent', label: 'Absent', count: todayStats.absent, dot: 'pulse-dot-red' },
-              { key: 'onLeave', label: 'On Leave', count: todayStats.onLeave, dot: 'pulse-dot-orange' },
-            ].map(item => (
-              <div key={item.key} className="border-b border-border/80 dark:border-white/10 last:border-none">
-                <button
-                  onClick={() => setAttFilter(attFilter === item.key ? null : item.key)}
-                  className="w-full flex items-center justify-between px-6 py-3.5 border-none bg-transparent hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-colors cursor-pointer text-xs sm:text-sm font-bold text-foreground"
-                >
-                  <span className="flex items-center gap-3">
-                    <span className={`pulse-dot ${item.dot} m-0`}></span>
-                    {item.label}
-                  </span>
-                  <Badge variant="secondary" className="px-3 py-1 rounded-full text-xs font-semibold">
-                    {item.count}
-                  </Badge>
-                </button>
-                {attFilter === item.key && (
-                  <div className="px-6 pb-4 pt-1 bg-white/40 dark:bg-black/30">
-                    {attendanceLists[item.key].length === 0 ? (
-                      <p className="my-1.5 text-fluid-xs text-muted-foreground">No personnel in this category</p>
-                    ) : (
-                      attendanceLists[item.key].map((emp) => (
-                        <div key={emp.id} className="flex items-center gap-3.5 py-2.5 border-b border-black/[0.06] dark:border-white/10 last:border-none">
-                          <Avatar className="size-8 shrink-0 rounded-xl">
-                            {emp.avatar ? <AvatarImage src={emp.avatar} alt={emp.name} className="object-cover" /> : null}
-                            <AvatarFallback className="bg-primary/10 text-primary rounded-xl"><Icon name="person" size={16}/></AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 min-w-0">
-                            <span className="block text-xs font-bold text-foreground">{emp.name}</span>
-                            <span className="text-[11px] font-medium text-muted-foreground">{emp.role}</span>
-                          </div>
-                          {emp.time && <Badge variant="outline" className="text-[11px] px-2.5 py-0.5 rounded-full">{emp.time}</Badge>}
-                        </div>
-                      ))
-                    )}
-                  </div>
-                )}
-              </div>
-            ))}
-          </Card>
         )}
 
         {canViewCalendar && (

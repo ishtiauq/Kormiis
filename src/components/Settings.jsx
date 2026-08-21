@@ -272,7 +272,12 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
     })
     if (!filteredAudit.length) return
     const headers = ['Timestamp', 'User', 'Action', 'Entity', 'Details', 'IP Address']
-    const rows = filteredAudit.map(log => [formatDateTime(log.timestamp), log.user, log.action, log.entity, log.details, log.ip].map(f => `"${f}"`).join(','))
+    const rows = filteredAudit.map(log => {
+      const userLabel = (log.user && log.user !== 'Admin' && log.user !== 'Teammate') 
+        ? log.user 
+        : (currentUser?.name || currentUser?.displayName || currentUser?.email?.split('@')[0] || log.user || 'System')
+      return [formatDateTime(log.timestamp), userLabel, log.action, log.entity, log.details, log.ip].map(f => `"${f}"`).join(',')
+    })
     const csvContent = "data:text/csv;charset=utf-8," + [headers.join(','), ...rows].join('\n')
     const link = document.createElement("a")
     link.setAttribute("href", encodeURI(csvContent))
@@ -1040,20 +1045,26 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                         if (auditFilterAction !== 'All' && l.action !== auditFilterAction) return false
                         if (auditFilterDate && !l.timestamp.startsWith(auditFilterDate)) return false
                         return true
-                      }).map(log => (
-                        <TableRow key={log.id}>
-                          <TableCell className="font-sans text-xs">{formatDateTime(log.timestamp)}</TableCell>
-                          <TableCell className="font-bold text-sm">{log.user}</TableCell>
-                          <TableCell>
-                            <Badge variant={log.action === 'CREATE' ? 'default' : log.action === 'UPDATE' ? 'secondary' : log.action === 'DELETE' ? 'destructive' : 'outline'} className="text-[10px]">
-                              {log.action}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-sm font-medium">{log.entity}</TableCell>
-                          <TableCell className="text-xs text-muted-foreground max-w-[200px] break-words">{log.details}</TableCell>
-                          <TableCell className="font-sans text-xs text-muted-foreground">{log.ip}</TableCell>
-                        </TableRow>
-                      ))
+                      }).map(log => {
+                        const userLabel = (log.user && log.user !== 'Admin' && log.user !== 'Teammate') 
+                          ? log.user 
+                          : (currentUser?.name || currentUser?.displayName || currentUser?.email?.split('@')[0] || log.user || 'System')
+
+                        return (
+                          <TableRow key={log.id}>
+                            <TableCell className="font-sans text-xs">{formatDateTime(log.timestamp)}</TableCell>
+                            <TableCell className="font-bold text-sm text-foreground">{userLabel}</TableCell>
+                            <TableCell>
+                              <Badge variant={log.action === 'CREATE' ? 'default' : log.action === 'UPDATE' ? 'secondary' : log.action === 'DELETE' ? 'destructive' : 'outline'} className="text-[10px]">
+                                {log.action}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-sm font-medium">{log.entity}</TableCell>
+                            <TableCell className="text-xs text-muted-foreground max-w-[200px] break-words">{log.details}</TableCell>
+                            <TableCell className="font-sans text-xs text-muted-foreground">{log.ip}</TableCell>
+                          </TableRow>
+                        )
+                      })
                     )}
                   </TableBody>
                 </Table>

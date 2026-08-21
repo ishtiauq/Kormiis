@@ -14,6 +14,13 @@ export default function Sidebar({
 }) {
   const [isOpen, setIsOpen] = useState(false)
   const sidebarRef = useRef(null)
+  const navRef = useRef(null)
+  const isDraggingRef = useRef(false)
+  const startYRef = useRef(0)
+  const startScrollTopRef = useRef(0)
+  const hasMovedRef = useRef(false)
+  const justDraggedRef = useRef(false)
+  const [isDragging, setIsDragging] = useState(false)
   const hoverTimeoutRef = useRef(null)
   const [isDesktopOrTablet, setIsDesktopOrTablet] = useState(
     typeof window !== 'undefined' ? window.innerWidth >= 768 : true
@@ -34,9 +41,51 @@ export default function Sidebar({
   }
 
   const handleMouseLeave = () => {
+    if (isDraggingRef.current) return
     hoverTimeoutRef.current = setTimeout(() => {
       setIsOpen(false)
     }, 180)
+  }
+
+  // Pointer drag to scroll handlers (mouse button hold & drag up/down)
+  const handlePointerDown = (e) => {
+    if (!isOpen || !navRef.current) return
+    if (e.pointerType === 'mouse' && e.button !== 0) return
+
+    isDraggingRef.current = true
+    startYRef.current = e.clientY
+    startScrollTopRef.current = navRef.current.scrollTop
+    hasMovedRef.current = false
+    setIsDragging(true)
+
+    const handlePointerMove = (moveEvent) => {
+      if (!isDraggingRef.current || !navRef.current) return
+      const deltaY = moveEvent.clientY - startYRef.current
+      if (Math.abs(deltaY) > 4) {
+        hasMovedRef.current = true
+      }
+      navRef.current.scrollTop = startScrollTopRef.current - deltaY
+    }
+
+    const handlePointerUp = () => {
+      if (isDraggingRef.current) {
+        isDraggingRef.current = false
+        setIsDragging(false)
+        if (hasMovedRef.current) {
+          justDraggedRef.current = true
+          setTimeout(() => {
+            justDraggedRef.current = false
+          }, 80)
+        }
+      }
+      window.removeEventListener('pointermove', handlePointerMove)
+      window.removeEventListener('pointerup', handlePointerUp)
+      window.removeEventListener('pointercancel', handlePointerUp)
+    }
+
+    window.addEventListener('pointermove', handlePointerMove, { passive: true })
+    window.addEventListener('pointerup', handlePointerUp)
+    window.addEventListener('pointercancel', handlePointerUp)
   }
 
   // Tablet/iPad Tap/Touch to open when collapsed
@@ -120,10 +169,18 @@ export default function Sidebar({
     >
       {/* NAVIGATION ITEMS */}
       <nav 
+        ref={navRef}
+        onPointerDown={handlePointerDown}
         aria-label="Main navigation" 
         className={`sidebar-nav-scroll flex-1 flex flex-col gap-1.5 items-center ${
-          isOpen ? 'overflow-y-auto py-1.5 pr-0.5' : 'overflow-hidden justify-center py-1'
-        }`}
+          isOpen 
+            ? 'overflow-y-auto py-1.5 pr-0.5 select-none overscroll-contain' 
+            : 'overflow-hidden justify-center py-1'
+        } ${isDragging ? 'cursor-grabbing select-none' : isOpen ? 'cursor-grab' : ''}`}
+        style={{
+          userSelect: isDragging ? 'none' : undefined,
+          touchAction: isOpen ? 'pan-y' : undefined,
+        }}
       >
         {(isOpen ? visibleNavItems.filter(item => item.id !== 'profile') : top4Items).map(item => {
           const isActive = currentView === item.id;
@@ -149,6 +206,9 @@ export default function Sidebar({
                 data-label={item.label}
                 onClick={(e) => { 
                   e.stopPropagation();
+                  if (justDraggedRef.current || hasMovedRef.current) {
+                    return;
+                  }
                   if (setCurrentView) setCurrentView(item.id);
                   if (window.matchMedia('(hover: none)').matches) {
                     setIsOpen(false);
@@ -211,7 +271,7 @@ export default function Sidebar({
         </button>
       </div>
 
-      {/* Scoped icon styles */}
+      {/* Scoped icon & scrollbar styles */}
       <style>{`
         aside .msr {
           font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0 !important;
@@ -220,6 +280,34 @@ export default function Sidebar({
         aside [data-active="true"] .msr {
           font-variation-settings: "FILL" 1, "wght" 600, "GRAD" 0 !important;
           transform: scale(1.08);
+        }
+
+        .sidebar-nav-scroll::-webkit-scrollbar {
+          width: 4px !important;
+          height: 4px !important;
+        }
+        .sidebar-nav-scroll::-webkit-scrollbar-track {
+          background: transparent !important;
+        }
+        .sidebar-nav-scroll::-webkit-scrollbar-thumb {
+          background: transparent !important;
+          border-radius: 9999px !important;
+          transition: none !important;
+        }
+        aside:hover .sidebar-nav-scroll::-webkit-scrollbar-thumb,
+        .sidebar-nav-scroll:hover::-webkit-scrollbar-thumb {
+          background: rgba(0, 0, 0, 0.30) !important;
+          transition: none !important;
+        }
+        :is(.dark, [data-theme="dark"]) aside:hover .sidebar-nav-scroll::-webkit-scrollbar-thumb,
+        :is(.dark, [data-theme="dark"]) .sidebar-nav-scroll:hover::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.35) !important;
+          transition: none !important;
+        }
+        .sidebar-nav-scroll::-webkit-scrollbar-thumb:hover,
+        .sidebar-nav-scroll::-webkit-scrollbar-thumb:active {
+          background: #FE3501 !important;
+          transition: none !important;
         }
       `}</style>
     </aside>
