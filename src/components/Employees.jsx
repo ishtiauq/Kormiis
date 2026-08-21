@@ -151,24 +151,33 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
     reader.readAsDataURL(file)
   }
 
-  const fetchGmailAvatar = (email, onSuccess) => {
+  const fetchGmailAvatar = (email, onSuccess, { silent = false } = {}) => {
     if (!email || !email.includes('@')) {
-      addToast('Please provide a valid email address first.', 'warning')
+      if (!silent) addToast('Please provide a valid email address first.', 'warning')
       return
     }
     const cleanEmail = email.trim().toLowerCase()
-    const avatarUrl = `https://unavatar.io/${encodeURIComponent(cleanEmail)}`
-    
+    const avatarUrl = `https://unavatar.io/${encodeURIComponent(cleanEmail)}?fallback=false`
+
     const testImg = new Image()
     testImg.onload = () => {
       onSuccess(avatarUrl)
-      addToast('Google / Gmail avatar fetched successfully!', 'success')
+      if (!silent) addToast('Google / Gmail avatar fetched successfully!', 'success')
     }
     testImg.onerror = () => {
-      addToast(`No public Google avatar found for ${cleanEmail}. You can upload a custom photo.`, 'info')
+      if (!silent) addToast(`No public Google avatar found for ${cleanEmail}. You can upload a custom photo.`, 'info')
     }
     testImg.src = avatarUrl
   }
+
+  useEffect(() => {
+    if (!newEmail || !newEmail.includes('@')) return undefined
+    if (newAvatar) return undefined
+    const timer = setTimeout(() => {
+      fetchGmailAvatar(newEmail, (url) => setNewAvatar(url), { silent: true })
+    }, 700)
+    return () => clearTimeout(timer)
+  }, [newEmail])
 
   const handleCopyInviteLink = () => {
     const companyId = adminUid || currentUser?.uid;

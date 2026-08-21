@@ -165,7 +165,12 @@ export default function Sidebar({
           ? 'h-[calc(100vh-4rem)] max-h-[min(calc(100vh-5rem),520px)] p-3 pt-3.5 pb-3 shadow-2xl'
           : 'w-[54px] h-auto py-3 px-1.5 cursor-pointer shadow-xl'
       }`}
-      style={{ width: isOpen ? `${expandedWidth}px` : undefined }}
+      style={{ 
+        width: isOpen ? `${expandedWidth}px` : undefined,
+        isolation: 'isolate',
+        contain: 'paint layout',
+        willChange: 'width, height, max-height'
+      }}
     >
       {/* NAVIGATION ITEMS */}
       <nav 
