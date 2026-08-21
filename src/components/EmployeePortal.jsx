@@ -22,6 +22,7 @@ import Notes from './Notes.jsx'
 import Sidebar from './layout/Sidebar.jsx'
 import Topbar from './layout/Topbar.jsx'
 import MobileTabButton from './layout/MobileTabButton.jsx'
+import LivingAuroraBackground from './layout/LivingAuroraBackground.jsx'
 import ProfileView from './ProfileView.jsx'
 import GeoCheckInWidget from './attendance/GeoCheckInWidget.jsx'
 import AttendancePage from './attendance/AttendancePage.jsx'
@@ -331,6 +332,9 @@ export default function EmployeePortal({
   return (
     <div className="dashboard-root app-shell relative" style={{ display: 'flex', height: '100vh', width: '100vw', maxWidth: '100vw', overflow: 'hidden', boxSizing: 'border-box' }}>
       
+      {/* Dynamic Animated Living Aurora Orbs (Cyclic Place-Swapping Orbital Mesh) */}
+      <LivingAuroraBackground isDarkMode={resolvedIsDark} />
+
       <Sidebar
         visibleNavItems={navItems}
         isCollapsed={isSidebarCollapsed}

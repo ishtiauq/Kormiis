@@ -1,18 +1,26 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import kormiisLogo from '../../Assets/Kormiis Logo Final.svg'
-import kormiisLogoDark from '../../Assets/Kormiis Logo Dark.svg'
+import kormiisWhiteLogo from '../../Assets/Kormiis white Logo.svg'
+import LivingAuroraBackground from './LivingAuroraBackground.jsx'
+import Icon from '../ui/Icon.jsx'
 
-export default function LoadingScreen({ message = "Preparing workspace...", isDarkMode = false, duration = 1200 }) {
+export default function LoadingScreen({ 
+  duration = 1400 
+}) {
   const [progress, setProgress] = useState(0)
 
+  // Progress simulation with organic easing
   useEffect(() => {
     const startTime = Date.now()
     const interval = setInterval(() => {
       const elapsed = Date.now() - startTime
-      const pct = Math.min(100, Math.floor((elapsed / duration) * 100))
-      setProgress(pct)
-      if (pct >= 100) {
+      const rawPct = Math.min(100, Math.floor((elapsed / duration) * 100))
+      
+      // Add slight organic acceleration curve
+      const easedPct = Math.min(100, Math.round(Math.pow(rawPct / 100, 0.9) * 100))
+      setProgress(easedPct)
+
+      if (rawPct >= 100) {
         clearInterval(interval)
       }
     }, 16)
@@ -24,63 +32,79 @@ export default function LoadingScreen({ message = "Preparing workspace...", isDa
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
-      className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background text-foreground select-none overflow-hidden"
+      exit={{ 
+        opacity: 0, 
+        scale: 1.03, 
+        filter: "blur(12px)",
+        transition: { duration: 0.45, ease: [0.32, 0.72, 0, 1] } 
+      }}
+      transition={{ duration: 0.35 }}
+      className="fixed inset-0 z-[9999] flex flex-col items-center justify-center dark force-dark-mode aurora-mesh-dark bg-[#090a0f] text-white select-none overflow-hidden isolate"
     >
-      {/* Background Ambient Glow */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden flex items-center justify-center">
-        <motion.div
-          animate={{
-            scale: [1, 1.25, 1],
-            opacity: [0.15, 0.3, 0.15],
-          }}
-          transition={{
-            duration: 2.5,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-          className="w-[500px] h-[500px] rounded-full bg-[#FE4D01]/25 blur-[110px]"
-        />
-      </div>
+      {/* 1. Animated Living Aurora Ambient Background (Always Dark Standard) */}
+      <LivingAuroraBackground isDarkMode={true} />
 
-      {/* Main Content */}
-      <div className="relative z-10 flex flex-col items-center gap-6 max-w-sm px-6 text-center">
-        {/* Pulsing Logo Container */}
+      {/* 2. Unboxed Clean Center Stage */}
+      <div className="relative z-10 flex flex-col items-center gap-7 max-w-sm w-full px-6 text-center">
+        
+        {/* Clean Kormiis White Logo */}
         <motion.div
-          animate={{
-            scale: [0.96, 1.04, 0.96],
-          }}
-          transition={{
-            duration: 1.8,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-          className="relative flex items-center justify-center p-4"
+          initial={{ opacity: 0, scale: 0.94 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          className="relative flex items-center justify-center"
         >
           <img
-            src={isDarkMode ? kormiisLogoDark : kormiisLogo}
+            src={kormiisWhiteLogo}
             alt="Kormiis Logo"
-            className="h-12 sm:h-16 w-auto object-contain drop-shadow-lg"
+            className="h-11 sm:h-13 w-auto object-contain drop-shadow-sm"
           />
         </motion.div>
 
-        {/* Progress Bar Container */}
-        <div className="w-56 sm:w-64 flex flex-col items-center gap-2 mt-2">
-          <div className="w-full h-2.5 bg-muted/80 rounded-full overflow-hidden p-0.5 border border-border/50 shadow-inner">
+        {/* Shimmering Liquid Glass Progress Capsule */}
+        <div className="w-64 sm:w-72 flex flex-col items-center gap-2.5">
+          {/* Progress Capsule Track */}
+          <div className="w-full h-2.5 sm:h-3 bg-white/[0.10] rounded-full overflow-hidden p-0.5 border border-white/15 shadow-inner relative">
             <motion.div
               style={{ width: `${progress}%` }}
-              className="h-full bg-gradient-to-r from-[#FE4D01] via-[#ff6b26] to-[#FE4D01] rounded-full shadow-[0_0_12px_rgba(254,77,1,0.8)] transition-all duration-75 ease-out"
-            />
+              className="h-full bg-gradient-to-r from-[#FE4D01] via-[#ff6b26] to-[#FE4D01] rounded-full relative overflow-hidden transition-all duration-75 ease-out shadow-xs"
+            >
+              {/* Dynamic Shimmer Light Sweep */}
+              <motion.div
+                animate={{ x: ["-100%", "200%"] }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent w-full h-full"
+              />
+            </motion.div>
           </div>
 
-          {/* Percentage Counter */}
-          <div className="flex items-center justify-between w-full px-1">
-            <span className="text-xs font-bold tracking-wider text-muted-foreground uppercase">{message}</span>
-            <span className="text-xs font-black tracking-tight tabular-nums text-[#FE4D01]">{progress}%</span>
+          {/* Progress Percentage & Live Activity Indicator */}
+          <div className="flex items-center justify-between w-full px-1 text-xs">
+            <div className="flex items-center gap-1.5">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+              </span>
+              <span className="text-[11px] font-semibold text-white/60">Loading</span>
+            </div>
+
+            <span className="font-black tracking-tight tabular-nums text-[#FE4D01] text-xs sm:text-sm">
+              {progress}%
+            </span>
           </div>
         </div>
       </div>
+
+      {/* 3. Sleek Floating Security / Connectivity Glass Pill */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3, duration: 0.45 }}
+        className="absolute bottom-6 sm:bottom-8 z-10 flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.07] border border-white/12 backdrop-blur-xl shadow-xs text-white/70 text-[10.5px] sm:text-[11.5px] font-medium"
+      >
+        <Icon name="shield" size={14} className="text-primary shrink-0" />
+        <span>Enterprise Cloud Architecture • 256-bit Secure</span>
+      </motion.div>
     </motion.div>
   )
 }

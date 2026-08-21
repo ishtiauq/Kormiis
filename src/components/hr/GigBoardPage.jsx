@@ -644,7 +644,7 @@ export default function GigBoardPage({ adminUid, currentUser, addToast }) {
 
       {/* Mobile Floating Action Button (FAB) */}
       <Button
-        className="sm:hidden fixed bottom-[76px] right-6 h-14 w-14 rounded-full shadow-[0_4px_20px_rgba(249,115,22,0.4)] z-50 p-0 hover:scale-105 active:scale-95 transition-transform"
+        className="sm:hidden fixed bottom-[76px] right-6 h-14 w-14 rounded-full shadow-lg z-50 p-0 hover:scale-105 active:scale-95 transition-transform"
         onClick={openCreateModal}
         aria-label="Request Help"
       >

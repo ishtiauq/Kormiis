@@ -27,6 +27,7 @@ import {
 
 // Landing Page Header & Footer
 import LandingFooter from './landing/LandingFooter.jsx'
+import LivingAuroraBackground from './layout/LivingAuroraBackground.jsx'
 
 const HERO_FEATURE_ROWS = [
   // Row 1: Core Operations & Productivity
@@ -568,8 +569,10 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
   return (
     <div 
       ref={containerRef}
-      className="dark force-dark-mode aurora-mesh-dark min-h-screen w-full text-foreground relative font-sans scroll-smooth transition-colors duration-[1500ms] ease-[cubic-bezier(0.4,0,0.2,1)] selection:bg-primary/30"
+      className="dark force-dark-mode aurora-mesh-dark min-h-screen w-full text-foreground relative font-sans scroll-smooth transition-colors duration-[1500ms] ease-[cubic-bezier(0.4,0,0.2,1)] selection:bg-primary/30 overflow-x-hidden"
     >
+      {/* 0. Dynamic Animated Living Aurora Orbs (Cyclic Place-Swapping Orbital Mesh) */}
+      <LivingAuroraBackground isDarkMode={true} />
 
       {/* 1A. Mobile Top-Left Brand Logo (Compact on mobile: sm:hidden) */}
       <motion.div 
@@ -628,7 +631,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
             {/* Start for Free CTA */}
             <button
               onClick={() => openAuthModal('up')}
-              className="liquid-glass-btn bg-primary text-primary-foreground px-4 sm:px-5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold shadow-lg shadow-primary/30 hover:opacity-95 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
+              className="liquid-glass-btn bg-primary text-primary-foreground px-4 sm:px-5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold shadow-sm hover:opacity-95 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
             >
               <span>Start for free</span>
               <Icon name="arrow_forward" size={15} />
@@ -667,7 +670,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
           {/* Start for Free CTA */}
           <button
             onClick={() => openAuthModal('up')}
-            className="liquid-glass-btn bg-primary text-primary-foreground px-4 py-1.5 rounded-full text-xs font-bold shadow-lg shadow-primary/30 hover:opacity-95 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
+            className="liquid-glass-btn bg-primary text-primary-foreground px-4 py-1.5 rounded-full text-xs font-bold shadow-sm hover:opacity-95 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
           >
             <span>Start for free</span>
             <Icon name="arrow_forward" size={14} />
@@ -708,7 +711,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
               transition={{ duration: 0.8, delay: 0.35, type: 'spring', damping: 20, stiffness: 280 }}
               className="mt-2 sm:mt-2.5 lg:mt-[clamp(0.4rem,1.2vh,1rem)] flex items-center justify-center pointer-events-none select-none"
             >
-              <div className="inline-flex items-center justify-center px-4 sm:px-5.5 py-1.5 sm:py-2 rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/25 pointer-events-none select-none cursor-default">
+              <div className="inline-flex items-center justify-center px-4 sm:px-5.5 py-1.5 sm:py-2 rounded-full bg-primary text-primary-foreground shadow-sm pointer-events-none select-none cursor-default">
                 <p className="text-fluid-xs sm:text-fluid-sm font-semibold tracking-wide text-center leading-snug select-none">
                   The only HRM app you need for your workspace.
                 </p>

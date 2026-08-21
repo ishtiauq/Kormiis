@@ -217,7 +217,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
       <Button 
         onClick={handleSave} 
         disabled={isSaving || disabled}
-        className="h-10 rounded-2xl font-bold px-6 shadow-md shadow-primary/20 transition-all active:scale-95"
+        className="h-10 rounded-2xl font-bold px-6 shadow-sm transition-all active:scale-95"
       >
         {isSaving ? <Icon name="monitoring" className="mr-2 h-4 w-4 animate-spin" size={16}/> : <Icon name="save" className="mr-2 h-4 w-4" size={16}/>}
         {isSaving ? 'Saving...' : 'Save Changes'}

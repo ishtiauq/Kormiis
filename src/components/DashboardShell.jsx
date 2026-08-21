@@ -10,6 +10,7 @@ import AppContent from './AppContent.jsx'
 import { allNavItems } from '../utils/helpers.js'
 import { useCommandPalette } from '../hooks/useCommandPalette.jsx'
 import LoadingScreen from './layout/LoadingScreen.jsx'
+import LivingAuroraBackground from './layout/LivingAuroraBackground.jsx'
 import useAppData from '../hooks/useAppData.js'
 
 const EmployeePortal = lazy(() => import('./EmployeePortal.jsx'))
@@ -148,6 +149,8 @@ export default function DashboardShell({ user, themeMode, isDarkMode, toggleThem
   return (
     <div className="dashboard-root app-shell relative" style={{ display: 'flex', height: '100vh', width: '100vw', maxWidth: '100vw', overflow: 'hidden', boxSizing: 'border-box' }}>
       
+      {/* Dynamic Animated Living Aurora Orbs (Cyclic Place-Swapping Orbital Mesh) */}
+      <LivingAuroraBackground isDarkMode={isDarkMode} />
 
       <Sidebar
         visibleNavItems={visibleNavItems}

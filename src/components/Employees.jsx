@@ -874,7 +874,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
             <Button variant="outline" onClick={handleDownloadDemoExcel} className="shadow-sm flex-1 sm:flex-none">
               <Icon name="table_view" className="mr-2 h-4 w-4 text-emerald-500" size={16}/> Demo Excel
             </Button>
-            <Button onClick={handleOpenAddForm} className="shadow-sm shadow-primary/20 flex-1 sm:flex-none">
+            <Button onClick={handleOpenAddForm} className="shadow-sm flex-1 sm:flex-none">
               <Icon name="add" className="mr-2 h-4 w-4" size={16}/> Add Employee
             </Button>
           </div>
@@ -941,7 +941,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
                                     onClick={(e) => toggleSelect(emp.id, e)}
                                     className={`size-6 rounded-full border-2 transition-all flex items-center justify-center cursor-pointer ${
                                       selectedIds.has(emp.id)
-                                        ? 'bg-primary border-primary text-primary-foreground shadow-md shadow-primary/30 scale-105'
+                                        ? 'bg-primary border-primary text-primary-foreground shadow-xs scale-105'
                                         : 'border-border/80 dark:border-white/20 bg-background/50 group-hover:border-primary/50 hover:bg-background/80'
                                     }`}
                                     title={selectedIds.has(emp.id) ? "Deselect" : "Select"}

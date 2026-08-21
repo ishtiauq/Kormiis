@@ -75,7 +75,7 @@ function AssetInventory({ filteredAssets, stats, assets, search, setSearch, filt
               <Icon name="upload" className="mr-2 h-4 w-4" size={16}/> Import CSV
             </Button>
             <input type="file" ref={fileInputRef} onChange={handleImportCSV} accept=".csv" className="hidden" />
-            <Button onClick={() => setShowAddModal(true)} className="shadow-sm shadow-primary/20 flex-1 sm:flex-none">
+            <Button onClick={() => setShowAddModal(true)} className="shadow-sm flex-1 sm:flex-none">
               <Icon name="add" className="mr-2 h-4 w-4" size={16}/> Add Asset
             </Button>
           </div>

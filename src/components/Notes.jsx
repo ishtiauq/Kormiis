@@ -582,7 +582,7 @@ export default function Notes({ notes = [], setNotes, currentUser, addToast }) {
       </AnimatePresence>
 
       <Button
-        className="sm:hidden fixed bottom-[76px] right-8 h-14 w-14 rounded-full shadow-[0_4px_20px_rgba(0,0,0,0.2)] dark:shadow-[0_4px_20px_rgba(255,255,255,0.1)] z-50 p-0 hover:scale-105 active:scale-95 transition-transform bg-primary text-primary-foreground"
+        className="sm:hidden fixed bottom-[76px] right-8 h-14 w-14 rounded-full shadow-lg z-50 p-0 hover:scale-105 active:scale-95 transition-transform bg-primary text-primary-foreground"
         onClick={() => { setEditingNote(null); setShowModal(true) }}
         aria-label="New Note"
       >

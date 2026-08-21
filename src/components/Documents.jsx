@@ -527,7 +527,7 @@ export default function Documents({
           <Button 
             variant="default" 
             onClick={handleOpenUploadModal} 
-            className="rounded-2xl h-11 px-5 font-bold shadow-sm shadow-primary/20 flex-1 sm:flex-none"
+            className="rounded-2xl h-11 px-5 font-bold shadow-sm flex-1 sm:flex-none"
           >
             <Icon name="upload" className="mr-2 h-4 w-4" size={16}/> Upload Document
           </Button>
@@ -793,7 +793,7 @@ export default function Documents({
               onClick={() => setSelectedCategory('all')}
               className={`px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
                 selectedCategory === 'all'
-                  ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/30'
+                  ? 'bg-primary text-primary-foreground shadow-xs'
                   : 'bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 text-muted-foreground hover:text-foreground border border-black/10 dark:border-white/10'
               }`}
             >
@@ -809,7 +809,7 @@ export default function Documents({
                   onClick={() => setSelectedCategory(cat.id)}
                   className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
                     isSelected
-                      ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/30'
+                      ? 'bg-primary text-primary-foreground shadow-xs'
                       : 'bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 text-muted-foreground hover:text-foreground border border-black/10 dark:border-white/10'
                   }`}
                 >
@@ -1253,7 +1253,7 @@ export default function Documents({
               <Button type="button" variant="outline" onClick={() => setShowLetterModal(false)} className="rounded-2xl h-11 px-5">
                 Cancel
               </Button>
-              <Button type="submit" className="rounded-2xl h-11 px-6 font-bold shadow-md shadow-primary/20">
+              <Button type="submit" className="rounded-2xl h-11 px-6 font-bold shadow-sm">
                 <Icon name="download" className="mr-2" size={16}/>
                 Generate & Download PDF
               </Button>

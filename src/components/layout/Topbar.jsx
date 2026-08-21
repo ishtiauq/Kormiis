@@ -481,7 +481,7 @@ export default function Topbar({
               onClick={() => setNotificationTab('unread')}
               className={`flex-1 h-7.5 text-xs font-bold rounded-xl transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
                 notificationTab === 'unread' 
-                  ? 'bg-primary text-white shadow-md shadow-primary/25' 
+                  ? 'bg-primary text-white shadow-xs' 
                   : 'text-muted-foreground hover:text-foreground bg-transparent'
               }`}
             >

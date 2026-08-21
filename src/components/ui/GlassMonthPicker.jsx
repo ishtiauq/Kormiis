@@ -207,7 +207,7 @@ export default function GlassMonthPicker({
                   onClick={() => handleSelectMonth(idx)}
                   className={`group relative h-9.5 rounded-xl flex items-center justify-center transition-all duration-200 cursor-pointer border select-none ${
                     isSelected
-                      ? 'bg-primary text-white font-black border-primary shadow-md shadow-primary/30 scale-[1.03] ring-2 ring-primary/40'
+                      ? 'bg-primary text-white font-black border-primary shadow-xs scale-[1.03]'
                       : 'bg-white/40 hover:bg-white/80 dark:bg-white/[0.06] dark:hover:bg-white/[0.14] text-foreground hover:text-primary border-black/[0.06] dark:border-white/10 hover:border-primary/30 font-bold text-fluid-xs shadow-2xs'
                   }`}
                 >

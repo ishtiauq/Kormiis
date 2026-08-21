@@ -219,9 +219,9 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
                 tabIndex={0}
                 className={`group relative flex flex-col items-center justify-between p-1.5 sm:p-2 cursor-pointer min-h-[56px] sm:min-h-[72px] rounded-2xl transition-all duration-200 select-none ${
                   isSelected 
-                    ? 'bg-primary text-primary-foreground shadow-md shadow-primary/25 scale-[1.02] z-10' 
+                    ? 'bg-primary text-primary-foreground shadow-sm scale-[1.02] z-10' 
                     : isToday 
-                    ? 'bg-primary/10 dark:bg-primary/15 border-2 border-primary text-foreground shadow-sm shadow-primary/20 ring-2 ring-primary/20' 
+                    ? 'bg-primary/10 dark:bg-primary/15 border-2 border-primary text-foreground shadow-xs' 
                     : 'bg-black/[0.02] dark:bg-white/[0.02] hover:bg-black/5 dark:hover:bg-white/5 border border-border/40 hover:border-primary/30 hover:scale-[1.02]'
                 }`}
               >
