@@ -1518,3 +1518,38 @@ div[class*="text-rose-"]:not([class*="bg-"]):not([class*="size-"]):not([class*="
   border-color: rgba(255, 255, 255, 0.16) !important;
 }
 
+/* Selected Day Capsule: Pure Solid Black in Light Mode / Pure Solid White in Dark Mode */
+.selected-day-capsule {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3) !important;
+}
+.selected-day-capsule span,
+.selected-day-capsule strong,
+.selected-day-capsule p {
+  color: #ffffff !important;
+}
+.selected-day-capsule .day-dot {
+  background-color: #ffffff !important;
+}
+
+.dark .selected-day-capsule,
+[data-theme="dark"] .selected-day-capsule {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  box-shadow: 0 4px 14px rgba(255, 255, 255, 0.25) !important;
+}
+.dark .selected-day-capsule span,
+.dark .selected-day-capsule strong,
+.dark .selected-day-capsule p,
+[data-theme="dark"] .selected-day-capsule span,
+[data-theme="dark"] .selected-day-capsule strong,
+[data-theme="dark"] .selected-day-capsule p {
+  color: #000000 !important;
+}
+.dark .selected-day-capsule .day-dot,
+[data-theme="dark"] .selected-day-capsule .day-dot {
+  background-color: #000000 !important;
+}
+
+
