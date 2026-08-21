@@ -422,7 +422,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
                   </button>
                 </div>
 
-                <div className="max-h-36 overflow-y-auto pr-1 flex flex-col divide-y divide-border/40 dark:divide-white/6 custom-scrollbar">
+                <div className="max-h-36 overflow-y-auto pr-1 flex flex-col divide-y divide-border/40 dark:divide-white/6">
                   {attendanceLists[attFilter]?.length === 0 ? (
                     <p className="text-center py-3 text-xs text-muted-foreground">No teammates in this category today.</p>
                   ) : (

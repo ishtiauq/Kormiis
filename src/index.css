@@ -929,10 +929,49 @@ html.dark .glass-floating-sidebar,
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
+    cursor: default !important;
+  }
+
+  /* Complete Elimination of Scrollbar Stepper Buttons/Arrows (Top, Bottom, Left, Right) */
+  ::-webkit-scrollbar-button,
+  *::-webkit-scrollbar-button,
+  ::-webkit-scrollbar-button:single-button,
+  ::-webkit-scrollbar-button:double-button,
+  ::-webkit-scrollbar-button:vertical:decrement,
+  ::-webkit-scrollbar-button:vertical:increment,
+  ::-webkit-scrollbar-button:horizontal:decrement,
+  ::-webkit-scrollbar-button:horizontal:increment,
+  ::-webkit-scrollbar-button:start,
+  ::-webkit-scrollbar-button:end,
+  ::-webkit-scrollbar-button:vertical:start:decrement,
+  ::-webkit-scrollbar-button:vertical:end:increment,
+  ::-webkit-scrollbar-button:horizontal:start:decrement,
+  ::-webkit-scrollbar-button:horizontal:end:increment {
+    display: none !important;
+    width: 0px !important;
+    height: 0px !important;
+    max-width: 0px !important;
+    max-height: 0px !important;
+    background: transparent !important;
+    border: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  ::-webkit-scrollbar-corner,
+  *::-webkit-scrollbar-corner,
+  ::-webkit-resizer,
+  *::-webkit-resizer {
+    display: none !important;
+    background: transparent !important;
+    width: 0px !important;
+    height: 0px !important;
   }
 
   ::-webkit-scrollbar-track {
     background: transparent !important;
+    cursor: default !important;
   }
 
   /* Default State: Completely Invisible / Hidden */
@@ -942,6 +981,7 @@ html.dark .glass-floating-sidebar,
     border: none !important;
     background-clip: padding-box !important;
     transition: none !important;
+    cursor: default !important;
   }
 
   /* Container Hover State: Apple Ultra-Liquid Glass Bar (Light Mode) */
@@ -953,6 +993,7 @@ html.dark .glass-floating-sidebar,
     border-radius: 9999px !important;
     background-clip: padding-box !important;
     transition: none !important;
+    cursor: default !important;
   }
 
   /* Container Hover State: Apple Ultra-Liquid Glass Bar (Dark Mode) */
@@ -967,14 +1008,20 @@ html.dark .glass-floating-sidebar,
     border-radius: 9999px !important;
     background-clip: padding-box !important;
     transition: none !important;
+    cursor: default !important;
   }
 
-  /* Direct Scrollbar Thumb Hover & Active / Drag State: Brand Color (#FE3501) */
+  /* Direct Scrollbar Thumb Hover & Active / Selection State: Consistent Liquid Glass, No color shift, No cursor change */
   ::-webkit-scrollbar-thumb:hover,
   ::-webkit-scrollbar-thumb:active,
   *:hover::-webkit-scrollbar-thumb:hover,
   *:hover::-webkit-scrollbar-thumb:active,
-  *:active::-webkit-scrollbar-thumb,
+  *:active::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.28) !important;
+    border: 1px solid rgba(255, 255, 255, 0.65) !important;
+    cursor: default !important;
+  }
+
   .dark ::-webkit-scrollbar-thumb:hover,
   .dark ::-webkit-scrollbar-thumb:active,
   .dark *:hover::-webkit-scrollbar-thumb:hover,
@@ -985,14 +1032,14 @@ html.dark .glass-floating-sidebar,
   [data-theme="dark"] *:hover::-webkit-scrollbar-thumb:hover,
   [data-theme="dark"] *:hover::-webkit-scrollbar-thumb:active,
   [data-theme="dark"] *:active::-webkit-scrollbar-thumb {
-    background: #FE3501 !important;
-    border: 1px solid rgba(255, 255, 255, 0.45) !important;
-    border-radius: 9999px !important;
-    background-clip: padding-box !important;
-    transition: none !important;
+    background: rgba(255, 255, 255, 0.32) !important;
+    border: 1px solid rgba(255, 255, 255, 0.20) !important;
+    cursor: default !important;
   }
+}
 
-  /* Standard CSS Scrollbar (Firefox) */
+/* Standard CSS Scrollbar (Scoped specifically for Firefox) */
+@supports (-moz-appearance: none) {
   * {
     scrollbar-width: thin;
     scrollbar-color: transparent transparent;

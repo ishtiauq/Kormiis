@@ -176,7 +176,7 @@ export default function Sidebar({
           isOpen 
             ? 'overflow-y-auto py-1.5 pr-1 pl-0.5 select-none overscroll-contain' 
             : 'overflow-hidden justify-center py-1'
-        } ${isDragging ? 'cursor-grabbing select-none' : isOpen ? 'cursor-grab' : ''}`}
+        }`}
         style={{
           userSelect: isDragging ? 'none' : undefined,
           touchAction: isOpen ? 'pan-y' : undefined,
@@ -283,12 +283,23 @@ export default function Sidebar({
           transform: scale(1.08);
         }
 
+        .sidebar-nav-scroll {
+          cursor: default !important;
+        }
         .sidebar-nav-scroll::-webkit-scrollbar {
           width: 5px !important;
           height: 5px !important;
+          cursor: default !important;
+        }
+        .sidebar-nav-scroll::-webkit-scrollbar-button {
+          display: none !important;
+          width: 0px !important;
+          height: 0px !important;
+          background: transparent !important;
         }
         .sidebar-nav-scroll::-webkit-scrollbar-track {
           background: transparent !important;
+          cursor: default !important;
         }
         .sidebar-nav-scroll::-webkit-scrollbar-thumb {
           background: transparent !important;
@@ -296,6 +307,7 @@ export default function Sidebar({
           border: 1px solid transparent !important;
           background-clip: padding-box !important;
           transition: none !important;
+          cursor: default !important;
         }
         /* Container hover / scroll: Apple Ultra-Liquid Glass Bar */
         aside:hover .sidebar-nav-scroll::-webkit-scrollbar-thumb,
@@ -305,6 +317,7 @@ export default function Sidebar({
           border-radius: 9999px !important;
           background-clip: padding-box !important;
           transition: none !important;
+          cursor: default !important;
         }
         :is(.dark, [data-theme="dark"]) aside:hover .sidebar-nav-scroll::-webkit-scrollbar-thumb,
         :is(.dark, [data-theme="dark"]) .sidebar-nav-scroll:hover::-webkit-scrollbar-thumb {
@@ -313,15 +326,20 @@ export default function Sidebar({
           border-radius: 9999px !important;
           background-clip: padding-box !important;
           transition: none !important;
+          cursor: default !important;
         }
-        /* Direct Scrollbar Hover & Active / Drag: Brand Color #FE3501 */
+        /* Direct Scrollbar Hover & Active / Drag: Consistent Liquid Glass, No color shift, No cursor change */
         .sidebar-nav-scroll::-webkit-scrollbar-thumb:hover,
         .sidebar-nav-scroll::-webkit-scrollbar-thumb:active {
-          background: #FE3501 !important;
-          border: 1px solid rgba(255, 255, 255, 0.45) !important;
-          border-radius: 9999px !important;
-          background-clip: padding-box !important;
-          transition: none !important;
+          background: rgba(0, 0, 0, 0.28) !important;
+          border: 1px solid rgba(255, 255, 255, 0.65) !important;
+          cursor: default !important;
+        }
+        :is(.dark, [data-theme="dark"]) .sidebar-nav-scroll::-webkit-scrollbar-thumb:hover,
+        :is(.dark, [data-theme="dark"]) .sidebar-nav-scroll::-webkit-scrollbar-thumb:active {
+          background: rgba(255, 255, 255, 0.32) !important;
+          border: 1px solid rgba(255, 255, 255, 0.20) !important;
+          cursor: default !important;
         }
       `}</style>
     </aside>

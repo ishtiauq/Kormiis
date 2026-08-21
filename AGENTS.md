@@ -136,7 +136,8 @@ Scrollbars across the entire application **MUST STRICTLY** follow this fixed two
 - **Container Hover State**: Visible **ONLY** when the mouse hovers over the scrollable container or page (`*:hover::-webkit-scrollbar-thumb`).
   - **Light Mode**: Apple Ultra-Liquid Glass capsule (`rgba(0, 0, 0, 0.28)` with `1px solid rgba(255, 255, 255, 0.65)` border).
   - **Dark Mode**: High-clarity frosted capsule (`rgba(255, 255, 255, 0.32)` with `1px solid rgba(255, 255, 255, 0.20)` border).
-- **Direct Thumb Hover & Dragging / Active State**: Switches to Brand Color `#FE3501` (`background: #FE3501 !important`, border `1px solid rgba(255, 255, 255, 0.45)`).
+- **Direct Thumb Hover & Dragging / Selection State**: Maintains consistent Apple Liquid Glass frosted look without changing color (`rgba(0, 0, 0, 0.28)` in light mode, `rgba(255, 255, 255, 0.32)` in dark mode). Cursor remains default (`cursor: default !important`) with zero cursor changes during selection or scroll interaction.
 - **Mouse Leave**: Instantly disappears (`transition: none !important` with 0ms delay).
+- **No Stepper Arrows**: Up/down and left/right arrows are completely eliminated (`::-webkit-scrollbar-button { display: none !important; width: 0; height: 0; }`).
 - **DO NOT** add custom inline or per-component scrollbars that leave a visible bar in the default idle state. Always inherit or use the centralized standard.
 
