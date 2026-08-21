@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import kormiisWhiteLogo from '../../Assets/Kormiis white Logo.svg'
 import LivingAuroraBackground from './LivingAuroraBackground.jsx'
-import Icon from '../ui/Icon.jsx'
 
 export default function LoadingScreen({ 
   duration = 1400 
@@ -94,17 +93,6 @@ export default function LoadingScreen({
           </div>
         </div>
       </div>
-
-      {/* 3. Sleek Floating Security / Connectivity Glass Pill */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3, duration: 0.45 }}
-        className="absolute bottom-6 sm:bottom-8 z-10 flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.07] border border-white/12 backdrop-blur-xl shadow-xs text-white/70 text-[10.5px] sm:text-[11.5px] font-medium"
-      >
-        <Icon name="shield" size={14} className="text-primary shrink-0" />
-        <span>Enterprise Cloud Architecture • 256-bit Secure</span>
-      </motion.div>
     </motion.div>
   )
 }
