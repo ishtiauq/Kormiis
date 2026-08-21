@@ -10,8 +10,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectItem } from "@/components/ui/select"
-import { requestPushPermission, showSystemNotification, getPushPermission } from "../services/pushNotifications.js"
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
+import { requestPushPermission, getPushPermission, registerPushSubscription } from "../services/pushNotifications.js"
+import { sendTestEmail } from "../services/emailService.js"
 
 export default function Settings({ settings, setSettings, addLog, addToast, auditLogs, themeMode, toggleTheme, employees, setEmployees, currentUser }) {
   // Accordion open states
@@ -83,7 +84,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
   const [companyName, setCompanyName] = useState(settings.company?.name || 'Kormiis Ltd.')
   const [companyEmail, setCompanyEmail] = useState(settings.company?.email || 'hr@kormiis.io')
   const [companyPhone, setCompanyPhone] = useState(settings.company?.phone || '+880 1700-000000')
-  const [companyWebsite, setCompanyWebsite] = useState(settings.company?.website || 'www.kormiis.io')
+  const [companyWebsite, setCompanyWebsite] = useState(settings.company?.website || 'kormiis.vercel.app')
   const [logo, setLogo] = useState(settings.company?.logo || '')
   const [logoX, setLogoX] = useState(settings.company?.logoX || 0)
   const [logoY, setLogoY] = useState(settings.company?.logoY || 0)
@@ -97,7 +98,10 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
   const [emailDigests, setEmailDigests] = useState(settings.notifications?.emailDigests ?? false)
   const [pushEnabled, setPushEnabled] = useState(settings.notifications?.pushEnabled ?? false)
   const [pushPermission, setPushPermission] = useState(() => getPushPermission())
-  const [isPushTesting, setIsPushTesting] = useState(false)
+  const [resendApiKey, setResendApiKey] = useState(settings.company?.resendApiKey || '')
+  const [resendFromEmail, setResendFromEmail] = useState(settings.company?.resendFromEmail || '')
+  const [showApiKey, setShowApiKey] = useState(false)
+  const [isTestingEmail, setIsTestingEmail] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [showResetModal, setShowResetModal] = useState(false)
   useModal(() => setShowResetModal(false))
@@ -122,6 +126,8 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
     if (settings.company?.logoX !== undefined) setLogoX(settings.company.logoX)
     if (settings.company?.logoY !== undefined) setLogoY(settings.company.logoY)
     if (settings.company?.logoZoom !== undefined) setLogoZoom(settings.company.logoZoom)
+    if (settings.company?.resendApiKey !== undefined) setResendApiKey(settings.company.resendApiKey)
+    if (settings.company?.resendFromEmail !== undefined) setResendFromEmail(settings.company.resendFromEmail)
     if (settings.notifications) {
       if (settings.notifications.syncAlerts !== undefined) setSyncAlerts(settings.notifications.syncAlerts)
       if (settings.notifications.emailDigests !== undefined) setEmailDigests(settings.notifications.emailDigests)
@@ -148,13 +154,87 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
     setSalaryStructure(prev => prev.filter(item => item.id !== id))
   }
 
+  const handleTogglePushNotifications = async (targetState) => {
+    if (targetState) {
+      // Turning ON
+      let perm = pushPermission
+      if (perm !== 'granted') {
+        perm = await requestPushPermission()
+        setPushPermission(perm)
+      }
+      if (perm === 'granted') {
+        setPushEnabled(true)
+        const updated = {
+          ...settings,
+          notifications: { ...settings?.notifications, syncAlerts, emailDigests, pushEnabled: true }
+        }
+        setSettings(updated)
+        if (currentUser) {
+          registerPushSubscription(currentUser, currentUser.companyUid || currentUser.uid).catch(() => {})
+        }
+        if (addToast) addToast('Push notifications turned ON for this device!', 'success')
+      } else {
+        if (addToast) addToast('Notification permission was not allowed in your browser.', 'warning')
+      }
+    } else {
+      // Turning OFF
+      setPushEnabled(false)
+      const updated = {
+        ...settings,
+        notifications: { ...settings?.notifications, syncAlerts, emailDigests, pushEnabled: false }
+      }
+      setSettings(updated)
+      if (addToast) addToast('Push notifications turned OFF on this device.', 'info')
+    }
+  }
+
+  const handleSendTestEmail = async () => {
+    const key = resendApiKey?.trim()
+    if (!key) {
+      if (addToast) addToast('Please enter your Resend API Key first.', 'warning')
+      return
+    }
+    const targetEmail = companyEmail || currentUser?.email
+    if (!targetEmail) {
+      if (addToast) addToast('No recipient email available to send test email.', 'warning')
+      return
+    }
+    setIsTestingEmail(true)
+    try {
+      const res = await sendTestEmail({
+        apiKey: key,
+        fromEmail: resendFromEmail?.trim(),
+        recipientEmail: targetEmail,
+        companyName,
+      })
+      if (res.success) {
+        if (addToast) addToast(`Verification email successfully dispatched to ${targetEmail}!`, 'success')
+      } else {
+        if (addToast) addToast(`Resend Error: ${res.error}`, 'danger')
+      }
+    } catch (e) {
+      if (addToast) addToast(`Dispatch failed: ${e.message}`, 'danger')
+    } finally {
+      setIsTestingEmail(false)
+    }
+  }
+
   const handleSave = () => {
     setIsSaving(true)
     Promise.resolve().then(() => {
       setSettings({
         ...settings,
         currency, salaryStructure, expensePolicies,
-        company: { ...settings?.company, name: companyName, email: companyEmail, phone: companyPhone, website: companyWebsite, logo, logoX, logoY, logoZoom },
+        company: { 
+          ...settings?.company, 
+          name: companyName, 
+          email: companyEmail, 
+          phone: companyPhone, 
+          website: companyWebsite, 
+          logo, logoX, logoY, logoZoom,
+          resendApiKey: resendApiKey?.trim() || '',
+          resendFromEmail: resendFromEmail?.trim() || ''
+        },
         notifications: { syncAlerts, emailDigests, pushEnabled }
       })
       addLog?.('Settings Updated', 'Saved system settings and synced configurations', 'success')
@@ -347,7 +427,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                     <Input 
                       value={companyWebsite} 
                       onChange={e => setCompanyWebsite(e.target.value)} 
-                      placeholder="www.kormiis.io" 
+                      placeholder="kormiis.vercel.app" 
                       className="!pl-10.5 h-11 rounded-2xl" 
                     />
                   </div>
@@ -581,7 +661,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                 <div className="py-3.5 first:pt-0 flex justify-between items-center">
                   <div className="flex flex-col gap-0.5">
                     <span className="font-bold text-sm text-foreground">Real-time Cloud Sync Alerts</span>
-                    <span className="text-fluid-xs text-muted-foreground">Displays toast notifications when offline queue finishes syncing to Firestore.</span>
+                    <span className="text-fluid-xs text-muted-foreground">Displays toast notifications when offline queue finishes syncing to Cloud.</span>
                   </div>
                   <input 
                     type="checkbox" 
@@ -604,57 +684,176 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                   />
                 </div>
 
-                <div className="py-3.5 flex justify-between items-center">
-                  <div className="flex flex-col gap-0.5">
-                    <span className="font-bold text-sm text-foreground">Browser Push Notifications</span>
-                    <span className="text-fluid-xs text-muted-foreground">Displays system-level banners for new announcements and clock-in reminders.</span>
-                  </div>
-                  <input 
-                    type="checkbox" 
-                    checked={pushEnabled} 
-                    onChange={e => setPushEnabled(e.target.checked)} 
-                    className="h-5 w-5 rounded-lg accent-primary cursor-pointer shrink-0 ml-4" 
-                  />
-                </div>
               </div>
 
-              {/* Push Diagnostics */}
-              <div className="p-4 rounded-2xl bg-black/[0.02] dark:bg-white/[0.02] border border-border/40 dark:border-white/8 flex flex-col gap-3">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <span className="text-xs font-bold text-foreground">Browser Permission: </span>
-                    <span className={`text-xs font-semibold ${pushPermission === 'granted' ? 'text-emerald-500' : 'text-amber-500'}`}>
-                      {pushPermission === 'granted' ? 'Granted' : 'Pending / Not Enabled'}
+              {/* Push Notifications Card with Direct On / Off Toggle */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-black/[0.02] dark:bg-white/[0.02] border border-border/60 dark:border-white/10 flex flex-col gap-3.5 mt-1">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex flex-col gap-1 min-w-0">
+                    <div className="flex items-center gap-2.5 flex-wrap">
+                      <span className="font-bold text-sm text-foreground">Browser Push Notifications</span>
+                      {pushEnabled && pushPermission === 'granted' ? (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                          Active (ON)
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-muted text-muted-foreground border border-border/40">
+                          <span className="w-2 h-2 rounded-full bg-muted-foreground/50"></span>
+                          Disabled (OFF)
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-fluid-xs text-muted-foreground">
+                      {pushEnabled && pushPermission === 'granted'
+                        ? 'Web push alerts are currently active and delivering notifications to this device.'
+                        : 'Turn on to receive instant system banners for announcements, task assignments, and shift changes.'}
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    {pushPermission !== 'granted' && (
-                      <Button variant="outline" size="sm" onClick={async () => {
-                        const res = await requestPushPermission()
-                        setPushPermission(res)
-                        if (res === 'granted' && addToast) addToast('Push notifications enabled.', 'success')
-                      }} className="h-9 rounded-xl text-xs font-bold">
-                        Enable Permission
-                      </Button>
-                    )}
-                    <Button variant="outline" size="sm" disabled={isPushTesting} onClick={async () => {
-                      setIsPushTesting(true)
-                      await showSystemNotification({ title: 'Kormiis Test Alert', body: 'Push notifications are working properly! 🎉', url: '' })
-                      if (addToast) addToast('Test notification sent.', 'success')
-                      setIsPushTesting(false)
-                    }} className="h-9 rounded-xl text-xs font-bold gap-1.5">
-                      <Icon name="send" size={14}/> Send Test Alert
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Button
+                      type="button"
+                      variant={pushEnabled && pushPermission === 'granted' ? "outline" : "default"}
+                      size="sm"
+                      onClick={() => handleTogglePushNotifications(!pushEnabled || pushPermission !== 'granted')}
+                      className={`h-9 px-4 rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95 ${
+                        pushEnabled && pushPermission === 'granted'
+                          ? 'border-border/80 text-foreground hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30'
+                          : 'bg-primary text-primary-foreground hover:brightness-105'
+                      }`}
+                    >
+                      <Icon 
+                        name={pushEnabled && pushPermission === 'granted' ? "notifications_off" : "notifications_active"} 
+                        size={15} 
+                        className="mr-1.5" 
+                      />
+                      {pushEnabled && pushPermission === 'granted' ? 'Turn Off' : 'Turn On'}
                     </Button>
                   </div>
                 </div>
 
-                {pushEnabled && (
-                  <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-muted/40 dark:bg-white/5 border border-border/60 dark:border-white/10 text-xs text-muted-foreground">
-                    <Icon name="notifications_active" size={16} className="text-emerald-500" />
-                    <span>Web push channel active on this device.</span>
+                {/* Permission Details */}
+                <div className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-muted/40 dark:bg-white/5 border border-border/40 dark:border-white/8 text-xs">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-foreground">Browser Permission:</span>
+                    <span className={`font-semibold ${pushPermission === 'granted' ? 'text-emerald-500' : pushPermission === 'denied' ? 'text-rose-500' : 'text-amber-500'}`}>
+                      {pushPermission === 'granted' ? 'Granted' : pushPermission === 'denied' ? 'Blocked by Browser' : 'Not Allowed Yet'}
+                    </span>
                   </div>
-                )}
+                  {pushPermission !== 'granted' && (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        const res = await requestPushPermission()
+                        setPushPermission(res)
+                        if (res === 'granted') {
+                          handleTogglePushNotifications(true)
+                        }
+                      }}
+                      className="text-primary hover:underline font-bold text-xs"
+                    >
+                      Request Permission
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* 3. Resend Email Integration Card */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-black/[0.02] dark:bg-white/[0.02] border border-border/60 dark:border-white/10 flex flex-col gap-4 mt-1">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex flex-col gap-1 min-w-0">
+                    <div className="flex items-center gap-2.5 flex-wrap">
+                      <div className="flex items-center gap-2">
+                        <Icon name="mail" size={20} className="text-primary" />
+                        <span className="font-bold text-sm text-foreground">Automated Emails (Resend Integration)</span>
+                      </div>
+                      {resendApiKey ? (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                          Configured
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-muted text-muted-foreground border border-border/40">
+                          Optional / Inactive
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-fluid-xs text-muted-foreground">
+                      Automatically delivers employee onboarding invitations, temporary login passwords, and payroll slips to employee inboxes.
+                    </span>
+                  </div>
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={isTestingEmail || !resendApiKey}
+                    onClick={handleSendTestEmail}
+                    className="h-9 px-4 rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95 shrink-0 gap-1.5"
+                  >
+                    {isTestingEmail ? (
+                      <Icon name="monitoring" className="animate-spin" size={14} />
+                    ) : (
+                      <Icon name="send" size={14} />
+                    )}
+                    {isTestingEmail ? 'Sending...' : 'Send Test Email'}
+                  </Button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-border/40 dark:border-white/8">
+                  {/* Resend API Key Input */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-bold text-foreground flex items-center justify-between">
+                      <span>Resend API Key</span>
+                      <a 
+                        href="https://resend.com/api-keys" 
+                        target="_blank" 
+                        rel="noreferrer"
+                        className="text-primary text-[11px] font-semibold hover:underline"
+                      >
+                        Get Free Key (3,000 emails/mo) ↗
+                      </a>
+                    </label>
+                    <div className="relative">
+                      <Input
+                        type={showApiKey ? "text" : "password"}
+                        value={resendApiKey}
+                        onChange={e => setResendApiKey(e.target.value)}
+                        placeholder="re_123456789_abcdef..."
+                        className="h-10 text-xs font-mono pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowApiKey(prev => !prev)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
+                        tabIndex={-1}
+                      >
+                        <Icon name={showApiKey ? "visibility_off" : "visibility"} size={16} />
+                      </button>
+                    </div>
+                    <span className="text-[11px] text-muted-foreground">
+                      Enter your API key from resend.com dashboard.
+                    </span>
+                  </div>
+
+                  {/* Sender Email / Domain */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-bold text-foreground">
+                      Sender Email / Domain (From)
+                    </label>
+                    <Input
+                      type="text"
+                      value={resendFromEmail}
+                      onChange={e => setResendFromEmail(e.target.value)}
+                      placeholder="onboarding@resend.dev or hr@yourcompany.com"
+                      className="h-10 text-xs"
+                    />
+                    <span className="text-[11px] text-muted-foreground">
+                      Default is <code className="font-mono bg-muted/60 px-1 py-0.5 rounded text-[10px]">onboarding@resend.dev</code> (or your verified domain).
+                    </span>
+                  </div>
+                </div>
               </div>
 
               {renderActionFooter()}

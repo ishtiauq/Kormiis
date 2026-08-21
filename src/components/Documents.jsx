@@ -105,7 +105,7 @@ export default function Documents({
       const companyLogo = settings?.company?.logo
       const companyEmail = settings?.company?.email || 'hr@kormiis.io'
       const companyPhone = settings?.company?.phone || ''
-      const companyWebsite = settings?.company?.website || 'www.kormiis.io'
+      const companyWebsite = settings?.company?.website || 'kormiis.vercel.app'
       const currency = settings?.currency || '৳'
       const todayStr = formatDate(new Date().toISOString().split('T')[0])
       const refNo = `REF: ${companyName.substring(0, 3).toUpperCase()}/HR/${new Date().getFullYear()}/${Math.floor(1000 + Math.random() * 9000)}`

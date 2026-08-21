@@ -48,6 +48,45 @@ async function getSwRegistration() {
   return null
 }
 
+export async function registerPushSubscription(user, companyUid) {
+  if (!isPushSupported() || Notification.permission !== 'granted') return null
+  try {
+    const swReg = await getSwRegistration()
+    if (!swReg || !swReg.pushManager) return null
+
+    let subscription = await swReg.pushManager.getSubscription()
+    if (!subscription && swReg.pushManager.subscribe) {
+      try {
+        subscription = await swReg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: undefined
+        })
+      } catch (subErr) {
+        // Fallback for browsers without VAPID key
+      }
+    }
+
+    if (subscription && user?.uid && companyUid) {
+      const { db, doc, setDoc, serverTimestamp } = await import('./firebase.js')
+      if (db) {
+        const subJson = subscription.toJSON()
+        const subId = (user.uid || 'anon') + '_' + (btoa(subJson.endpoint || '').slice(-12).replace(/[^a-zA-Z0-9]/g, ''))
+        await setDoc(doc(db, 'companies', companyUid, 'pushSubscriptions', subId), {
+          uid: user.uid,
+          endpoint: subJson.endpoint,
+          keys: subJson.keys || {},
+          platform: navigator.userAgent,
+          updatedAt: serverTimestamp(),
+        }, { merge: true })
+      }
+    }
+    return subscription
+  } catch (e) {
+    console.warn('Push subscription registration notice:', e)
+    return null
+  }
+}
+
 export async function showSystemNotification({ title = 'Kormiis', body = '', icon = APP_ICON, url = '', tag }) {
   if (!isPushSupported()) return
   if (Notification.permission !== 'granted') return

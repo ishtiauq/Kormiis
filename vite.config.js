@@ -8,6 +8,55 @@ export default defineConfig({
   plugins: [
     react(), 
     tailwindcss(),
+    {
+      name: 'resend-dev-api-proxy',
+      configureServer(server) {
+        server.middlewares.use('/api/send-email', async (req, res) => {
+          if (req.method === 'OPTIONS') {
+            res.statusCode = 200
+            res.setHeader('Access-Control-Allow-Origin', '*')
+            res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS')
+            res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+            res.end()
+            return
+          }
+          if (req.method === 'POST') {
+            let body = ''
+            req.on('data', chunk => { body += chunk })
+            req.on('end', async () => {
+              try {
+                const parsed = JSON.parse(body || '{}')
+                const token = parsed.apiKey || process.env.VITE_RESEND_API_KEY
+                const response = await fetch('https://api.resend.com/emails', {
+                  method: 'POST',
+                  headers: {
+                    'Authorization': `Bearer ${token?.trim()}`,
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    from: parsed.from || 'Kormiis <onboarding@resend.dev>',
+                    to: Array.isArray(parsed.to) ? parsed.to : [parsed.to],
+                    subject: parsed.subject,
+                    html: parsed.html,
+                    text: parsed.text,
+                  }),
+                })
+                const data = await response.json()
+                res.setHeader('Content-Type', 'application/json')
+                res.setHeader('Access-Control-Allow-Origin', '*')
+                res.statusCode = response.status
+                res.end(JSON.stringify(data))
+              } catch (e) {
+                res.statusCode = 500
+                res.setHeader('Content-Type', 'application/json')
+                res.setHeader('Access-Control-Allow-Origin', '*')
+                res.end(JSON.stringify({ message: e.message }))
+              }
+            })
+          }
+        })
+      }
+    },
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: false,

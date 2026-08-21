@@ -5,6 +5,7 @@ import AdSlot from './AdSlot.jsx'
 import { formatDate } from '../services/date.js'
 import { provisionEmployeeAccount, revokeInvite } from '../services/auth.js'
 import { cascadeDeleteEmployees } from '../services/cascadeDeleteEmployee.js'
+import { sendEmployeeInviteEmail } from '../services/emailService.js'
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -16,9 +17,7 @@ import { Select, SelectItem } from "@/components/ui/select"
 import { DatePicker } from "@/components/ui/date-picker"
 import defaultAvatar from '../Assets/default-avatar.svg'
 
-
-
-export default function Employees({ employees, setEmployees, addLog, addAuditLog, pendingProfileEdits, setPendingProfileEdits, addToast, selectedEmployeeId, setSelectedEmployeeId, isSidebarCollapsed, adminUid, currentUser }) {
+export default function Employees({ employees, setEmployees, addLog, addAuditLog, pendingProfileEdits, setPendingProfileEdits, addToast, selectedEmployeeId, setSelectedEmployeeId, isSidebarCollapsed, adminUid, currentUser, settings }) {
   const [searchTerm, setSearchTerm] = useState('')
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
   const [deptFilter, setDeptFilter] = useState('All')
@@ -288,6 +287,24 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
         addToast(`Teammate added & workspace invite linked for ${newName}!`, 'success')
       } else {
         addToast(`New teammate ${newName} added successfully!`, 'success')
+      }
+
+      // Automatically dispatch Resend onboarding invitation email if configured
+      const resendApiKey = settings?.company?.resendApiKey || import.meta.env.VITE_RESEND_API_KEY
+      if (resendApiKey && newEmail) {
+        const inviteUrl = `${window.location.origin}/?company=${companyUid}`
+        sendEmployeeInviteEmail({
+          apiKey: resendApiKey,
+          fromEmail: settings?.company?.resendFromEmail,
+          companyName: settings?.company?.name || 'Kormiis Ltd.',
+          employee: newEmp,
+          inviteLink: inviteUrl,
+          temporaryPassword: newPassword || null,
+        }).then(res => {
+          if (res.success && addToast) {
+            addToast(`Onboarding email dispatched to ${newEmail} via Resend!`, 'success')
+          }
+        }).catch(err => console.error('[Resend Invite Error]', err))
       }
     }
 
