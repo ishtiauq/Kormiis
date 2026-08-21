@@ -298,6 +298,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
             {...wProps}
           >
             {/* 1. Interactive KPI Cards / Status Filters */}
+            {/* 1. Interactive KPI Cards / Status Filters */}
             <div className="grid grid-cols-3 gap-2 sm:gap-2.5">
               {/* Present Tab */}
               <button
@@ -305,18 +306,18 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
                 onClick={() => setAttFilter(attFilter === 'present' ? null : 'present')}
                 className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all cursor-pointer select-none text-left relative overflow-hidden group ${
                   attFilter === 'present'
-                    ? 'bg-emerald-500/20 dark:bg-emerald-500/25 border-2 border-emerald-500 shadow-md shadow-emerald-500/10 scale-[1.02]'
-                    : 'bg-emerald-500/[0.08] dark:bg-emerald-500/[0.12] border border-emerald-500/20 hover:border-emerald-500/40 hover:bg-emerald-500/[0.12]'
+                    ? 'bg-black/15 dark:bg-white/20 border-2 border-black/30 dark:border-white/40 shadow-sm scale-[1.02]'
+                    : 'bg-black/[0.04] dark:bg-white/[0.06] border border-black/10 dark:border-white/12 hover:bg-black/[0.08] dark:hover:bg-white/[0.10]'
                 }`}
               >
                 <div className="flex items-center gap-1.5">
-                  <span className="pulse-dot pulse-dot-green m-0"></span>
-                  <span className="text-fluid-xl font-black text-emerald-600 dark:text-emerald-400 tabular-nums">
+                  <span className="pulse-dot m-0"></span>
+                  <span className="text-fluid-xl font-black text-foreground tabular-nums">
                     {todayStats.present}
                   </span>
                 </div>
-                <span className="text-[11px] font-bold text-foreground/90 mt-1">Present</span>
-                <span className="text-[10px] text-emerald-600/80 dark:text-emerald-400/80 font-semibold">
+                <span className="text-[11px] font-bold text-foreground mt-1">Present</span>
+                <span className="text-[10px] text-muted-foreground font-semibold">
                   {totalTracked > 0 ? `${Math.round((todayStats.present / totalTracked) * 100)}%` : '0%'}
                 </span>
               </button>
@@ -327,18 +328,18 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
                 onClick={() => setAttFilter(attFilter === 'absent' ? null : 'absent')}
                 className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all cursor-pointer select-none text-left relative overflow-hidden group ${
                   attFilter === 'absent'
-                    ? 'bg-destructive/20 dark:bg-destructive/25 border-2 border-destructive shadow-md shadow-destructive/10 scale-[1.02]'
-                    : 'bg-destructive/[0.08] dark:bg-destructive/[0.12] border border-destructive/20 hover:border-destructive/40 hover:bg-destructive/[0.12]'
+                    ? 'bg-black/15 dark:bg-white/20 border-2 border-black/30 dark:border-white/40 shadow-sm scale-[1.02]'
+                    : 'bg-black/[0.04] dark:bg-white/[0.06] border border-black/10 dark:border-white/12 hover:bg-black/[0.08] dark:hover:bg-white/[0.10]'
                 }`}
               >
                 <div className="flex items-center gap-1.5">
-                  <span className="pulse-dot pulse-dot-red m-0"></span>
-                  <span className="text-fluid-xl font-black text-destructive tabular-nums">
+                  <span className="pulse-dot m-0"></span>
+                  <span className="text-fluid-xl font-black text-foreground tabular-nums">
                     {todayStats.absent}
                   </span>
                 </div>
-                <span className="text-[11px] font-bold text-foreground/90 mt-1">Absent</span>
-                <span className="text-[10px] text-destructive/80 font-semibold">
+                <span className="text-[11px] font-bold text-foreground mt-1">Absent</span>
+                <span className="text-[10px] text-muted-foreground font-semibold">
                   {totalTracked > 0 ? `${Math.round((todayStats.absent / totalTracked) * 100)}%` : '0%'}
                 </span>
               </button>
@@ -349,18 +350,18 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
                 onClick={() => setAttFilter(attFilter === 'onLeave' ? null : 'onLeave')}
                 className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all cursor-pointer select-none text-left relative overflow-hidden group ${
                   attFilter === 'onLeave'
-                    ? 'bg-amber-500/20 dark:bg-amber-500/25 border-2 border-amber-500 shadow-md shadow-amber-500/10 scale-[1.02]'
-                    : 'bg-amber-500/[0.08] dark:bg-amber-500/[0.12] border border-amber-500/20 hover:border-amber-500/40 hover:bg-amber-500/[0.12]'
+                    ? 'bg-black/15 dark:bg-white/20 border-2 border-black/30 dark:border-white/40 shadow-sm scale-[1.02]'
+                    : 'bg-black/[0.04] dark:bg-white/[0.06] border border-black/10 dark:border-white/12 hover:bg-black/[0.08] dark:hover:bg-white/[0.10]'
                 }`}
               >
                 <div className="flex items-center gap-1.5">
-                  <span className="pulse-dot pulse-dot-orange m-0"></span>
-                  <span className="text-fluid-xl font-black text-amber-600 dark:text-amber-400 tabular-nums">
+                  <span className="pulse-dot m-0"></span>
+                  <span className="text-fluid-xl font-black text-foreground tabular-nums">
                     {todayStats.onLeave}
                   </span>
                 </div>
-                <span className="text-[11px] font-bold text-foreground/90 mt-1">Leave</span>
-                <span className="text-[10px] text-amber-600/80 dark:text-amber-400/80 font-semibold">
+                <span className="text-[11px] font-bold text-foreground mt-1">Leave</span>
+                <span className="text-[10px] text-muted-foreground font-semibold">
                   {totalTracked > 0 ? `${Math.round((todayStats.onLeave / totalTracked) * 100)}%` : '0%'}
                 </span>
               </button>
@@ -381,21 +382,21 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
               <div className="w-full bg-black/[0.06] dark:bg-white/10 rounded-full h-2.5 overflow-hidden flex gap-0.5 p-0.5 shadow-inner">
                 {todayStats.present > 0 && (
                   <div 
-                    className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-500 shadow-xs" 
+                    className="bg-foreground h-full rounded-full transition-all duration-500 shadow-xs" 
                     style={{ width: `${(todayStats.present / (totalTracked || 1)) * 100}%` }}
                     title={`Present: ${todayStats.present}`}
                   />
                 )}
                 {todayStats.onLeave > 0 && (
                   <div 
-                    className="bg-gradient-to-r from-amber-500 to-orange-400 h-full rounded-full transition-all duration-500 shadow-xs" 
+                    className="bg-foreground/50 h-full rounded-full transition-all duration-500 shadow-xs" 
                     style={{ width: `${(todayStats.onLeave / (totalTracked || 1)) * 100}%` }}
                     title={`On Leave: ${todayStats.onLeave}`}
                   />
                 )}
                 {todayStats.absent > 0 && (
                   <div 
-                    className="bg-gradient-to-r from-rose-500 to-red-600 h-full rounded-full transition-all duration-500 shadow-xs" 
+                    className="bg-foreground/25 h-full rounded-full transition-all duration-500 shadow-xs" 
                     style={{ width: `${(todayStats.absent / (totalTracked || 1)) * 100}%` }}
                     title={`Absent: ${todayStats.absent}`}
                   />
@@ -411,13 +412,13 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
                     <Icon 
                       name={attFilter === 'present' ? 'check_circle' : attFilter === 'absent' ? 'cancel' : 'event_busy'} 
                       size={14} 
-                      className={attFilter === 'present' ? 'text-emerald-500' : attFilter === 'absent' ? 'text-destructive' : 'text-amber-500'} 
+                      className="text-foreground shrink-0" 
                     />
                     {attFilter === 'present' ? 'Present Today' : attFilter === 'absent' ? 'Absent Today' : 'On Leave Today'} ({attendanceLists[attFilter]?.length || 0})
                   </span>
                   <button
                     onClick={() => setAttFilter(null)}
-                    className="text-[11px] font-semibold text-primary hover:underline cursor-pointer"
+                    className="text-[11px] font-semibold text-foreground hover:underline cursor-pointer"
                   >
                     Hide
                   </button>
@@ -442,7 +443,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
                           </div>
                         </div>
                         {emp.time ? (
-                          <span className="text-[11px] font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-lg border border-emerald-500/20 shrink-0">
+                          <span className="text-[11px] font-mono font-bold text-foreground bg-emerald-500/10 px-2 py-0.5 rounded-lg border border-emerald-500/20 shrink-0">
                             {emp.time}
                           </span>
                         ) : (
@@ -705,11 +706,11 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
               <div className="grid grid-cols-2 gap-3 p-3.5 rounded-2xl bg-white/60 dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] shadow-[0_2px_8px_rgba(0,0,0,0.02)] dark:shadow-none">
                 <div>
                   <span className="block text-xs font-medium text-muted-foreground">Paid</span>
-                  <span className="text-fluid-xl font-black tabular-nums text-emerald-600 dark:text-emerald-400 mt-0.5 block">{paidCount}</span>
+                  <span className="text-fluid-xl font-black tabular-nums text-foreground mt-0.5 block">{paidCount}</span>
                 </div>
                 <div>
                   <span className="block text-xs font-medium text-muted-foreground">Pending</span>
-                  <span className="text-fluid-xl font-black tabular-nums text-amber-500 mt-0.5 block">{pendingCount}</span>
+                  <span className="text-fluid-xl font-black tabular-nums text-foreground mt-0.5 block">{pendingCount}</span>
                 </div>
                 <div className="col-span-2 border-t border-border/80 dark:border-white/10 pt-2 mt-1">
                   <span className="block text-xs font-medium text-muted-foreground">Total Payroll</span>

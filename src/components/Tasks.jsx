@@ -36,10 +36,10 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
 
   const getPriorityColor = (prio) => {
     switch(prio) {
-      case 'High': return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-      case 'Medium': return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
-      case 'Low': return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-      default: return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
+      case 'High': return 'bg-black/20 dark:bg-white/25 text-foreground border border-black/25 dark:border-white/30 font-bold'
+      case 'Medium': return 'bg-black/15 dark:bg-white/20 text-foreground border border-black/20 dark:border-white/25'
+      case 'Low': return 'bg-black/10 dark:bg-white/15 text-foreground border border-black/15 dark:border-white/20'
+      default: return 'bg-black/5 dark:bg-white/10 text-foreground border border-black/10 dark:border-white/15'
     }
   }
 

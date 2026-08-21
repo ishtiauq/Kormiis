@@ -11,9 +11,9 @@ import { GlassTimePicker } from "../attendance/GlassTimePicker.jsx"
 import { gigApi } from '../../services/hr.js'
 
 const statusTone = {
-  open: 'bg-amber-500/10 text-amber-600 border-amber-500/20',
-  accepted: 'bg-sky-500/10 text-sky-600 border-sky-500/20',
-  completed: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20',
+  open: 'bg-black/5 dark:bg-white/10 text-foreground border-black/10 dark:border-white/15',
+  accepted: 'bg-black/10 dark:bg-white/15 text-foreground border-black/15 dark:border-white/20',
+  completed: 'bg-black/15 dark:bg-white/20 text-foreground border-black/20 dark:border-white/25',
 }
 
 function formatExpiry(isoString) {

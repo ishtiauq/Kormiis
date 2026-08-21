@@ -10,10 +10,10 @@ import GlassMonthPicker from "@/components/ui/GlassMonthPicker.jsx"
 import { performanceApi, currentMonthKey, lastMonthKey } from '../../services/hr.js'
 
 const gradeTone = {
-  A: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20',
-  B: 'bg-slate-500/10 text-slate-600 border-slate-500/20',
-  C: 'bg-amber-500/10 text-amber-600 border-amber-500/20',
-  D: 'bg-red-500/10 text-red-600 border-red-500/20',
+  A: 'bg-black/15 dark:bg-white/20 text-foreground border-black/20 dark:border-white/25 font-bold',
+  B: 'bg-black/10 dark:bg-white/15 text-foreground border-black/15 dark:border-white/20',
+  C: 'bg-black/5 dark:bg-white/10 text-foreground border-black/10 dark:border-white/15',
+  D: 'bg-black/20 dark:bg-white/25 text-foreground border-black/25 dark:border-white/30',
 }
 
 const DEFAULT_WEIGHTS = {

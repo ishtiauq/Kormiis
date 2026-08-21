@@ -17,9 +17,9 @@ const COLORS = [
 ]
 
 const PRIORITY_STYLES = {
-  High: 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20',
-  Medium: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
-  Low: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20'
+  High: 'bg-black/20 dark:bg-white/25 text-foreground border-black/25 dark:border-white/30 font-bold',
+  Medium: 'bg-black/15 dark:bg-white/20 text-foreground border-black/20 dark:border-white/25',
+  Low: 'bg-black/10 dark:bg-white/15 text-foreground border-black/15 dark:border-white/20'
 }
 
 export default function Notes({ notes = [], setNotes, currentUser, addToast }) {

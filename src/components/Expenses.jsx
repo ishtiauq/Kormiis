@@ -574,7 +574,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
                           <span className="font-semibold text-base leading-tight">{exp.category}</span>
                           <span className="text-xs text-muted-foreground">{exp.id}</span>
                         </div>
-                        <Badge variant="outline" className={exp.status === 'Approved' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : exp.status === 'Rejected' ? 'bg-destructive/10 text-destructive border-destructive/20' : exp.status === 'Reimbursed' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : 'bg-muted/50'}>
+                        <Badge variant="outline" className={exp.status === 'Approved' ? 'bg-black/10 dark:bg-white/15 text-foreground border-black/15 dark:border-white/20' : exp.status === 'Rejected' ? 'bg-black/15 dark:bg-white/20 text-foreground border-black/20 dark:border-white/25' : exp.status === 'Reimbursed' ? 'bg-black/10 dark:bg-white/15 text-foreground border-black/15 dark:border-white/20' : 'bg-muted/50 text-foreground'}>
                           {exp.status}
                         </Badge>
                       </div>
@@ -603,8 +603,8 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
                       {(exp.approvedBy || exp.rejectedBy || exp.reimbursedBy) && (
                         <div className="pt-1 flex flex-col gap-1 text-[11px] text-muted-foreground font-medium">
                           {exp.approvedBy && <span>Approved by {exp.approvedBy}</span>}
-                          {exp.rejectedBy && <span className="text-destructive">Rejected by {exp.rejectedBy}</span>}
-                          {exp.reimbursedBy && <span className="text-blue-500">Reimbursed by {exp.reimbursedBy} {exp.transactionRef ? `(Ref: ${exp.transactionRef})` : ''}</span>}
+                          {exp.rejectedBy && <span>Rejected by {exp.rejectedBy}</span>}
+                          {exp.reimbursedBy && <span>Reimbursed by {exp.reimbursedBy} {exp.transactionRef ? `(Ref: ${exp.transactionRef})` : ''}</span>}
                         </div>
                       )}
                     </div>
@@ -643,7 +643,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
                             <span className="text-xs text-muted-foreground">{exp.id}</span>
                           </div>
                         </div>
-                        <Badge variant="outline" className={exp.status === 'Approved' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : exp.status === 'Rejected' ? 'bg-destructive/10 text-destructive border-destructive/20' : exp.status === 'Reimbursed' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : 'bg-muted/50'}>
+                        <Badge variant="outline" className={exp.status === 'Approved' ? 'bg-black/10 dark:bg-white/15 text-foreground border-black/15 dark:border-white/20' : exp.status === 'Rejected' ? 'bg-black/15 dark:bg-white/20 text-foreground border-black/20 dark:border-white/25' : exp.status === 'Reimbursed' ? 'bg-black/10 dark:bg-white/15 text-foreground border-black/15 dark:border-white/20' : 'bg-muted/50 text-foreground'}>
                           {exp.status}
                         </Badge>
                       </div>

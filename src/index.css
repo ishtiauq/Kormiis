@@ -44,21 +44,21 @@
 
 :root {
   --background: #f4f6fb;
-  --foreground: hsl(0 0% 0%);
+  --foreground: #000000;
   --card: rgba(255, 255, 255, 0.72);
-  --card-foreground: hsl(0 0% 0%);
+  --card-foreground: #000000;
   --popover: rgba(255, 255, 255, 0.82);
-  --popover-foreground: hsl(0 0% 0%);
+  --popover-foreground: #000000;
   --primary: #FE3501;
-  --primary-foreground: hsl(0 0% 100%);
+  --primary-foreground: #ffffff;
   --secondary: rgba(240, 243, 250, 0.75);
-  --secondary-foreground: hsl(0 0% 0%);
+  --secondary-foreground: #000000;
   --muted: rgba(240, 243, 250, 0.65);
-  --muted-foreground: hsl(210 10% 42%);
+  --muted-foreground: #555555;
   --accent: rgba(240, 243, 250, 0.75);
-  --accent-foreground: hsl(0 0% 0%);
+  --accent-foreground: #000000;
   --destructive: hsl(0 84.2% 60.2%);
-  --destructive-foreground: hsl(210 40% 98%);
+  --destructive-foreground: #ffffff;
   --border: rgba(0, 0, 0, 0.10);
   --input: rgba(0, 0, 0, 0.12);
   --ring: rgba(0, 0, 0, 0.15);
@@ -98,21 +98,21 @@
 html.dark,
 [data-theme="dark"] {
   --background: #090a0f;
-  --foreground: hsl(0 0% 96%);
+  --foreground: #ffffff;
   --card: rgba(18, 18, 26, 0.40);
-  --card-foreground: hsl(0 0% 96%);
+  --card-foreground: #ffffff;
   --popover: rgba(18, 18, 26, 0.55);
-  --popover-foreground: hsl(0 0% 96%);
+  --popover-foreground: #ffffff;
   --primary: #FE3501;
-  --primary-foreground: hsl(0 0% 100%);
+  --primary-foreground: #ffffff;
   --secondary: rgba(28, 28, 40, 0.45);
-  --secondary-foreground: hsl(0 0% 96%);
+  --secondary-foreground: #ffffff;
   --muted: rgba(28, 28, 40, 0.40);
-  --muted-foreground: #bbbbbb;
+  --muted-foreground: #a1a1aa;
   --accent: rgba(28, 28, 40, 0.45);
-  --accent-foreground: hsl(0 0% 96%);
+  --accent-foreground: #ffffff;
   --destructive: hsl(0 60% 40%);
-  --destructive-foreground: hsl(0 0% 100%);
+  --destructive-foreground: #ffffff;
   --border: rgba(255, 255, 255, 0.14);
   --input: rgba(255, 255, 255, 0.08);
   --ring: rgba(255, 255, 255, 0.5);
@@ -618,8 +618,7 @@ html.dark .glass-floating-sidebar,
   border: 1px solid rgba(255, 255, 255, 0.16) !important;
   box-shadow: inset 0 1px 0.5px rgba(255, 255, 255, 0.2), 0 2px 6px rgba(0, 0, 0, 0.3) !important;
 }
-
-/* Animated Live Pulse Dots (Apple Standard) */
+/* Animated Live Pulse Dots (Monochrome Apple Standard) */
 .pulse-dot {
   position: relative;
   display: inline-flex;
@@ -627,6 +626,7 @@ html.dark .glass-floating-sidebar,
   height: 7px;
   border-radius: 9999px;
   flex-shrink: 0;
+  background-color: var(--foreground);
 }
 .pulse-dot::before {
   content: '';
@@ -634,36 +634,25 @@ html.dark .glass-floating-sidebar,
   inset: -3px;
   border-radius: 9999px;
   animation: pulse-ring 2s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
-  opacity: 0.6;
+  opacity: 0.4;
+  background-color: var(--foreground);
 }
 @keyframes pulse-ring {
-  0% { transform: scale(0.85); opacity: 0.8; }
+  0% { transform: scale(0.85); opacity: 0.6; }
   50% { transform: scale(1.6); opacity: 0; }
-  100% { transform: scale(0.85); opacity: 0; }
+  100% { transform: scale(0.85); opacity: 0.6; }
 }
-.pulse-dot-green {
-  background-color: #10b981;
-}
-.pulse-dot-green::before {
-  background-color: #10b981;
-}
-.pulse-dot-red {
-  background-color: #ef4444;
-}
-.pulse-dot-red::before {
-  background-color: #ef4444;
-}
-.pulse-dot-orange {
-  background-color: #FE3501;
-}
-.pulse-dot-orange::before {
-  background-color: #FE3501;
-}
+.pulse-dot-green,
+.pulse-dot-red,
+.pulse-dot-orange,
 .pulse-dot-blue {
-  background-color: #3b82f6;
+  background-color: var(--foreground) !important;
 }
+.pulse-dot-green::before,
+.pulse-dot-red::before,
+.pulse-dot-orange::before,
 .pulse-dot-blue::before {
-  background-color: #3b82f6;
+  background-color: var(--foreground) !important;
 }
 
 /* Apple Liquid Glass Widget Item Card */
@@ -873,17 +862,17 @@ html.dark .glass-floating-sidebar,
 /* Custom Status Badges (Liquid Glass Tints) */
 .bg-status-success { 
   background-color: rgba(16, 185, 129, 0.18) !important; 
-  color: #10b981 !important; 
+  color: var(--foreground) !important; 
   border: 1px solid rgba(16, 185, 129, 0.3) !important;
 }
 .bg-status-warning { 
   background-color: rgba(245, 158, 11, 0.18) !important; 
-  color: #f59e0b !important; 
+  color: var(--foreground) !important; 
   border: 1px solid rgba(245, 158, 11, 0.3) !important;
 }
 .bg-status-error { 
   background-color: rgba(239, 68, 68, 0.18) !important; 
-  color: #ef4444 !important; 
+  color: var(--foreground) !important; 
   border: 1px solid rgba(239, 68, 68, 0.3) !important;
 }
 .bg-live-red { 
@@ -927,62 +916,83 @@ html.dark .glass-floating-sidebar,
    UI/UX POLISH & ACCESSIBILITY TOKENS
    ============================================================== */
 
-/* 1. Universal Single Apple Ultra-Liquid Glass Scrollbar (Desktop Pointer Only) */
-@media (hover: hover) and (pointer: fine) and (min-width: 1025px) {
+/* 1. Universal Single Apple Ultra-Liquid Glass Scrollbar (Desktop & Pointer Devices) */
+@media (hover: hover) and (pointer: fine) {
   ::-webkit-scrollbar {
-    width: 5px;
-    height: 5px;
+    width: 6px;
+    height: 6px;
   }
 
   ::-webkit-scrollbar-track {
-    background: transparent;
+    background: transparent !important;
   }
 
   /* Default State: Completely Invisible / Hidden */
   ::-webkit-scrollbar-thumb {
-    background: transparent;
-    border-radius: 9999px;
-    border: 1px solid transparent;
-    background-clip: padding-box;
+    background: transparent !important;
+    border-radius: 9999px !important;
+    border: 1px solid transparent !important;
+    background-clip: padding-box !important;
     transition: none !important;
   }
 
-  /* Instant Hover State on Desktop (Light Mode) */
+  /* Container Hover / Scroll State: Apple Ultra-Liquid Glass Bar (Light Mode) */
   *:hover::-webkit-scrollbar-thumb,
-  ::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 0, 0, 0.28);
-    border: 1px solid rgba(255, 255, 255, 0.65);
-    background-clip: padding-box;
+  html:hover ::-webkit-scrollbar-thumb,
+  body:hover ::-webkit-scrollbar-thumb,
+  aside:hover ::-webkit-scrollbar-thumb,
+  nav:hover ::-webkit-scrollbar-thumb,
+  main:hover ::-webkit-scrollbar-thumb,
+  div:hover ::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.28) !important;
+    border: 1px solid rgba(255, 255, 255, 0.65) !important;
+    border-radius: 9999px !important;
+    background-clip: padding-box !important;
     transition: none !important;
   }
 
-  /* Instant Hover State on Desktop (Dark Mode) */
+  /* Container Hover / Scroll State: Apple Ultra-Liquid Glass Bar (Dark Mode) */
   .dark *:hover::-webkit-scrollbar-thumb,
-  .dark ::-webkit-scrollbar-thumb:hover,
+  .dark html:hover ::-webkit-scrollbar-thumb,
+  .dark body:hover ::-webkit-scrollbar-thumb,
+  .dark aside:hover ::-webkit-scrollbar-thumb,
+  .dark nav:hover ::-webkit-scrollbar-thumb,
+  .dark main:hover ::-webkit-scrollbar-thumb,
+  .dark div:hover ::-webkit-scrollbar-thumb,
   [data-theme="dark"] *:hover::-webkit-scrollbar-thumb,
-  [data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.32);
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    background-clip: padding-box;
+  [data-theme="dark"] html:hover ::-webkit-scrollbar-thumb,
+  [data-theme="dark"] body:hover ::-webkit-scrollbar-thumb,
+  [data-theme="dark"] aside:hover ::-webkit-scrollbar-thumb,
+  [data-theme="dark"] nav:hover ::-webkit-scrollbar-thumb,
+  [data-theme="dark"] main:hover ::-webkit-scrollbar-thumb,
+  [data-theme="dark"] div:hover ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.32) !important;
+    border: 1px solid rgba(255, 255, 255, 0.20) !important;
+    border-radius: 9999px !important;
+    background-clip: padding-box !important;
     transition: none !important;
   }
 
-  /* Press / Drag State: Solid Brand Color (#FE3501) with Zero Glow */
+  /* Direct Scrollbar Thumb Hover & Active / Drag State: Brand Color (#FE3501) */
+  ::-webkit-scrollbar-thumb:hover,
   ::-webkit-scrollbar-thumb:active,
   *:active::-webkit-scrollbar-thumb,
+  .dark ::-webkit-scrollbar-thumb:hover,
   .dark ::-webkit-scrollbar-thumb:active,
   .dark *:active::-webkit-scrollbar-thumb,
+  [data-theme="dark"] ::-webkit-scrollbar-thumb:hover,
   [data-theme="dark"] ::-webkit-scrollbar-thumb:active,
   [data-theme="dark"] *:active::-webkit-scrollbar-thumb {
     background: #FE3501 !important;
-    border: 1px solid rgba(255, 255, 255, 0.35) !important;
+    border: 1px solid rgba(255, 255, 255, 0.45) !important;
+    border-radius: 9999px !important;
     background-clip: padding-box !important;
     transition: none !important;
   }
 }
 
-/* 2. Completely Eliminate Scrollbars on Tablet, iPad, Touchpad & Mobile (< 1025px / Touch Devices) */
-@media (hover: none), (pointer: coarse), (max-width: 1024px) {
+/* 2. Touch Devices (Phones / Tablets without pointer) */
+@media (hover: none) and (pointer: coarse) {
   * {
     scrollbar-width: none !important;
     -ms-overflow-style: none !important;
@@ -1268,3 +1278,181 @@ button[role="tab"][aria-selected="true"] .msr {
     font-size: clamp(2.5rem, 1.5rem + 3.5vw, 4.5rem) !important;
   }
 }
+
+/* ==============================================================
+   UNIVERSAL STRICT MONOCHROME TYPOGRAPHY STANDARD (Black & White)
+   All fonts/text across the app MUST strictly be Black in Light Mode
+   and White in Dark Mode, with clean neutral grayscale tones for muted captions.
+   ============================================================== */
+
+body, html, input, button, select, textarea {
+  color: var(--foreground);
+}
+
+h1, h2, h3, h4, h5, h6, p, span, a, label, strong, b, em, i, th, td {
+  color: inherit;
+}
+
+/* Muted / Secondary grayscale tones */
+.text-muted-foreground,
+.text-muted,
+[class*="text-muted-foreground"] {
+  color: var(--muted-foreground) !important;
+}
+
+/* Landing Page Hero Headline Custom Accent */
+.landing-headline-text {
+  color: #ffffff !important;
+}
+.landing-changeable-word,
+.landing-changeable-word span {
+  color: #FE3501 !important;
+}
+
+/* Landing Page Marquee Streams: Pure White Typography */
+.animate-marquee-vertical span,
+.animate-marquee-left span,
+.animate-marquee-right span,
+.animate-marquee-vertical p,
+.animate-marquee-left p,
+.animate-marquee-right p {
+  color: #ffffff !important;
+}
+
+/* Sidebar Logout Button & Destructive Action Typography: Always Pure White */
+.sidebar-logout-btn,
+.sidebar-logout-btn *,
+button.sidebar-logout-btn,
+button.sidebar-logout-btn span,
+button.sidebar-logout-btn i,
+button.sidebar-logout-btn svg {
+  color: #ffffff !important;
+}
+
+/* Enforce monochrome text across all colored Tailwind typography utility classes */
+:not(svg):not(i):not([role="img"]) > [class*="text-emerald-"],
+:not(svg):not(i):not([role="img"]) > [class*="text-amber-"],
+:not(svg):not(i):not([role="img"]) > [class*="text-blue-"],
+:not(svg):not(i):not([role="img"]) > [class*="text-rose-"],
+:not(svg):not(i):not([role="img"]) > [class*="text-purple-"],
+:not(svg):not(i):not([role="img"]) > [class*="text-teal-"],
+:not(svg):not(i):not([role="img"]) > [class*="text-indigo-"],
+:not(svg):not(i):not([role="img"]) > [class*="text-cyan-"],
+:not(svg):not(i):not([role="img"]) > [class*="text-green-"],
+:not(svg):not(i):not([role="img"]) > [class*="text-red-"] {
+  color: var(--foreground) !important;
+}
+
+span[class*="text-emerald-"]:not([class*="pulse-dot"]):not([class*="msr"]),
+span[class*="text-amber-"]:not([class*="pulse-dot"]):not([class*="msr"]),
+span[class*="text-blue-"]:not([class*="pulse-dot"]):not([class*="msr"]),
+span[class*="text-rose-"]:not([class*="pulse-dot"]):not([class*="msr"]),
+span[class*="text-purple-"]:not([class*="pulse-dot"]):not([class*="msr"]),
+span[class*="text-teal-"]:not([class*="pulse-dot"]):not([class*="msr"]),
+span[class*="text-indigo-"]:not([class*="pulse-dot"]):not([class*="msr"]),
+span[class*="text-green-"]:not([class*="pulse-dot"]):not([class*="msr"]),
+span[class*="text-red-"]:not([class*="pulse-dot"]):not([class*="msr"]),
+span.text-destructive:not([class*="pulse-dot"]),
+p[class*="text-emerald-"],
+p[class*="text-amber-"],
+p[class*="text-blue-"],
+p[class*="text-rose-"],
+p[class*="text-purple-"],
+p[class*="text-teal-"],
+p[class*="text-destructive"],
+div[class*="text-emerald-"]:not([class*="bg-"]):not([class*="size-"]):not([class*="border-"]),
+div[class*="text-amber-"]:not([class*="bg-"]):not([class*="size-"]):not([class*="border-"]),
+div[class*="text-blue-"]:not([class*="bg-"]):not([class*="size-"]):not([class*="border-"]),
+div[class*="text-rose-"]:not([class*="bg-"]):not([class*="size-"]):not([class*="border-"]) {
+  color: var(--foreground) !important;
+}
+
+.dark span[class*="text-emerald-"]:not([class*="pulse-dot"]):not([class*="msr"]),
+.dark span[class*="text-amber-"]:not([class*="pulse-dot"]):not([class*="msr"]),
+.dark span[class*="text-blue-"]:not([class*="pulse-dot"]):not([class*="msr"]),
+.dark span[class*="text-rose-"]:not([class*="pulse-dot"]):not([class*="msr"]),
+.dark span[class*="text-purple-"]:not([class*="pulse-dot"]):not([class*="msr"]),
+.dark span[class*="text-teal-"]:not([class*="pulse-dot"]):not([class*="msr"]),
+.dark span[class*="text-indigo-"]:not([class*="pulse-dot"]):not([class*="msr"]),
+.dark span[class*="text-green-"]:not([class*="pulse-dot"]):not([class*="msr"]),
+.dark span[class*="text-red-"]:not([class*="pulse-dot"]):not([class*="msr"]),
+.dark span.text-destructive:not([class*="pulse-dot"]),
+.dark p[class*="text-emerald-"],
+.dark p[class*="text-amber-"],
+.dark p[class*="text-blue-"],
+.dark p[class*="text-rose-"],
+/* ==============================================================
+   UNIVERSAL MONOCHROME TAGS, BADGES, PILLS, CHIPS & BORDERS
+   All tags, badges, status chips and pills across the app are
+   strictly monochrome (Grayscale Liquid Glass).
+   ============================================================== */
+
+/* Light Mode: Monochrome Glass Badges & Tags */
+[class*="bg-emerald-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
+[class*="bg-amber-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
+[class*="bg-blue-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
+[class*="bg-rose-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
+[class*="bg-purple-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
+[class*="bg-teal-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
+[class*="bg-indigo-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
+[class*="bg-cyan-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
+[class*="bg-green-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
+[class*="bg-red-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button) {
+  background-color: rgba(0, 0, 0, 0.06) !important;
+  border-color: rgba(0, 0, 0, 0.12) !important;
+  color: #000000 !important;
+}
+
+/* Dark Mode: Monochrome Glass Badges & Tags */
+.dark [class*="bg-emerald-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
+.dark [class*="bg-amber-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
+.dark [class*="bg-blue-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
+.dark [class*="bg-rose-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
+.dark [class*="bg-purple-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
+.dark [class*="bg-teal-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
+.dark [class*="bg-indigo-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
+.dark [class*="bg-cyan-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
+.dark [class*="bg-green-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
+.dark [class*="bg-red-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
+[data-theme="dark"] [class*="bg-emerald-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
+[data-theme="dark"] [class*="bg-amber-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
+[data-theme="dark"] [class*="bg-blue-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
+[data-theme="dark"] [class*="bg-rose-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
+[data-theme="dark"] [class*="bg-purple-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
+[data-theme="dark"] [class*="bg-teal-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
+[data-theme="dark"] [class*="bg-indigo-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
+[data-theme="dark"] [class*="bg-cyan-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
+[data-theme="dark"] [class*="bg-green-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
+[data-theme="dark"] [class*="bg-red-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button) {
+  background-color: rgba(255, 255, 255, 0.10) !important;
+  border-color: rgba(255, 255, 255, 0.16) !important;
+  color: #ffffff !important;
+}
+
+/* Monochrome Borders */
+[class*="border-emerald-"],
+[class*="border-amber-"],
+[class*="border-blue-"],
+[class*="border-rose-"],
+[class*="border-purple-"],
+[class*="border-teal-"],
+[class*="border-indigo-"] {
+  border-color: rgba(0, 0, 0, 0.12) !important;
+}
+.dark [class*="border-emerald-"],
+.dark [class*="border-amber-"],
+.dark [class*="border-blue-"],
+.dark [class*="border-rose-"],
+.dark [class*="border-purple-"],
+.dark [class*="border-teal-"],
+.dark [class*="border-indigo-"],
+[data-theme="dark"] [class*="border-emerald-"],
+[data-theme="dark"] [class*="border-amber-"],
+[data-theme="dark"] [class*="border-blue-"],
+[data-theme="dark"] [class*="border-rose-"],
+[data-theme="dark"] [class*="border-purple-"],
+[data-theme="dark"] [class*="border-teal-"],
+[data-theme="dark"] [class*="border-indigo-"] {
+  border-color: rgba(255, 255, 255, 0.16) !important;
+}
+

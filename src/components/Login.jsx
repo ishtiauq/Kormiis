@@ -739,19 +739,20 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
             transition={{ duration: 0.9, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
             className="flex flex-col items-center justify-center text-center shrink-0 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 z-10 w-full"
           >
-            <h1 className="text-fluid-display-xl font-black tracking-tight text-white leading-[1.1] text-center w-full uppercase">
-              <span>MANAGE YOUR</span>
+            <h1 className="text-fluid-display-xl font-black tracking-tight leading-[1.1] text-center w-full uppercase">
+              <span className="text-white landing-headline-text" style={{ color: '#ffffff' }}>MANAGE YOUR</span>
               <br className="sm:hidden" />{' '}
-              <span className="text-primary relative inline-block">
+              <span className="landing-changeable-word relative inline-block text-[#FE3501]" style={{ color: '#FE3501' }}>
                 {typed || '\u00A0'}
                 <motion.span
                   animate={{ opacity: [1, 0, 1] }}
                   transition={{ repeat: Infinity, duration: 0.8, ease: "easeInOut" }}
-                  className="inline-block w-[3px] sm:w-[5px] h-[0.82em] bg-primary align-baseline ml-1"
+                  className="inline-block w-[3px] sm:w-[5px] h-[0.82em] align-baseline ml-1"
+                  style={{ backgroundColor: '#FE3501' }}
                 />
               </span>
               <br />
-              <span>WITH EASE</span>
+              <span className="text-white landing-headline-text" style={{ color: '#ffffff' }}>WITH EASE</span>
             </h1>
             <motion.div 
               initial={{ opacity: 0, scale: 0.9, y: 16 }}
@@ -800,13 +801,13 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                       </div>
 
                       {/* Feature Title */}
-                      <span className="text-[11px] sm:text-xs font-bold text-white tracking-tight whitespace-nowrap truncate drop-shadow-sm">
+                      <span className="text-[11px] sm:text-xs font-bold text-white tracking-tight whitespace-nowrap truncate drop-shadow-sm" style={{ color: '#ffffff' }}>
                         {item.label}
                       </span>
                     </div>
 
                     {/* Micro-Tag Pill */}
-                    <span className={`text-[8px] sm:text-[9.5px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full ${item.tagBg} whitespace-nowrap shadow-xs shrink-0`}>
+                    <span className={`text-[8px] sm:text-[9.5px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full ${item.tagBg} whitespace-nowrap shadow-xs shrink-0 text-white`} style={{ color: '#ffffff' }}>
                       {item.tag}
                     </span>
                   </div>
@@ -844,18 +845,18 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                             <Icon 
                               name={item.icon} 
                               size={undefined} 
-                              className="!text-[17px] leading-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] relative z-10" 
+                              className="!text-[17px] leading-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] relative z-10 text-white" 
                             />
                           </div>
 
                           {/* Feature Title */}
-                          <span className="text-sm font-bold text-white tracking-tight whitespace-nowrap truncate drop-shadow-sm">
+                          <span className="text-sm font-bold text-white tracking-tight whitespace-nowrap truncate drop-shadow-sm" style={{ color: '#ffffff' }}>
                             {item.label}
                           </span>
                         </div>
 
                         {/* Micro-Tag Pill */}
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${item.tagBg} whitespace-nowrap shadow-xs shrink-0`}>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${item.tagBg} whitespace-nowrap shadow-xs shrink-0 text-white`} style={{ color: '#ffffff' }}>
                           {item.tag}
                         </span>
                       </div>
@@ -882,18 +883,18 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                             <Icon 
                               name={item.icon} 
                               size={undefined} 
-                              className="!text-[17px] leading-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] relative z-10" 
+                              className="!text-[17px] leading-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] relative z-10 text-white" 
                             />
                           </div>
 
                           {/* Feature Title */}
-                          <span className="text-sm font-bold text-white tracking-tight whitespace-nowrap truncate drop-shadow-sm">
+                          <span className="text-sm font-bold text-white tracking-tight whitespace-nowrap truncate drop-shadow-sm" style={{ color: '#ffffff' }}>
                             {item.label}
                           </span>
                         </div>
 
                         {/* Micro-Tag Pill */}
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${item.tagBg} whitespace-nowrap shadow-xs shrink-0`}>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${item.tagBg} whitespace-nowrap shadow-xs shrink-0 text-white`} style={{ color: '#ffffff' }}>
                           {item.tag}
                         </span>
                       </div>

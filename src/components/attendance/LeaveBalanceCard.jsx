@@ -6,9 +6,9 @@ import Icon from "@/components/ui/Icon.jsx"
 import { formatDateShort } from '../../services/date.js'
 
 const STATUS_STYLE = {
-  Approved: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
-  Rejected: 'bg-destructive/10 text-destructive border-destructive/20',
-  Pending: 'bg-amber-500/10 text-amber-600 border-amber-500/20',
+  Approved: 'bg-black/10 dark:bg-white/15 text-foreground border-black/15 dark:border-white/20',
+  Rejected: 'bg-black/15 dark:bg-white/20 text-foreground border-black/20 dark:border-white/25',
+  Pending: 'bg-black/5 dark:bg-white/10 text-foreground border-black/10 dark:border-white/15',
 }
 
 export default function LeaveBalanceCard({ employees, balances, leaves = [], settings }) {

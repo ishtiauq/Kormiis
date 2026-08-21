@@ -162,7 +162,7 @@ export default function Sidebar({
       aria-label="Floating navigation sidebar"
       className={`hidden md:flex flex-col fixed left-3 md:left-5 top-1/2 -translate-y-1/2 z-50 glass-kormiis text-sidebar-foreground rounded-3xl border border-white/30 dark:border-white/14 shadow-2xl transition-all duration-350 ease-[cubic-bezier(0.34,1.56,0.64,1)] overflow-hidden ${
         isOpen
-          ? 'h-[calc(100vh-4rem)] max-h-[660px] p-3 pt-3.5 pb-3 shadow-2xl'
+          ? 'h-[calc(100vh-4rem)] max-h-[min(calc(100vh-5rem),520px)] p-3 pt-3.5 pb-3 shadow-2xl'
           : 'w-[54px] h-auto py-3 px-1.5 cursor-pointer shadow-xl'
       }`}
       style={{ width: isOpen ? `${expandedWidth}px` : undefined }}
@@ -174,7 +174,7 @@ export default function Sidebar({
         aria-label="Main navigation" 
         className={`sidebar-nav-scroll flex-1 flex flex-col gap-1.5 items-center ${
           isOpen 
-            ? 'overflow-y-auto py-1.5 pr-0.5 select-none overscroll-contain' 
+            ? 'overflow-y-auto py-1.5 pr-1 pl-0.5 select-none overscroll-contain' 
             : 'overflow-hidden justify-center py-1'
         } ${isDragging ? 'cursor-grabbing select-none' : isOpen ? 'cursor-grab' : ''}`}
         style={{
@@ -264,10 +264,11 @@ export default function Sidebar({
             setIsOpen(false);
             if (handleLogout) handleLogout();
           }}
-          className="w-full flex items-center justify-center gap-2 px-2.5 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-semibold text-xs active:scale-[0.97] transition-all cursor-pointer h-9.5 box-border shadow-sm"
+          className="sidebar-logout-btn w-full flex items-center justify-center gap-2 px-2.5 rounded-2xl bg-red-600 hover:bg-red-700 !text-white font-semibold text-xs active:scale-[0.97] transition-all cursor-pointer h-9.5 box-border shadow-sm"
+          style={{ color: '#ffffff' }}
         >
-          <Icon name="logout" size={16}/>
-          <span className="font-semibold text-xs">Logout</span>
+          <Icon name="logout" size={16} className="!text-white text-white" style={{ color: '#ffffff' }}/>
+          <span className="font-semibold text-xs !text-white text-white" style={{ color: '#ffffff' }}>Logout</span>
         </button>
       </div>
 
@@ -283,8 +284,8 @@ export default function Sidebar({
         }
 
         .sidebar-nav-scroll::-webkit-scrollbar {
-          width: 4px !important;
-          height: 4px !important;
+          width: 5px !important;
+          height: 5px !important;
         }
         .sidebar-nav-scroll::-webkit-scrollbar-track {
           background: transparent !important;
@@ -292,21 +293,34 @@ export default function Sidebar({
         .sidebar-nav-scroll::-webkit-scrollbar-thumb {
           background: transparent !important;
           border-radius: 9999px !important;
+          border: 1px solid transparent !important;
+          background-clip: padding-box !important;
           transition: none !important;
         }
+        /* Container hover / scroll: Apple Ultra-Liquid Glass Bar */
         aside:hover .sidebar-nav-scroll::-webkit-scrollbar-thumb,
         .sidebar-nav-scroll:hover::-webkit-scrollbar-thumb {
-          background: rgba(0, 0, 0, 0.30) !important;
+          background: rgba(0, 0, 0, 0.28) !important;
+          border: 1px solid rgba(255, 255, 255, 0.65) !important;
+          border-radius: 9999px !important;
+          background-clip: padding-box !important;
           transition: none !important;
         }
         :is(.dark, [data-theme="dark"]) aside:hover .sidebar-nav-scroll::-webkit-scrollbar-thumb,
         :is(.dark, [data-theme="dark"]) .sidebar-nav-scroll:hover::-webkit-scrollbar-thumb {
-          background: rgba(255, 255, 255, 0.35) !important;
+          background: rgba(255, 255, 255, 0.32) !important;
+          border: 1px solid rgba(255, 255, 255, 0.20) !important;
+          border-radius: 9999px !important;
+          background-clip: padding-box !important;
           transition: none !important;
         }
+        /* Direct Scrollbar Hover & Active / Drag: Brand Color #FE3501 */
         .sidebar-nav-scroll::-webkit-scrollbar-thumb:hover,
         .sidebar-nav-scroll::-webkit-scrollbar-thumb:active {
           background: #FE3501 !important;
+          border: 1px solid rgba(255, 255, 255, 0.45) !important;
+          border-radius: 9999px !important;
+          background-clip: padding-box !important;
           transition: none !important;
         }
       `}</style>
