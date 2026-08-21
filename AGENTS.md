@@ -9,9 +9,11 @@ In repositories indexed by CodeGraph (a `.codegraph/` directory exists at the re
 If there is no `.codegraph/` directory, skip CodeGraph entirely — indexing is the user's decision.
 <!-- CODEGRAPH_END -->
 
-# Global Design System: Apple Liquid Glass UI + Micro-interactions (iOS 26+ Standard)
+# Global Design System: **MonoGlass** — Apple Ultra-Liquid Glass UI + Micro-interactions (iOS 26+ Standard)
 
-Whenever creating new components, pages, widgets, or modifying existing ones in this project, you **MUST STRICTLY ADHERE** to this Apple Liquid Glass Design System. All styling is centralized in `src/index.css` with semantic utility tokens.
+> **Official name: MonoGlass.** When the user or agents say "MonoGlass", they mean THIS design system — and nothing else. It is the one and only design system in this project.
+
+Whenever creating new components, pages, widgets, or modifying existing ones in this project, you **MUST STRICTLY ADHERE** to MonoGlass (Apple Ultra-Liquid Glass). All styling is centralized in `src/index.css` with semantic utility tokens.
 
 ---
 

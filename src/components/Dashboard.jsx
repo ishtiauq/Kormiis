@@ -19,12 +19,12 @@ const DashboardWidget = ({
 }) => {
   return (
     <Card className={`flex flex-col p-0 h-full ${cardClass}`}>
-      <CardHeader className="flex-row items-center justify-between pb-3.5 space-y-0">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center shrink-0">
+      <CardHeader className="flex-row items-center justify-between pb-3.5 space-y-0 gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="size-11 shrink-0 rounded-2xl bg-black/[0.04] dark:bg-white/[0.07] border border-black/[0.05] dark:border-white/[0.08] shadow-[inset_0_1px_1px_rgba(255,255,255,0.45)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.08)] flex items-center justify-center [&_.msr]:!text-foreground">
             {icon}
           </div>
-          <CardTitle className="text-fluid-lg font-bold text-foreground m-0">{title}</CardTitle>
+          <CardTitle className="text-fluid-lg font-bold tracking-tight text-foreground m-0 leading-snug truncate">{title}</CardTitle>
         </div>
         {action}
       </CardHeader>
@@ -49,6 +49,10 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
   const canViewAnnouncements = hasPermission ? hasPermission('announcements') : true
   const canViewTasks = hasPermission ? hasPermission('tasks') : true
   const canViewDocuments = hasPermission ? hasPermission('documents') : true
+
+  const hour = new Date().getHours()
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
+  const firstName = (currentUser?.name || '').split(' ')[0]
   const canViewAssets = hasPermission ? hasPermission('assets') : true
 
   const [todayStats, setTodayStats] = useState({ present: 0, absent: 0, onLeave: 0 })
@@ -337,13 +341,14 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
         />
       )}
 
-      <div className="flex items-center justify-between">
-        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
-          <Icon name="dashboard" className="text-foreground shrink-0" size={28}/>
-          Dashboard
-        </h1>
+      <div className="flex items-end justify-between flex-wrap gap-3 pt-1">
+        <div className="flex flex-col gap-1 min-w-0">
+          <h1 className="text-fluid-2xl font-black tracking-tight text-foreground m-0 leading-none">Dashboard</h1>
+          <p className="text-fluid-sm font-medium text-muted-foreground m-0">
+            {greeting}{firstName ? `, ${firstName}` : ''} — here's today at a glance.
+          </p>
+        </div>
       </div>
-      <div className="border-t border-border border-headline" />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3 gap-5 lg:gap-6 items-stretch">
         

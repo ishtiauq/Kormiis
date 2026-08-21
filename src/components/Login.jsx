@@ -616,7 +616,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
   return (
     <div 
       ref={containerRef}
-      className="dark force-dark-mode aurora-mesh-dark min-h-screen w-full text-foreground relative font-sans scroll-smooth transition-colors duration-[1500ms] ease-[cubic-bezier(0.4,0,0.2,1)] selection:bg-primary/30 overflow-x-hidden"
+      className="dark force-dark-mode min-h-screen w-full text-foreground relative font-sans scroll-smooth transition-colors duration-[1500ms] ease-[cubic-bezier(0.4,0,0.2,1)] selection:bg-primary/30 overflow-x-hidden"
     >
       {/* 1A. Mobile Top-Left Brand Logo (Compact on mobile: sm:hidden) */}
       <motion.div 

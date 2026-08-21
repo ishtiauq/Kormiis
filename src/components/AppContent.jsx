@@ -40,12 +40,12 @@ export default function AppContent({ currentView, setCurrentView, isAppLoading, 
 
   if (!hasPermission(currentView)) {
     return (
-      <div className="animate-fade-in p-16 px-8" style={{ textAlign: 'center', background: 'var(--color-md-sys-surface-container)', borderRadius: '16px', border: '1px solid var(--color-md-sys-outline-variant)', marginTop: '24px' }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--color-md-sys-error)', marginBottom: '16px' }}>
+      <div className="animate-fade-in p-16 px-8" style={{ textAlign: 'center', background: 'var(--muted)', borderRadius: '20px', border: '1px solid var(--border)', marginTop: '24px' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--destructive)', marginBottom: '16px' }}>
           <span style={{ fontSize: '2rem', fontWeight: 700 }}>!</span>
         </div>
-        <h2 style={{ fontSize: '1.8rem', color: 'var(--color-md-sys-error)', marginBottom: '16px' }}>403 Forbidden</h2>
-        <p style={{ color: 'var(--color-md-sys-on-surface-variant)', maxWidth: '400px', margin: '0 auto' }}>
+        <h2 style={{ fontSize: '1.8rem', color: 'var(--destructive)', marginBottom: '16px' }}>403 Forbidden</h2>
+        <p style={{ color: 'var(--muted-foreground)', maxWidth: '400px', margin: '0 auto' }}>
           Your current role (<strong>{user?.role || (user?.isEmployee ? 'Teammate' : 'Admin')}</strong>) does not have permission to access the <strong>{currentView}</strong> module.
         </p>
       </div>

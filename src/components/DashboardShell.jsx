@@ -151,7 +151,6 @@ export default function DashboardShell({ user, themeMode, isDarkMode, toggleThem
 
   return (
     <div className="dashboard-root app-shell relative" style={{ display: 'flex', height: '100vh', width: '100vw', maxWidth: '100vw', overflow: 'hidden', boxSizing: 'border-box' }}>
-      
       <Sidebar
         visibleNavItems={visibleNavItems}
         isCollapsed={isCollapsed}

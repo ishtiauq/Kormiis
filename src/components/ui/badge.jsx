@@ -13,7 +13,7 @@ const badgeVariants = cva(
           "glass-badge text-foreground",
         destructive:
           "border-black/25 dark:border-white/30 bg-black/20 dark:bg-white/25 text-foreground font-bold",
-        outline: "border-black/15 dark:border-white/15 bg-transparent text-foreground backdrop-blur-xs",
+        outline: "border-black/15 dark:border-white/15 bg-transparent text-foreground",
         success:
           "border-black/15 dark:border-white/20 bg-black/10 dark:bg-white/15 text-foreground",
         warning:

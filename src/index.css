@@ -1,3 +1,10 @@
+/* ==============================================================
+   MONOGLASS — Official Design System of Kormiis
+   Apple Ultra-Liquid Glass + Monochrome Standard (iOS 26+).
+   This file is the single source of truth: semantic tokens,
+   glass materials, spring micro-interactions, fluid typography
+   and the universal monochrome/scrollbar standards.
+   ============================================================== */
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -139,8 +146,7 @@ html.dark,
   --glass-btn-hover-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.25), 0 4px 10px rgba(0, 0, 0, 0.35);
 }
 
-.force-dark-mode,
-.aurora-mesh-dark {
+.force-dark-mode {
   --background: #090a0f !important;
   --foreground: #ffffff !important;
   --card: rgba(18, 18, 26, 0.48) !important;
@@ -151,12 +157,13 @@ html.dark,
   --muted-foreground: #bbbbbb !important;
   --border: rgba(255, 255, 255, 0.14) !important;
   --input: rgba(255, 255, 255, 0.08) !important;
-  background-color: #090a0f !important;
-  background-image: 
-    radial-gradient(at 5% 5%, rgba(254, 53, 1, 0.20) 0px, transparent 48%),
-    radial-gradient(at 95% 10%, rgba(59, 130, 246, 0.18) 0px, transparent 52%),
-    radial-gradient(at 50% 50%, rgba(147, 51, 234, 0.16) 0px, transparent 56%),
-    radial-gradient(at 80% 90%, rgba(16, 185, 129, 0.14) 0px, transparent 48%) !important;
+  background-color: #090a0b !important;
+  background-image:
+    radial-gradient(ellipse 120% 90% at 50% 38%, rgba(0, 0, 0, 0) 52%, rgba(0, 0, 0, 0.42) 100%),
+    radial-gradient(ellipse 70% 55% at 12% 8%, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 60%),
+    radial-gradient(ellipse 65% 50% at 88% 14%, rgba(255, 255, 255, 0.028) 0%, rgba(255, 255, 255, 0) 62%),
+    radial-gradient(ellipse 80% 65% at 78% 96%, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0) 64%),
+    radial-gradient(ellipse 60% 45% at 8% 92%, rgba(255, 255, 255, 0.022) 0%, rgba(255, 255, 255, 0) 60%) !important;
   background-attachment: fixed !important;
 }
 
@@ -178,12 +185,13 @@ html.dark,
 }
 
 body {
-  background-color: var(--background);
-  background-image: 
-    radial-gradient(at 8% 8%, rgba(254, 53, 1, 0.12) 0px, transparent 48%),
-    radial-gradient(at 92% 12%, rgba(59, 130, 246, 0.12) 0px, transparent 52%),
-    radial-gradient(at 50% 80%, rgba(147, 51, 234, 0.10) 0px, transparent 56%),
-    radial-gradient(at 85% 90%, rgba(16, 185, 129, 0.08) 0px, transparent 48%);
+  background-color: #f4f4f5;
+  background-image:
+    radial-gradient(ellipse 120% 90% at 50% 38%, rgba(0, 0, 0, 0) 55%, rgba(0, 0, 0, 0.045) 100%),
+    radial-gradient(ellipse 70% 55% at 12% 8%, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0) 60%),
+    radial-gradient(ellipse 65% 50% at 88% 14%, rgba(0, 0, 0, 0.038) 0%, rgba(0, 0, 0, 0) 62%),
+    radial-gradient(ellipse 80% 65% at 78% 96%, rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0) 64%),
+    radial-gradient(ellipse 60% 45% at 8% 92%, rgba(0, 0, 0, 0.028) 0%, rgba(0, 0, 0, 0) 60%);
   background-attachment: fixed;
   color: var(--foreground);
   font-family: var(--font-sans);
@@ -196,12 +204,13 @@ body {
 html.dark body,
 body[data-theme="dark"],
 [data-theme="dark"] body {
-  background-color: #090a0f !important;
-  background-image: 
-    radial-gradient(at 5% 5%, rgba(254, 53, 1, 0.20) 0px, transparent 48%),
-    radial-gradient(at 95% 10%, rgba(59, 130, 246, 0.18) 0px, transparent 52%),
-    radial-gradient(at 50% 50%, rgba(147, 51, 234, 0.16) 0px, transparent 56%),
-    radial-gradient(at 80% 90%, rgba(16, 185, 129, 0.14) 0px, transparent 48%);
+  background-color: #090a0b !important;
+  background-image:
+    radial-gradient(ellipse 120% 90% at 50% 38%, rgba(0, 0, 0, 0) 52%, rgba(0, 0, 0, 0.42) 100%),
+    radial-gradient(ellipse 70% 55% at 12% 8%, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 60%),
+    radial-gradient(ellipse 65% 50% at 88% 14%, rgba(255, 255, 255, 0.028) 0%, rgba(255, 255, 255, 0) 62%),
+    radial-gradient(ellipse 80% 65% at 78% 96%, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0) 64%),
+    radial-gradient(ellipse 60% 45% at 8% 92%, rgba(255, 255, 255, 0.022) 0%, rgba(255, 255, 255, 0) 60%);
   background-attachment: fixed;
 }
 
@@ -236,7 +245,8 @@ html.dark,
    specular highlights, inner strokes, and diffuse depth shadows.
    ============================================================== */
 
-.glass-kormiis {
+.glass-kormiis,
+.glass-apple {
   background: var(--glass-bg) !important;
   -webkit-backdrop-filter: saturate(190%) blur(32px) !important;
   backdrop-filter: saturate(190%) blur(32px) !important;
@@ -245,16 +255,6 @@ html.dark,
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
   will-change: backdrop-filter, transform;
-}
-
-.dark .glass-kormiis,
-html.dark .glass-kormiis,
-[data-theme="dark"] .glass-kormiis {
-  background: var(--glass-bg) !important;
-  -webkit-backdrop-filter: saturate(190%) blur(32px) !important;
-  backdrop-filter: saturate(190%) blur(32px) !important;
-  border: 1px solid var(--glass-border) !important;
-  box-shadow: var(--glass-shadow) !important;
 }
 
 /* True Apple Liquid Glass Top Bar (iOS 26 Ultra-Liquid Standard - Matching App Topbar) */
@@ -286,18 +286,6 @@ html.dark .glass-kormiis,
     inset 0 1px 1px 0 rgba(255, 255, 255, 0.18),
     inset 1px 0 1px 0 rgba(255, 255, 255, 0.08) !important;
   border-radius: 9999px !important;
-  transform: translateZ(0);
-  -webkit-transform: translateZ(0);
-  will-change: backdrop-filter, transform;
-}
-
-/* True Apple Liquid Glass Footer (iOS 26 Ultra-Liquid Standard) */
-.landing-glass-footer {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(14, 14, 22, 0.40) 100%) !important;
-  -webkit-backdrop-filter: saturate(190%) blur(32px) brightness(105%) !important;
-  backdrop-filter: saturate(190%) blur(32px) !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.16) !important;
-  box-shadow: 0 -12px 32px -8px rgba(0, 0, 0, 0.45) !important;
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
   will-change: backdrop-filter, transform;
@@ -409,7 +397,9 @@ html.dark .glass-mobile-drawer,
 
 .dark .glass-card,
 .dark .bg-card,
+html.dark .glass-card,
 html.dark .bg-card,
+[data-theme="dark"] .glass-card,
 [data-theme="dark"] .bg-card {
   background: linear-gradient(135deg, rgba(28, 28, 40, 0.42) 0%, rgba(14, 14, 22, 0.30) 100%) !important;
   -webkit-backdrop-filter: saturate(190%) blur(32px) !important;
@@ -433,41 +423,14 @@ html.dark .bg-card,
 
 .dark .glass-card:hover,
 .dark .bg-card:hover,
+html.dark .glass-card:hover,
 html.dark .bg-card:hover,
+[data-theme="dark"] .glass-card:hover,
 [data-theme="dark"] .bg-card:hover {
   box-shadow: 
     0 18px 36px -10px rgba(0, 0, 0, 0.45),
     0 3px 8px -2px rgba(0, 0, 0, 0.3),
     inset 0 1px 1px 0 rgba(255, 255, 255, 0.14) !important;
-}
-
-/* Dedicated Apple Floating Sidebar Glass Material */
-.glass-floating-sidebar {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.18) 100%) !important;
-  -webkit-backdrop-filter: saturate(190%) blur(32px) !important;
-  backdrop-filter: saturate(190%) blur(32px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.30) !important;
-  box-shadow: 
-    0 20px 40px -10px rgba(0, 0, 0, 0.08),
-    0 2px 6px 0 rgba(0, 0, 0, 0.04),
-    inset 0 1px 1px 0 rgba(255, 255, 255, 0.35),
-    inset 1px 0 1px 0 rgba(255, 255, 255, 0.15) !important;
-  transform: translateZ(0);
-  -webkit-transform: translateZ(0);
-}
-
-.dark .glass-floating-sidebar,
-html.dark .glass-floating-sidebar,
-[data-theme="dark"] .glass-floating-sidebar {
-  background: linear-gradient(135deg, rgba(24, 24, 34, 0.65) 0%, rgba(12, 12, 18, 0.45) 100%) !important;
-  -webkit-backdrop-filter: saturate(190%) blur(36px) !important;
-  backdrop-filter: saturate(190%) blur(36px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.14) !important;
-  box-shadow: 
-    0 18px 36px -12px rgba(0, 0, 0, 0.4),
-    0 3px 8px 0 rgba(0, 0, 0, 0.25),
-    inset 0 1px 1px 0 rgba(255, 255, 255, 0.18),
-    inset 1px 0 1px 0 rgba(255, 255, 255, 0.10) !important;
 }
 
 /* ==============================================================
@@ -537,8 +500,10 @@ html.dark .glass-floating-sidebar,
   cursor: not-allowed !important;
 }
 
-/* Primary Glass Pill */
-.bg-primary {
+/* Primary Glass Pill (interactive controls only) */
+button.bg-primary,
+[role="button"].bg-primary,
+a.bg-primary {
   background: linear-gradient(135deg, hsl(12 99% 54%) 0%, hsl(355 90% 50%) 100%) !important;
   border-radius: 9999px !important;
   border: 1px solid rgba(255, 255, 255, 0.25) !important;
@@ -548,7 +513,9 @@ html.dark .glass-floating-sidebar,
     inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.35) !important;
   color: #ffffff !important;
 }
-.bg-primary:hover {
+button.bg-primary:hover,
+[role="button"].bg-primary:hover,
+a.bg-primary:hover {
   transform: scale(1.02) translateZ(0);
   filter: brightness(1.04);
   box-shadow: 
@@ -556,7 +523,9 @@ html.dark .glass-floating-sidebar,
     0 1px 2px 0 rgba(0, 0, 0, 0.08),
     inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.45) !important;
 }
-.bg-primary:active {
+button.bg-primary:active,
+[role="button"].bg-primary:active,
+a.bg-primary:active {
   transform: scale(0.97) translateZ(0) !important;
   filter: brightness(0.95) !important;
   box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.2) !important;
@@ -601,6 +570,7 @@ html.dark .glass-floating-sidebar,
   border-top-color: #ffffff;
   border-radius: 50%;
   animation: liquid-wobble-spin 900ms cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
 }
 
@@ -743,43 +713,13 @@ html.dark .glass-floating-sidebar,
 }
 
 @layer components {
-  /* Apple-style True Liquid Glass */
-  .glass-apple {
-    @apply bg-white/10 dark:bg-white/5 backdrop-blur-2xl backdrop-saturate-[1.8] shadow-[0_4px_12px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_16px_rgba(0,0,0,0.4)];
-  }
-
-  /* Dark Liquid Glass — for modals that need white text over any backdrop */
-  .glass-apple-dark {
-    background: rgba(12, 14, 18, 0.6) !important;
-    -webkit-backdrop-filter: blur(28px) saturate(1.8) !important;
-    backdrop-filter: blur(28px) saturate(1.8) !important;
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35) !important;
-    color: #ffffff !important;
-  }
-
   /* Floating pill-shaped top and bottom bars (Ultra-Liquid Glass Standard) */
   .topbar,
   .bottom-bar.bottom-bar-pill {
     border-radius: 9999px !important;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.10) 100%) !important;
-    -webkit-backdrop-filter: blur(22px) saturate(150%) !important;
-    backdrop-filter: blur(22px) saturate(150%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.40) !important;
-    box-shadow:
-      0 8px 24px -10px rgba(0, 0, 0, 0.06),
-      0 2px 6px 0 rgba(0, 0, 0, 0.03),
-      inset 0 1px 1px 0 rgba(255, 255, 255, 0.25),
-      inset 1px 0 1px 0 rgba(255, 255, 255, 0.10) !important;
-    transform: translateZ(0);
-    -webkit-transform: translateZ(0);
-    will-change: backdrop-filter, transform;
-  }
-
-  .dark .topbar,
-  .dark .bottom-bar.bottom-bar-pill {
     background: var(--glass-bg) !important;
-    -webkit-backdrop-filter: blur(32px) saturate(190%) brightness(105%) !important;
-    backdrop-filter: blur(32px) saturate(190%) brightness(105%) !important;
+    -webkit-backdrop-filter: saturate(190%) blur(32px) !important;
+    backdrop-filter: saturate(190%) blur(32px) !important;
     border: 1px solid var(--glass-border) !important;
     box-shadow: var(--glass-shadow) !important;
     transform: translateZ(0);
@@ -840,18 +780,6 @@ html.dark .glass-floating-sidebar,
 }
 
 /* Simple Solid Headline Styling */
-.headline-gradient {
-  color: hsl(var(--foreground)) !important;
-  background-image: none !important;
-  -webkit-background-clip: initial !important;
-  background-clip: initial !important;
-}
-.dark .headline-gradient {
-  color: hsl(var(--foreground)) !important;
-  background-image: none !important;
-}
-
-/* Solid Foreground Text for Modal/Form Headers (overrides headline-gradient) */
 .modal-title-solid {
   background-image: none !important;
   -webkit-background-clip: initial !important;
@@ -865,51 +793,10 @@ html.dark .glass-floating-sidebar,
   color: var(--foreground) !important; 
   border: 1px solid rgba(16, 185, 129, 0.3) !important;
 }
-.bg-status-warning { 
-  background-color: rgba(245, 158, 11, 0.18) !important; 
-  color: var(--foreground) !important; 
-  border: 1px solid rgba(245, 158, 11, 0.3) !important;
-}
-.bg-status-error { 
-  background-color: rgba(239, 68, 68, 0.18) !important; 
-  color: var(--foreground) !important; 
+.bg-status-error {
+  background-color: rgba(239, 68, 68, 0.18) !important;
+  color: var(--foreground) !important;
   border: 1px solid rgba(239, 68, 68, 0.3) !important;
-}
-.bg-live-red { 
-  background-color: #dc2626 !important; 
-  color: #ffffff !important; 
-  border: none !important; 
-}
-
-/* Global Shimmer Effect */
-@keyframes shimmer-slide {
-  0% { transform: translateX(-150%) skewX(-20deg); }
-  30% { transform: translateX(150%) skewX(-20deg); }
-  100% { transform: translateX(150%) skewX(-20deg); }
-}
-.btn-shimmer {
-  position: relative;
-  overflow: hidden;
-}
-.btn-shimmer::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(to right, transparent, rgba(255,255,255,0.2) 20%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0.2) 80%, transparent);
-  animation: shimmer-slide 4s infinite ease-in-out;
-  pointer-events: none;
-}
-
-/* Custom Sharp Blink Animation */
-@keyframes sharpBlink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
-}
-.animate-blink {
-  animation: sharpBlink 1s step-start infinite !important;
 }
 
 /* ==============================================================
@@ -1442,7 +1329,10 @@ div[class*="text-rose-"]:not([class*="bg-"]):not([class*="size-"]):not([class*="
 .dark p[class*="text-emerald-"],
 .dark p[class*="text-amber-"],
 .dark p[class*="text-blue-"],
-.dark p[class*="text-rose-"],
+.dark p[class*="text-rose-"] {
+  color: var(--foreground) !important;
+}
+
 /* ==============================================================
    UNIVERSAL MONOCHROME TAGS, BADGES, PILLS, CHIPS & BORDERS
    All tags, badges, status chips and pills across the app are
@@ -1519,6 +1409,18 @@ div[class*="text-rose-"]:not([class*="bg-"]):not([class*="size-"]):not([class*="
 }
 
 /* Selected Day Capsule: Pure Solid Black in Light Mode / Pure Solid White in Dark Mode */
+.nav-capsule-active {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25) !important;
+}
+.dark .nav-capsule-active,
+[data-theme="dark"] .nav-capsule-active {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5) !important;
+}
+
 .selected-day-capsule {
   background-color: #000000 !important;
   color: #ffffff !important;

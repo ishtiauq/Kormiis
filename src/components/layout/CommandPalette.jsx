@@ -7,7 +7,7 @@ export default function CommandPalette({ showCommandPalette, setShowCommandPalet
         <div className="command-palette-overlay" role="dialog" aria-modal="true" aria-label="Command palette" onClick={(e) => { if (e.target === e.currentTarget) setShowCommandPalette(false) }}>
           <div className="command-palette">
             <div className="command-palette-search-wrapper p-3 sm:p-4">
-              <Icon name="search" style={{ color: 'var(--color-md-sys-on-surface-variant)' }} size={18}/>
+              <Icon name="search" style={{ color: 'var(--muted-foreground)' }} size={18}/>
               <input
                 autoFocus
                 className="command-palette-input px-3 py-2 sm:px-4 sm:py-2.5"
@@ -44,7 +44,7 @@ export default function CommandPalette({ showCommandPalette, setShowCommandPalet
             </div>
             <div className="command-palette-list p-3 sm:p-4" role="listbox" aria-label="Search results">
               {filteredItems.length === 0 ? (
-                <div className="p-6 text-center" role="status" aria-live="polite" style={{ color: 'var(--color-md-sys-on-surface-variant)', fontSize: '0.9rem' }}>
+                <div className="p-6 text-center" role="status" aria-live="polite" style={{ color: 'var(--muted-foreground)', fontSize: '0.9rem' }}>
                   No results found.
                 </div>
               ) : (

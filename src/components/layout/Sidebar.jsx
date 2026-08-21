@@ -160,7 +160,7 @@ export default function Sidebar({
       onMouseLeave={handleMouseLeave}
       onClick={handleBarTouchOrClick}
       aria-label="Floating navigation sidebar"
-      className={`hidden md:flex flex-col fixed left-3 md:left-5 top-1/2 -translate-y-1/2 z-50 glass-kormiis text-sidebar-foreground rounded-3xl border border-white/30 dark:border-white/14 shadow-2xl transition-all duration-350 ease-[cubic-bezier(0.34,1.56,0.64,1)] overflow-hidden ${
+      className={`hidden md:flex flex-col fixed left-3 md:left-5 top-1/2 -translate-y-1/2 z-50 glass-kormiis text-sidebar-foreground rounded-3xl border border-white/30 dark:border-white/14 shadow-2xl transition-[width,height,max-height,padding,box-shadow,translate] duration-350 ease-[cubic-bezier(0.34,1.56,0.64,1)] overflow-hidden ${
         isOpen
           ? 'h-[calc(100vh-4rem)] max-h-[min(calc(100vh-5rem),520px)] p-3 pt-3.5 pb-3 shadow-2xl'
           : 'w-[54px] h-auto py-3 px-1.5 cursor-pointer shadow-xl'
@@ -197,9 +197,9 @@ export default function Sidebar({
                 tabIndex={0}
                 aria-label={item.label}
                 className={`${isActive 
-                  ? 'active bg-primary/15 dark:bg-primary/25 text-primary dark:text-primary font-semibold border border-primary/30 shadow-[inset_0_1px_1px_rgba(255,255,255,0.35)] backdrop-blur-md' 
+                  ? 'nav-capsule-active font-semibold' 
                   : 'text-sidebar-foreground/75 hover:text-sidebar-foreground hover:bg-white/20 dark:hover:bg-white/[0.08] hover:border-white/15 dark:hover:border-white/10 border border-transparent font-medium active:scale-[0.98]'
-                } flex items-center rounded-2xl cursor-pointer box-border transition-all duration-200 relative no-underline shrink-0 select-none ${
+                } flex items-center rounded-2xl cursor-pointer box-border transition-[background-color,border-color,color,transform] duration-200 relative no-underline shrink-0 select-none ${
                   isOpen ? 'gap-3 px-3 h-10 w-full' : 'justify-center size-10'
                 }`}
                 data-active={isActive ? 'true' : 'false'}
