@@ -88,10 +88,12 @@ export default function DashboardShell({ user, themeMode, isDarkMode, toggleThem
       <Suspense fallback={<LoadingScreen isDarkMode={isDarkMode} message="Loading your workspace..." />}>
         <EmployeePortal
           currentUser={{...user, id: user.id || user.employeeId, role: user.role || 'Teammate', department: user.department || 'Engineering'}}
-        themeMode={themeMode}
-        isDarkMode={isDarkMode}
-        toggleTheme={toggleTheme}
-        employees={appData.employees}
+          currentView={currentView}
+          setCurrentView={setCurrentView}
+          themeMode={themeMode}
+          isDarkMode={isDarkMode}
+          toggleTheme={toggleTheme}
+          employees={appData.employees}
         setEmployees={appData.handleSetEmployees}
         attendance={appData.attendance}
         payroll={appData.payroll}

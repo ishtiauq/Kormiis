@@ -334,6 +334,19 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
     }
   }, [])
 
+  useEffect(() => {
+    try {
+      const searchParams = new URLSearchParams(window.location.search)
+      const companyFromUrl = searchParams.get('company') || searchParams.get('workspace')
+      if (companyFromUrl) {
+        setAuthModalOpen(true)
+        setAuthTab('in')
+      }
+    } catch {
+      // ignore in environments without window.location.search
+    }
+  }, [])
+
   const handleInstallClick = async () => {
     if (!deferredPrompt) {
       alert('To install the app, use your browser menu (e.g. Chrome 3 dots -> Install App, or Safari -> Add to Home Screen).')
@@ -389,7 +402,42 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
 
   const finishGoogleLogin = async (user, mode) => {
     try {
-      const linkage = await getCompanyForUser(user.uid)
+      let linkage = await getCompanyForUser(user.uid)
+      
+      // 1. If no direct company linkage found, check if an email invite exists
+      if (!linkage?.companyUid && user.email) {
+        try {
+          const invite = await getInviteByEmail(user.email)
+          if (invite?.companyUid) {
+            await acceptInvite(user, invite)
+            linkage = await getCompanyForUser(user.uid)
+          }
+        } catch (inviteErr) {
+          console.warn('Error resolving invite for user:', inviteErr)
+        }
+      }
+
+      // 2. If still not linked, check if user came via a ?company= invite link
+      if (!linkage?.companyUid) {
+        try {
+          const searchParams = new URLSearchParams(window.location.search)
+          const companyFromUrl = searchParams.get('company') || searchParams.get('workspace')
+          if (companyFromUrl) {
+            const autoInvite = {
+              companyUid: companyFromUrl,
+              role: 'Teammate',
+              department: 'General',
+              name: user.displayName || user.email?.split('@')[0] || 'Teammate',
+              employeeId: '',
+            }
+            await acceptInvite(user, autoInvite)
+            linkage = await getCompanyForUser(user.uid)
+          }
+        } catch (urlInviteErr) {
+          console.warn('Error linking via company url param:', urlInviteErr)
+        }
+      }
+
       if (linkage?.companyUid) {
         if (linkage.companyUid === user.uid) {
           completeAdminLogin(user, linkage.companyName)

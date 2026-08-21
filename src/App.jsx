@@ -14,13 +14,54 @@ export default function App() {
   const { toasts, addToast, removeToast } = useToast()
 
   const [isInitialLoading, setIsInitialLoading] = useState(true)
-  const [currentView, setCurrentView] = useState(() => localStorage.getItem('kormiis_current_view') || 'dashboard')
+  
+  // Read initial view from URL hash or localStorage
+  const [currentView, setCurrentViewState] = useState(() => {
+    const hash = window.location.hash.replace(/^#\/?/, '').trim()
+    return hash || localStorage.getItem('kormiis_current_view') || 'dashboard'
+  })
 
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
 
+  // Unified navigation handler with browser history support
+  const setCurrentView = (newView, pushState = true) => {
+    if (!newView) return
+    setCurrentViewState(prev => {
+      if (prev === newView) return prev
+      if (pushState) {
+        window.history.pushState({ view: newView }, '', `#${newView}`)
+      }
+      localStorage.setItem('kormiis_current_view', newView)
+      return newView
+    })
+  }
+
+  // Handle browser back and forward button clicks across all devices & screen sizes
+  useEffect(() => {
+    // Set initial history state if not already recorded
+    const initialView = window.location.hash.replace(/^#\/?/, '').trim() || localStorage.getItem('kormiis_current_view') || 'dashboard'
+    window.history.replaceState({ view: initialView }, '', `#${initialView}`)
+
+    const handlePopState = (event) => {
+      const hashView = window.location.hash.replace(/^#\/?/, '').trim()
+      const targetView = event.state?.view || hashView || 'dashboard'
+      if (targetView) {
+        setCurrentViewState(targetView)
+        localStorage.setItem('kormiis_current_view', targetView)
+      }
+    }
+
+    window.addEventListener('popstate', handlePopState)
+    window.addEventListener('hashchange', handlePopState)
+    return () => {
+      window.removeEventListener('popstate', handlePopState)
+      window.removeEventListener('hashchange', handlePopState)
+    }
+  }, [])
+
   useEffect(() => {
     window.__kormiisNavigate = (view) => {
-      if (view && view !== currentView) setCurrentView(view)
+      if (view && view !== currentView) setCurrentView(view, true)
       window.focus()
     }
     return () => { window.__kormiisNavigate = null }

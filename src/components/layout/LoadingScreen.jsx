@@ -66,7 +66,7 @@ export default function LoadingScreen({
           <div className="w-full h-2.5 sm:h-3 bg-white/[0.10] rounded-full overflow-hidden p-0.5 border border-white/15 shadow-inner relative">
             <motion.div
               style={{ width: `${progress}%` }}
-              className="h-full bg-gradient-to-r from-[#FE4D01] via-[#ff6b26] to-[#FE4D01] rounded-full relative overflow-hidden transition-all duration-75 ease-out shadow-xs"
+              className="h-full bg-gradient-to-r from-[#FE3501] via-[#ff5522] to-[#FE3501] rounded-full relative overflow-hidden transition-all duration-75 ease-out shadow-xs"
             >
               {/* Dynamic Shimmer Light Sweep */}
               <motion.div
@@ -87,7 +87,7 @@ export default function LoadingScreen({
               <span className="text-[11px] font-semibold text-white/60">Loading</span>
             </div>
 
-            <span className="font-black tracking-tight tabular-nums text-[#FE4D01] text-xs sm:text-sm">
+            <span className="font-black tracking-tight tabular-nums text-[#FE3501] text-xs sm:text-sm">
               {progress}%
             </span>
           </div>

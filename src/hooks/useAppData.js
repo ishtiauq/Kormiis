@@ -3,7 +3,7 @@ import { validateDatabase } from '../services/validator.js'
 import { encryptJson, decryptJson } from '../services/crypto.js'
 import { EMPLOYEES_STORAGE_KEY, timestampArrayChanges, getDeviceInfo } from '../utils/helpers.js'
 import { subscribeToTable, writeToTable, fetchTableFromFirestore } from '../services/bridge.js'
-import { initPushSync, broadcast, updateBadge, notifyOnHidden } from '../services/pushNotifications.js'
+import { initPushSync, broadcast, updateBadge, notifyOnHidden, showSystemNotification } from '../services/pushNotifications.js'
 
 export default function useAppData({ user, addToast }) {
   /* ─── DB state ─── */
@@ -301,8 +301,50 @@ export default function useAppData({ user, addToast }) {
     const unsubAnnouncements = subscribeToTable(adminUid, 'announcements', (data, lastUpdated) => applyUpdate(setAnnouncements, 'announcements', data, lastUpdated));
     const unsubAssets = subscribeToTable(adminUid, 'assets', (data, lastUpdated) => applyUpdate(setAssets, 'assets', data, lastUpdated));
     const unsubAssetRequests = subscribeToTable(adminUid, 'asset_requests', (data, lastUpdated) => applyUpdate(setAssetRequests, 'asset_requests', data, lastUpdated));
-    const unsubAssetCategories = subscribeToTable(adminUid, 'asset_categories', (data, lastUpdated) => applyUpdate(setAssetCategories, 'asset_categories', data, lastUpdated));
-    const unsubNotifications = subscribeToTable(adminUid, 'notifications', (data, lastUpdated) => applyUpdate(setAllNotifications, 'notifications', data, lastUpdated));
+    const handleNotifUpdate = (data, lastUpdated) => {
+      if (Array.isArray(data)) {
+        const currentId = user?.id || user?.employeeId || user?.uid;
+        const currentEmail = user?.email?.toLowerCase();
+        const currentRole = user?.role || (user?.isEmployee ? 'Teammate' : 'Admin');
+
+        setAllNotifications(prev => {
+          const prevIds = new Set((prev || []).map(n => n.id));
+          const newIncoming = data.filter(n => !prevIds.has(n.id));
+
+          // For any new notification from another user, trigger native system push notification
+          newIncoming.forEach(n => {
+            const isOwn = n.actorId && (n.actorId === currentId || (currentEmail && n.actorEmail && n.actorEmail.toLowerCase() === currentEmail));
+            if (!isOwn) {
+              let isTargeted = true;
+              if (Array.isArray(n.targetEmployeeIds) && n.targetEmployeeIds.length > 0) {
+                isTargeted = n.targetEmployeeIds.includes(currentId) || currentRole === 'Admin';
+              }
+              if (Array.isArray(n.targetRoles) && n.targetRoles.length > 0) {
+                if (!n.targetRoles.includes(currentRole)) isTargeted = false;
+              }
+              if (n.targetId && n.targetId !== currentId && currentRole !== 'Admin') {
+                isTargeted = false;
+              }
+
+              if (isTargeted) {
+                showSystemNotification({
+                  title: n.title || 'Kormiis',
+                  body: n.text,
+                  url: n.view || '',
+                  tag: n.category || 'system',
+                });
+              }
+            }
+          });
+
+          if (JSON.stringify(prev) !== JSON.stringify(data)) {
+            return data;
+          }
+          return prev;
+        });
+      }
+    };
+    const unsubNotifications = subscribeToTable(adminUid, 'notifications', handleNotifUpdate);
 
     const handleAttUpdate = (key, data, lastUpdated) => {
       if(data) {

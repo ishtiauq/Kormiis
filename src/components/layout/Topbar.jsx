@@ -495,7 +495,7 @@ export default function Topbar({
           </div>
 
           {/* List Content */}
-          <div className="max-h-[50vh] sm:max-h-[420px] overflow-y-auto py-2 flex flex-col gap-2.5" style={{ scrollbarWidth: 'thin' }}>
+          <div className="max-h-[50vh] sm:max-h-[420px] overflow-y-auto py-2 flex flex-col gap-2.5">
             {renderDataIntegrityCard()}
 
             {filteredNotifications.length === 0 && !hasIntegrityIssues ? (

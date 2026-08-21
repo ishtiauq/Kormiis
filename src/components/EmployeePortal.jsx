@@ -50,6 +50,8 @@ const getInitialsAvatar = (name) => {
 
 export default function EmployeePortal({ 
   currentUser,
+  currentView,
+  setCurrentView,
   themeMode,
   isDarkMode,
   toggleTheme,
@@ -101,7 +103,12 @@ export default function EmployeePortal({
   handleAutoRepairDatabase,
   isSyncing = false
 }) {
-  const [activeTab, setActiveTab] = useState('dashboard') // dashboard, attendance, payslips, leave, profile
+  const [localActiveTab, setLocalActiveTab] = useState('dashboard')
+  const activeTab = currentView || localActiveTab
+  const setActiveTab = (tab) => {
+    if (setCurrentView) setCurrentView(tab)
+    else setLocalActiveTab(tab)
+  }
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const [showMobileMenu, setShowMobileMenu] = useState(false)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => localStorage.getItem('sidebar_collapsed') === 'true')

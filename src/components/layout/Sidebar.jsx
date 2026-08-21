@@ -101,7 +101,7 @@ export default function Sidebar({
       probe.remove()
     }
     // label + icon(22) + gap(12) + item px(24) + aside p(20) + border(2)
-    return Math.max(160, Math.min(max + 82, 262))
+    return Math.max(160, Math.min(max + 82, 248))
   }, [visibleNavItems])
 
   return (
@@ -211,7 +211,7 @@ export default function Sidebar({
         </button>
       </div>
 
-      {/* Scoped scrollbar & icon styles */}
+      {/* Scoped icon styles */}
       <style>{`
         aside .msr {
           font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0 !important;
@@ -220,36 +220,6 @@ export default function Sidebar({
         aside [data-active="true"] .msr {
           font-variation-settings: "FILL" 1, "wght" 600, "GRAD" 0 !important;
           transform: scale(1.08);
-        }
-
-        .sidebar-nav-scroll {
-          scrollbar-width: thin;
-          scrollbar-color: transparent transparent;
-          transition: scrollbar-color 0.3s ease;
-        }
-        .sidebar-nav-scroll:hover {
-          scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent;
-        }
-        .dark .sidebar-nav-scroll:hover {
-          scrollbar-color: hsl(0 0% 30%) transparent;
-        }
-
-        .sidebar-nav-scroll::-webkit-scrollbar {
-          width: 4px;
-        }
-        .sidebar-nav-scroll::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .sidebar-nav-scroll::-webkit-scrollbar-thumb {
-          background: transparent;
-          border-radius: 9999px;
-          transition: background 0.3s ease;
-        }
-        .sidebar-nav-scroll:hover::-webkit-scrollbar-thumb {
-          background: rgba(0, 0, 0, 0.15);
-        }
-        .dark .sidebar-nav-scroll:hover::-webkit-scrollbar-thumb {
-          background: rgba(255, 255, 255, 0.2);
         }
       `}</style>
     </aside>

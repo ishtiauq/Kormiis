@@ -24,7 +24,7 @@ export default function LivingAuroraBackground({ isDarkMode = true, className = 
           repeat: Infinity,
           ease: "easeInOut"
         }}
-        className="absolute top-0 left-0 w-[560px] sm:w-[820px] h-[560px] sm:h-[820px] rounded-full bg-[#FE4D01] blur-[130px] sm:blur-[180px] will-change-transform"
+        className="absolute top-0 left-0 w-[560px] sm:w-[820px] h-[560px] sm:h-[820px] rounded-full bg-[#FE3501] blur-[130px] sm:blur-[180px] will-change-transform"
       />
 
       {/* Electric Sky Blue Orb (Top-Right -> Bottom-Right -> Bottom-Left -> Top-Left -> Top-Right) */}

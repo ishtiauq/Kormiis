@@ -20,7 +20,9 @@ const DashboardWidget = ({
     <Card className={`flex flex-col p-0 h-full ${cardClass}`}>
       <CardHeader className="flex-row items-center justify-between pb-3.5 space-y-0">
         <div className="flex items-center gap-3">
-          {icon}
+          <div className="size-9 rounded-2xl bg-white/60 dark:bg-white/[0.08] border border-white/50 dark:border-white/12 shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)] flex items-center justify-center shrink-0">
+            {icon}
+          </div>
           <CardTitle className="text-fluid-lg font-bold text-foreground m-0">{title}</CardTitle>
         </div>
         {action}
@@ -200,7 +202,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
 
   return (
     <div className="space-y-6">
-      {currentUser?.role === 'Teammate' && currentUser && (
+      {currentUser && (
         <GeoCheckInWidget 
           currentUser={currentUser} 
           attendance={attendance} 
@@ -219,16 +221,6 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
         </h1>
       </div>
       <div className="border-t border-border border-headline" />
-      
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between glass-card p-5 sm:p-6 rounded-3xl border border-black/[0.08] dark:border-white/12 shadow-xl gap-4 mb-2">
-        <h2 className="text-fluid-lg sm:text-fluid-xl font-extrabold tracking-tight flex items-center gap-3 text-foreground m-0">
-          <Icon name="monitoring" className="text-primary shrink-0" size={28}/>
-          Admin Overview
-        </h2>
-        <span className="text-xs sm:text-sm font-semibold text-foreground apple-glass-btn px-4 py-2 rounded-full border border-black/[0.08] dark:border-white/10 shrink-0">
-          {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
-        </span>
-      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3 gap-5 lg:gap-6 items-stretch">
         
@@ -236,30 +228,32 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
           <DashboardWidget
           id="w4"
           title="Announcements"
-          icon={<Icon name="rss_feed" className="text-amber-500 shrink-0" size={26}/>}
+          icon={<Icon name="rss_feed" className="text-amber-500 shrink-0" size={22}/>}
           cardClass="col-span-full"
           action={<button onClick={() => setCurrentView && setCurrentView('announcements')} className="apple-glass-btn text-xs font-semibold px-3.5 h-7 rounded-full cursor-pointer">View All</button>}
           contentClass="flex flex-col justify-start gap-2.5 pt-4"
           {...wProps}
         >
           {recentAnnouncements.length === 0 ? (
-            <p className="text-center my-auto text-fluid-xs text-muted-foreground">No active announcements</p>
+            <p className="text-center my-auto text-fluid-xs text-muted-foreground py-4">No active announcements</p>
           ) : (
             recentAnnouncements.map((ann, idx) => (
               <div
                 key={ann.id || idx}
-                className="flex items-center gap-3 p-3 px-3.5 rounded-2xl bg-white/60 dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] hover:bg-white/90 dark:hover:bg-white/[0.08] transition-all cursor-pointer select-none active:scale-[0.99] shadow-[0_2px_8px_rgba(0,0,0,0.02)] dark:shadow-none"
+                className="flex items-center gap-3.5 p-3 px-4 rounded-2xl liquid-widget-item cursor-pointer select-none active:scale-[0.99]"
                 onClick={() => setCurrentView && setCurrentView('announcements')}
               >
-                <Icon name="rss_feed" className="text-amber-500 shrink-0" size={24}/>
+                <div className="size-8 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center justify-center shrink-0">
+                  <Icon name="rss_feed" size={18}/>
+                </div>
                 <div className="flex-1 min-w-0 pr-2">
-                  <p className="m-0 text-fluid-xs font-bold text-foreground break-words">{ann.title}</p>
+                  <p className="m-0 text-fluid-xs font-bold text-foreground truncate">{ann.title}</p>
                   <p className="m-0 mt-0.5 text-[11px] font-medium text-muted-foreground">
                     {getEmployeeName(ann.authorId)} &middot; {new Date(ann.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                   </p>
                 </div>
                 {ann.priority === 'Important' && (
-                  <Badge variant="destructive" className="uppercase text-[10px] rounded-full px-2 py-0.5">
+                  <Badge variant="destructive" className="uppercase text-[10px] rounded-full px-2.5 py-0.5 shadow-xs">
                     Important
                   </Badge>
                 )}
@@ -273,81 +267,95 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
           <DashboardWidget
           id="w2"
           title="Today's Attendance"
-          icon={<Icon name="group" className="text-emerald-500 shrink-0" size={26}/>}
-          action={<button onClick={() => setShowAttDropdown(!showAttDropdown)} className="apple-glass-btn text-xs font-semibold px-3.5 h-7 rounded-full cursor-pointer">{showAttDropdown ? 'Hide' : 'Details'}</button>}
+          icon={<Icon name="group" className="text-emerald-500 shrink-0" size={22}/>}
+          action={<button onClick={() => setCurrentView && setCurrentView('attendance')} className="apple-glass-btn text-xs font-semibold px-3.5 h-7 rounded-full cursor-pointer">View All</button>}
           contentClass="flex flex-col justify-between pt-4"
           {...wProps}
         >
-          <div className="flex items-center justify-between gap-1 sm:gap-2 xl:gap-3 py-2">
-            <div className="flex flex-col items-center flex-1">
-              <span className="text-fluid-xl font-black text-emerald-600 dark:text-emerald-400 flex items-center gap-1 xl:gap-1.5">
+          <div className="grid grid-cols-3 gap-2.5 sm:gap-3 py-1">
+            <div className="flex flex-col items-center justify-center p-3 rounded-2xl bg-emerald-500/[0.08] dark:bg-emerald-500/[0.14] border border-emerald-500/20 shadow-xs">
+              <span className="text-fluid-xl font-black text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 tabular-nums">
                 <span className="pulse-dot pulse-dot-green m-0"></span>
                 {todayStats.present}
               </span>
-              <span className="text-[10px] xl:text-xs font-medium text-muted-foreground mt-1">Present</span>
+              <span className="text-[11px] font-semibold text-muted-foreground mt-1">Present</span>
             </div>
-            <div className="w-[1px] h-10 bg-border/80 dark:bg-white/10"></div>
-            <div className="flex flex-col items-center flex-1">
-              <span className="text-fluid-xl font-black text-destructive flex items-center gap-1 xl:gap-1.5">
+            <div className="flex flex-col items-center justify-center p-3 rounded-2xl bg-destructive/[0.08] dark:bg-destructive/[0.14] border border-destructive/20 shadow-xs">
+              <span className="text-fluid-xl font-black text-destructive flex items-center gap-1.5 tabular-nums">
                 <span className="pulse-dot pulse-dot-red m-0"></span>
                 {todayStats.absent}
               </span>
-              <span className="text-[10px] xl:text-xs font-medium text-muted-foreground mt-1">Absent</span>
+              <span className="text-[11px] font-semibold text-muted-foreground mt-1">Absent</span>
             </div>
-            <div className="w-[1px] h-10 bg-border/80 dark:bg-white/10"></div>
-            <div className="flex flex-col items-center flex-1">
-              <span className="text-fluid-xl font-black text-amber-500 flex items-center gap-1 xl:gap-1.5">
+            <div className="flex flex-col items-center justify-center p-3 rounded-2xl bg-primary/[0.08] dark:bg-primary/[0.14] border border-primary/20 shadow-xs">
+              <span className="text-fluid-xl font-black text-primary flex items-center gap-1.5 tabular-nums">
                 <span className="pulse-dot pulse-dot-orange m-0"></span>
                 {todayStats.onLeave}
               </span>
-              <span className="text-[10px] xl:text-xs font-medium text-muted-foreground mt-1">Leave</span>
+              <span className="text-[11px] font-semibold text-muted-foreground mt-1">Leave</span>
             </div>
           </div>
-          <div className="mt-3 pt-3 border-t border-border/80 dark:border-white/10 flex justify-between items-center text-xs font-medium text-muted-foreground">
-            <span>Attendance Rate</span>
-            <span className="font-extrabold text-sm text-foreground">{attendanceRate}%</span>
+
+          <div className="mt-3.5 pt-3 border-t border-border/80 dark:border-white/10 flex flex-col gap-1.5">
+            <div className="flex justify-between items-center text-xs font-semibold text-muted-foreground">
+              <span>Attendance Rate</span>
+              <span className="font-extrabold text-sm text-foreground tabular-nums">{attendanceRate}%</span>
+            </div>
+            <div className="w-full bg-black/[0.06] dark:bg-white/10 rounded-full h-2 overflow-hidden shadow-inner p-0.5">
+              <div className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-500 shadow-xs" style={{ width: `${attendanceRate}%` }}></div>
+            </div>
           </div>
         </DashboardWidget>
         )}
 
-        <DailyChecklistWidget notes={notes} setNotes={setNotes} ownerId={currentUser?.id || currentUser?.uid || ''} cardClass="" />
+        <DailyChecklistWidget notes={notes} setNotes={setNotes} ownerId={currentUser?.id || currentUser?.uid || ''} setCurrentView={setCurrentView} cardClass="" />
 
         <HrOverview adminUid={currentUser?.uid} currentUser={currentUser} setCurrentView={setCurrentView} addToast={addToast} />
 
         <DashboardWidget
           id="perf-widget"
           title="Performance Tracker"
-          icon={<Icon name="insights" className="text-purple-500 shrink-0" size={26}/>}
+          icon={<Icon name="insights" className="text-purple-500 shrink-0" size={22}/>}
+          action={<button onClick={() => setCurrentView && setCurrentView('performance')} className="apple-glass-btn text-xs font-semibold px-3.5 h-7 rounded-full cursor-pointer">Details</button>}
           {...wProps}
         >
-          <div className="flex flex-col gap-5 justify-center h-full">
-            <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-4 justify-center h-full pt-1">
+            <div className="flex flex-col gap-1.5">
               <div className="flex justify-between items-end">
-                <span className="text-xs font-semibold text-muted-foreground">Workforce Efficiency</span>
-                <span className="text-base font-bold text-foreground">{efficiencyScore}%</span>
+                <span className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+                  <span className="size-2 rounded-full bg-purple-500" />
+                  Workforce Efficiency
+                </span>
+                <span className="text-sm font-bold text-foreground tabular-nums">{efficiencyScore}%</span>
               </div>
               <div className="w-full bg-black/[0.06] dark:bg-white/10 rounded-full h-2 overflow-hidden shadow-inner">
-                <div className="bg-purple-500 h-2 rounded-full transition-all duration-500" style={{ width: `${efficiencyScore}%` }}></div>
+                <div className="bg-gradient-to-r from-purple-500 to-indigo-400 h-full rounded-full transition-all duration-500" style={{ width: `${efficiencyScore}%` }}></div>
               </div>
             </div>
 
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-1.5">
               <div className="flex justify-between items-end">
-                <span className="text-xs font-semibold text-muted-foreground">Task Completion</span>
-                <span className="text-base font-bold text-foreground">{taskCompletionRate}%</span>
+                <span className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+                  <span className="size-2 rounded-full bg-blue-500" />
+                  Task Completion
+                </span>
+                <span className="text-sm font-bold text-foreground tabular-nums">{taskCompletionRate}%</span>
               </div>
               <div className="w-full bg-black/[0.06] dark:bg-white/10 rounded-full h-2 overflow-hidden shadow-inner">
-                <div className="bg-blue-500 h-2 rounded-full transition-all duration-500" style={{ width: `${taskCompletionRate}%` }}></div>
+                <div className="bg-gradient-to-r from-blue-500 to-cyan-400 h-full rounded-full transition-all duration-500" style={{ width: `${taskCompletionRate}%` }}></div>
               </div>
             </div>
 
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-1.5">
               <div className="flex justify-between items-end">
-                <span className="text-xs font-semibold text-muted-foreground">Attendance Rate</span>
-                <span className="text-base font-bold text-foreground">{attendanceRate}%</span>
+                <span className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+                  <span className="size-2 rounded-full bg-emerald-500" />
+                  Attendance Rate
+                </span>
+                <span className="text-sm font-bold text-foreground tabular-nums">{attendanceRate}%</span>
               </div>
               <div className="w-full bg-black/[0.06] dark:bg-white/10 rounded-full h-2 overflow-hidden shadow-inner">
-                <div className="bg-emerald-500 h-2 rounded-full transition-all duration-500" style={{ width: `${attendanceRate}%` }}></div>
+                <div className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-500" style={{ width: `${attendanceRate}%` }}></div>
               </div>
             </div>
           </div>
@@ -357,29 +365,40 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
         <DashboardWidget
           id="tasks-widget"
           title="Tasks Overview"
-          icon={<Icon name="check_box" className="text-orange-500 shrink-0" size={26}/>}
+          icon={<Icon name="check_box" className="text-primary shrink-0" size={22}/>}
           {...wProps}
           action={
-            <button onClick={() => setCurrentView('tasks')} className="apple-glass-btn text-xs font-semibold px-3.5 h-7 rounded-full text-orange-500 hover:text-orange-600 cursor-pointer">
+            <button onClick={() => setCurrentView('tasks')} className="apple-glass-btn text-xs font-semibold px-3.5 h-7 rounded-full text-primary hover:text-primary/80 cursor-pointer">
               View All
             </button>
           }
         >
-          <div className="flex flex-col h-full justify-between gap-3.5">
-            <div className="flex flex-col gap-0.5">
-              <span className="text-fluid-xl font-black text-foreground">{pendingTasksCount}</span>
-              <span className="text-xs font-medium text-muted-foreground">Pending Tasks</span>
-            </div>
-            {tasks.filter(t => t.status !== 'Done').slice(0, 2).map((t, i) => (
-              <div key={i} className="flex items-center gap-3 p-2.5 px-3 rounded-2xl bg-white/60 dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] hover:bg-white/90 dark:hover:bg-white/[0.08] transition-all shadow-[0_2px_8px_rgba(0,0,0,0.02)] dark:shadow-none">
-                <div className="size-2 rounded-full bg-orange-500 shrink-0" />
-                <p className="text-fluid-sm font-medium text-foreground truncate flex-1 m-0">{t.title}</p>
-                <Badge variant="outline" className="text-[10px] shrink-0 rounded-full px-2">{t.status}</Badge>
+          <div className="flex flex-col h-full justify-between gap-3 pt-1">
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="text-fluid-xl font-black text-foreground tabular-nums">{pendingTasksCount}</span>
+                <span className="text-xs font-medium text-muted-foreground ml-2">Pending Tasks</span>
               </div>
-            ))}
-            {pendingTasksCount === 0 && (
-              <p className="text-fluid-sm text-muted-foreground m-0">No pending tasks! Great job.</p>
-            )}
+              <Badge variant="outline" className="rounded-full px-2.5 py-0.5 text-xs font-semibold border-primary/30 text-primary bg-primary/10">
+                Active
+              </Badge>
+            </div>
+            
+            <div className="flex flex-col gap-2">
+              {tasks.filter(t => t.status !== 'Done').slice(0, 2).map((t, i) => (
+                <div key={i} className="flex items-center gap-3 p-2.5 px-3 rounded-2xl liquid-widget-item cursor-pointer">
+                  <div className="size-2 rounded-full bg-primary shrink-0" />
+                  <p className="text-fluid-sm font-medium text-foreground truncate flex-1 m-0">{t.title}</p>
+                  <Badge variant="outline" className="text-[10px] shrink-0 rounded-full px-2 py-0.5 border-black/10 dark:border-white/10">{t.status}</Badge>
+                </div>
+              ))}
+              {pendingTasksCount === 0 && (
+                <div className="text-center py-3">
+                  <Icon name="verified" className="text-emerald-500/80 mb-1" size={26}/>
+                  <p className="text-fluid-xs text-muted-foreground m-0">No pending tasks! All caught up.</p>
+                </div>
+              )}
+            </div>
           </div>
         </DashboardWidget>
       )}
@@ -388,8 +407,8 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
           <DashboardWidget
           id="w8"
           title="Upcoming Milestones"
-          icon={<Icon name="workspace_premium" className="text-amber-500 shrink-0" size={26}/>}
-          action={<Badge variant="secondary" className="px-2.5 py-0.5 rounded-full text-xs font-semibold">30 Days</Badge>}
+          icon={<Icon name="workspace_premium" className="text-amber-500 shrink-0" size={22}/>}
+          action={<button onClick={() => setCurrentView && setCurrentView('employees')} className="apple-glass-btn text-xs font-semibold px-3.5 h-7 rounded-full cursor-pointer">Directory</button>}
           contentClass="flex flex-col justify-start pt-4"
           {...wProps}
         >
@@ -401,16 +420,16 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
           ) : (
             <div className="flex flex-col gap-2.5">
               {upcomingMilestones.map((milestone, i) => (
-                <div key={i} className="flex items-center gap-3 p-3 px-3.5 border border-black/[0.06] dark:border-white/[0.08] rounded-2xl bg-white/60 dark:bg-white/[0.04] hover:bg-white/90 dark:hover:bg-white/[0.08] transition-all shadow-[0_2px_8px_rgba(0,0,0,0.02)] dark:shadow-none">
-                  <Avatar className="size-8 shrink-0 rounded-xl">
+                <div key={i} className="flex items-center gap-3 p-2.5 px-3.5 rounded-2xl liquid-widget-item">
+                  <Avatar className="size-8 shrink-0 rounded-xl ring-2 ring-primary/20">
                     {milestone.avatar ? <AvatarImage src={milestone.avatar} alt={milestone.empName} className="object-cover" /> : null}
-                    <AvatarFallback className="bg-primary/10 text-primary rounded-xl"><Icon name="person" size={16}/></AvatarFallback>
+                    <AvatarFallback className="bg-primary/10 text-primary rounded-xl font-bold"><Icon name="person" size={16}/></AvatarFallback>
                   </Avatar>
                   <div className="flex-1 flex flex-col gap-0.5 min-w-0">
                     <p className="m-0 text-fluid-xs font-bold text-foreground truncate">{milestone.empName}</p>
                     <p className="m-0 text-[11px] font-medium text-muted-foreground truncate">{milestone.label}</p>
                   </div>
-                  <Badge variant="default" className="uppercase text-[10px] rounded-full px-2 py-0.5">
+                  <Badge variant="default" className="uppercase text-[10px] rounded-full px-2.5 py-0.5 shadow-xs font-bold">
                     {milestone.daysRemaining === 0 ? 'Today' : `${milestone.daysRemaining}d`}
                   </Badge>
                 </div>

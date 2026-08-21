@@ -13,6 +13,8 @@ if (typeof document !== 'undefined' && document.fonts) {
   })
 }
 
+
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ErrorBoundary>

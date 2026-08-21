@@ -243,6 +243,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
 
       // Invite the teammate by email/phone
       let uid = null
+      let wasAlreadyExisted = false
       const companyUid = adminUid || currentUser?.uid
       try {
         const result = await provisionEmployeeAccount({
@@ -256,6 +257,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
           avatar: newAvatar || ''
         })
         uid = result.uid
+        wasAlreadyExisted = result.alreadyExisted
       } catch (err) {
         addToast('Failed to create login account: ' + err.message, 'danger')
         return
@@ -281,6 +283,12 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
       setEmployees(prev => [...prev, newEmp])
       addLog('Added new employee', `Saved ${newName} (${newEmpId})`)
       if (addAuditLog) addAuditLog('CREATE', 'Employee', `Created new employee profile for ${newName} (${newEmpId})`)
+      
+      if (wasAlreadyExisted) {
+        addToast(`Teammate added & workspace invite linked for ${newName}!`, 'success')
+      } else {
+        addToast(`New teammate ${newName} added successfully!`, 'success')
+      }
     }
 
     // Reset Form

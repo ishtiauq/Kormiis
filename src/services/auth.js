@@ -207,57 +207,92 @@ export const acceptInvite = async (user, invite) => {
 
 /**
  * Registers a teammate by email or phone. Uses secondaryAuth to create the account 
- * without signing out the admin.
+ * without signing out the admin. If the account already exists in Firebase Auth,
+ * it automatically links the teammate to the company and creates an invite record.
  */
 export const provisionEmployeeAccount = async ({ email, password, name, role, companyUid, employeeId, department, avatar }) => {
-  const { db, doc, setDoc, serverTimestamp } = await getFirebase();
+  const { db, doc, setDoc, getDocs, collection, query, where, serverTimestamp } = await getFirebase();
   if (!db || !secondaryAuth) throw new Error('Firebase not configured');
   if (!email) throw new Error('Teammate identifier is required.');
   if (!companyUid) throw new Error('Missing company ID.');
   
   const parsedEmail = parseIdentifier(email);
+  const rawEmail = (email || '').trim().toLowerCase();
   let uid = null;
+  let alreadyExisted = false;
 
   try {
-    // 1. Create the user in Firebase Auth using the secondary instance
+    // 1. Try to create the user in Firebase Auth using the secondary instance
     const userCredential = await createUserWithEmailAndPassword(secondaryAuth, parsedEmail, password || 'KormiisTemp123!');
     uid = userCredential.user.uid;
     
     // Sign out from the secondary instance just in case
     await signOut(secondaryAuth);
   } catch (error) {
-    // If the account already exists, we could handle it or throw
     if (error.code === 'auth/email-already-in-use') {
-      throw new Error('An account with this email/number already exists.');
+      alreadyExisted = true;
+      // The email/phone is already registered in Firebase Auth!
+      // Look up if a Firestore user record already exists for this email
+      try {
+        const usersQ = query(collection(db, 'users'), where('email', 'in', [parsedEmail, rawEmail]));
+        const userSnaps = await getDocs(usersQ);
+        if (!userSnaps.empty) {
+          uid = userSnaps.docs[0].id;
+        }
+      } catch (lookupErr) {
+        console.warn('Could not query users collection for existing user:', lookupErr);
+      }
+    } else {
+      throw error;
     }
-    throw error;
   }
 
-  // 2. Create the user doc
-  await setDoc(doc(db, 'users', uid), {
-    uid,
-    email: parsedEmail,
-    fullName: name || '',
+  // 2. If UID is known, update user doc and company members collection
+  if (uid) {
+    await setDoc(doc(db, 'users', uid), {
+      uid,
+      email: parsedEmail,
+      fullName: name || '',
+      companyUid,
+      employeeId: employeeId || '',
+      role: role || 'Teammate',
+      department: department || '',
+      avatar: avatar || '',
+      joinedAt: serverTimestamp(),
+    }, { merge: true });
+
+    await setDoc(doc(db, 'companies', companyUid, 'members', uid), {
+      employeeId: employeeId || '',
+      email: parsedEmail,
+      name: name || '',
+      role: role || 'Teammate',
+      department: department || '',
+      avatar: avatar || '',
+      registeredAt: serverTimestamp(),
+    }, { merge: true });
+  }
+
+  // 3. Always create an invite record in 'invites' so when they sign in with Google or credentials, they auto-link
+  const inviteData = {
+    email: rawEmail,
+    parsedEmail,
     companyUid,
     employeeId: employeeId || '',
-    role: role || 'Teammate',
-    department: department || '',
-    avatar: avatar || '',
-    joinedAt: serverTimestamp(),
-  });
-
-  // 3. Register in company's members subcollection
-  await setDoc(doc(db, 'companies', companyUid, 'members', uid), {
-    employeeId: employeeId || '',
-    email: parsedEmail,
     name: name || '',
     role: role || 'Teammate',
     department: department || '',
     avatar: avatar || '',
-    registeredAt: serverTimestamp(),
-  }, { merge: true });
+    createdAt: serverTimestamp(),
+    status: uid ? 'linked' : 'pending',
+    linkedUid: uid || null,
+  };
 
-  return { uid, invited: false };
+  await setDoc(doc(db, 'invites', parsedEmail), inviteData, { merge: true });
+  if (rawEmail && rawEmail !== parsedEmail) {
+    await setDoc(doc(db, 'invites', rawEmail), inviteData, { merge: true });
+  }
+
+  return { uid, invited: !uid, alreadyExisted };
 };
 
 /**
