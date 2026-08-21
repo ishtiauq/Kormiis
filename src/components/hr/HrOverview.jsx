@@ -10,9 +10,7 @@ const stat = (icon, label, value, toneColor, iconBg, view, setCurrentView) => (
     onClick={() => setCurrentView && setCurrentView(view)}
     className="flex flex-col items-start gap-1 p-3 sm:p-3.5 rounded-2xl liquid-widget-item cursor-pointer text-left w-full active:scale-[0.98]"
   >
-    <div className={`size-8 rounded-xl ${iconBg} flex items-center justify-center shrink-0 border border-black/5 dark:border-white/10`}>
-      <Icon name={icon} size={20} className={toneColor}/>
-    </div>
+    <Icon name={icon} size={28} className="text-foreground shrink-0"/>
     <span className="text-fluid-xl font-black tabular-nums text-foreground leading-tight mt-1.5">{value}</span>
     <span className="text-[11px] font-semibold text-muted-foreground truncate w-full">{label}</span>
   </button>
@@ -43,8 +41,8 @@ export default function HrOverview({ adminUid, currentUser, setCurrentView, addT
     <Card className="flex flex-col p-0 h-full">
       <CardHeader className="flex-row items-center justify-between pb-3.5 space-y-0">
         <div className="flex items-center gap-3">
-          <div className="size-9 rounded-2xl bg-white/60 dark:bg-white/[0.08] border border-white/50 dark:border-white/12 shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)] flex items-center justify-center shrink-0">
-            <Icon name="monitoring" className="text-primary shrink-0" size={22}/>
+          <div className="flex items-center justify-center shrink-0">
+            <Icon name="monitoring" className="text-primary shrink-0" size={28}/>
           </div>
           <CardTitle className="text-fluid-lg font-bold text-foreground m-0">People Insights</CardTitle>
         </div>

@@ -53,9 +53,7 @@ export default function SecurityCloudSection() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 w-full">
           {securityPillars.map((item, i) => (
             <div key={i} className="p-5 rounded-2xl bg-card border border-border shadow-sm flex flex-col gap-2.5">
-              <div className="w-10 h-10 rounded-xl bg-foreground/10 flex items-center justify-center text-foreground shrink-0">
-                <Icon name={item.icon} size={20} />
-              </div>
+              <Icon name={item.icon} size={36} className="text-foreground shrink-0" />
               <h3 className="font-bold text-sm text-foreground">{item.title}</h3>
               <p className="text-xs text-muted-foreground leading-relaxed">{item.desc}</p>
             </div>

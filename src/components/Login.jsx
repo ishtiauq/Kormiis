@@ -790,15 +790,12 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                     <div className={`absolute top-0 inset-x-4 h-1.5 sm:h-2 bg-gradient-to-b ${item.rimLight} opacity-20 pointer-events-none blur-sm z-10`} />
 
                     <div className="flex items-center gap-2 min-w-0 flex-1">
-                      {/* 3D Embossed Glossy Icon Container */}
-                      <div className={`relative size-5.5 sm:size-7.5 rounded-md sm:rounded-xl bg-gradient-to-br ${item.iconGrad} flex items-center justify-center text-white shadow-lg ${item.iconShadow} shrink-0 overflow-hidden`}>
-                        <div className="absolute inset-0 bg-gradient-to-b from-white/25 via-transparent to-black/25 pointer-events-none" />
-                        <Icon 
-                          name={item.icon} 
-                          size={undefined} 
-                          className="!text-[12px] sm:!text-[16px] leading-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] relative z-10" 
-                        />
-                      </div>
+                      <Icon 
+                        name={item.icon} 
+                        size={22} 
+                        className="drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] shrink-0 text-white" 
+                        style={{ color: '#ffffff' }}
+                      />
 
                       {/* Feature Title */}
                       <span className="text-[11px] sm:text-xs font-bold text-white tracking-tight whitespace-nowrap truncate drop-shadow-sm" style={{ color: '#ffffff' }}>
@@ -839,15 +836,12 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                         <div className={`absolute top-0 inset-x-4 h-2.5 bg-gradient-to-b ${item.rimLight} opacity-20 pointer-events-none blur-sm z-10`} />
 
                         <div className="flex items-center gap-3 min-w-0 flex-1">
-                          {/* 3D Embossed Glossy Icon Container */}
-                          <div className={`relative size-8.5 rounded-xl bg-gradient-to-br ${item.iconGrad} flex items-center justify-center text-white shadow-lg ${item.iconShadow} shrink-0 overflow-hidden`}>
-                            <div className="absolute inset-0 bg-gradient-to-b from-white/25 via-transparent to-black/25 pointer-events-none" />
-                            <Icon 
-                              name={item.icon} 
-                              size={undefined} 
-                              className="!text-[17px] leading-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] relative z-10 text-white" 
-                            />
-                          </div>
+                          <Icon 
+                            name={item.icon} 
+                            size={26} 
+                            className="drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] shrink-0 text-white" 
+                            style={{ color: '#ffffff' }}
+                          />
 
                           {/* Feature Title */}
                           <span className="text-sm font-bold text-white tracking-tight whitespace-nowrap truncate drop-shadow-sm" style={{ color: '#ffffff' }}>
@@ -877,15 +871,12 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                         <div className={`absolute top-0 inset-x-4 h-2.5 bg-gradient-to-b ${item.rimLight} opacity-20 pointer-events-none blur-sm z-10`} />
 
                         <div className="flex items-center gap-3 min-w-0 flex-1">
-                          {/* 3D Embossed Glossy Icon Container */}
-                          <div className={`relative size-8.5 rounded-xl bg-gradient-to-br ${item.iconGrad} flex items-center justify-center text-white shadow-lg ${item.iconShadow} shrink-0 overflow-hidden`}>
-                            <div className="absolute inset-0 bg-gradient-to-b from-white/25 via-transparent to-black/25 pointer-events-none" />
-                            <Icon 
-                              name={item.icon} 
-                              size={undefined} 
-                              className="!text-[17px] leading-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] relative z-10 text-white" 
-                            />
-                          </div>
+                          <Icon 
+                            name={item.icon} 
+                            size={26} 
+                            className="drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] shrink-0 text-white" 
+                            style={{ color: '#ffffff' }}
+                          />
 
                           {/* Feature Title */}
                           <span className="text-sm font-bold text-white tracking-tight whitespace-nowrap truncate drop-shadow-sm" style={{ color: '#ffffff' }}>

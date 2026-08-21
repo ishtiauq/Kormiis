@@ -509,7 +509,7 @@ export default function Documents({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
-            <Icon name="folder_open" className="text-primary" size={24}/>
+            <Icon name="folder_open" className="text-primary shrink-0" size={28}/>
             Documents
           </h1>
         </div>
@@ -555,9 +555,7 @@ export default function Documents({
             className="group relative p-4 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] hover:bg-primary/[0.08] dark:hover:bg-primary/[0.12] border border-border/70 dark:border-white/10 hover:border-primary/50 transition-all duration-300 cursor-pointer shadow-sm flex flex-col justify-between gap-3"
           >
             <div className="flex items-start justify-between gap-2">
-              <div className="size-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
-                <Icon name="flight_takeoff" size={20}/>
-              </div>
+              <Icon name="flight_takeoff" size={32} className="text-foreground shrink-0"/>
               <Badge variant="outline" className="text-[10px] uppercase font-bold text-amber-600 border-amber-500/30 bg-amber-500/5">
                 NOC
               </Badge>
@@ -582,9 +580,7 @@ export default function Documents({
             className="group relative p-4 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] hover:bg-primary/[0.08] dark:hover:bg-primary/[0.12] border border-border/70 dark:border-white/10 hover:border-primary/50 transition-all duration-300 cursor-pointer shadow-sm flex flex-col justify-between gap-3"
           >
             <div className="flex items-start justify-between gap-2">
-              <div className="size-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold">
-                <Icon name="payments" size={20}/>
-              </div>
+              <Icon name="payments" size={32} className="text-foreground shrink-0"/>
               <Badge variant="outline" className="text-[10px] uppercase font-bold text-emerald-600 border-emerald-500/30 bg-emerald-500/5">
                 Salary
               </Badge>
@@ -609,9 +605,7 @@ export default function Documents({
             className="group relative p-4 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] hover:bg-primary/[0.08] dark:hover:bg-primary/[0.12] border border-border/70 dark:border-white/10 hover:border-primary/50 transition-all duration-300 cursor-pointer shadow-sm flex flex-col justify-between gap-3"
           >
             <div className="flex items-start justify-between gap-2">
-              <div className="size-10 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold">
-                <Icon name="workspace_premium" size={20}/>
-              </div>
+              <Icon name="workspace_premium" size={32} className="text-foreground shrink-0"/>
               <Badge variant="outline" className="text-[10px] uppercase font-bold text-blue-600 border-blue-500/30 bg-blue-500/5">
                 Experience
               </Badge>
@@ -636,9 +630,7 @@ export default function Documents({
             className="group relative p-4 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] hover:bg-primary/[0.08] dark:hover:bg-primary/[0.12] border border-border/70 dark:border-white/10 hover:border-primary/50 transition-all duration-300 cursor-pointer shadow-sm flex flex-col justify-between gap-3"
           >
             <div className="flex items-start justify-between gap-2">
-              <div className="size-10 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold">
-                <Icon name="verified_user" size={20}/>
-              </div>
+              <Icon name="verified_user" size={32} className="text-foreground shrink-0"/>
               <Badge variant="outline" className="text-[10px] uppercase font-bold text-purple-600 border-purple-500/30 bg-purple-500/5">
                 Verification
               </Badge>

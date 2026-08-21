@@ -341,11 +341,11 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
               <h3 className="font-bold text-fluid text-foreground tracking-tight">Company Profile</h3>
             </div>
 
-            <div className={`size-8 rounded-full flex items-center justify-center transition-transform duration-300 shrink-0 ${
-              openSections.company ? 'rotate-180 bg-primary/10 text-primary' : 'rotate-0 bg-black/5 dark:bg-white/5 text-muted-foreground'
-            }`}>
-              <Icon name="expand_more" size={18}/>
-            </div>
+            <Icon 
+              name="expand_more" 
+              size={24} 
+              className={`transition-transform duration-300 shrink-0 ${openSections.company ? 'rotate-180 text-foreground' : 'rotate-0 text-muted-foreground'}`}
+            />
           </button>
 
           {openSections.company && (
@@ -460,11 +460,11 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
               <h3 className="font-bold text-fluid text-foreground tracking-tight">Payroll & Currency</h3>
             </div>
 
-            <div className={`size-8 rounded-full flex items-center justify-center transition-transform duration-300 shrink-0 ${
-              openSections.payroll ? 'rotate-180 bg-primary/10 text-primary' : 'rotate-0 bg-black/5 dark:bg-white/5 text-muted-foreground'
-            }`}>
-              <Icon name="expand_more" size={18}/>
-            </div>
+            <Icon 
+              name="expand_more" 
+              size={24} 
+              className={`transition-transform duration-300 shrink-0 ${openSections.payroll ? 'rotate-180 text-foreground' : 'rotate-0 text-muted-foreground'}`}
+            />
           </button>
 
           {openSections.payroll && (
@@ -608,11 +608,11 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
               <h3 className="font-bold text-fluid text-foreground tracking-tight">Expense Policies</h3>
             </div>
 
-            <div className={`size-8 rounded-full flex items-center justify-center transition-transform duration-300 shrink-0 ${
-              openSections.expenses ? 'rotate-180 bg-primary/10 text-primary' : 'rotate-0 bg-black/5 dark:bg-white/5 text-muted-foreground'
-            }`}>
-              <Icon name="expand_more" size={18}/>
-            </div>
+            <Icon 
+              name="expand_more" 
+              size={24} 
+              className={`transition-transform duration-300 shrink-0 ${openSections.expenses ? 'rotate-180 text-foreground' : 'rotate-0 text-muted-foreground'}`}
+            />
           </button>
 
           {openSections.expenses && (
@@ -653,11 +653,11 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
               <h3 className="font-bold text-fluid text-foreground tracking-tight">Notifications & Alerts</h3>
             </div>
 
-            <div className={`size-8 rounded-full flex items-center justify-center transition-transform duration-300 shrink-0 ${
-              openSections.notifications ? 'rotate-180 bg-primary/10 text-primary' : 'rotate-0 bg-black/5 dark:bg-white/5 text-muted-foreground'
-            }`}>
-              <Icon name="expand_more" size={18}/>
-            </div>
+            <Icon 
+              name="expand_more" 
+              size={24} 
+              className={`transition-transform duration-300 shrink-0 ${openSections.notifications ? 'rotate-180 text-foreground' : 'rotate-0 text-muted-foreground'}`}
+            />
           </button>
 
           {openSections.notifications && (
@@ -882,11 +882,11 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
               <h3 className="font-bold text-fluid text-foreground tracking-tight">Security & Sessions</h3>
             </div>
 
-            <div className={`size-8 rounded-full flex items-center justify-center transition-transform duration-300 shrink-0 ${
-              openSections.security ? 'rotate-180 bg-primary/10 text-primary' : 'rotate-0 bg-black/5 dark:bg-white/5 text-muted-foreground'
-            }`}>
-              <Icon name="expand_more" size={18}/>
-            </div>
+            <Icon 
+              name="expand_more" 
+              size={24} 
+              className={`transition-transform duration-300 shrink-0 ${openSections.security ? 'rotate-180 text-foreground' : 'rotate-0 text-muted-foreground'}`}
+            />
           </button>
 
           {openSections.security && (
@@ -989,11 +989,11 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
               <h3 className="font-bold text-fluid text-foreground tracking-tight">System Audit Logs</h3>
             </div>
 
-            <div className={`size-8 rounded-full flex items-center justify-center transition-transform duration-300 shrink-0 ${
-              openSections.audit ? 'rotate-180 bg-primary/10 text-primary' : 'rotate-0 bg-black/5 dark:bg-white/5 text-muted-foreground'
-            }`}>
-              <Icon name="expand_more" size={18}/>
-            </div>
+            <Icon 
+              name="expand_more" 
+              size={24} 
+              className={`transition-transform duration-300 shrink-0 ${openSections.audit ? 'rotate-180 text-foreground' : 'rotate-0 text-muted-foreground'}`}
+            />
           </button>
 
           {openSections.audit && (

@@ -238,7 +238,7 @@ export default function Notes({ notes = [], setNotes, currentUser, addToast }) {
     <div className="animate-fade-in pb-10 flex flex-col gap-6 w-full max-w-full overflow-x-hidden">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
-          <Icon name="sticky_note_2" className="text-foreground" size={24}/>
+          <Icon name="sticky_note_2" className="text-foreground shrink-0" size={28}/>
           Notes
         </h1>
       </div>

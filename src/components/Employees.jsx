@@ -677,7 +677,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
 
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground"><Icon name="group" className="text-foreground" size={20}/>Employees</h1>
+        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground"><Icon name="group" className="text-foreground shrink-0" size={28}/>Employees</h1>
       </div>
 
       {/* Pending Profile Updates Queue */}

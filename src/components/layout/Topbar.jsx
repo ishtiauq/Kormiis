@@ -524,17 +524,8 @@ export default function Topbar({
                         : 'bg-white/60 dark:bg-white/[0.04] hover:bg-white/90 dark:hover:bg-white/[0.08] border-black/[0.06] dark:border-white/[0.08] shadow-[0_2px_8px_rgba(0,0,0,0.02)] dark:shadow-none'
                     }`}
                   >
-                    {/* Category Squircle Icon */}
-                    <div 
-                      className="size-8.5 sm:size-9 shrink-0 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-105 shadow-sm mt-0.5" 
-                      style={{ 
-                        background: `${meta.color}18`, 
-                        color: meta.color,
-                        border: `1px solid ${meta.color}35` 
-                      }}
-                    >
-                      <Icon name={meta.icon} size={17} />
-                    </div>
+                    {/* Category Icon */}
+                    <Icon name={meta.icon} size={26} className="shrink-0 text-foreground transition-transform group-hover:scale-105 mt-0.5" />
 
                     {/* Content */}
                     <div className="min-w-0 flex-1 flex flex-col gap-0.5">

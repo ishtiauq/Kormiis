@@ -126,7 +126,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
     <div className="animate-fade-in flex flex-col gap-5 max-w-[1200px] mx-auto w-full">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground m-0">
-          <Icon name="insights" className="text-foreground" size={20}/> Performance Tracker
+          <Icon name="insights" className="text-foreground shrink-0" size={28}/> Performance Tracker
         </h1>
         <div className="flex items-center gap-2.5">
           <GlassMonthPicker 

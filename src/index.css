@@ -916,8 +916,16 @@ html.dark .glass-floating-sidebar,
    UI/UX POLISH & ACCESSIBILITY TOKENS
    ============================================================== */
 
-/* 1. Universal Single Apple Ultra-Liquid Glass Scrollbar (Desktop & Pointer Devices) */
+/* ==============================================================
+   UNIVERSAL GLOBAL SCROLLBAR SYSTEM (PERMANENT FIXED STANDARD)
+   - Invisible by default everywhere in the app
+   - Becomes visible ONLY when the scrollable container is hovered
+   - Apple Ultra-Liquid Glass capsule on container hover
+   - Brand Accent #FE3501 on direct thumb hover or dragging
+   - Instant disappear when mouse leaves
+   ============================================================== */
 @media (hover: hover) and (pointer: fine) {
+  /* WebKit / Chromium / Edge / Safari */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -931,19 +939,15 @@ html.dark .glass-floating-sidebar,
   ::-webkit-scrollbar-thumb {
     background: transparent !important;
     border-radius: 9999px !important;
-    border: 1px solid transparent !important;
+    border: none !important;
     background-clip: padding-box !important;
     transition: none !important;
   }
 
-  /* Container Hover / Scroll State: Apple Ultra-Liquid Glass Bar (Light Mode) */
+  /* Container Hover State: Apple Ultra-Liquid Glass Bar (Light Mode) */
   *:hover::-webkit-scrollbar-thumb,
-  html:hover ::-webkit-scrollbar-thumb,
-  body:hover ::-webkit-scrollbar-thumb,
-  aside:hover ::-webkit-scrollbar-thumb,
-  nav:hover ::-webkit-scrollbar-thumb,
-  main:hover ::-webkit-scrollbar-thumb,
-  div:hover ::-webkit-scrollbar-thumb {
+  html:hover::-webkit-scrollbar-thumb,
+  body:hover::-webkit-scrollbar-thumb {
     background: rgba(0, 0, 0, 0.28) !important;
     border: 1px solid rgba(255, 255, 255, 0.65) !important;
     border-radius: 9999px !important;
@@ -951,21 +955,13 @@ html.dark .glass-floating-sidebar,
     transition: none !important;
   }
 
-  /* Container Hover / Scroll State: Apple Ultra-Liquid Glass Bar (Dark Mode) */
+  /* Container Hover State: Apple Ultra-Liquid Glass Bar (Dark Mode) */
   .dark *:hover::-webkit-scrollbar-thumb,
-  .dark html:hover ::-webkit-scrollbar-thumb,
-  .dark body:hover ::-webkit-scrollbar-thumb,
-  .dark aside:hover ::-webkit-scrollbar-thumb,
-  .dark nav:hover ::-webkit-scrollbar-thumb,
-  .dark main:hover ::-webkit-scrollbar-thumb,
-  .dark div:hover ::-webkit-scrollbar-thumb,
+  .dark html:hover::-webkit-scrollbar-thumb,
+  .dark body:hover::-webkit-scrollbar-thumb,
   [data-theme="dark"] *:hover::-webkit-scrollbar-thumb,
-  [data-theme="dark"] html:hover ::-webkit-scrollbar-thumb,
-  [data-theme="dark"] body:hover ::-webkit-scrollbar-thumb,
-  [data-theme="dark"] aside:hover ::-webkit-scrollbar-thumb,
-  [data-theme="dark"] nav:hover ::-webkit-scrollbar-thumb,
-  [data-theme="dark"] main:hover ::-webkit-scrollbar-thumb,
-  [data-theme="dark"] div:hover ::-webkit-scrollbar-thumb {
+  [data-theme="dark"] html:hover::-webkit-scrollbar-thumb,
+  [data-theme="dark"] body:hover::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.32) !important;
     border: 1px solid rgba(255, 255, 255, 0.20) !important;
     border-radius: 9999px !important;
@@ -976,18 +972,37 @@ html.dark .glass-floating-sidebar,
   /* Direct Scrollbar Thumb Hover & Active / Drag State: Brand Color (#FE3501) */
   ::-webkit-scrollbar-thumb:hover,
   ::-webkit-scrollbar-thumb:active,
+  *:hover::-webkit-scrollbar-thumb:hover,
+  *:hover::-webkit-scrollbar-thumb:active,
   *:active::-webkit-scrollbar-thumb,
   .dark ::-webkit-scrollbar-thumb:hover,
   .dark ::-webkit-scrollbar-thumb:active,
+  .dark *:hover::-webkit-scrollbar-thumb:hover,
+  .dark *:hover::-webkit-scrollbar-thumb:active,
   .dark *:active::-webkit-scrollbar-thumb,
   [data-theme="dark"] ::-webkit-scrollbar-thumb:hover,
   [data-theme="dark"] ::-webkit-scrollbar-thumb:active,
+  [data-theme="dark"] *:hover::-webkit-scrollbar-thumb:hover,
+  [data-theme="dark"] *:hover::-webkit-scrollbar-thumb:active,
   [data-theme="dark"] *:active::-webkit-scrollbar-thumb {
     background: #FE3501 !important;
     border: 1px solid rgba(255, 255, 255, 0.45) !important;
     border-radius: 9999px !important;
     background-clip: padding-box !important;
     transition: none !important;
+  }
+
+  /* Standard CSS Scrollbar (Firefox) */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+  *:hover {
+    scrollbar-color: rgba(0, 0, 0, 0.28) transparent;
+  }
+  .dark *:hover,
+  [data-theme="dark"] *:hover {
+    scrollbar-color: rgba(255, 255, 255, 0.32) transparent;
   }
 }
 

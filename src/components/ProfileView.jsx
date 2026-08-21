@@ -327,9 +327,7 @@ export default function ProfileView({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
-            <div className="size-9 rounded-2xl bg-primary/10 text-primary flex items-center justify-center border border-primary/20 shadow-xs">
-              <Icon name="person" size={20}/>
-            </div>
+            <Icon name="person" size={28} className="text-foreground shrink-0"/>
             My Profile
           </h1>
           <p className="text-fluid-xs sm:text-fluid-sm text-muted-foreground mt-1">
@@ -362,9 +360,7 @@ export default function ProfileView({
       {hasPending && (
         <div className="glass-card rounded-3xl p-4 sm:p-5 border border-amber-500/30 bg-amber-500/10 dark:bg-amber-500/15 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
           <div className="flex items-start sm:items-center gap-3.5">
-            <div className="size-10 rounded-2xl bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 border border-amber-500/30">
-              <Icon name="pending_actions" size={22} />
-            </div>
+            <Icon name="pending_actions" size={32} className="text-foreground shrink-0"/>
             <div>
               <div className="text-sm font-semibold text-foreground flex items-center gap-2">
                 Pending Profile Updates

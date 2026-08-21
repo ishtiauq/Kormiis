@@ -115,9 +115,7 @@ export default function GeofenceSettings({ settings, setSettings, addToast, addL
     <Card className="glass-kormiis border border-border/80 dark:border-white/12 shadow-xl rounded-3xl overflow-hidden animate-fade-in">
       <CardHeader className="p-6 pb-4 border-b border-border/40 dark:border-white/8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-2xl bg-primary/10 text-primary">
-            <Icon name="pin_drop" size={22}/>
-          </div>
+          <Icon name="pin_drop" size={32} className="text-foreground shrink-0"/>
           <div>
             <CardTitle className="text-fluid-lg font-bold">Office Geofence Location</CardTitle>
             <CardDescription className="text-fluid-xs text-muted-foreground">

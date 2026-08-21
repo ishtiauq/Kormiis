@@ -72,9 +72,7 @@ export default function ClockWidget({ employees = [], attendance = {}, setAttend
     <Card className="glass-card border border-white/30 dark:border-white/12 shadow-xl rounded-3xl p-0">
       <CardContent className="flex items-center justify-between flex-wrap gap-4 p-4 sm:p-6">
         <div className="flex items-center gap-3.5">
-          <div className="size-11 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
-            <Icon name="schedule" className="text-primary" size={24}/>
-          </div>
+          <Icon name="schedule" className="text-foreground shrink-0" size={38}/>
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
               <span aria-live="polite" role="timer" className="text-2xl sm:text-3xl font-black tabular-nums leading-tight tracking-tight text-foreground">

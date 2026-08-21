@@ -20,7 +20,7 @@ const DashboardWidget = ({
     <Card className={`flex flex-col p-0 h-full ${cardClass}`}>
       <CardHeader className="flex-row items-center justify-between pb-3.5 space-y-0">
         <div className="flex items-center gap-3">
-          <div className="size-9 rounded-2xl bg-white/60 dark:bg-white/[0.08] border border-white/50 dark:border-white/12 shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)] flex items-center justify-center shrink-0">
+          <div className="flex items-center justify-center shrink-0">
             {icon}
           </div>
           <CardTitle className="text-fluid-lg font-bold text-foreground m-0">{title}</CardTitle>
@@ -235,7 +235,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
           <DashboardWidget
           id="w4"
           title="Announcements"
-          icon={<Icon name="rss_feed" className="text-amber-500 shrink-0" size={22}/>}
+          icon={<Icon name="rss_feed" className="text-amber-500 shrink-0" size={28}/>}
           cardClass="col-span-full"
           action={<button onClick={() => setCurrentView && setCurrentView('announcements')} className="apple-glass-btn text-xs font-semibold px-3.5 h-7 rounded-full cursor-pointer">View All</button>}
           contentClass="flex flex-col justify-start gap-2.5 pt-4"
@@ -250,9 +250,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
                 className="flex items-center gap-3.5 p-3 px-4 rounded-2xl liquid-widget-item cursor-pointer select-none active:scale-[0.99]"
                 onClick={() => setCurrentView && setCurrentView('announcements')}
               >
-                <div className="size-8 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center justify-center shrink-0">
-                  <Icon name="rss_feed" size={18}/>
-                </div>
+                <Icon name="rss_feed" size={24} className="text-foreground shrink-0"/>
                 <div className="flex-1 min-w-0 pr-2">
                   <p className="m-0 text-fluid-xs font-bold text-foreground truncate">{ann.title}</p>
                   <p className="m-0 mt-0.5 text-[11px] font-medium text-muted-foreground">
@@ -274,7 +272,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
           <DashboardWidget
             id="w2"
             title="Today's Attendance"
-            icon={<Icon name="group" className="text-emerald-500 shrink-0" size={22}/>}
+            icon={<Icon name="group" className="text-emerald-500 shrink-0" size={28}/>}
             action={
               <div className="flex items-center gap-2">
                 {attFilter && (
@@ -501,7 +499,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
         <DashboardWidget
           id="perf-widget"
           title="Performance Tracker"
-          icon={<Icon name="insights" className="text-purple-500 shrink-0" size={22}/>}
+          icon={<Icon name="insights" className="text-purple-500 shrink-0" size={28}/>}
           action={<button onClick={() => setCurrentView && setCurrentView('performance')} className="apple-glass-btn text-xs font-semibold px-3.5 h-7 rounded-full cursor-pointer">Details</button>}
           {...wProps}
         >
@@ -551,7 +549,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
         <DashboardWidget
           id="tasks-widget"
           title="Tasks Overview"
-          icon={<Icon name="check_box" className="text-primary shrink-0" size={22}/>}
+          icon={<Icon name="check_box" className="text-primary shrink-0" size={28}/>}
           {...wProps}
           action={
             <button onClick={() => setCurrentView('tasks')} className="apple-glass-btn text-xs font-semibold px-3.5 h-7 rounded-full text-primary hover:text-primary/80 cursor-pointer">
@@ -593,7 +591,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
           <DashboardWidget
           id="w8"
           title="Upcoming Milestones"
-          icon={<Icon name="workspace_premium" className="text-amber-500 shrink-0" size={22}/>}
+          icon={<Icon name="workspace_premium" className="text-amber-500 shrink-0" size={28}/>}
           action={<button onClick={() => setCurrentView && setCurrentView('employees')} className="apple-glass-btn text-xs font-semibold px-3.5 h-7 rounded-full cursor-pointer">Directory</button>}
           contentClass="flex flex-col justify-start pt-4"
           {...wProps}
@@ -629,7 +627,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
           <DashboardWidget
           id="w6"
           title="Upcoming Events"
-          icon={<Icon name="calendar_month" className="text-emerald-500 shrink-0" size={26}/>}
+          icon={<Icon name="calendar_month" className="text-emerald-500 shrink-0" size={28}/>}
           cardClass="md:col-span-2 lg:col-span-2"
           action={<button onClick={() => setCurrentView && setCurrentView('calendar')} className="apple-glass-btn text-xs font-semibold px-3.5 h-7 rounded-full cursor-pointer">Events</button>}
           contentClass="flex flex-col justify-start gap-2.5 pt-4"
@@ -664,7 +662,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
         <DashboardWidget
           id="documents-widget"
           title="Recent Documents"
-          icon={<Icon name="description" className="text-blue-500 shrink-0" size={26}/>}
+          icon={<Icon name="description" className="text-blue-500 shrink-0" size={28}/>}
           {...wProps}
           action={
             <button onClick={() => setCurrentView('documents')} className="apple-glass-btn text-xs font-semibold px-3.5 h-7 rounded-full text-blue-500 hover:text-blue-600 cursor-pointer">
@@ -694,7 +692,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
           <DashboardWidget
           id="w5"
           title="Payroll Summary"
-          icon={<Icon name="account_balance" className="text-emerald-500 shrink-0" size={26}/>}
+          icon={<Icon name="account_balance" className="text-emerald-500 shrink-0" size={28}/>}
           action={currentPayrollMonth && <Badge variant="secondary" className="px-2.5 py-0.5 rounded-full text-xs font-semibold">{currentPayrollMonth}</Badge>}
           contentClass="flex flex-col justify-between pt-4"
           {...wProps}
@@ -730,7 +728,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
           <DashboardWidget
           id="w1"
           title="Employee Directory"
-          icon={<Icon name="group" className="text-blue-500 shrink-0" size={26}/>}
+          icon={<Icon name="group" className="text-blue-500 shrink-0" size={28}/>}
           action={<button onClick={() => setCurrentView && setCurrentView('employees')} className="apple-glass-btn text-xs font-semibold px-3.5 h-7 rounded-full cursor-pointer">View All</button>}
           contentClass="flex items-center justify-around py-4"
           {...wProps}
@@ -757,7 +755,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
         <DashboardWidget
           id="assets-widget"
           title="Asset Inventory"
-          icon={<Icon name="devices_other" className="text-teal-500 shrink-0" size={26}/>}
+          icon={<Icon name="devices_other" className="text-teal-500 shrink-0" size={28}/>}
           {...wProps}
           action={
             <button onClick={() => setCurrentView('assets')} className="apple-glass-btn text-xs font-semibold px-3.5 h-7 rounded-full text-teal-500 hover:text-teal-600 cursor-pointer">

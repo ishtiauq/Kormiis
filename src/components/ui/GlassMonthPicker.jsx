@@ -125,9 +125,7 @@ export default function GlassMonthPicker({
           isOpen ? 'ring-2 ring-primary/40 border-primary/50' : ''
         }`}
       >
-        <div className="size-6 rounded-xl bg-primary/10 dark:bg-primary/20 text-primary flex items-center justify-center shrink-0 transition-transform group-hover:scale-105">
-          <Icon name="calendar_month" size={14} />
-        </div>
+        <Icon name="calendar_month" size={18} className="text-foreground shrink-0 transition-transform group-hover:scale-105" />
 
         <span className="text-fluid-xs font-bold tracking-tight text-foreground whitespace-nowrap">
           {activeMonthLabel} <span className="tabular-nums font-semibold text-muted-foreground ml-0.5">{selectedYear}</span>

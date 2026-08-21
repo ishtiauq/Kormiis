@@ -679,7 +679,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
       {/* Header and Month Selector */}
       <div className="flex items-center justify-between">
         <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
-          <Icon name="account_balance" className="text-foreground" size={20}/>
+          <Icon name="account_balance" className="text-foreground shrink-0" size={28}/>
           Payroll
         </h1>
       </div>

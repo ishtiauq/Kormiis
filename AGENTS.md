@@ -125,3 +125,18 @@ Global fluid typography uses `clamp()` in `@layer base`:
   - **iPad Pro Requirement**: The iPad Pro screen size (`1024px × 1366px`) **MUST ALWAYS** be treated as a **Tablet screen**, NOT as a desktop.
   - Tablet screens use the top unified navigation bar with viewport bottom-edge image anchoring (`h-[100dvh] pb-0`), single vertical feature marquee stream (`xl:hidden` / `< 1025px`), and tablet-proportional aspect scaling.
 - **Desktop & Widescreen Laptops**: `> 1024px` (`xl:` / `≥ 1025px`). Dual horizontal feature marquee streams and desktop widescreen layout.
+
+---
+
+## 9. Universal Global Scrollbar Rule (Permanent Fixed Standard)
+
+Scrollbars across the entire application **MUST STRICTLY** follow this fixed two-tier interaction standard (centralized in `src/index.css`):
+
+- **Default Idle State**: **Completely Invisible** (`background: transparent !important`, border `none`, track `transparent`). No scrollbars should ever be visible when the mouse is resting or outside a scrollable container.
+- **Container Hover State**: Visible **ONLY** when the mouse hovers over the scrollable container or page (`*:hover::-webkit-scrollbar-thumb`).
+  - **Light Mode**: Apple Ultra-Liquid Glass capsule (`rgba(0, 0, 0, 0.28)` with `1px solid rgba(255, 255, 255, 0.65)` border).
+  - **Dark Mode**: High-clarity frosted capsule (`rgba(255, 255, 255, 0.32)` with `1px solid rgba(255, 255, 255, 0.20)` border).
+- **Direct Thumb Hover & Dragging / Active State**: Switches to Brand Color `#FE3501` (`background: #FE3501 !important`, border `1px solid rgba(255, 255, 255, 0.45)`).
+- **Mouse Leave**: Instantly disappears (`transition: none !important` with 0ms delay).
+- **DO NOT** add custom inline or per-component scrollbars that leave a visible bar in the default idle state. Always inherit or use the centralized standard.
+

@@ -204,7 +204,7 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
       {/* Header */}
       <div className="flex flex-col pb-4 border-b border-border border-headline mb-2">
         <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
-          <Icon name="check_box" className="text-foreground" size={20}/> Tasks
+          <Icon name="check_box" className="text-foreground shrink-0" size={28}/> Tasks
         </h1>
       </div>
       

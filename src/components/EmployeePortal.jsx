@@ -433,9 +433,7 @@ export default function EmployeePortal({
           <div className="pt-2 pb-1">
             {isPunchedOut ? (
               <div className="flex flex-col items-center gap-2 py-3">
-                <div className="size-10 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
-                  <Icon name="check_circle" size={20}/>
-                </div>
+                <Icon name="check_circle" size={36} className="text-foreground shrink-0"/>
                 <p className="text-fluid-sm font-semibold text-foreground">Today's attendance completed</p>
                 <p className="text-fluid-xs text-muted-foreground">In: {punchLog.checkIn} • Out: {punchLog.checkOut} • {punchLog.hours}h</p>
               </div>
@@ -577,7 +575,7 @@ function DashboardView({ currentUser, attendance, setAttendance, addToast, expen
     <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[1200px] mx-auto">
       <div className="flex items-center justify-between">
         <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
-          <Icon name="dashboard" className="text-foreground" size={20}/>
+          <Icon name="dashboard" className="text-foreground shrink-0" size={28}/>
           Dashboard
         </h1>
       </div>
@@ -828,7 +826,7 @@ function AttendanceView({
     <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[1000px] mx-auto pb-10">
       <div className="flex items-center justify-between">
         <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
-          <Icon name="schedule" className="text-foreground" size={20}/>
+          <Icon name="schedule" className="text-foreground shrink-0" size={28}/>
           Attendance
         </h1>
       </div>
@@ -1187,7 +1185,7 @@ function PayslipsView({ currentUser, payroll, addToast, settings }) {
     <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[1000px] mx-auto pb-10">
       <div className="flex items-center justify-between">
         <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
-          <Icon name="account_balance" className="text-foreground" size={20}/>
+          <Icon name="account_balance" className="text-foreground shrink-0" size={28}/>
           Payslips
         </h1>
       </div>
@@ -1282,7 +1280,7 @@ function LeaveView({ currentUser, attendance, setAttendance, addToast, addLog, s
     <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[1000px] mx-auto pb-10">
       <div className="flex items-center justify-between">
         <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
-          <Icon name="calendar_month" className="text-foreground" size={20}/>
+          <Icon name="calendar_month" className="text-foreground shrink-0" size={28}/>
           Leave
         </h1>
       </div>
@@ -1581,7 +1579,7 @@ function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetR
     <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[900px] mx-auto pb-10">
       <div className="flex items-center justify-between">
         <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
-          <Icon name="monitor" className="text-foreground" size={20}/>
+          <Icon name="monitor" className="text-foreground shrink-0" size={28}/>
           Assets
         </h1>
       </div>
