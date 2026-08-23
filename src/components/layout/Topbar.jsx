@@ -54,7 +54,6 @@ export default function Topbar({
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true)
   const buttonRef = useRef(null)
-  const [modalPos, setModalPos] = useState({ top: 0, right: 0 })
   const [notificationTab, setNotificationTab] = useState('all')
   const [expandedIntegrity, setExpandedIntegrity] = useState(false)
   const filteredNotifications = notificationTab === 'unread' ? notifications.filter(n => !n.read) : notifications
@@ -193,20 +192,6 @@ export default function Topbar({
     window.addEventListener('resize', handleResize)
     return () => { clearTimeout(resizeTimer); window.removeEventListener('resize', handleResize) }
   }, [])
-
-  useEffect(() => {
-    if (showNotifications && !isMobile && buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect()
-      const popoverWidth = Math.min(400, window.innerWidth - 24)
-      const idealRight = window.innerWidth - rect.right - 8
-      const safeRight = Math.max(12, Math.min(window.innerWidth - popoverWidth - 12, idealRight))
-      setModalPos({
-        top: rect.bottom + 10,
-        right: safeRight,
-        width: popoverWidth
-      })
-    }
-  }, [showNotifications, isMobile])
 
   const renderDataIntegrityCard = () => {
     if (!hasIntegrityIssues) return null
@@ -487,8 +472,11 @@ export default function Topbar({
 
       {/* Notification Modal - Identical Liquid Glass architecture to other modals */}
       <Dialog open={showNotifications} onOpenChange={setShowNotifications}>
-        <DialogContent className="sm:max-w-[480px]">
-          <DialogHeader className="flex flex-row items-center justify-between border-b border-border/80 dark:border-white/12 pb-3.5 mb-1 space-y-0">
+        <DialogContent
+          className="sm:max-w-[480px] h-[min(600px,88dvh)]"
+          dialogClassName="overflow-hidden p-5 sm:p-6"
+        >
+          <DialogHeader className="flex-row items-center justify-between border-b border-border/80 dark:border-white/12 pb-3.5 mb-1 space-y-0 shrink-0">
             <div className="flex items-center gap-2.5">
               <div className="size-8.5 rounded-2xl flex items-center justify-center bg-primary/10 text-primary shrink-0 shadow-inner">
                 <Icon name="notifications" size={19} />
@@ -523,7 +511,7 @@ export default function Topbar({
           </DialogHeader>
 
           {/* Segmented Tab Filter Switcher */}
-          <div className="flex items-center gap-1.5 p-1 bg-muted/40 dark:bg-white/[0.05] rounded-2xl border border-border/60 dark:border-white/[0.08] my-1">
+          <div className="flex items-center gap-1.5 p-1 bg-muted/40 dark:bg-white/[0.05] rounded-2xl border border-border/60 dark:border-white/[0.08] my-1 shrink-0">
             <button 
               onClick={() => setNotificationTab('all')}
               className={`flex-1 h-7.5 text-xs font-bold rounded-xl transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
@@ -555,7 +543,7 @@ export default function Topbar({
           </div>
 
           {/* List Content */}
-          <div className="max-h-[50vh] sm:max-h-[420px] overflow-y-auto py-2 flex flex-col gap-2.5">
+          <div className="flex-1 min-h-0 overflow-y-auto py-2 pr-1 flex flex-col gap-2.5">
             {renderDataIntegrityCard()}
 
             {filteredNotifications.length === 0 && !hasIntegrityIssues ? (
