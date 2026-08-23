@@ -96,7 +96,7 @@ export default function Sidebar({
       className={`hidden md:flex flex-col fixed left-3 sm:left-4 z-50 glass-kormiis text-sidebar-foreground shadow-2xl transition-[width,height,max-height,box-shadow] duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] overflow-hidden ${
         isOpen
           ? 'w-[196px] h-[min(calc(100vh_-_5rem),510px)] p-2.5 pt-3 pb-2.5 rounded-3xl shadow-2xl'
-          : 'w-[50px] sm:w-[52px] h-auto p-1.5 py-2.5 rounded-2xl sm:rounded-3xl shadow-xl'
+          : 'w-10 h-auto p-1 py-2.5 rounded-2xl sm:rounded-3xl shadow-xl'
       }`}
       style={{ top: '50%', transform: 'translateY(-50%)', isolation: 'isolate' }}
     >
@@ -128,7 +128,7 @@ export default function Sidebar({
                   ? 'nav-capsule-active font-semibold' 
                   : 'text-sidebar-foreground/75 hover:text-sidebar-foreground hover:bg-white/20 dark:hover:bg-white/[0.08] hover:border-white/15 dark:hover:border-white/10 border border-transparent font-medium active:scale-[0.98]'
                 } flex items-center cursor-pointer box-border transition-[background-color,border-color,color,transform] duration-200 relative no-underline shrink-0 select-none overflow-hidden ${
-                  isOpen ? 'gap-3 px-3 h-10 w-full rounded-2xl' : 'justify-center size-9 rounded-xl sm:rounded-2xl'
+                  isOpen ? 'gap-3 px-3 h-10 w-full rounded-2xl' : 'justify-center size-8 rounded-xl sm:rounded-2xl'
                 }`}
                 data-active={isActive ? 'true' : 'false'}
                 data-label={item.label}
@@ -165,7 +165,7 @@ export default function Sidebar({
 
         {/* Resting state hint: 3 dots indicator when collapsed */}
         {!isOpen && (
-          <div className="size-9 flex flex-col items-center justify-center gap-1 opacity-60">
+          <div className="size-8 flex flex-col items-center justify-center gap-1 opacity-60">
             <span className={`size-1 rounded-full ${isAnyOtherActive ? 'bg-primary ring-2 ring-primary/40' : 'bg-sidebar-foreground/40'}`} />
             <span className="size-1 rounded-full bg-sidebar-foreground/40" />
             <span className="size-1 rounded-full bg-sidebar-foreground/40" />

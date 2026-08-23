@@ -380,7 +380,7 @@ export default function EmployeePortal({
       />
 
       <main 
-        className={`content dashboard-content ${isMobile ? 'pb-24' : 'pb-12 md:pl-[76px] md:pr-5 lg:pr-6 xl:pr-8'} flex-1 overflow-y-auto overflow-x-hidden flex flex-col items-center max-w-[100vw] transition-all duration-300`} 
+        className={`content dashboard-content ${isMobile ? 'pb-24' : 'pb-12 md:pl-16 md:pr-5 lg:pr-6 xl:pr-8'} flex-1 overflow-y-auto overflow-x-hidden flex flex-col items-center max-w-[100vw] transition-all duration-300`} 
         style={{ scrollbarGutter: 'stable' }}
         onScroll={handleScroll}
       >
