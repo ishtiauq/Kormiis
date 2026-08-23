@@ -95,7 +95,7 @@ export default function Sidebar({
       aria-label="Floating navigation sidebar"
       className={`hidden md:flex flex-col fixed left-3 sm:left-4 z-50 glass-kormiis text-sidebar-foreground shadow-2xl transition-[width,height,max-height,box-shadow] duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] overflow-hidden ${
         isOpen
-          ? 'w-[196px] h-[min(calc(100vh_-_5rem),510px)] p-2.5 pt-3 pb-2.5 rounded-3xl shadow-2xl'
+          ? 'w-[176px] h-[min(calc(100vh_-_5rem),510px)] p-2.5 pt-3 pb-2.5 rounded-3xl shadow-2xl'
           : 'w-10 h-auto p-1 py-2.5 rounded-2xl sm:rounded-3xl shadow-xl'
       }`}
       style={{ top: '50%', transform: 'translateY(-50%)', isolation: 'isolate' }}
