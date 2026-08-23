@@ -11,12 +11,8 @@ export const GEMINI_MODELS = [
 ]
 
 export function getAiApiKey() {
-  if (typeof window === 'undefined') return 'AQ.Ab8RN6LJ6DmMRiNKbzXca7mj3urwvmno3FNU4pOQI9dQOZXEYQ'
-  return (
-    localStorage.getItem('kormiis_gemini_api_key') ||
-    import.meta.env.VITE_GEMINI_API_KEY ||
-    'AQ.Ab8RN6LJ6DmMRiNKbzXca7mj3urwvmno3FNU4pOQI9dQOZXEYQ'
-  )
+  if (typeof window === 'undefined') return ''
+  return localStorage.getItem('kormiis_gemini_api_key') || import.meta.env.VITE_GEMINI_API_KEY || ''
 }
 
 export function setAiApiKey(key) {
