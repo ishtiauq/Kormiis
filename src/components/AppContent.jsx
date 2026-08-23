@@ -18,6 +18,7 @@ const Notes = lazy(() => import('./Notes.jsx'))
 const GigBoardPage = lazy(() => import('./hr/GigBoardPage.jsx'))
 const PerformancePage = lazy(() => import('./hr/PerformancePage.jsx'))
 const WellbeingPage = lazy(() => import('./hr/WellbeingPage.jsx'))
+const AiAssistantPage = lazy(() => import('./ai/AiAssistantPage.jsx'))
 
 function ViewSkeleton() {
   return (
@@ -104,6 +105,9 @@ export default function AppContent({ currentView, setCurrentView, isAppLoading, 
       break
     case 'wellbeing':
       view = <WellbeingPage adminUid={data.adminUid} currentUser={user} employees={data.employees} addToast={data.addToast} />
+      break
+    case 'ai':
+      view = <AiAssistantPage currentUser={user} employees={data.employees} setEmployees={data.handleSetEmployees} payroll={data.payroll} setPayroll={data.handleSetPayroll} attendance={data.attendance} setAttendance={data.handleSetAttendance} expenses={data.expenses} setExpenses={data.handleSetExpenses} announcements={data.announcements} setAnnouncements={data.setAnnouncements} tasks={data.tasks} setTasks={data.setTasks} settings={data.settings} setCurrentView={setCurrentView} addToast={data.addToast} />
       break
     default:
       view = <Dashboard employees={data.employees} syncLogs={data.syncLogs} addLog={data.addLog} onSync={data.handleSync} setCurrentView={setCurrentView} announcements={data.announcements} events={data.events} payroll={data.payroll} isSidebarCollapsed={isSidebarCollapsed} hasPermission={hasPermission} tasks={data.tasks} documents={data.documents} assets={data.assets} attendance={data.attendance} setAttendance={data.handleSetAttendance} currentUser={user} addToast={data.addToast} />

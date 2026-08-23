@@ -8,6 +8,8 @@ import { useState, useEffect, useRef } from 'react'
 import { Badge } from "@/components/ui/badge"
 import { getRelativeTime } from '../../services/date.js'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
+import AiCoPilotModal from '../ai/AiCoPilotModal.jsx'
+
 export default function Topbar({ 
   isDarkMode, 
   toggleSidebar, 
@@ -31,12 +33,22 @@ export default function Topbar({
   user, 
   setCurrentView,
   onOpenSearch,
+  onOpenAi,
+  isAiOpen = false,
+  employees = [],
+  setEmployees,
+  payroll = {},
+  setPayroll,
   attendance,
   setAttendance,
-  expenses,
+  expenses = [],
   setExpenses,
-  tasks,
+  announcements = [],
+  setAnnouncements,
+  tasks = [],
   setTasks,
+  settings = {},
+  aiModalAction,
   addToast
 }) {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
@@ -275,7 +287,35 @@ export default function Topbar({
   return (
     <>
       {/* Mobile: Liquid Glass Top Bar */}
-      {isMobile ? (
+      {isAiOpen ? (
+        <header
+          aria-label="Kormiis AI Co-Pilot"
+          className="topbar pointer-events-auto w-[98%] min-[400px]:w-[94%] sm:w-[85%] max-w-3xl mx-auto h-[min(78vh,580px)] flex flex-col rounded-[28px] sm:rounded-[32px] glass-kormiis-modal text-foreground transition-all duration-400 ease-[cubic-bezier(0.34,1.56,0.64,1)] shadow-[0_24px_50px_-12px_rgba(0,0,0,0.50),0_0_20px_0_rgba(0,0,0,0.20)] overflow-hidden backdrop-blur-3xl border border-white/35 dark:border-white/16 relative"
+        >
+          <AiCoPilotModal
+            isMorphMode={true}
+            isOpen={true}
+            onClose={() => onOpenAi && onOpenAi()}
+            currentUser={user}
+            employees={employees}
+            setEmployees={setEmployees}
+            payroll={payroll}
+            setPayroll={setPayroll}
+            attendance={attendance}
+            setAttendance={setAttendance}
+            expenses={expenses}
+            setExpenses={setExpenses}
+            announcements={announcements}
+            setAnnouncements={setAnnouncements}
+            tasks={tasks}
+            setTasks={setTasks}
+            settings={settings}
+            setCurrentView={setCurrentView}
+            addToast={addToast}
+            initialAction={aiModalAction}
+          />
+        </header>
+      ) : isMobile ? (
         <header aria-label="Top bar" className="topbar topbar-mobile-bar pointer-events-auto w-full h-14 px-4 flex items-center justify-between glass-apple text-foreground transition-all duration-300 rounded-none border-x-0 border-t-0 border-b border-border/80 dark:border-white/12">
           <div className="flex items-center shrink-0">
             <a
@@ -378,8 +418,24 @@ export default function Topbar({
             )}
           </div>
 
-          {/* Right: Actions Group (Theme, Notification, Profile) */}
+          {/* Right: Actions Group (AI, Theme, Notification, Profile) */}
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            {/* AI Co-Pilot Trigger Button (Visible on Tablet/iPad & Desktop) */}
+            {onOpenAi && (
+              <button
+                onClick={onOpenAi}
+                title="Kormiis AI Co-Pilot"
+                aria-label="Toggle Kormiis AI"
+                className={`rounded-full size-9 sm:size-9 text-foreground apple-glass-btn shrink-0 flex items-center justify-center cursor-pointer active:scale-95 transition-all ${
+                  isAiOpen
+                    ? 'bg-primary/20 text-primary border-primary/40 shadow-xs'
+                    : 'text-foreground'
+                }`}
+              >
+                <Icon name="auto_awesome" size={18} className={isAiOpen ? 'text-primary' : 'text-foreground'} />
+              </button>
+            )}
+
             {showThemeToggle && (
               <button
                 onClick={toggleTheme}

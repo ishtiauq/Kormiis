@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react'
+import React, { useState, useEffect, useRef, useMemo } from 'react'
 import Icon from "@/components/ui/Icon.jsx"
 import { sendChatMessage, fileToBase64, checkLocalScopeGuardrail } from '../../services/aiAgent.js'
 
@@ -41,10 +41,7 @@ function createInitialSession(userName = 'there') {
   }
 }
 
-export default function AiCoPilotModal({
-  isMorphMode = false,
-  isOpen,
-  onClose,
+export default function AiAssistantPage({
   currentUser,
   employees = [],
   setEmployees,
@@ -60,10 +57,10 @@ export default function AiCoPilotModal({
   setTasks,
   settings = {},
   setCurrentView,
-  addToast,
-  initialAction,
-  onHistoryDrawerChange
+  setActiveTab,
+  addToast
 }) {
+  const navigate = setCurrentView || setActiveTab
   const userName = currentUser?.name 
     ? currentUser.name.split(' ')[0] 
     : currentUser?.displayName 
@@ -73,7 +70,7 @@ export default function AiCoPilotModal({
     : 'there'
   const sessionsStorageKey = `kormiis_ai_sessions_${currentUser?.id || 'admin'}`
 
-  // Multi-session State (Only stores and persists conversations that have user messages)
+  // Multi-session State (Only stores conversations with user messages)
   const [sessions, setSessions] = useState(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem(sessionsStorageKey)
@@ -98,20 +95,25 @@ export default function AiCoPilotModal({
     return sessions[0]?.id || `session-${Date.now()}`
   })
 
-  const [showHistoryDrawer, setShowHistoryDrawer] = useState(false)
+  const [showHistoryView, setShowHistoryView] = useState(false)
   const [historySearch, setHistorySearch] = useState('')
+  const [input, setInput] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [attachedFile, setAttachedFile] = useState(null)
+  const [isRecording, setIsRecording] = useState(false)
+  const [showScrollBottomBtn, setShowScrollBottomBtn] = useState(false)
 
-  useEffect(() => {
-    if (onHistoryDrawerChange) {
-      onHistoryDrawerChange(showHistoryDrawer)
-    }
-  }, [showHistoryDrawer, onHistoryDrawerChange])
+  const isAtBottomRef = useRef(true)
+  const chatScrollContainerRef = useRef(null)
+  const historyScrollContainerRef = useRef(null)
+  const fileInputRef = useRef(null)
+  const recognitionRef = useRef(null)
 
   // Active Session
   const activeSession = sessions.find(s => s.id === activeSessionId) || sessions[0]
   const messages = activeSession?.messages || []
 
-  // Persist only meaningful conversations (with at least 1 user message) to localStorage
+  // Persist only meaningful conversations to localStorage
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const userSessions = sessions.filter(s => s.messages && s.messages.some(m => m.role === 'user'))
@@ -129,7 +131,6 @@ export default function AiCoPilotModal({
         if (session.id === activeSessionId) {
           const newMessages = typeof updater === 'function' ? updater(session.messages) : updater
           let title = session.title
-          // Auto-title session from first user message if still default
           if (title === 'New Conversation' || !title) {
             const firstUserMsg = newMessages.find(m => m.role === 'user')
             if (firstUserMsg && firstUserMsg.text) {
@@ -148,46 +149,25 @@ export default function AiCoPilotModal({
     })
   }
 
-  // Create a brand new chat session
   const handleNewChat = () => {
     const hasUserMessage = activeSession?.messages?.some(m => m.role === 'user')
     if (!hasUserMessage) {
-      // Current conversation is already clean and fresh, just stay on it
-      setShowHistoryDrawer(false)
+      setShowHistoryView(false)
       return
     }
-    // Retain only sessions with user messages, plus one new clean session
     const cleanSessions = sessions.filter(s => s.messages && s.messages.some(m => m.role === 'user'))
     const newSession = createInitialSession(userName)
     setSessions([newSession, ...cleanSessions])
     setActiveSessionId(newSession.id)
-    setShowHistoryDrawer(false)
+    setShowHistoryView(false)
     if (addToast) addToast('Started a new conversation', 'info')
   }
 
-  // React to initialAction (e.g. from top-right AI action bar buttons)
-  useEffect(() => {
-    if (!isOpen) {
-      setShowHistoryDrawer(false)
-      return
-    }
-    if (initialAction?.startsWith('open_history')) {
-      setShowHistoryDrawer(true)
-    } else {
-      setShowHistoryDrawer(false)
-      if (initialAction?.startsWith('new_chat')) {
-        handleNewChat()
-      }
-    }
-  }, [initialAction, isOpen])
-
-  // Select an existing past session
   const handleSelectSession = (sessionId) => {
     setActiveSessionId(sessionId)
-    setShowHistoryDrawer(false)
+    setShowHistoryView(false)
   }
 
-  // Delete a specific session
   const handleDeleteSession = (e, sessionId) => {
     e.stopPropagation()
     setSessions(prev => {
@@ -205,12 +185,11 @@ export default function AiCoPilotModal({
     if (addToast) addToast('Deleted conversation from history', 'info')
   }
 
-  // Clear all conversation history
   const handleClearAllHistory = () => {
     const fresh = createInitialSession(userName)
     setSessions([fresh])
     setActiveSessionId(fresh.id)
-    setShowHistoryDrawer(false)
+    setShowHistoryView(false)
     if (typeof window !== 'undefined') {
       try {
         localStorage.removeItem(sessionsStorageKey)
@@ -218,20 +197,6 @@ export default function AiCoPilotModal({
     }
     if (addToast) addToast('All conversation history cleared', 'info')
   }
-
-  const [input, setInput] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const [attachedFile, setAttachedFile] = useState(null)
-  const [isRecording, setIsRecording] = useState(false)
-
-  const [showScrollBottomBtn, setShowScrollBottomBtn] = useState(false)
-  const isAtBottomRef = useRef(true)
-
-  const chatScrollContainerRef = useRef(null)
-  const historyScrollContainerRef = useRef(null)
-  const fileInputRef = useRef(null)
-  const recognitionRef = useRef(null)
-  const modalRef = useRef(null)
 
   const handleChatScroll = (e) => {
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget
@@ -250,67 +215,45 @@ export default function AiCoPilotModal({
     }
   }
 
-  // Auto-scroll to bottom only when new messages arrive or initial open
   const prevMsgCountRef = useRef(0)
   useEffect(() => {
-    if (isOpen) {
-      if (prevMsgCountRef.current === 0) {
-        setTimeout(() => scrollToBottom(false), 50)
-      } else if (messages.length > prevMsgCountRef.current) {
-        const lastMsg = messages[messages.length - 1]
-        if (lastMsg?.role === 'user' || isAtBottomRef.current) {
-          setTimeout(() => scrollToBottom(true), 50)
-        }
-      }
-      prevMsgCountRef.current = messages.length
-    } else {
-      prevMsgCountRef.current = 0
-      setShowScrollBottomBtn(false)
-      isAtBottomRef.current = true
-    }
-  }, [messages.length, isOpen])
-
-  // Handle outside click without background overlay
-  useEffect(() => {
-    if (!isOpen) return
-    const handleClickOutside = (e) => {
-      if (
-        modalRef.current && 
-        !modalRef.current.contains(e.target) && 
-        !e.target.closest?.('[data-ai-trigger]')
-      ) {
-        onClose()
+    if (prevMsgCountRef.current === 0) {
+      setTimeout(() => scrollToBottom(false), 50)
+    } else if (messages.length > prevMsgCountRef.current) {
+      const lastMsg = messages[messages.length - 1]
+      if (lastMsg?.role === 'user' || isAtBottomRef.current) {
+        setTimeout(() => scrollToBottom(true), 50)
       }
     }
-    document.addEventListener('mousedown', handleClickOutside)
-    document.addEventListener('touchstart', handleClickOutside, { passive: true })
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-      document.removeEventListener('touchstart', handleClickOutside)
-    }
-  }, [isOpen, onClose])
+    prevMsgCountRef.current = messages.length
+  }, [messages.length])
 
   // Initialize Speech Recognition if supported
   useEffect(() => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
-    if (SpeechRecognition) {
-      const recognition = new SpeechRecognition()
-      recognition.continuous = false
-      recognition.interimResults = false
-      recognition.lang = 'en-US'
+    if (typeof window !== 'undefined') {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+      if (SpeechRecognition) {
+        const recognition = new SpeechRecognition()
+        recognition.continuous = false
+        recognition.interimResults = false
+        recognition.lang = 'en-US'
 
-      recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript
-        if (transcript) {
+        recognition.onresult = (event) => {
+          const transcript = event.results[0][0].transcript
           setInput(prev => (prev ? `${prev} ${transcript}` : transcript))
+          setIsRecording(false)
         }
-        setIsRecording(false)
+
+        recognition.onerror = () => {
+          setIsRecording(false)
+        }
+
+        recognition.onend = () => {
+          setIsRecording(false)
+        }
+
+        recognitionRef.current = recognition
       }
-
-      recognition.onerror = () => setIsRecording(false)
-      recognition.onend = () => setIsRecording(false)
-
-      recognitionRef.current = recognition
     }
   }, [])
 
@@ -319,7 +262,6 @@ export default function AiCoPilotModal({
       if (addToast) addToast('Voice recognition is not supported in this browser.', 'warning')
       return
     }
-
     if (isRecording) {
       recognitionRef.current.stop()
       setIsRecording(false)
@@ -350,7 +292,6 @@ export default function AiCoPilotModal({
     }
   }
 
-  // Workspace Context builder for Gemini
   const context = {
     currentUser,
     employees,
@@ -382,7 +323,6 @@ export default function AiCoPilotModal({
     setInput('')
     setAttachedFile(null)
 
-    // 🛡️ ZERO-TOKEN LOCAL GUARDRAIL: Check if request is completely off-topic (saves 100% quota!)
     const guardrail = checkLocalScopeGuardrail(textToSend, Boolean(attachedFile))
     if (!guardrail.isAllowed) {
       setMessagesForActiveSession(prev => [
@@ -400,25 +340,20 @@ export default function AiCoPilotModal({
     setIsLoading(true)
 
     try {
-      const response = await sendChatMessage({
-        messages: newMessages,
-        context
-      })
+      const history = newMessages.slice(-8).map(m => ({
+        role: m.role,
+        text: m.text
+      }))
 
-      const botMessageId = `bot-${Date.now()}`
+      const response = await sendChatMessage(textToSend, context, history, attachedFile)
+
       setMessagesForActiveSession(prev => [
         ...prev,
         {
-          id: botMessageId,
+          id: `model-${Date.now()}`,
           role: 'model',
-          text: response.text || (response.functionCalls?.length ? 'I have prepared the action for your review:' : 'Action ready.'),
-          functionCalls: response.functionCalls || [],
-          pendingActions: response.functionCalls?.map((fc, idx) => ({
-            actionId: `${botMessageId}-${idx}`,
-            name: fc.name,
-            args: fc.args,
-            status: 'pending' // 'pending' | 'executed' | 'cancelled'
-          })),
+          text: response.text,
+          pendingActions: response.actions || [],
           timestamp: new Date().toISOString()
         }
       ])
@@ -426,9 +361,9 @@ export default function AiCoPilotModal({
       setMessagesForActiveSession(prev => [
         ...prev,
         {
-          id: `err-${Date.now()}`,
+          id: `error-${Date.now()}`,
           role: 'model',
-          text: `⚠️ Error: ${err.message || 'Could not communicate with Gemini API. Please check network connection.'}`,
+          text: `⚠️ I encountered an error: ${err.message || 'Unable to connect to AI engine.'}`,
           isError: true,
           timestamp: new Date().toISOString()
         }
@@ -438,87 +373,50 @@ export default function AiCoPilotModal({
     }
   }
 
-  // Execute Approved Action from Action Card
-  const handleExecuteAction = (messageId, actionId, actionName, args) => {
+  const handleExecuteAction = async (messageId, actionId, actionName, args) => {
     try {
-      if (actionName === 'create_employee') {
+      if (actionName === 'add_employee' && setEmployees) {
         const newEmp = {
-          id: `emp-${Date.now()}`,
-          name: args.name,
-          email: args.email || `${args.name.toLowerCase().replace(/\s+/g, '')}@kormiis.io`,
-          phone: args.phone || '',
-          department: args.department || 'Engineering',
-          position: args.position || 'Specialist',
-          salary: Number(args.salary) || 50000,
-          joinDate: args.joinDate || new Date().toISOString().split('T')[0],
+          id: `EMP-${Date.now().toString().slice(-4)}`,
+          name: args.name || 'New Employee',
+          department: args.department || 'General',
+          position: args.position || 'Staff',
+          salary: Number(args.salary) || 0,
           status: 'Active',
-          role: args.role || 'Teammate'
+          joinDate: new Date().toISOString().split('T')[0],
+          email: args.email || `${(args.name || 'employee').toLowerCase().replace(/\s+/g, '.')}@company.com`
         }
-        if (setEmployees) setEmployees([...employees, newEmp])
-        if (addToast) addToast(`Added employee ${newEmp.name}`, 'success')
-      } else if (actionName === 'update_employee') {
-        const target = employees.find(
-          e => e.name?.toLowerCase().includes(args.employeeNameOrId?.toLowerCase()) || e.id === args.employeeNameOrId
-        )
-        if (target && setEmployees) {
-          const updated = employees.map(e => {
-            if (e.id === target.id) {
-              return {
-                ...e,
-                ...(args.department && { department: args.department }),
-                ...(args.position && { position: args.position }),
-                ...(args.salary && { salary: Number(args.salary) }),
-                ...(args.status && { status: args.status })
-              }
-            }
-            return e
-          })
-          setEmployees(updated)
-          if (addToast) addToast(`Updated details for ${target.name}`, 'success')
-        }
-      } else if (actionName === 'create_announcement') {
+        await setEmployees(prev => [newEmp, ...(prev || [])])
+        if (addToast) addToast(`Added employee ${newEmp.name} successfully!`, 'success')
+      } else if (actionName === 'create_announcement' && setAnnouncements) {
         const newAnn = {
           id: `ann-${Date.now()}`,
-          title: args.title,
-          content: args.content,
-          date: new Date().toISOString(),
+          title: args.title || 'Company Announcement',
+          content: args.content || '',
           priority: args.priority || 'Normal',
-          authorId: currentUser?.id || 'admin'
+          category: args.category || 'General',
+          date: new Date().toISOString(),
+          author: currentUser?.name || 'HR Team'
         }
-        if (setAnnouncements) setAnnouncements([newAnn, ...announcements])
-        if (addToast) addToast(`Published announcement "${newAnn.title}"`, 'success')
-      } else if (actionName === 'create_expense') {
+        await setAnnouncements(prev => [newAnn, ...(prev || [])])
+        if (addToast) addToast(`Published announcement: "${newAnn.title}"`, 'success')
+      } else if (actionName === 'add_expense' && setExpenses) {
         const newExp = {
           id: `exp-${Date.now()}`,
-          category: args.category || 'General',
+          employeeName: args.employeeName || currentUser?.name || 'Staff',
+          category: args.category || 'Travel',
           amount: Number(args.amount) || 0,
-          description: args.description || 'Expense entry',
-          date: args.date || new Date().toISOString().split('T')[0],
-          status: 'Approved',
-          claimantId: currentUser?.id || 'admin'
+          description: args.description || 'Expense claim',
+          date: new Date().toISOString().split('T')[0],
+          status: 'Approved'
         }
-        if (setExpenses) setExpenses([newExp, ...expenses])
-        if (addToast) addToast(`Logged expense of ${newExp.amount} for ${newExp.category}`, 'success')
-      } else if (actionName === 'assign_task') {
-        const newTask = {
-          id: `task-${Date.now()}`,
-          title: args.title,
-          description: args.description || '',
-          assignedTo: args.assignedToNameOrId || currentUser?.id || 'all',
-          dueDate: args.dueDate || new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0],
-          priority: args.priority || 'Medium',
-          status: 'Todo'
-        }
-        if (setTasks) setTasks([newTask, ...tasks])
-        if (addToast) addToast(`Created task "${newTask.title}"`, 'success')
-      } else if (actionName === 'navigate_view') {
-        if (setCurrentView && args.view) {
-          setCurrentView(args.view)
-          if (addToast) addToast(`Navigated to ${args.view}`, 'info')
-        }
+        await setExpenses(prev => [newExp, ...(prev || [])])
+        if (addToast) addToast(`Logged expense of ৳${newExp.amount} successfully!`, 'success')
+      } else if (actionName === 'navigate_to_view' && navigate) {
+        navigate(args.viewName)
+        if (addToast) addToast(`Navigated to ${args.viewName}`, 'info')
       }
 
-      // Mark action as executed in local UI state
       setMessagesForActiveSession(prev =>
         prev.map(msg => {
           if (msg.id === messageId && msg.pendingActions) {
@@ -553,7 +451,6 @@ export default function AiCoPilotModal({
     )
   }
 
-  // Only conversations with actual user messages count as history
   const historySessions = useMemo(() => {
     return sessions.filter(s => s.messages && s.messages.some(m => m.role === 'user'))
   }, [sessions])
@@ -564,87 +461,70 @@ export default function AiCoPilotModal({
     return historySessions.filter(s => s.title.toLowerCase().includes(term) || s.messages.some(m => m.text?.toLowerCase().includes(term)))
   }, [historySessions, historySearch])
 
-  if (!isOpen) return null
-
-  const modalInner = (
-    <div 
-      ref={modalRef}
-      className={
-        isMorphMode
-          ? "w-full h-full flex flex-col overflow-hidden relative animate-in fade-in duration-200"
-          : "pointer-events-auto w-full sm:w-[85%] sm:max-w-3xl mx-auto h-[min(82vh,620px)] sm:h-[min(72vh,560px)] flex flex-col rounded-t-[32px] sm:rounded-[28px] rounded-b-none sm:rounded-b-[28px] glass-mobile-drawer sm:glass-kormiis-modal border-t sm:border border-white/35 dark:border-white/16 shadow-[0_-12px_40px_rgba(0,0,0,0.40)] sm:shadow-[0_24px_50px_-12px_rgba(0,0,0,0.50),0_0_20px_0_rgba(0,0,0,0.20)] overflow-hidden backdrop-blur-3xl relative animate-in slide-in-from-bottom sm:slide-in-from-top-3 duration-300 sm:duration-200"
-      }
-    >
-      {/* Mobile Drawer Pull Indicator Handle */}
-      {!isMorphMode && (
-        <div className="w-10 h-1 rounded-full bg-foreground/25 mx-auto mt-2.5 mb-1 sm:hidden shrink-0" />
-      )}
-
-      {/* MODAL HEADER */}
-        <div className="flex items-center justify-between px-4.5 py-3.5 border-b border-border/80 dark:border-white/12 shrink-0 bg-white/20 dark:bg-white/[0.03]">
+  return (
+    <div className="w-full flex-1 flex flex-col items-center justify-start pb-20 sm:pb-8 pt-1 animate-in fade-in duration-200 max-w-[1000px] mx-auto">
+      {/* FULL-PAGE AI CHAT WORKSPACE CONTAINER */}
+      <div className="w-full h-[calc(100dvh-130px)] sm:h-[calc(100dvh-140px)] md:h-[calc(100vh-140px)] flex flex-col rounded-[24px] sm:rounded-[32px] glass-kormiis border border-white/35 dark:border-white/16 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.30)] overflow-hidden backdrop-blur-3xl relative">
+        
+        {/* HEADER BAR */}
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-border/60 dark:border-white/10 shrink-0 bg-white/20 dark:bg-white/[0.03]">
           <div className="flex items-center gap-2.5">
-            <div className="size-8.5 rounded-xl bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 flex items-center justify-center shadow-xs shrink-0">
-              <Icon name={showHistoryDrawer ? "history" : "auto_awesome"} size={18} className="text-white dark:text-neutral-900" />
+            <div className="size-8 sm:size-9 rounded-xl bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 flex items-center justify-center shadow-xs shrink-0">
+              <Icon name={showHistoryView ? "history" : "auto_awesome"} size={18} className="text-white dark:text-neutral-900" />
             </div>
             <div>
               <h2 className="text-sm sm:text-base font-black tracking-tight text-foreground m-0 leading-tight">
-                {showHistoryDrawer ? 'Chat History' : 'Kormiis AI Co-Pilot'}
+                {showHistoryView ? 'Chat History' : 'Kormiis AI Co-Pilot'}
               </h2>
-              {showHistoryDrawer && (
-                <p className="text-[10px] text-muted-foreground m-0 leading-tight mt-0.5 font-medium">
-                  {historySessions.length} conversation{historySessions.length !== 1 ? 's' : ''} saved
-                </p>
-              )}
+              <p className="text-[10px] sm:text-[11px] text-muted-foreground m-0 leading-tight mt-0.5 font-medium">
+                {showHistoryView 
+                  ? `${historySessions.length} conversation${historySessions.length !== 1 ? 's' : ''} saved`
+                  : (activeSession?.title || 'Active Conversation')}
+              </p>
             </div>
           </div>
 
-          {/* Action/Close buttons in Header (Available across all devices) */}
-          <div className="flex items-center gap-1.5">
-            {showHistoryDrawer ? (
-              <button
-                onClick={() => setShowHistoryDrawer(false)}
-                aria-label="Back to chat"
-                className="apple-glass-btn size-7.5 sm:size-8 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground cursor-pointer transition-all active:scale-95 border border-white/35 dark:border-white/15"
-                title="Back to conversation"
-              >
-                <Icon name="close" size={16} />
-              </button>
-            ) : (
-              <div className="flex items-center gap-1.5">
+          {/* Action buttons */}
+          <div className="flex items-center gap-2">
+            {!showHistoryView ? (
+              <>
                 <button
                   type="button"
                   onClick={handleNewChat}
                   aria-label="New chat"
-                  className="apple-glass-btn size-7.5 sm:size-8 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground cursor-pointer transition-all active:scale-95 border border-white/35 dark:border-white/15"
+                  className="apple-glass-btn h-8 sm:h-8.5 px-2.5 sm:px-3 rounded-xl flex items-center gap-1.5 text-xs font-bold text-foreground border border-white/35 dark:border-white/15 active:scale-95 transition-all cursor-pointer"
                   title="Start a new conversation"
                 >
                   <Icon name="add" size={16} />
+                  <span className="hidden xs:inline">New Chat</span>
                 </button>
                 <button
                   type="button"
-                  onClick={() => setShowHistoryDrawer(true)}
-                  aria-label="Chat history"
-                  className="apple-glass-btn size-7.5 sm:size-8 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground cursor-pointer transition-all active:scale-95 border border-white/35 dark:border-white/15"
+                  onClick={() => setShowHistoryView(true)}
+                  aria-label="View history"
+                  className="apple-glass-btn h-8 sm:h-8.5 px-2.5 sm:px-3 rounded-xl flex items-center gap-1.5 text-xs font-bold text-foreground border border-white/35 dark:border-white/15 active:scale-95 transition-all cursor-pointer"
                   title="Past conversations"
                 >
                   <Icon name="history" size={16} />
+                  <span className="hidden xs:inline">History</span>
                 </button>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  aria-label="Close AI Co-Pilot"
-                  className="apple-glass-btn size-7.5 sm:size-8 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground cursor-pointer transition-all active:scale-95 border border-white/35 dark:border-white/15"
-                  title="Close modal"
-                >
-                  <Icon name="close" size={16} />
-                </button>
-              </div>
+              </>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setShowHistoryView(false)}
+                aria-label="Back to conversation"
+                className="apple-glass-btn size-8 rounded-xl flex items-center justify-center text-foreground border border-white/35 dark:border-white/15 active:scale-95 transition-all cursor-pointer"
+                title="Back to conversation"
+              >
+                <Icon name="close" size={16} />
+              </button>
             )}
           </div>
         </div>
 
         {/* MAIN BODY: SWITCHES BETWEEN HISTORY VIEW AND ACTIVE CHAT FEED */}
-        {showHistoryDrawer ? (
+        {showHistoryView ? (
           /* FULL-VIEW CHAT HISTORY */
           <div className="flex-1 flex flex-col overflow-hidden animate-in fade-in duration-200">
             {/* Search & New Chat Action Bar */}
@@ -726,7 +606,7 @@ export default function AiCoPilotModal({
 
             {/* Clear All History Footer */}
             {historySessions.length > 0 && (
-              <div className="p-3 pb-22 sm:pb-3 border-t border-border/50 dark:border-white/10 bg-white/20 dark:bg-white/[0.02] backdrop-blur-md shrink-0">
+              <div className="p-3 border-t border-border/50 dark:border-white/10 bg-white/20 dark:bg-white/[0.02] backdrop-blur-md shrink-0">
                 <button
                   onClick={handleClearAllHistory}
                   className="w-full h-8.5 rounded-xl border border-destructive/30 hover:bg-destructive/10 text-destructive text-[11px] font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-98"
@@ -771,7 +651,7 @@ export default function AiCoPilotModal({
 
                   {/* Message Bubble */}
                   <div
-                    className={`max-w-[88%] sm:max-w-[80%] rounded-2xl p-3.5 sm:p-4 text-xs sm:text-sm leading-relaxed relative shadow-xs backdrop-blur-md ${
+                    className={`max-w-[92%] sm:max-w-[80%] rounded-2xl p-3.5 sm:p-4 text-xs sm:text-sm leading-relaxed relative shadow-xs backdrop-blur-md ${
                       msg.role === 'user'
                         ? 'glass-card border border-white/45 dark:border-white/12 text-foreground rounded-tr-xs bg-white/65 dark:bg-white/[0.06]'
                         : msg.isError
@@ -820,7 +700,7 @@ export default function AiCoPilotModal({
                   {msg.pendingActions?.map(action => (
                     <div
                       key={action.actionId}
-                      className="w-full max-w-[92%] sm:max-w-[85%] rounded-2xl p-4 glass-card border border-white/30 dark:border-white/15 bg-white/40 dark:bg-white/[0.04] shadow-md space-y-3 animate-in fade-in duration-300"
+                      className="w-full max-w-[95%] sm:max-w-[85%] rounded-2xl p-4 glass-card border border-white/30 dark:border-white/15 bg-white/40 dark:bg-white/[0.04] shadow-md space-y-3 animate-in fade-in duration-300"
                     >
                       <div className="flex items-center justify-between gap-2 border-b border-border/60 pb-2">
                         <div className="flex items-center gap-2">
@@ -888,7 +768,7 @@ export default function AiCoPilotModal({
 
             {/* JUMP TO LATEST MESSAGES FLOATING BUTTON (CENTERED MONOGLASS PILL) */}
             {showScrollBottomBtn && (
-              <div className="absolute bottom-[86px] sm:bottom-[70px] left-1/2 -translate-x-1/2 z-30 animate-in fade-in zoom-in-95 slide-in-from-bottom-2 duration-200 pointer-events-auto">
+              <div className="absolute bottom-[66px] sm:bottom-[70px] left-1/2 -translate-x-1/2 z-30 animate-in fade-in zoom-in-95 slide-in-from-bottom-2 duration-200 pointer-events-auto">
                 <button
                   type="button"
                   onClick={() => scrollToBottom(true)}
@@ -903,7 +783,7 @@ export default function AiCoPilotModal({
             )}
 
             {/* INPUT & ATTACHMENT DOCK */}
-            <div className="p-2.5 sm:p-3 pb-22 sm:pb-3 border-t border-border/60 dark:border-white/10 bg-white/30 dark:bg-white/[0.04] shrink-0 space-y-2">
+            <div className="p-2.5 sm:p-3.5 border-t border-border/60 dark:border-white/10 bg-white/30 dark:bg-white/[0.04] shrink-0 space-y-2">
               {/* File Attachment Chip */}
               {attachedFile && (
                 <div className="flex items-center justify-between p-1.5 px-2.5 rounded-xl bg-foreground/10 border border-foreground/20 text-xs text-foreground">
@@ -934,7 +814,7 @@ export default function AiCoPilotModal({
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   aria-label="Upload document, excel sheet, or receipt"
-                  className="apple-glass-btn size-10 rounded-2xl flex items-center justify-center text-muted-foreground hover:text-foreground cursor-pointer shrink-0 border border-white/35 dark:border-white/15"
+                  className="apple-glass-btn size-9 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground cursor-pointer shrink-0"
                   title="Upload file or receipt"
                 >
                   <Icon name="upload_file" size={18} />
@@ -952,7 +832,7 @@ export default function AiCoPilotModal({
                   type="button"
                   onClick={toggleVoice}
                   aria-label="Voice input"
-                  className={`apple-glass-btn size-10 rounded-2xl flex items-center justify-center transition-all cursor-pointer shrink-0 border border-white/35 dark:border-white/15 ${
+                  className={`apple-glass-btn size-9 rounded-xl flex items-center justify-center transition-all cursor-pointer shrink-0 ${
                     isRecording
                       ? 'bg-rose-500 text-white animate-pulse border-rose-400'
                       : 'text-muted-foreground hover:text-foreground'
@@ -969,7 +849,7 @@ export default function AiCoPilotModal({
                   value={input}
                   onChange={e => setInput(e.target.value)}
                   disabled={isLoading}
-                  className="flex-1 h-10 sm:h-11 px-4 rounded-2xl border border-black/12 dark:border-white/14 bg-white/85 dark:bg-white/[0.07] text-xs sm:text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)] placeholder:text-muted-foreground"
+                  className="flex-1 h-9.5 px-3.5 rounded-xl border border-black/10 dark:border-white/12 bg-white/70 dark:bg-white/[0.07] text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)] placeholder:text-muted-foreground"
                 />
 
                 {/* Send Button (MonoGlass Liquid Glass Button) */}
@@ -977,25 +857,16 @@ export default function AiCoPilotModal({
                   type="submit"
                   disabled={isLoading || (!input.trim() && !attachedFile)}
                   aria-label="Send command"
-                  className="apple-glass-btn size-10 sm:size-11 rounded-2xl flex items-center justify-center cursor-pointer text-foreground active:scale-95 transition-all disabled:opacity-30 disabled:cursor-not-allowed shrink-0 border border-white/40 dark:border-white/18 shadow-xs hover:scale-102"
+                  className="apple-glass-btn size-9.5 rounded-xl flex items-center justify-center cursor-pointer text-foreground active:scale-95 transition-all disabled:opacity-30 disabled:cursor-not-allowed shrink-0 border border-white/35 dark:border-white/15 shadow-xs hover:scale-102"
                   title="Send command (Enter)"
                 >
-                  <Icon name="send" size={18} className="text-foreground" />
+                  <Icon name="send" size={17} className="text-foreground" />
                 </button>
               </form>
             </div>
           </div>
         )}
       </div>
-  )
-
-  if (isMorphMode) {
-    return modalInner
-  }
-
-  return (
-    <div className="fixed inset-0 z-[60] pointer-events-none flex flex-col justify-end sm:items-center sm:justify-start sm:pt-[76px] md:pt-[84px] sm:px-4 md:px-6 bg-transparent animate-in fade-in duration-200">
-      {modalInner}
     </div>
   )
 }

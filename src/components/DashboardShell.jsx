@@ -11,8 +11,6 @@ import { allNavItems } from '../utils/helpers.js'
 import { useCommandPalette } from '../hooks/useCommandPalette.jsx'
 import LoadingScreen from './layout/LoadingScreen.jsx'
 import useAppData from '../hooks/useAppData.js'
-import AiFloatingTrigger from './ai/AiFloatingTrigger.jsx'
-import AiCoPilotModal from './ai/AiCoPilotModal.jsx'
 
 const EmployeePortal = lazy(() => import('./EmployeePortal.jsx'))
 
@@ -171,42 +169,6 @@ export default function DashboardShell({ user, themeMode, isDarkMode, toggleThem
         setMobileMenuOpen={setShowMobileMenu}
       />
 
-      {/* 2. Top-Right AI Action Bar (Aligned with Topbar) */}
-      <AiFloatingTrigger
-        onClick={() => {
-          setShowAiModal(prev => {
-            const next = !prev
-            setShowAiHistory(false)
-            if (next) {
-              setAiModalAction(`open_chat_${Date.now()}`)
-            }
-            return next
-          })
-        }}
-        onNewChat={() => {
-          setShowAiModal(true)
-          setShowAiHistory(false)
-          setAiModalAction(`new_chat_${Date.now()}`)
-        }}
-        onToggleHistory={() => {
-          if (!showAiModal) {
-            setShowAiModal(true)
-            setShowAiHistory(true)
-            setAiModalAction(`open_history_${Date.now()}`)
-          } else {
-            setShowAiHistory(prev => {
-              const next = !prev
-              setAiModalAction(`${next ? 'open' : 'close'}_history_${Date.now()}`)
-              return next
-            })
-          }
-        }}
-        isOpen={showAiModal}
-        isHistoryOpen={showAiHistory}
-        isDarkMode={isDarkMode}
-        isMobile={false}
-      />
-
       <main 
         className={`content dashboard-content ${isMobile ? 'pb-24' : 'pb-12 md:pl-[76px] md:pr-5 lg:pr-6 xl:pr-8'} flex-1 overflow-y-auto overflow-x-hidden flex flex-col items-center max-w-[100vw] transition-all duration-300`} 
         style={{ scrollbarGutter: 'stable' }}
@@ -238,12 +200,29 @@ export default function DashboardShell({ user, themeMode, isDarkMode, toggleThem
                 setCurrentView={setCurrentView}
                 user={user}
                 onOpenSearch={() => setShowCommandPalette(true)}
+                onOpenAi={() => {
+                  setShowAiModal(prev => {
+                    const next = !prev
+                    setShowAiHistory(false)
+                    if (next) setAiModalAction(`open_chat_${Date.now()}`)
+                    return next
+                  })
+                }}
+                isAiOpen={showAiModal}
+                employees={appData.employees}
+                setEmployees={appData.handleSetEmployees}
+                payroll={appData.payroll}
+                setPayroll={appData.handleSetPayroll}
                 attendance={appData.attendance}
                 setAttendance={appData.setAttendance || appData.handleSetAttendance}
                 expenses={appData.expenses}
                 setExpenses={appData.setExpenses || appData.handleSetExpenses}
+                announcements={appData.announcements}
+                setAnnouncements={appData.setAnnouncements}
                 tasks={appData.tasks}
                 setTasks={appData.setTasks || appData.handleSetTasks}
+                settings={appData.settings}
+                aiModalAction={aiModalAction}
                 addToast={addToast}
               />
           </div>
@@ -268,8 +247,8 @@ export default function DashboardShell({ user, themeMode, isDarkMode, toggleThem
 
       {/* Bottom Tab Bar (Mobile) - Floating Pill */}
       {isMobile && (
-<div className={`fixed bottom-0 left-0 right-0 z-40 flex justify-center pointer-events-none px-4 pb-3.5 sm:pb-4 transition-all duration-300 ${isScrollingDown && !showMobileMenu ? 'translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
-          <nav className="bottom-bar bottom-bar-pill pointer-events-auto w-full max-w-[210px] flex items-center justify-around px-2 h-15 transition-all duration-300 rounded-full glass-kormiis text-foreground border border-white/30 dark:border-white/14 shadow-2xl backdrop-blur-3xl" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
+        <div className={`fixed bottom-0 left-0 right-0 z-40 flex justify-center pointer-events-none px-4 pb-3.5 sm:pb-4 transition-all duration-300 ${isScrollingDown && !showMobileMenu ? 'translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
+          <nav className="bottom-bar bottom-bar-pill pointer-events-auto w-full max-w-[280px] flex items-center justify-around px-2 h-15 transition-all duration-300 rounded-full glass-kormiis text-foreground border border-white/30 dark:border-white/14 shadow-2xl backdrop-blur-3xl" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
             <MobileTabButton
               active={currentView === 'dashboard'}
               label="Home"
@@ -283,6 +262,21 @@ export default function DashboardShell({ user, themeMode, isDarkMode, toggleThem
               onClick={() => { setCurrentView('announcements'); setShowMobileMenu(false) }}
             >
               <Icon name="rss_feed" size={24}/>
+            </MobileTabButton>
+            <MobileTabButton
+              active={showAiModal}
+              label="AI Assistant"
+              onClick={() => {
+                setShowAiModal(prev => {
+                  const next = !prev
+                  setShowAiHistory(false)
+                  if (next) setAiModalAction(`open_chat_${Date.now()}`)
+                  return next
+                })
+                setShowMobileMenu(false)
+              }}
+            >
+              <Icon name="auto_awesome" size={24}/>
             </MobileTabButton>
             <MobileTabButton
               active={showMobileMenu}
@@ -373,70 +367,6 @@ export default function DashboardShell({ user, themeMode, isDarkMode, toggleThem
         getCategoryIcon={getCategoryIcon}
       />
       <ConfirmDialog />
-
-      {/* Mobile Floating AI Trigger (Bottom-Right on phones) */}
-      {isMobile && (
-        <div className="fixed right-3 bottom-20 z-50 md:hidden">
-          <AiFloatingTrigger
-            onClick={() => {
-              setShowAiModal(prev => {
-                const next = !prev
-                setShowAiHistory(false)
-                if (next) {
-                  setAiModalAction(`open_chat_${Date.now()}`)
-                }
-                return next
-              })
-            }}
-            onNewChat={() => {
-              setShowAiModal(true)
-              setShowAiHistory(false)
-              setAiModalAction(`new_chat_${Date.now()}`)
-            }}
-            onToggleHistory={() => {
-              if (!showAiModal) {
-                setShowAiModal(true)
-                setShowAiHistory(true)
-                setAiModalAction(`open_history_${Date.now()}`)
-              } else {
-                setShowAiHistory(prev => {
-                  const next = !prev
-                  setAiModalAction(`${next ? 'open' : 'close'}_history_${Date.now()}`)
-                  return next
-                })
-              }
-            }}
-            isOpen={showAiModal}
-            isHistoryOpen={showAiHistory}
-            isDarkMode={isDarkMode}
-          />
-        </div>
-      )}
-      <AiCoPilotModal
-        isOpen={showAiModal}
-        onClose={() => {
-          setShowAiModal(false)
-          setShowAiHistory(false)
-        }}
-        initialAction={aiModalAction}
-        onHistoryDrawerChange={setShowAiHistory}
-        currentUser={user}
-        employees={appData.employees}
-        setEmployees={appData.handleSetEmployees}
-        payroll={appData.payroll}
-        setPayroll={appData.handleSetPayroll}
-        attendance={appData.attendance}
-        setAttendance={appData.handleSetAttendance}
-        expenses={appData.expenses}
-        setExpenses={appData.handleSetExpenses}
-        announcements={appData.announcements}
-        setAnnouncements={appData.setAnnouncements}
-        tasks={appData.tasks}
-        setTasks={appData.setTasks}
-        settings={appData.settings}
-        setCurrentView={setCurrentView}
-        addToast={addToast}
-      />
     </div>
   )
 }

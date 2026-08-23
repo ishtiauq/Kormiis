@@ -27,7 +27,7 @@ export default function AiFloatingTrigger({ onClick, onNewChat, onToggleHistory,
       className={`${
         isMobile
           ? 'flex flex-col fixed right-3 bottom-20 z-50 md:hidden rounded-2xl p-1.5 py-2.5 gap-1.5'
-          : 'hidden md:flex items-center fixed top-4 md:top-5 right-4 sm:right-6 z-50 h-14 sm:h-16 px-3 sm:px-4 gap-2 sm:gap-2.5 rounded-full'
+          : 'hidden xl:flex items-center fixed top-4 xl:top-5 right-4 sm:right-6 z-50 h-14 sm:h-16 px-3.5 sm:px-4.5 gap-2 sm:gap-2.5 rounded-full'
       } glass-apple text-foreground shadow-2xl transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] select-none border border-white/30 dark:border-white/12`}
       style={{ isolation: 'isolate' }}
     >
@@ -49,9 +49,6 @@ export default function AiFloatingTrigger({ onClick, onNewChat, onToggleHistory,
           )}
         </button>
       </TooltipPopover>
-
-      {/* Subtle Divider */}
-      <div className={`${isMobile ? 'w-4 h-[1px] my-0.5' : 'h-6 sm:h-7 w-[1px] mx-0.5 sm:mx-1'} bg-white/25 dark:bg-white/10`} />
 
       {/* 2. New Chat Action Button */}
       <TooltipPopover label="New Conversation" isCollapsed={true} isDarkMode={isDarkMode}>

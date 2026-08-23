@@ -27,8 +27,7 @@ import GeoCheckInWidget from './attendance/GeoCheckInWidget.jsx'
 import AttendancePage from './attendance/AttendancePage.jsx'
 import GigBoardPage from './hr/GigBoardPage.jsx'
 import PerformancePage from './hr/PerformancePage.jsx'
-import AiFloatingTrigger from './ai/AiFloatingTrigger.jsx'
-import AiCoPilotModal from './ai/AiCoPilotModal.jsx'
+import AiAssistantPage from './ai/AiAssistantPage.jsx'
 
 // Dummy profile image generation based on initials
 const getInitialsAvatar = (name) => {
@@ -295,6 +294,29 @@ export default function EmployeePortal({
         return <div className="max-w-[1200px] mx-auto w-full"><GigBoardPage adminUid={currentUser.adminUid} currentUser={currentUser} employees={employees} addToast={addToast} /></div>
       case 'performance':
         return <div className="max-w-[1200px] mx-auto w-full"><PerformancePage adminUid={currentUser.adminUid} currentUser={currentUser} addToast={addToast} /></div>
+      case 'ai':
+        return (
+          <div className="w-full">
+            <AiAssistantPage
+              currentUser={currentUser}
+              employees={employees}
+              setEmployees={setEmployees}
+              payroll={payroll}
+              setPayroll={setPayroll}
+              attendance={attendance}
+              setAttendance={setAttendance}
+              expenses={expenses}
+              setExpenses={setExpenses}
+              announcements={announcements}
+              setAnnouncements={setAnnouncements}
+              tasks={tasks}
+              setTasks={setTasks}
+              settings={settings}
+              setActiveTab={setActiveTab}
+              addToast={addToast}
+            />
+          </div>
+        )
       default:
         return <DashboardView currentUser={currentUser} attendance={attendance} setAttendance={setAttendance} addToast={addToast} expenses={expenses} announcements={announcements} tasks={tasks} events={events} setActiveTab={setActiveTab} setShowPunchModal={setShowPunchModal} settings={settings} notes={notes} setNotes={setNotes} />
       case 'team_attendance':
@@ -357,42 +379,6 @@ export default function EmployeePortal({
         setMobileMenuOpen={setShowMobileMenu}
       />
 
-      {/* 2. Top-Right AI Action Bar (Aligned with Topbar) */}
-      <AiFloatingTrigger
-        onClick={() => {
-          setShowAiModal(prev => {
-            const next = !prev
-            setShowAiHistory(false)
-            if (next) {
-              setAiModalAction(`open_chat_${Date.now()}`)
-            }
-            return next
-          })
-        }}
-        onNewChat={() => {
-          setShowAiModal(true)
-          setShowAiHistory(false)
-          setAiModalAction(`new_chat_${Date.now()}`)
-        }}
-        onToggleHistory={() => {
-          if (!showAiModal) {
-            setShowAiModal(true)
-            setShowAiHistory(true)
-            setAiModalAction(`open_history_${Date.now()}`)
-          } else {
-            setShowAiHistory(prev => {
-              const next = !prev
-              setAiModalAction(`${next ? 'open' : 'close'}_history_${Date.now()}`)
-              return next
-            })
-          }
-        }}
-        isOpen={showAiModal}
-        isHistoryOpen={showAiHistory}
-        isDarkMode={isDarkMode}
-        isMobile={false}
-      />
-
       <main 
         className={`content dashboard-content ${isMobile ? 'pb-24' : 'pb-12 md:pl-[76px] md:pr-5 lg:pr-6 xl:pr-8'} flex-1 overflow-y-auto overflow-x-hidden flex flex-col items-center max-w-[100vw] transition-all duration-300`} 
         style={{ scrollbarGutter: 'stable' }}
@@ -423,12 +409,29 @@ export default function EmployeePortal({
                 handleLogout={handleLogout}
                 setCurrentView={setActiveTab}
                 user={currentUser}
+                onOpenAi={() => {
+                  setShowAiModal(prev => {
+                    const next = !prev
+                    setShowAiHistory(false)
+                    if (next) setAiModalAction(`open_chat_${Date.now()}`)
+                    return next
+                  })
+                }}
+                isAiOpen={showAiModal}
+                employees={employees}
+                setEmployees={setEmployees}
+                payroll={payroll}
+                setPayroll={null}
                 attendance={attendance}
                 setAttendance={setAttendance}
                 expenses={expenses}
                 setExpenses={setExpenses}
+                announcements={announcements}
+                setAnnouncements={setAnnouncements}
                 tasks={tasks}
                 setTasks={setTasks}
+                settings={settings}
+                aiModalAction={aiModalAction}
                 addToast={addToast}
             />
           </div>
@@ -488,8 +491,8 @@ export default function EmployeePortal({
 
       {/* Bottom Tab Bar (Mobile) — Floating Pill */}
       {isMobile && (
-<div className={`fixed bottom-0 left-0 right-0 z-40 flex justify-center pointer-events-none px-4 pb-3.5 sm:pb-4 transition-all duration-300 ${isScrollingDown && !showMobileMenu ? 'translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
-          <nav className="bottom-bar bottom-bar-pill pointer-events-auto w-full max-w-[210px] flex items-center justify-around px-2 h-15 transition-all duration-300 rounded-full glass-kormiis text-foreground border border-white/30 dark:border-white/14 shadow-2xl backdrop-blur-3xl" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
+        <div className={`fixed bottom-0 left-0 right-0 z-40 flex justify-center pointer-events-none px-4 pb-3.5 sm:pb-4 transition-all duration-300 ${isScrollingDown && !showMobileMenu ? 'translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
+          <nav className="bottom-bar bottom-bar-pill pointer-events-auto w-full max-w-[280px] flex items-center justify-around px-2 h-15 transition-all duration-300 rounded-full glass-kormiis text-foreground border border-white/30 dark:border-white/14 shadow-2xl backdrop-blur-3xl" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
             <MobileTabButton
               active={activeTab === 'dashboard'}
               label="Home"
@@ -503,6 +506,21 @@ export default function EmployeePortal({
               onClick={() => { setActiveTab('announcements'); setShowMobileMenu(false) }}
             >
               <Icon name="rss_feed" size={24}/>
+            </MobileTabButton>
+            <MobileTabButton
+              active={showAiModal}
+              label="AI Assistant"
+              onClick={() => {
+                setShowAiModal(prev => {
+                  const next = !prev
+                  setShowAiHistory(false)
+                  if (next) setAiModalAction(`open_chat_${Date.now()}`)
+                  return next
+                })
+                setShowMobileMenu(false)
+              }}
+            >
+              <Icon name="auto_awesome" size={24}/>
             </MobileTabButton>
             <MobileTabButton
               active={showMobileMenu}
@@ -1903,70 +1921,6 @@ function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetR
           </div>
         </DialogContent>
       </Dialog>
-
-      {/* Mobile Floating AI Trigger (Bottom-Right on phones) */}
-      {isMobile && (
-        <div className="fixed right-3 bottom-20 z-50 md:hidden">
-          <AiFloatingTrigger
-            onClick={() => {
-              setShowAiModal(prev => {
-                const next = !prev
-                setShowAiHistory(false)
-                if (next) {
-                  setAiModalAction(`open_chat_${Date.now()}`)
-                }
-                return next
-              })
-            }}
-            onNewChat={() => {
-              setShowAiModal(true)
-              setShowAiHistory(false)
-              setAiModalAction(`new_chat_${Date.now()}`)
-            }}
-            onToggleHistory={() => {
-              if (!showAiModal) {
-                setShowAiModal(true)
-                setShowAiHistory(true)
-                setAiModalAction(`open_history_${Date.now()}`)
-              } else {
-                setShowAiHistory(prev => {
-                  const next = !prev
-                  setAiModalAction(`${next ? 'open' : 'close'}_history_${Date.now()}`)
-                  return next
-                })
-              }
-            }}
-            isOpen={showAiModal}
-            isHistoryOpen={showAiHistory}
-            isDarkMode={isDarkMode}
-          />
-        </div>
-      )}
-      <AiCoPilotModal
-        isOpen={showAiModal}
-        onClose={() => {
-          setShowAiModal(false)
-          setShowAiHistory(false)
-        }}
-        initialAction={aiModalAction}
-        onHistoryDrawerChange={setShowAiHistory}
-        currentUser={currentUser}
-        employees={employees}
-        setEmployees={setEmployees}
-        payroll={payroll}
-        setPayroll={null}
-        attendance={attendance}
-        setAttendance={setAttendance}
-        expenses={expenses}
-        setExpenses={setExpenses}
-        announcements={announcements}
-        setAnnouncements={setAnnouncements}
-        tasks={tasks}
-        setTasks={setTasks}
-        settings={settings}
-        setCurrentView={setActiveTab}
-        addToast={addToast}
-      />
     </div>
   )
 }
