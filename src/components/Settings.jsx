@@ -13,6 +13,7 @@ import { Select, SelectItem } from "@/components/ui/select"
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
 import { requestPushPermission, getPushPermission, registerPushSubscription } from "../services/pushNotifications.js"
 import { sendTestEmail } from "../services/emailService.js"
+import { getAiApiKey, setAiApiKey, getAiModel, setAiModel, testGeminiApiKey, GEMINI_MODELS } from "../services/aiAgent.js"
 
 export default function Settings({ settings, setSettings, addLog, addToast, auditLogs, themeMode, toggleTheme, employees, setEmployees, currentUser }) {
   // Accordion open states
@@ -21,7 +22,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
     if (saved) {
       try { return JSON.parse(saved) } catch (e) {}
     }
-    return { company: true, payroll: false, expenses: false, notifications: false, security: false, audit: false }
+    return { company: true, payroll: false, expenses: false, notifications: false, ai: false, security: false, audit: false }
   })
 
   const toggleSection = (id) => {
@@ -33,7 +34,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
   }
 
   const expandAll = () => {
-    const next = { company: true, payroll: true, expenses: true, notifications: true, security: true, audit: true }
+    const next = { company: true, payroll: true, expenses: true, notifications: true, ai: true, security: true, audit: true }
     setOpenSections(next)
     localStorage.setItem('kormiis_settings_open_sections', JSON.stringify(next))
   }
@@ -42,6 +43,28 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
     const next = {}
     setOpenSections(next)
     localStorage.setItem('kormiis_settings_open_sections', JSON.stringify(next))
+  }
+
+  // AI Agent Settings State
+  const [aiKey, setAiKeyState] = useState(() => getAiApiKey())
+  const [aiModel, setAiModelState] = useState(() => getAiModel())
+  const [isTestingKey, setIsTestingKey] = useState(false)
+  const [aiTestResult, setAiTestResult] = useState(null)
+
+  const handleSaveAiSettings = () => {
+    setAiApiKey(aiKey)
+    setAiModel(aiModel)
+    if (addToast) addToast('AI Co-Pilot settings saved!', 'success')
+    if (addLog) addLog('AI Settings Updated', `Updated Gemini Model to ${aiModel}`, 'info')
+  }
+
+  const handleTestKey = async () => {
+    setIsTestingKey(true)
+    setAiTestResult(null)
+    const res = await testGeminiApiKey(aiKey)
+    setIsTestingKey(false)
+    setAiTestResult(res)
+    if (addToast) addToast(res.message, res.success ? 'success' : 'error')
   }
 
   const [auditFilterDate, setAuditFilterDate] = useState('')
@@ -286,7 +309,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
     if (addToast) addToast("Audit logs exported to CSV", "success")
   }
 
-  const allSectionsOpen = openSections.company && openSections.payroll && openSections.expenses && openSections.notifications && openSections.security && openSections.audit
+  const allSectionsOpen = openSections.company && openSections.payroll && openSections.expenses && openSections.notifications && openSections.ai && openSections.security && openSections.audit
 
   const renderActionFooter = (disabled = false) => (
     <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-border/50 dark:border-white/8 mt-2">
@@ -320,7 +343,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
         </h1>
       </div>
 
-      <div className="border-t border-border/80 dark:border-white/12" />
+      <div className="border-t border-border border-headline" />
 
       {/* Accordion Stream */}
       <div className="flex flex-col gap-2.5 sm:gap-3">
@@ -866,7 +889,99 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
           )}
         </div>
 
-        {/* 5. Security & Sessions Accordion */}
+        {/* 5. AI Agent & Co-Pilot Accordion */}
+        <div className={`glass-kormiis border rounded-3xl transition-all duration-300 overflow-hidden shadow-sm ${
+          openSections.ai 
+            ? 'border-primary/40 dark:border-white/20 ring-1 ring-primary/20' 
+            : 'border-border/80 dark:border-white/10 hover:border-primary/30'
+        }`}>
+          <button
+            type="button"
+            onClick={() => toggleSection('ai')}
+            className="w-full py-2.5 px-4 sm:px-5 flex items-center justify-between gap-4 text-left transition-colors hover:bg-black/[0.02] dark:hover:bg-white/[0.03] cursor-pointer select-none border-0 outline-none"
+          >
+            <div className="flex items-center gap-3.5 min-w-0">
+              <Icon name="auto_awesome" className="text-primary shrink-0" size={32}/>
+              <div>
+                <h3 className="font-bold text-fluid text-foreground tracking-tight">AI Agent & Co-Pilot</h3>
+                <p className="text-xs text-muted-foreground m-0">Configure free Google Gemini API key and AI models</p>
+              </div>
+            </div>
+
+            <Icon 
+              name="expand_more" 
+              size={24} 
+              className={`transition-transform duration-300 shrink-0 ${openSections.ai ? 'rotate-180 text-foreground' : 'rotate-0 text-muted-foreground'}`}
+            />
+          </button>
+
+          {openSections.ai && (
+            <div className="border-t border-border/60 dark:border-white/8 p-5 sm:p-6 flex flex-col gap-5 animate-in fade-in-50 duration-200">
+              <div className="p-4.5 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/25 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3.5">
+                  <div className="size-11 rounded-2xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                    <Icon name="check_circle" size={26} />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-sm font-bold text-foreground m-0">Kormiis AI Engine is Active</h4>
+                      <Badge className="bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 text-[10px] uppercase font-bold">
+                        Built-in Free
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground m-0 mt-0.5">
+                      All admins and teammates can seamlessly chat, execute actions, upload files, and give voice commands without any setup.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-4 rounded-2xl bg-black/[0.02] dark:bg-white/[0.02] border border-border/60 dark:border-white/10 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Icon name="psychology" size={20} className="text-primary" />
+                    <span className="text-xs font-bold text-foreground uppercase tracking-wider">AI Model Engine</span>
+                  </div>
+                  <Select value={aiModel} onValueChange={setAiModelState}>
+                    {GEMINI_MODELS.map(m => (
+                      <SelectItem key={m.id} value={m.id}>
+                        {m.name}
+                      </SelectItem>
+                    ))}
+                  </Select>
+                  <p className="text-[11px] text-muted-foreground mt-1">
+                    Gemini 3.6 Flash provides the fastest function execution and multimodal OCR capabilities.
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-black/[0.02] dark:bg-white/[0.02] border border-border/60 dark:border-white/10 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Icon name="verified" size={20} className="text-emerald-500" />
+                    <span className="text-xs font-bold text-foreground uppercase tracking-wider">Active Capabilities</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    <Badge variant="outline" className="text-[10px] bg-primary/10 text-primary border-primary/20">Natural Language Actions</Badge>
+                    <Badge variant="outline" className="text-[10px] bg-primary/10 text-primary border-primary/20">Multimodal File & OCR</Badge>
+                    <Badge variant="outline" className="text-[10px] bg-primary/10 text-primary border-primary/20">Speech-to-Text Voice</Badge>
+                    <Badge variant="outline" className="text-[10px] bg-primary/10 text-primary border-primary/20">Auto-Payroll & HR</Badge>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-border/50 dark:border-white/8">
+                <Button
+                  onClick={handleSaveAiSettings}
+                  className="h-10 rounded-2xl text-xs font-semibold px-5 shadow-sm"
+                >
+                  <Icon name="check" size={16} className="mr-1.5"/>
+                  Save AI Preferences
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* 6. Security & Sessions Accordion */}
         <div className={`glass-kormiis border rounded-3xl transition-all duration-300 overflow-hidden shadow-sm ${
           openSections.security 
             ? 'border-primary/40 dark:border-white/20 ring-1 ring-primary/20' 

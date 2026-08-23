@@ -688,6 +688,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
       <div className="flex items-center justify-between">
         <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground"><Icon name="group" className="text-foreground shrink-0" size={28}/>Employees</h1>
       </div>
+      <div className="border-t border-border border-headline" />
 
       {/* Pending Profile Updates Queue */}
       {pendingProfileEdits && pendingProfileEdits.length > 0 && (

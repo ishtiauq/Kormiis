@@ -534,6 +534,8 @@ export default function Documents({
         </div>
       </div>
 
+      <div className="border-t border-border border-headline" />
+
       {/* Official HR Document & Certificate Studio (Quick Action Cards) */}
       <div className="rounded-[28px] p-5 sm:p-6 glass-kormiis glass-apple text-foreground border border-white/30 dark:border-white/14 shadow-lg flex flex-col gap-4">
         <div className="flex items-center justify-between flex-wrap gap-2">

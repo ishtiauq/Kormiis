@@ -1,8 +1,6 @@
-import { useState, useEffect, useRef, useMemo } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Icon from "@/components/ui/Icon.jsx"
 import TooltipPopover from '../TooltipPopover.jsx'
-import kormiisLogo from '../../Assets/Kormiis Logo Final.svg'
-import kormiisWhiteLogo from '../../Assets/Kormiis white Logo.svg'
 
 export default function Sidebar({
   visibleNavItems = [], 
@@ -15,12 +13,6 @@ export default function Sidebar({
   const [isOpen, setIsOpen] = useState(false)
   const sidebarRef = useRef(null)
   const navRef = useRef(null)
-  const isDraggingRef = useRef(false)
-  const startYRef = useRef(0)
-  const startScrollTopRef = useRef(0)
-  const hasMovedRef = useRef(false)
-  const justDraggedRef = useRef(false)
-  const [isDragging, setIsDragging] = useState(false)
   const hoverTimeoutRef = useRef(null)
   const [isDesktopOrTablet, setIsDesktopOrTablet] = useState(
     typeof window !== 'undefined' ? window.innerWidth >= 768 : true
@@ -41,51 +33,9 @@ export default function Sidebar({
   }
 
   const handleMouseLeave = () => {
-    if (isDraggingRef.current) return
     hoverTimeoutRef.current = setTimeout(() => {
       setIsOpen(false)
     }, 180)
-  }
-
-  // Pointer drag to scroll handlers (mouse button hold & drag up/down)
-  const handlePointerDown = (e) => {
-    if (!isOpen || !navRef.current) return
-    if (e.pointerType === 'mouse' && e.button !== 0) return
-
-    isDraggingRef.current = true
-    startYRef.current = e.clientY
-    startScrollTopRef.current = navRef.current.scrollTop
-    hasMovedRef.current = false
-    setIsDragging(true)
-
-    const handlePointerMove = (moveEvent) => {
-      if (!isDraggingRef.current || !navRef.current) return
-      const deltaY = moveEvent.clientY - startYRef.current
-      if (Math.abs(deltaY) > 4) {
-        hasMovedRef.current = true
-      }
-      navRef.current.scrollTop = startScrollTopRef.current - deltaY
-    }
-
-    const handlePointerUp = () => {
-      if (isDraggingRef.current) {
-        isDraggingRef.current = false
-        setIsDragging(false)
-        if (hasMovedRef.current) {
-          justDraggedRef.current = true
-          setTimeout(() => {
-            justDraggedRef.current = false
-          }, 80)
-        }
-      }
-      window.removeEventListener('pointermove', handlePointerMove)
-      window.removeEventListener('pointerup', handlePointerUp)
-      window.removeEventListener('pointercancel', handlePointerUp)
-    }
-
-    window.addEventListener('pointermove', handlePointerMove, { passive: true })
-    window.addEventListener('pointerup', handlePointerUp)
-    window.addEventListener('pointercancel', handlePointerUp)
   }
 
   // Tablet/iPad Tap/Touch to open when collapsed
@@ -136,23 +86,6 @@ export default function Sidebar({
   const top4Items = visibleNavItems.slice(0, 4)
   const isAnyOtherActive = !top4Items.some(item => item.id === currentView)
 
-  // Width of the widest menu label (matches text-sm/500/20px) so the expanded
-  // sidebar hugs the longest menu tab exactly.
-  const expandedWidth = useMemo(() => {
-    if (typeof document === 'undefined' || !visibleNavItems?.length) return 240
-    const probe = document.createElement('span')
-    probe.style.cssText = 'position:fixed;visibility:hidden;pointer-events:none;white-space:nowrap;font-size:14px;font-weight:500;line-height:20px;font-family:inherit'
-    let max = 0
-    for (const item of visibleNavItems) {
-      probe.textContent = item.label || ''
-      document.body.appendChild(probe)
-      max = Math.max(max, probe.offsetWidth)
-      probe.remove()
-    }
-    // label + icon(22) + gap(12) + item px(24) + aside p(20) + border(2)
-    return Math.max(160, Math.min(max + 82, 248))
-  }, [visibleNavItems])
-
   return (
     <aside
       ref={sidebarRef}
@@ -160,32 +93,22 @@ export default function Sidebar({
       onMouseLeave={handleMouseLeave}
       onClick={handleBarTouchOrClick}
       aria-label="Floating navigation sidebar"
-      className={`hidden md:flex flex-col fixed left-3 md:left-5 top-1/2 -translate-y-1/2 z-50 glass-kormiis text-sidebar-foreground rounded-3xl border border-white/30 dark:border-white/14 shadow-2xl transition-[width,height,max-height,padding,box-shadow,translate] duration-350 ease-[cubic-bezier(0.34,1.56,0.64,1)] overflow-hidden ${
+      className={`hidden md:flex flex-col fixed left-3 sm:left-4 z-50 glass-kormiis text-sidebar-foreground shadow-2xl transition-[width,height,max-height,box-shadow] duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] overflow-hidden ${
         isOpen
-          ? 'h-[calc(100vh-4rem)] max-h-[min(calc(100vh-5rem),520px)] p-3 pt-3.5 pb-3 shadow-2xl'
-          : 'w-[54px] h-auto py-3 px-1.5 cursor-pointer shadow-xl'
+          ? 'w-[218px] h-[min(calc(100vh-5rem),510px)] p-2.5 pt-3 pb-2.5 rounded-3xl shadow-2xl'
+          : 'w-[50px] sm:w-[52px] h-auto p-1.5 py-2.5 rounded-2xl sm:rounded-3xl shadow-xl'
       }`}
-      style={{ 
-        width: isOpen ? `${expandedWidth}px` : undefined,
-        isolation: 'isolate',
-        contain: 'paint layout',
-        willChange: 'width, height, max-height'
-      }}
+      style={{ top: '50%', transform: 'translateY(-50%)', isolation: 'isolate' }}
     >
       {/* NAVIGATION ITEMS */}
       <nav 
         ref={navRef}
-        onPointerDown={handlePointerDown}
         aria-label="Main navigation" 
-        className={`sidebar-nav-scroll flex-1 flex flex-col gap-1.5 items-center ${
+        className={`sidebar-nav-scroll flex-1 w-full flex flex-col gap-1.5 items-center cursor-default ${
           isOpen 
-            ? 'overflow-y-auto py-1.5 pr-1 pl-0.5 select-none overscroll-contain' 
-            : 'overflow-hidden justify-center py-1'
+            ? 'overflow-y-auto overflow-x-hidden select-none overscroll-contain pr-1' 
+            : 'overflow-hidden justify-center'
         }`}
-        style={{
-          userSelect: isDragging ? 'none' : undefined,
-          touchAction: isOpen ? 'pan-y' : undefined,
-        }}
       >
         {(isOpen ? visibleNavItems.filter(item => item.id !== 'profile') : top4Items).map(item => {
           const isActive = currentView === item.id;
@@ -204,16 +127,13 @@ export default function Sidebar({
                 className={`${isActive 
                   ? 'nav-capsule-active font-semibold' 
                   : 'text-sidebar-foreground/75 hover:text-sidebar-foreground hover:bg-white/20 dark:hover:bg-white/[0.08] hover:border-white/15 dark:hover:border-white/10 border border-transparent font-medium active:scale-[0.98]'
-                } flex items-center rounded-2xl cursor-pointer box-border transition-[background-color,border-color,color,transform] duration-200 relative no-underline shrink-0 select-none ${
-                  isOpen ? 'gap-3 px-3 h-10 w-full' : 'justify-center size-10'
+                } flex items-center cursor-pointer box-border transition-[background-color,border-color,color,transform] duration-200 relative no-underline shrink-0 select-none overflow-hidden ${
+                  isOpen ? 'gap-3 px-3 h-10 w-full rounded-2xl' : 'justify-center size-9 rounded-xl sm:rounded-2xl'
                 }`}
                 data-active={isActive ? 'true' : 'false'}
                 data-label={item.label}
                 onClick={(e) => { 
                   e.stopPropagation();
-                  if (justDraggedRef.current || hasMovedRef.current) {
-                    return;
-                  }
                   if (setCurrentView) setCurrentView(item.id);
                   if (window.matchMedia('(hover: none)').matches) {
                     setIsOpen(false);
@@ -233,15 +153,11 @@ export default function Sidebar({
                 </div>
                 
                 {/* Label (Revealed on hover / tap expansion) */}
-                <span 
-                  className="text-sm font-medium leading-5 whitespace-nowrap overflow-hidden transition-[opacity,max-width] duration-300"
-                  style={{
-                    opacity: isOpen ? 1 : 0,
-                    maxWidth: isOpen ? '180px' : '0px'
-                  }}
-                >
-                  {item.label}
-                </span>
+                {isOpen && (
+                  <span className="flex-1 min-w-0 truncate text-sm font-medium leading-5 whitespace-nowrap text-left">
+                    {item.label}
+                  </span>
+                )}
               </div>
             </TooltipPopover>
           )
@@ -249,7 +165,7 @@ export default function Sidebar({
 
         {/* Resting state hint: 3 dots indicator when collapsed */}
         {!isOpen && (
-          <div className="size-10 flex flex-col items-center justify-center gap-1 opacity-60">
+          <div className="size-9 flex flex-col items-center justify-center gap-1 opacity-60">
             <span className={`size-1 rounded-full ${isAnyOtherActive ? 'bg-primary ring-2 ring-primary/40' : 'bg-sidebar-foreground/40'}`} />
             <span className="size-1 rounded-full bg-sidebar-foreground/40" />
             <span className="size-1 rounded-full bg-sidebar-foreground/40" />
@@ -259,7 +175,7 @@ export default function Sidebar({
 
       {/* EXPANDED FOOTER: LOGOUT ONLY */}
       <div 
-        className={`shrink-0 flex flex-col border-t border-white/12 dark:border-white/8 transition-all duration-300 overflow-hidden ${
+        className={`shrink-0 w-full flex flex-col border-t border-white/12 dark:border-white/8 transition-all duration-300 overflow-hidden ${
           isOpen ? 'max-h-16 pt-2 mt-1 opacity-100' : 'max-h-0 opacity-0 pointer-events-none p-0 m-0 border-none'
         }`}
       >
@@ -269,7 +185,7 @@ export default function Sidebar({
             setIsOpen(false);
             if (handleLogout) handleLogout();
           }}
-          className="sidebar-logout-btn w-full flex items-center justify-center gap-2 px-2.5 rounded-2xl bg-red-600 hover:bg-red-700 !text-white font-semibold text-xs active:scale-[0.97] transition-all cursor-pointer h-9.5 box-border shadow-sm"
+          className="sidebar-logout-btn w-full flex items-center justify-center gap-2 px-3 rounded-2xl bg-red-600 hover:bg-red-700 !text-white font-semibold text-xs active:scale-[0.97] transition-all cursor-pointer h-9.5 box-border shadow-sm"
           style={{ color: '#ffffff' }}
         >
           <Icon name="logout" size={16} className="!text-white text-white" style={{ color: '#ffffff' }}/>
@@ -288,63 +204,56 @@ export default function Sidebar({
           transform: scale(1.08);
         }
 
-        .sidebar-nav-scroll {
-          cursor: default !important;
-        }
         .sidebar-nav-scroll::-webkit-scrollbar {
-          width: 5px !important;
-          height: 5px !important;
-          cursor: default !important;
+          width: 4px;
+          background: transparent !important;
         }
-        .sidebar-nav-scroll::-webkit-scrollbar-button {
+
+        .sidebar-nav-scroll::-webkit-scrollbar-track {
+          background: transparent !important;
+        }
+
+        .sidebar-nav-scroll::-webkit-scrollbar-thumb {
+          background: transparent !important;
+          border-radius: 9999px;
+          border: none !important;
+          transition: none !important;
+        }
+
+        .sidebar-nav-scroll:hover::-webkit-scrollbar-thumb {
+          background: #cbd5e1 !important;
+          transition: none !important;
+        }
+
+        .dark .sidebar-nav-scroll:hover::-webkit-scrollbar-thumb {
+          background: #475569 !important;
+          transition: none !important;
+        }
+
+        .sidebar-nav-scroll::-webkit-scrollbar-thumb:hover {
+          background: #94a3b8 !important;
+        }
+
+        .dark .sidebar-nav-scroll::-webkit-scrollbar-thumb:hover {
+          background: #64748b !important;
+        }
+
+        .sidebar-nav-scroll::-webkit-scrollbar-button,
+        .sidebar-nav-scroll::-webkit-scrollbar-button:single-button,
+        .sidebar-nav-scroll::-webkit-scrollbar-button:vertical:decrement,
+        .sidebar-nav-scroll::-webkit-scrollbar-button:vertical:increment,
+        .sidebar-nav-scroll::-webkit-scrollbar-button:start,
+        .sidebar-nav-scroll::-webkit-scrollbar-button:end {
           display: none !important;
           width: 0px !important;
           height: 0px !important;
+          max-width: 0px !important;
+          max-height: 0px !important;
           background: transparent !important;
-        }
-        .sidebar-nav-scroll::-webkit-scrollbar-track {
-          background: transparent !important;
-          cursor: default !important;
-        }
-        .sidebar-nav-scroll::-webkit-scrollbar-thumb {
-          background: transparent !important;
-          border-radius: 9999px !important;
-          border: 1px solid transparent !important;
-          background-clip: padding-box !important;
-          transition: none !important;
-          cursor: default !important;
-        }
-        /* Container hover / scroll: Apple Ultra-Liquid Glass Bar */
-        aside:hover .sidebar-nav-scroll::-webkit-scrollbar-thumb,
-        .sidebar-nav-scroll:hover::-webkit-scrollbar-thumb {
-          background: rgba(0, 0, 0, 0.28) !important;
-          border: 1px solid rgba(255, 255, 255, 0.65) !important;
-          border-radius: 9999px !important;
-          background-clip: padding-box !important;
-          transition: none !important;
-          cursor: default !important;
-        }
-        :is(.dark, [data-theme="dark"]) aside:hover .sidebar-nav-scroll::-webkit-scrollbar-thumb,
-        :is(.dark, [data-theme="dark"]) .sidebar-nav-scroll:hover::-webkit-scrollbar-thumb {
-          background: rgba(255, 255, 255, 0.32) !important;
-          border: 1px solid rgba(255, 255, 255, 0.20) !important;
-          border-radius: 9999px !important;
-          background-clip: padding-box !important;
-          transition: none !important;
-          cursor: default !important;
-        }
-        /* Direct Scrollbar Hover & Active / Drag: Consistent Liquid Glass, No color shift, No cursor change */
-        .sidebar-nav-scroll::-webkit-scrollbar-thumb:hover,
-        .sidebar-nav-scroll::-webkit-scrollbar-thumb:active {
-          background: rgba(0, 0, 0, 0.28) !important;
-          border: 1px solid rgba(255, 255, 255, 0.65) !important;
-          cursor: default !important;
-        }
-        :is(.dark, [data-theme="dark"]) .sidebar-nav-scroll::-webkit-scrollbar-thumb:hover,
-        :is(.dark, [data-theme="dark"]) .sidebar-nav-scroll::-webkit-scrollbar-thumb:active {
-          background: rgba(255, 255, 255, 0.32) !important;
-          border: 1px solid rgba(255, 255, 255, 0.20) !important;
-          cursor: default !important;
+          border: none !important;
+          outline: none !important;
+          opacity: 0 !important;
+          pointer-events: none !important;
         }
       `}</style>
     </aside>

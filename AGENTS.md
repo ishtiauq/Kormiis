@@ -130,16 +130,17 @@ Global fluid typography uses `clamp()` in `@layer base`:
 
 ---
 
-## 9. Universal Global Scrollbar Rule (Permanent Fixed Standard)
+## 9. Universal Global Scrollbar Rule (Minimal Solid Standard)
 
-Scrollbars across the entire application **MUST STRICTLY** follow this fixed two-tier interaction standard (centralized in `src/index.css`):
+Scrollbars across the entire application **MUST STRICTLY** follow this minimal solid standard (centralized in `src/index.css`):
 
 - **Default Idle State**: **Completely Invisible** (`background: transparent !important`, border `none`, track `transparent`). No scrollbars should ever be visible when the mouse is resting or outside a scrollable container.
 - **Container Hover State**: Visible **ONLY** when the mouse hovers over the scrollable container or page (`*:hover::-webkit-scrollbar-thumb`).
-  - **Light Mode**: Apple Ultra-Liquid Glass capsule (`rgba(0, 0, 0, 0.28)` with `1px solid rgba(255, 255, 255, 0.65)` border).
-  - **Dark Mode**: High-clarity frosted capsule (`rgba(255, 255, 255, 0.32)` with `1px solid rgba(255, 255, 255, 0.20)` border).
-- **Direct Thumb Hover & Dragging / Selection State**: Maintains consistent Apple Liquid Glass frosted look without changing color (`rgba(0, 0, 0, 0.28)` in light mode, `rgba(255, 255, 255, 0.32)` in dark mode). Cursor remains default (`cursor: default !important`) with zero cursor changes during selection or scroll interaction.
+  - **Light Mode**: Clean minimal solid capsule (`#cbd5e1` with `border: none`).
+  - **Dark Mode**: Clean minimal solid capsule (`#475569` with `border: none`).
+- **Direct Thumb Hover & Dragging / Selection State**: Responsive solid feedback (`#94a3b8` in light mode, `#64748b` in dark mode) with zero borders, zero glass layers, and zero smear/glare artifacts.
 - **Mouse Leave**: Instantly disappears (`transition: none !important` with 0ms delay).
 - **No Stepper Arrows**: Up/down and left/right arrows are completely eliminated (`::-webkit-scrollbar-button { display: none !important; width: 0; height: 0; }`).
+- **No Glass Layers or Inner Strokes**: No white border, no translucent layer stacking, no backdrop filters on scrollbars to avoid rendering glitches/glare.
 - **DO NOT** add custom inline or per-component scrollbars that leave a visible bar in the default idle state. Always inherit or use the centralized standard.
 

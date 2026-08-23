@@ -11,12 +11,17 @@ import { allNavItems } from '../utils/helpers.js'
 import { useCommandPalette } from '../hooks/useCommandPalette.jsx'
 import LoadingScreen from './layout/LoadingScreen.jsx'
 import useAppData from '../hooks/useAppData.js'
+import AiFloatingTrigger from './ai/AiFloatingTrigger.jsx'
+import AiCoPilotModal from './ai/AiCoPilotModal.jsx'
 
 const EmployeePortal = lazy(() => import('./EmployeePortal.jsx'))
 
 export default function DashboardShell({ user, themeMode, isDarkMode, toggleTheme, addToast, toasts, removeToast, handleLogout, currentView, setCurrentView, isMobile }) {
   const appData = useAppData({ user, addToast })
 
+  const [showAiModal, setShowAiModal] = useState(false)
+  const [showAiHistory, setShowAiHistory] = useState(false)
+  const [aiModalAction, setAiModalAction] = useState(null)
   const [showMobileMenu, setShowMobileMenu] = useState(false)
   const [isScrollingDown, setIsScrollingDown] = useState(false)
   const lastScrollY = useRef(0)
@@ -151,6 +156,7 @@ export default function DashboardShell({ user, themeMode, isDarkMode, toggleThem
 
   return (
     <div className="dashboard-root app-shell relative" style={{ display: 'flex', height: '100vh', width: '100vw', maxWidth: '100vw', overflow: 'hidden', boxSizing: 'border-box' }}>
+      {/* 1. Left Navigation Menu Sidebar (Fixed Stationary at calc(50% - 191px)) */}
       <Sidebar
         visibleNavItems={visibleNavItems}
         isCollapsed={isCollapsed}
@@ -165,15 +171,51 @@ export default function DashboardShell({ user, themeMode, isDarkMode, toggleThem
         setMobileMenuOpen={setShowMobileMenu}
       />
 
+      {/* 2. Top-Right AI Action Bar (Aligned with Topbar) */}
+      <AiFloatingTrigger
+        onClick={() => {
+          setShowAiModal(prev => {
+            const next = !prev
+            setShowAiHistory(false)
+            if (next) {
+              setAiModalAction(`open_chat_${Date.now()}`)
+            }
+            return next
+          })
+        }}
+        onNewChat={() => {
+          setShowAiModal(true)
+          setShowAiHistory(false)
+          setAiModalAction(`new_chat_${Date.now()}`)
+        }}
+        onToggleHistory={() => {
+          if (!showAiModal) {
+            setShowAiModal(true)
+            setShowAiHistory(true)
+            setAiModalAction(`open_history_${Date.now()}`)
+          } else {
+            setShowAiHistory(prev => {
+              const next = !prev
+              setAiModalAction(`${next ? 'open' : 'close'}_history_${Date.now()}`)
+              return next
+            })
+          }
+        }}
+        isOpen={showAiModal}
+        isHistoryOpen={showAiHistory}
+        isDarkMode={isDarkMode}
+        isMobile={false}
+      />
+
       <main 
-        className={`content dashboard-content ${isMobile ? 'pb-24' : 'pb-12 md:pl-20 lg:pl-24'} flex-1 overflow-y-auto overflow-x-hidden flex flex-col items-center max-w-[100vw] transition-all duration-300`} 
+        className={`content dashboard-content ${isMobile ? 'pb-24' : 'pb-12 md:pl-[76px] md:pr-5 lg:pr-6 xl:pr-8'} flex-1 overflow-y-auto overflow-x-hidden flex flex-col items-center max-w-[100vw] transition-all duration-300`} 
         style={{ scrollbarGutter: 'stable' }}
         onScroll={handleScroll}
       >
-        <div className="w-full max-w-[1600px] flex flex-col relative">
+        <div className="w-full max-w-[1920px] flex flex-col relative">
           
           {/* Sticky Header Wrapper */}
-          <div className={`sticky top-0 z-40 w-full sm:pt-4 md:pt-6 sm:pb-3 sm:px-4 md:px-6 pointer-events-none transition-transform duration-300 ease-in-out ${isMobile && isScrollingDown && !showMobileMenu ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
+          <div className={`sticky top-0 z-40 w-full sm:pt-4 md:pt-5 sm:pb-3 px-1 sm:px-2 md:px-2 pointer-events-none transition-transform duration-300 ease-in-out ${isMobile && isScrollingDown && !showMobileMenu ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
             <Topbar
                 isDarkMode={isDarkMode}
                 toggleSidebar={toggleSidebar}
@@ -206,7 +248,7 @@ export default function DashboardShell({ user, themeMode, isDarkMode, toggleThem
               />
           </div>
 
-          <div className="w-full flex-1 px-4 md:px-6 lg:px-8 pt-4 sm:pt-2 md:pt-0">
+          <div className="w-full flex-1 px-1 sm:px-2 md:px-2 pt-4 sm:pt-2 md:pt-0">
             <AppContent
             currentView={currentView}
             setCurrentView={setCurrentView}
@@ -331,6 +373,70 @@ export default function DashboardShell({ user, themeMode, isDarkMode, toggleThem
         getCategoryIcon={getCategoryIcon}
       />
       <ConfirmDialog />
+
+      {/* Mobile Floating AI Trigger (Bottom-Right on phones) */}
+      {isMobile && (
+        <div className="fixed right-3 bottom-20 z-50 md:hidden">
+          <AiFloatingTrigger
+            onClick={() => {
+              setShowAiModal(prev => {
+                const next = !prev
+                setShowAiHistory(false)
+                if (next) {
+                  setAiModalAction(`open_chat_${Date.now()}`)
+                }
+                return next
+              })
+            }}
+            onNewChat={() => {
+              setShowAiModal(true)
+              setShowAiHistory(false)
+              setAiModalAction(`new_chat_${Date.now()}`)
+            }}
+            onToggleHistory={() => {
+              if (!showAiModal) {
+                setShowAiModal(true)
+                setShowAiHistory(true)
+                setAiModalAction(`open_history_${Date.now()}`)
+              } else {
+                setShowAiHistory(prev => {
+                  const next = !prev
+                  setAiModalAction(`${next ? 'open' : 'close'}_history_${Date.now()}`)
+                  return next
+                })
+              }
+            }}
+            isOpen={showAiModal}
+            isHistoryOpen={showAiHistory}
+            isDarkMode={isDarkMode}
+          />
+        </div>
+      )}
+      <AiCoPilotModal
+        isOpen={showAiModal}
+        onClose={() => {
+          setShowAiModal(false)
+          setShowAiHistory(false)
+        }}
+        initialAction={aiModalAction}
+        onHistoryDrawerChange={setShowAiHistory}
+        currentUser={user}
+        employees={appData.employees}
+        setEmployees={appData.handleSetEmployees}
+        payroll={appData.payroll}
+        setPayroll={appData.handleSetPayroll}
+        attendance={appData.attendance}
+        setAttendance={appData.handleSetAttendance}
+        expenses={appData.expenses}
+        setExpenses={appData.handleSetExpenses}
+        announcements={appData.announcements}
+        setAnnouncements={appData.setAnnouncements}
+        tasks={appData.tasks}
+        setTasks={appData.setTasks}
+        settings={appData.settings}
+        setCurrentView={setCurrentView}
+        addToast={addToast}
+      />
     </div>
   )
 }

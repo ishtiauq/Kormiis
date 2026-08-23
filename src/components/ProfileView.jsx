@@ -356,6 +356,8 @@ export default function ProfileView({
         )}
       </div>
 
+      <div className="border-t border-border border-headline" />
+
       {/* Pending Update Alert Banner */}
       {hasPending && (
         <div className="glass-card rounded-3xl p-4 sm:p-5 border border-amber-500/30 bg-amber-500/10 dark:bg-amber-500/15 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">

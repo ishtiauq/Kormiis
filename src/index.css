@@ -6,6 +6,7 @@
    and the universal monochrome/scrollbar standards.
    ============================================================== */
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *, [data-theme="dark"], [data-theme="dark"] *));
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/inter";
@@ -99,6 +100,13 @@
   --glass-btn-hover-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.52) 0%, rgba(255, 255, 255, 0.20) 100%);
   --glass-btn-hover-border: rgba(255, 255, 255, 0.38);
   --glass-btn-hover-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.50), 0 4px 10px 0 rgba(0, 0, 0, 0.08);
+
+  /* Apple Ultra-Liquid Glass Drawer Tokens (Light Mode) */
+  --history-drawer-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.48) 0%, rgba(255, 255, 255, 0.22) 100%);
+  --history-card-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.18) 100%);
+  --history-card-border: rgba(255, 255, 255, 0.32);
+  --history-card-active-bg: rgba(254, 53, 1, 0.12);
+  --history-card-active-border: rgba(254, 53, 1, 0.40);
 }
 
 .dark,
@@ -137,6 +145,13 @@ html.dark,
     0 3px 8px 0 rgba(0, 0, 0, 0.45),
     inset 0 1px 1px 0 rgba(255, 255, 255, 0.15),
     inset 1px 0 1px 0 rgba(255, 255, 255, 0.08);
+
+  /* Apple Ultra-Liquid Glass Drawer Tokens (Dark Mode) */
+  --history-drawer-bg: linear-gradient(135deg, rgba(28, 28, 40, 0.42) 0%, rgba(14, 14, 22, 0.30) 100%);
+  --history-card-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
+  --history-card-border: rgba(255, 255, 255, 0.14);
+  --history-card-active-bg: rgba(254, 53, 1, 0.22);
+  --history-card-active-border: rgba(254, 53, 1, 0.50);
   
   --glass-btn-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.03) 100%);
   --glass-btn-border: rgba(255, 255, 255, 0.16);
@@ -235,6 +250,26 @@ html.dark,
   border: 1px solid var(--glass-border) !important;
   box-shadow: var(--glass-shadow) !important;
   isolation: isolate !important;
+}
+
+.liquid-glass-drawer {
+  background: var(--history-drawer-bg) !important;
+  -webkit-backdrop-filter: saturate(190%) blur(32px) !important;
+  backdrop-filter: saturate(190%) blur(32px) !important;
+  border-left: 1px solid var(--glass-border) !important;
+  box-shadow: 
+    -15px 0 35px -5px rgba(0, 0, 0, 0.08),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.40),
+    inset 1px 0 1px 0 rgba(255, 255, 255, 0.20) !important;
+}
+.dark .liquid-glass-drawer,
+html.dark .liquid-glass-drawer,
+[data-theme="dark"] .liquid-glass-drawer {
+  border-left: 1px solid rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 
+    -20px 0 45px -5px rgba(0, 0, 0, 0.70),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.15),
+    inset 1px 0 1px 0 rgba(255, 255, 255, 0.08) !important;
 }
 
 /* True Apple Liquid Glass Top Bar (iOS 26 Ultra-Liquid Standard - Matching App Topbar) */
@@ -765,169 +800,210 @@ a.bg-primary:active {
    UI/UX POLISH & ACCESSIBILITY TOKENS
    ============================================================== */
 
+
+
 /* ==============================================================
-   UNIVERSAL GLOBAL SCROLLBAR SYSTEM (PERMANENT FIXED STANDARD)
-   - Invisible by default everywhere in the app
-   - Becomes visible ONLY when the scrollable container is hovered
-   - Apple Ultra-Liquid Glass capsule on container hover
-   - Brand Accent #FE3501 on direct thumb hover or dragging
-   - Instant disappear when mouse leaves
+   UNIVERSAL GLOBAL SCROLLBAR STANDARD (RULE 9 - MONOGLASS)
+   - Completely invisible at idle
+   - Visible only on container hover
+   - ZERO stepper arrows (up/down/left/right completely eliminated)
    ============================================================== */
-@media (hover: hover) and (pointer: fine) {
-  /* WebKit / Chromium / Edge / Safari */
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-    cursor: default !important;
-  }
 
-  /* Complete Elimination of Scrollbar Stepper Buttons/Arrows (Top, Bottom, Left, Right) */
-  ::-webkit-scrollbar-button,
-  *::-webkit-scrollbar-button,
-  ::-webkit-scrollbar-button:single-button,
-  ::-webkit-scrollbar-button:double-button,
-  ::-webkit-scrollbar-button:vertical:decrement,
-  ::-webkit-scrollbar-button:vertical:increment,
-  ::-webkit-scrollbar-button:horizontal:decrement,
-  ::-webkit-scrollbar-button:horizontal:increment,
-  ::-webkit-scrollbar-button:start,
-  ::-webkit-scrollbar-button:end,
-  ::-webkit-scrollbar-button:vertical:start:decrement,
-  ::-webkit-scrollbar-button:vertical:end:increment,
-  ::-webkit-scrollbar-button:horizontal:start:decrement,
-  ::-webkit-scrollbar-button:horizontal:end:increment {
-    display: none !important;
-    width: 0px !important;
-    height: 0px !important;
-    max-width: 0px !important;
-    max-height: 0px !important;
-    background: transparent !important;
-    border: none !important;
-    opacity: 0 !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
-  }
-
-  ::-webkit-scrollbar-corner,
-  *::-webkit-scrollbar-corner,
-  ::-webkit-resizer,
-  *::-webkit-resizer {
-    display: none !important;
-    background: transparent !important;
-    width: 0px !important;
-    height: 0px !important;
-  }
-
-  ::-webkit-scrollbar-track {
-    background: transparent !important;
-    cursor: default !important;
-  }
-
-  /* Default State: Completely Invisible / Hidden */
-  ::-webkit-scrollbar-thumb {
-    background: transparent !important;
-    border-radius: 9999px !important;
-    border: none !important;
-    background-clip: padding-box !important;
-    transition: none !important;
-    cursor: default !important;
-  }
-
-  /* Container Hover State: Apple Ultra-Liquid Glass Bar (Light Mode) */
-  *:hover::-webkit-scrollbar-thumb,
-  html:hover::-webkit-scrollbar-thumb,
-  body:hover::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.28) !important;
-    border: 1px solid rgba(255, 255, 255, 0.65) !important;
-    border-radius: 9999px !important;
-    background-clip: padding-box !important;
-    transition: none !important;
-    cursor: default !important;
-  }
-
-  /* Container Hover State: Apple Ultra-Liquid Glass Bar (Dark Mode) */
-  .dark *:hover::-webkit-scrollbar-thumb,
-  .dark html:hover::-webkit-scrollbar-thumb,
-  .dark body:hover::-webkit-scrollbar-thumb,
-  [data-theme="dark"] *:hover::-webkit-scrollbar-thumb,
-  [data-theme="dark"] html:hover::-webkit-scrollbar-thumb,
-  [data-theme="dark"] body:hover::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.32) !important;
-    border: 1px solid rgba(255, 255, 255, 0.20) !important;
-    border-radius: 9999px !important;
-    background-clip: padding-box !important;
-    transition: none !important;
-    cursor: default !important;
-  }
-
-  /* Direct Scrollbar Thumb Hover & Active / Selection State: Consistent Liquid Glass, No color shift, No cursor change */
-  ::-webkit-scrollbar-thumb:hover,
-  ::-webkit-scrollbar-thumb:active,
-  *:hover::-webkit-scrollbar-thumb:hover,
-  *:hover::-webkit-scrollbar-thumb:active,
-  *:active::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.28) !important;
-    border: 1px solid rgba(255, 255, 255, 0.65) !important;
-    cursor: default !important;
-  }
-
-  .dark ::-webkit-scrollbar-thumb:hover,
-  .dark ::-webkit-scrollbar-thumb:active,
-  .dark *:hover::-webkit-scrollbar-thumb:hover,
-  .dark *:hover::-webkit-scrollbar-thumb:active,
-  .dark *:active::-webkit-scrollbar-thumb,
-  [data-theme="dark"] ::-webkit-scrollbar-thumb:hover,
-  [data-theme="dark"] ::-webkit-scrollbar-thumb:active,
-  [data-theme="dark"] *:hover::-webkit-scrollbar-thumb:hover,
-  [data-theme="dark"] *:hover::-webkit-scrollbar-thumb:active,
-  [data-theme="dark"] *:active::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.32) !important;
-    border: 1px solid rgba(255, 255, 255, 0.20) !important;
-    cursor: default !important;
-  }
+/* Eliminate all stepper buttons and arrows everywhere across all browsers and pseudo-classes */
+::-webkit-scrollbar-button,
+*::-webkit-scrollbar-button,
+::-webkit-scrollbar-button:single-button,
+*::-webkit-scrollbar-button:single-button,
+::-webkit-scrollbar-button:vertical:decrement,
+*::-webkit-scrollbar-button:vertical:decrement,
+::-webkit-scrollbar-button:vertical:increment,
+*::-webkit-scrollbar-button:vertical:increment,
+::-webkit-scrollbar-button:horizontal:decrement,
+*::-webkit-scrollbar-button:horizontal:decrement,
+::-webkit-scrollbar-button:horizontal:increment,
+*::-webkit-scrollbar-button:horizontal:increment,
+::-webkit-scrollbar-button:start,
+*::-webkit-scrollbar-button:start,
+::-webkit-scrollbar-button:end,
+*::-webkit-scrollbar-button:end,
+::-webkit-scrollbar-button:start:decrement,
+*::-webkit-scrollbar-button:start:decrement,
+::-webkit-scrollbar-button:end:increment,
+*::-webkit-scrollbar-button:end:increment {
+  display: none !important;
+  width: 0px !important;
+  height: 0px !important;
+  max-width: 0px !important;
+  max-height: 0px !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  outline: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 
-/* Standard CSS Scrollbar (Scoped specifically for Firefox) */
-@supports (-moz-appearance: none) {
-  * {
-    scrollbar-width: thin;
-    scrollbar-color: transparent transparent;
-  }
-  *:hover {
-    scrollbar-color: rgba(0, 0, 0, 0.28) transparent;
-  }
-  .dark *:hover,
-  [data-theme="dark"] *:hover {
-    scrollbar-color: rgba(255, 255, 255, 0.32) transparent;
-  }
+/* Base scrollbar container */
+html,
+body,
+* {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
 }
 
-/* 2. Touch Devices (Phones / Tablets without pointer) */
-@media (hover: none) and (pointer: coarse) {
-  * {
-    scrollbar-width: none !important;
-    -ms-overflow-style: none !important;
-  }
+*:hover,
+body:hover,
+html:hover {
+  scrollbar-color: #cbd5e1 transparent;
+}
 
-  ::-webkit-scrollbar {
-    display: none !important;
-    width: 0px !important;
-    height: 0px !important;
-  }
+.dark *:hover,
+.dark body:hover,
+.dark html:hover,
+[data-theme="dark"] *:hover,
+[data-theme="dark"] body:hover,
+[data-theme="dark"] html:hover {
+  scrollbar-color: #475569 transparent;
+}
+
+::-webkit-scrollbar,
+*::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+  background: transparent !important;
+}
+
+::-webkit-scrollbar-track,
+*::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+/* Default Idle State: Completely Invisible */
+::-webkit-scrollbar-thumb,
+*::-webkit-scrollbar-thumb {
+  background: transparent !important;
+  border-radius: 9999px;
+  border: none !important;
+  transition: none !important;
+}
+
+/* Container Hover State: Minimal Solid Capsule (Instant appear on hover, instant disappear on leave) */
+*:hover::-webkit-scrollbar-thumb,
+body:hover::-webkit-scrollbar-thumb {
+  background: #cbd5e1 !important;
+  transition: none !important;
+}
+
+.dark *:hover::-webkit-scrollbar-thumb,
+.dark body:hover::-webkit-scrollbar-thumb,
+[data-theme="dark"] *:hover::-webkit-scrollbar-thumb {
+  background: #475569 !important;
+  transition: none !important;
+}
+
+/* Direct Thumb Hover & Dragging Feedback */
+::-webkit-scrollbar-thumb:hover,
+*::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8 !important;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover,
+.dark *::-webkit-scrollbar-thumb:hover,
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover,
+[data-theme="dark"] *::-webkit-scrollbar-thumb:hover {
+  background: #64748b !important;
+}
+
+/* Corner */
+::-webkit-scrollbar-corner,
+*::-webkit-scrollbar-corner {
+  background: transparent !important;
 }
 
 /* Explicit Utility to hide scrollbars only when intended */
-.no-scrollbar::-webkit-scrollbar,
-.scrollbar-none::-webkit-scrollbar {
-  display: none !important;
-  width: 0 !important;
-  height: 0 !important;
-}
-
 .no-scrollbar,
 .scrollbar-none {
   -ms-overflow-style: none !important;
   scrollbar-width: none !important;
+}
+
+.no-scrollbar::-webkit-scrollbar,
+.scrollbar-none::-webkit-scrollbar,
+*:hover .no-scrollbar::-webkit-scrollbar,
+*:hover .scrollbar-none::-webkit-scrollbar,
+*:hover.no-scrollbar::-webkit-scrollbar,
+*:hover.scrollbar-none::-webkit-scrollbar,
+.no-scrollbar::-webkit-scrollbar-thumb,
+.scrollbar-none::-webkit-scrollbar-thumb,
+*:hover .no-scrollbar::-webkit-scrollbar-thumb,
+*:hover .scrollbar-none::-webkit-scrollbar-thumb,
+*:hover.no-scrollbar::-webkit-scrollbar-thumb,
+*:hover.scrollbar-none::-webkit-scrollbar-thumb,
+.dark *:hover .no-scrollbar::-webkit-scrollbar-thumb,
+.dark *:hover .scrollbar-none::-webkit-scrollbar-thumb,
+[data-theme="dark"] *:hover .no-scrollbar::-webkit-scrollbar-thumb,
+[data-theme="dark"] *:hover .scrollbar-none::-webkit-scrollbar-thumb {
+  display: none !important;
+  width: 0px !important;
+  height: 0px !important;
+  max-width: 0px !important;
+  max-height: 0px !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  opacity: 0 !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Universal Global Scrollbar Rule for AI Chat Modal (Rule 9 Standard) */
+.chat-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+.chat-scrollbar:hover {
+  scrollbar-color: #cbd5e1 transparent;
+}
+.dark .chat-scrollbar:hover,
+[data-theme="dark"] .chat-scrollbar:hover {
+  scrollbar-color: #475569 transparent;
+}
+.chat-scrollbar::-webkit-scrollbar {
+  width: 6px !important;
+  height: 6px !important;
+}
+.chat-scrollbar::-webkit-scrollbar-button,
+.chat-scrollbar *::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+.chat-scrollbar::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+.chat-scrollbar::-webkit-scrollbar-thumb {
+  background: transparent !important;
+  border-radius: 9999px !important;
+  border: none !important;
+}
+.chat-scrollbar:hover::-webkit-scrollbar-thumb {
+  background: #cbd5e1 !important;
+  border: none !important;
+}
+.dark .chat-scrollbar:hover::-webkit-scrollbar-thumb,
+[data-theme="dark"] .chat-scrollbar:hover::-webkit-scrollbar-thumb {
+  background: #475569 !important;
+  border: none !important;
+}
+.chat-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8 !important;
+  border: none !important;
+}
+.dark .chat-scrollbar::-webkit-scrollbar-thumb:hover,
+[data-theme="dark"] .chat-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #64748b !important;
+  border: none !important;
 }
 
 /* 2. Accessibility: Reduced Motion */
@@ -1370,17 +1446,19 @@ div[class*="text-rose-"]:not([class*="bg-"]):not([class*="size-"]):not([class*="
   border-color: rgba(255, 255, 255, 0.16) !important;
 }
 
-/* Selected Day Capsule: Pure Solid Black in Light Mode / Pure Solid White in Dark Mode */
+/* Sidebar Active Capsule: Pure Solid Black in Light Mode / Pure Solid White in Dark Mode (Zero Shadow) */
 .nav-capsule-active {
   background-color: #000000 !important;
   color: #ffffff !important;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25) !important;
+  box-shadow: none !important;
+  -webkit-box-shadow: none !important;
 }
 .dark .nav-capsule-active,
 [data-theme="dark"] .nav-capsule-active {
   background-color: #ffffff !important;
   color: #000000 !important;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5) !important;
+  box-shadow: none !important;
+  -webkit-box-shadow: none !important;
 }
 
 .selected-day-capsule {
