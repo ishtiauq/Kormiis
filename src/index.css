@@ -1024,6 +1024,46 @@ body:hover::-webkit-scrollbar-thumb {
   }
 }
 
+@keyframes ai-panel-expand {
+  from { opacity: 0; transform: translateY(-16px) scale(0.94); }
+  55% { opacity: 1; }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes ai-panel-collapse {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  45% { opacity: 1; }
+  to { opacity: 0; transform: translateY(-16px) scale(0.94); }
+}
+
+.ai-panel-enter {
+  animation: ai-panel-expand 460ms var(--spring-physics) both;
+  transform-origin: top center;
+}
+
+.ai-panel-exit {
+  animation: ai-panel-collapse 260ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  transform-origin: top center;
+}
+
+@keyframes ai-panel-slide-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes ai-panel-slide-down {
+  from { transform: translateY(0); }
+  to { transform: translateY(100%); }
+}
+
+.ai-panel-enter-bottom {
+  animation: ai-panel-slide-up 350ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.ai-panel-exit-bottom {
+  animation: ai-panel-slide-down 260ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
 /* 4. Glass Inputs & Smooth Focus Rings */
 input, select, textarea, .border-input {
   background: rgba(255, 255, 255, 0.85);
@@ -1464,7 +1504,6 @@ div[class*="text-rose-"]:not([class*="bg-"]):not([class*="size-"]):not([class*="
 .selected-day-capsule {
   background-color: #000000 !important;
   color: #ffffff !important;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3) !important;
 }
 .selected-day-capsule span,
 .selected-day-capsule strong,
@@ -1479,7 +1518,6 @@ div[class*="text-rose-"]:not([class*="bg-"]):not([class*="size-"]):not([class*="
 [data-theme="dark"] .selected-day-capsule {
   background-color: #ffffff !important;
   color: #000000 !important;
-  box-shadow: 0 4px 14px rgba(255, 255, 255, 0.25) !important;
 }
 .dark .selected-day-capsule span,
 .dark .selected-day-capsule strong,

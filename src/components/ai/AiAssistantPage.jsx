@@ -464,7 +464,7 @@ export default function AiAssistantPage({
   return (
     <div className="w-full flex-1 flex flex-col items-center justify-start pb-20 sm:pb-8 pt-1 animate-in fade-in duration-200 max-w-[1000px] mx-auto">
       {/* FULL-PAGE AI CHAT WORKSPACE CONTAINER */}
-      <div className="w-full h-[calc(100dvh-130px)] sm:h-[calc(100dvh-140px)] md:h-[calc(100vh-140px)] flex flex-col rounded-[24px] sm:rounded-[32px] glass-kormiis border border-white/35 dark:border-white/16 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.30)] overflow-hidden backdrop-blur-3xl relative">
+      <div className="w-full h-[calc(100dvh_-_130px)] sm:h-[calc(100dvh_-_140px)] md:h-[calc(100vh_-_140px)] flex flex-col rounded-[24px] sm:rounded-[32px] glass-kormiis border border-white/35 dark:border-white/16 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.30)] overflow-hidden backdrop-blur-3xl relative">
         
         {/* HEADER BAR */}
         <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-border/60 dark:border-white/10 shrink-0 bg-white/20 dark:bg-white/[0.03]">

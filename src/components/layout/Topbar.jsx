@@ -5,9 +5,10 @@ import kormiisLogo from '../../Assets/Kormiis Logo Final.svg'
 import kormiisWhiteLogo from '../../Assets/Kormiis white Logo.svg'
 
 import { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { Badge } from "@/components/ui/badge"
 import { getRelativeTime } from '../../services/date.js'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import AiCoPilotModal from '../ai/AiCoPilotModal.jsx'
 
 export default function Topbar({ 
@@ -193,6 +194,62 @@ export default function Topbar({
     return () => { clearTimeout(resizeTimer); window.removeEventListener('resize', handleResize) }
   }, [])
 
+  const [aiPanelMounted, setAiPanelMounted] = useState(false)
+  const [aiPanelExiting, setAiPanelExiting] = useState(false)
+  const aiUnmountTimerRef = useRef(null)
+
+  useEffect(() => {
+    if (isAiOpen) {
+      clearTimeout(aiUnmountTimerRef.current)
+      setAiPanelMounted(true)
+      setAiPanelExiting(false)
+    } else {
+      aiUnmountTimerRef.current = setTimeout(() => {
+        setAiPanelMounted(false)
+        setAiPanelExiting(false)
+      }, 280)
+    }
+    return () => clearTimeout(aiUnmountTimerRef.current)
+  }, [isAiOpen])
+
+  const [notifPanelMounted, setNotifPanelMounted] = useState(false)
+  const [notifPanelExiting, setNotifPanelExiting] = useState(false)
+  const notifUnmountTimerRef = useRef(null)
+
+  useEffect(() => {
+    if (showNotifications) {
+      clearTimeout(notifUnmountTimerRef.current)
+      setNotifPanelMounted(true)
+      setNotifPanelExiting(false)
+    } else {
+      notifUnmountTimerRef.current = setTimeout(() => {
+        setNotifPanelMounted(false)
+        setNotifPanelExiting(false)
+      }, 280)
+    }
+    return () => clearTimeout(notifUnmountTimerRef.current)
+  }, [showNotifications])
+
+  // Outside click + Escape closes the notification panel (same behaviour as AI Co-Pilot panel)
+  useEffect(() => {
+    if (!showNotifications) return
+    const handleOutside = (e) => {
+      if (e.target.closest?.('#notification-trigger') || e.target.closest?.('[data-notif-panel]')) return
+      setShowNotifications(false)
+    }
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') setShowNotifications(false)
+    }
+    document.addEventListener('mousedown', handleOutside)
+    document.addEventListener('touchstart', handleOutside, { passive: true })
+    window.addEventListener('keydown', handleEscape)
+    return () => {
+      document.removeEventListener('mousedown', handleOutside)
+      document.removeEventListener('touchstart', handleOutside)
+      window.removeEventListener('keydown', handleEscape)
+    }
+  }, [showNotifications])
+
   const renderDataIntegrityCard = () => {
     if (!hasIntegrityIssues) return null
 
@@ -272,35 +329,7 @@ export default function Topbar({
   return (
     <>
       {/* Mobile: Liquid Glass Top Bar */}
-      {isAiOpen ? (
-        <header
-          aria-label="Kormiis AI Co-Pilot"
-          className="topbar pointer-events-auto w-[98%] min-[400px]:w-[94%] sm:w-[85%] max-w-3xl mx-auto h-[min(78vh,580px)] flex flex-col rounded-[28px] sm:rounded-[32px] glass-kormiis-modal text-foreground transition-all duration-400 ease-[cubic-bezier(0.34,1.56,0.64,1)] shadow-[0_24px_50px_-12px_rgba(0,0,0,0.50),0_0_20px_0_rgba(0,0,0,0.20)] overflow-hidden backdrop-blur-3xl border border-white/35 dark:border-white/16 relative"
-        >
-          <AiCoPilotModal
-            isMorphMode={true}
-            isOpen={true}
-            onClose={() => onOpenAi && onOpenAi()}
-            currentUser={user}
-            employees={employees}
-            setEmployees={setEmployees}
-            payroll={payroll}
-            setPayroll={setPayroll}
-            attendance={attendance}
-            setAttendance={setAttendance}
-            expenses={expenses}
-            setExpenses={setExpenses}
-            announcements={announcements}
-            setAnnouncements={setAnnouncements}
-            tasks={tasks}
-            setTasks={setTasks}
-            settings={settings}
-            setCurrentView={setCurrentView}
-            addToast={addToast}
-            initialAction={aiModalAction}
-          />
-        </header>
-      ) : isMobile ? (
+      {isMobile ? (
         <header aria-label="Top bar" className="topbar topbar-mobile-bar pointer-events-auto w-full h-14 px-4 flex items-center justify-between glass-apple text-foreground transition-all duration-300 rounded-none border-x-0 border-t-0 border-b border-border/80 dark:border-white/12">
           <div className="flex items-center shrink-0">
             <a
@@ -470,24 +499,69 @@ export default function Topbar({
         </header>
       )}
 
-      {/* Notification Modal - Identical Liquid Glass architecture to other modals */}
-      <Dialog open={showNotifications} onOpenChange={setShowNotifications}>
-        <DialogContent
-          className="sm:max-w-[480px] h-[min(600px,88dvh)]"
-          dialogClassName="overflow-hidden p-5 sm:p-6"
-        >
-          <DialogHeader className="flex-row items-center justify-between border-b border-border/80 dark:border-white/12 pb-3.5 mb-1 space-y-0 shrink-0">
+      {/* Kormiis AI Co-Pilot: floating panel anchored below the topbar on desktop,
+          and a bottom sheet that slides up like the mobile menu drawer on mobile.
+          Page layout stays untouched — the panel floats above all content.
+          Expands out of the topbar/bottom edge on open, collapses back on close. */}
+      {aiPanelMounted && createPortal(
+        <div className={`fixed inset-x-0 flex justify-center pointer-events-none ${
+          isMobile
+            ? `bottom-0 z-50 ${aiPanelExiting ? 'ai-panel-exit-bottom' : 'ai-panel-enter-bottom'}`
+            : `top-16 sm:top-20 md:top-24 z-[45] px-3 sm:px-4 ${aiPanelExiting ? 'ai-panel-exit' : 'ai-panel-enter'}`
+        }`}>
+          <div className={`pointer-events-auto flex flex-col overflow-hidden text-foreground ${
+            isMobile
+              ? 'w-full h-[min(85dvh,640px)] rounded-t-[32px] glass-mobile-drawer border-t border-white/35 dark:border-white/16 shadow-[0_-12px_40px_rgba(0,0,0,0.40)]'
+              : 'w-full min-[400px]:w-[94%] sm:w-[85%] max-w-3xl h-[min(72vh,600px)] rounded-[28px] sm:rounded-[32px] glass-kormiis-modal border border-white/35 dark:border-white/16 shadow-[0_32px_80px_-20px_rgba(0,0,0,0.55),0_0_0_1px_rgba(0,0,0,0.04)]'
+          }`}>
+            {isMobile && (
+              <div className="w-10 h-1 rounded-full bg-foreground/25 mx-auto mt-2.5 mb-1 shrink-0" />
+            )}
+            <AiCoPilotModal
+              isMorphMode={true}
+              isOpen={true}
+              onClose={() => onOpenAi && onOpenAi()}
+              currentUser={user}
+              employees={employees}
+              setEmployees={setEmployees}
+              payroll={payroll}
+              setPayroll={setPayroll}
+              attendance={attendance}
+              setAttendance={setAttendance}
+              expenses={expenses}
+              setExpenses={setExpenses}
+              announcements={announcements}
+              setAnnouncements={setAnnouncements}
+              tasks={tasks}
+              setTasks={setTasks}
+              settings={settings}
+              setCurrentView={setCurrentView}
+              addToast={addToast}
+              initialAction={aiModalAction}
+            />
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Notification Panel - Identical Liquid Glass architecture to AI Co-Pilot panel.
+          Floating drop-down anchored below the topbar, expands/collapses with spring physics. */}
+      {notifPanelMounted && createPortal(
+        <div className={`fixed inset-x-0 top-16 sm:top-20 md:top-24 z-[45] flex justify-center px-3 sm:px-4 pointer-events-none ${notifPanelExiting ? 'ai-panel-exit' : 'ai-panel-enter'}`}>
+          <div data-notif-panel className="pointer-events-auto w-full min-[400px]:w-[94%] sm:w-[85%] max-w-3xl h-[min(72vh,600px)] flex flex-col rounded-[28px] sm:rounded-[32px] glass-kormiis-modal text-foreground overflow-hidden border border-white/35 dark:border-white/16 shadow-[0_32px_80px_-20px_rgba(0,0,0,0.55),0_0_0_1px_rgba(0,0,0,0.04)]">
+            <div className="flex flex-col flex-1 min-h-0 p-5 sm:p-6">
+          <div className="flex-row items-center justify-between border-b border-border/80 dark:border-white/12 pb-3.5 mb-1 space-y-0 shrink-0">
             <div className="flex items-center gap-2.5">
               <div className="size-8.5 rounded-2xl flex items-center justify-center bg-primary/10 text-primary shrink-0 shadow-inner">
                 <Icon name="notifications" size={19} />
               </div>
               <div className="flex flex-col">
-                <DialogTitle className="text-fluid-lg font-black tracking-tight text-foreground m-0 leading-tight">
+                <h2 className="text-fluid-lg font-black tracking-tight text-foreground m-0 leading-tight">
                   Notifications
-                </DialogTitle>
-                <DialogDescription className="text-[11px] font-medium text-muted-foreground m-0 mt-0.5">
+                </h2>
+                <p className="text-[11px] font-medium text-muted-foreground m-0 mt-0.5">
                   {totalUnreadCount > 0 ? `${totalUnreadCount} unread update${totalUnreadCount > 1 ? 's' : ''}` : 'All caught up'}
-                </DialogDescription>
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -508,7 +582,7 @@ export default function Topbar({
                 {totalItemCount} Total
               </Badge>
             </div>
-          </DialogHeader>
+          </div>
 
           {/* Segmented Tab Filter Switcher */}
           <div className="flex items-center gap-1.5 p-1 bg-muted/40 dark:bg-white/[0.05] rounded-2xl border border-border/60 dark:border-white/[0.08] my-1 shrink-0">
@@ -689,23 +763,26 @@ export default function Topbar({
             )}
           </div>
 
-          <DialogFooter className="flex flex-row items-center justify-between pt-4 mt-2 border-t border-border/80 dark:border-white/12">
-            <button 
-              onClick={(e) => { e.stopPropagation(); if(clearNotifications) clearNotifications(); }} 
+          <div className="flex flex-row items-center justify-between pt-4 mt-2 border-t border-border/80 dark:border-white/12 shrink-0">
+            <button
+              onClick={(e) => { e.stopPropagation(); if(clearNotifications) clearNotifications(); }}
               className="text-xs font-semibold text-muted-foreground hover:text-destructive transition-colors cursor-pointer flex items-center gap-1.5 active:scale-95"
             >
               <Icon name="delete_sweep" size={16} />
               <span>Clear All</span>
             </button>
-            <button 
-              onClick={(e) => { e.stopPropagation(); setShowNotifications(false); }} 
+            <button
+              onClick={(e) => { e.stopPropagation(); setShowNotifications(false); }}
               className="liquid-glass-btn h-8 px-4.5 rounded-full text-xs font-bold cursor-pointer"
             >
               Close
             </button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </div>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
 
       {/* Corruption / Data Integrity Modal */}
       {showCorruptionModal !== undefined && (
