@@ -336,7 +336,7 @@ export default function DashboardShell({ user, themeMode, isDarkMode, toggleThem
                   <div className={`shrink-0 flex items-center justify-center ${active ? 'text-primary' : 'text-foreground/80'}`}>
                     {item.icon}
                   </div>
-                  <span className="text-[12px] font-semibold truncate leading-tight text-left">{item.label}</span>
+                  <span className="text-[12px] font-semibold break-words leading-tight text-left">{item.label}</span>
                 </button>
               )
             })}

@@ -477,7 +477,7 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
                                   {emp.avatar ? <AvatarImage src={emp.avatar} alt={emp.name} className="object-cover" /> : null}
                                   <AvatarFallback className="bg-primary/10 text-primary"><Icon name="person" size={12}/></AvatarFallback>
                                 </Avatar>
-                                <span className="truncate">{emp.name}</span>
+                                <span className=" break-words ">{emp.name}</span>
                               </label>
                             ))}
                           </div>

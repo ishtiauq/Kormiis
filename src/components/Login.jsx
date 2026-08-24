@@ -794,7 +794,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                       />
 
                       {/* Feature Title */}
-                      <span className="text-[11px] sm:text-xs font-bold text-white tracking-tight whitespace-nowrap truncate drop-shadow-sm" style={{ color: '#ffffff' }}>
+                      <span className="text-[11px] sm:text-xs font-bold text-white tracking-tight break-words drop-shadow-sm" style={{ color: '#ffffff' }}>
                         {item.label}
                       </span>
                     </div>
@@ -840,7 +840,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                           />
 
                           {/* Feature Title */}
-                          <span className="text-sm font-bold text-white tracking-tight whitespace-nowrap truncate drop-shadow-sm" style={{ color: '#ffffff' }}>
+                          <span className="text-sm font-bold text-white tracking-tight break-words drop-shadow-sm" style={{ color: '#ffffff' }}>
                             {item.label}
                           </span>
                         </div>
@@ -875,7 +875,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                           />
 
                           {/* Feature Title */}
-                          <span className="text-sm font-bold text-white tracking-tight whitespace-nowrap truncate drop-shadow-sm" style={{ color: '#ffffff' }}>
+                          <span className="text-sm font-bold text-white tracking-tight break-words drop-shadow-sm" style={{ color: '#ffffff' }}>
                             {item.label}
                           </span>
                         </div>

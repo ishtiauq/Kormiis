@@ -566,7 +566,7 @@ export default function Documents({
               <h3 className="font-bold text-sm text-foreground group-hover:text-primary transition-colors">
                 No Objection Certificate
               </h3>
-              <p className="text-[11px] text-muted-foreground mt-1 line-clamp-2">
+              <p className="text-[11px] text-muted-foreground mt-1 ">
                 For foreign visa applications, passport renewal, and official travel clearances.
               </p>
             </div>
@@ -591,7 +591,7 @@ export default function Documents({
               <h3 className="font-bold text-sm text-foreground group-hover:text-primary transition-colors">
                 Salary & Employment Certificate
               </h3>
-              <p className="text-[11px] text-muted-foreground mt-1 line-clamp-2">
+              <p className="text-[11px] text-muted-foreground mt-1 ">
                 For bank loans, credit cards, rent agreements, and income verification.
               </p>
             </div>
@@ -616,7 +616,7 @@ export default function Documents({
               <h3 className="font-bold text-sm text-foreground group-hover:text-primary transition-colors">
                 Experience Certificate
               </h3>
-              <p className="text-[11px] text-muted-foreground mt-1 line-clamp-2">
+              <p className="text-[11px] text-muted-foreground mt-1 ">
                 Official proof of tenure, job performance, and professional conduct.
               </p>
             </div>
@@ -641,7 +641,7 @@ export default function Documents({
               <h3 className="font-bold text-sm text-foreground group-hover:text-primary transition-colors">
                 Employment Verification Letter
               </h3>
-              <p className="text-[11px] text-muted-foreground mt-1 line-clamp-2">
+              <p className="text-[11px] text-muted-foreground mt-1 ">
                 Standard proof of active employment and job designation in the organization.
               </p>
             </div>
@@ -907,7 +907,7 @@ export default function Documents({
                     </div>
 
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-fluid-xs text-muted-foreground">
-                      <span className="font-mono text-muted-foreground/80 truncate max-w-[240px]">
+                      <span className="font-mono text-muted-foreground/80 break-words max-w-[240px]">
                         {doc.fileName}
                       </span>
                       <span>•</span>
@@ -921,7 +921,7 @@ export default function Documents({
                     </div>
 
                     {doc.description && (
-                      <p className="text-fluid-xs text-muted-foreground/90 mt-1.5 line-clamp-2">
+                      <p className="text-fluid-xs text-muted-foreground/90 mt-1.5 ">
                         {doc.description}
                       </p>
                     )}
@@ -1039,7 +1039,7 @@ export default function Documents({
                   {formFile ? (
                     <div className="relative z-10 flex flex-col items-center animate-in zoom-in-95 duration-300">
                       <Icon name="check_circle" className="text-emerald-500 mb-2.5" size={44}/>
-                      <p className="font-bold text-foreground text-sm truncate max-w-[280px]">{formFile.name}</p>
+                      <p className="font-bold text-foreground text-sm break-words max-w-[280px]">{formFile.name}</p>
                       <p className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold bg-emerald-500/10 px-2.5 py-0.5 rounded-full mt-1">
                         {formatFileSize(formFile.size)}
                       </p>
@@ -1129,7 +1129,7 @@ export default function Documents({
               <div className="flex flex-col gap-2 max-h-[220px] overflow-y-auto pr-1">
                 {categories.filter(c => c.id !== 'other').map(cat => (
                   <div key={cat.id} className="flex items-center justify-between gap-2.5 p-2.5 px-3.5 rounded-xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10">
-                    <span className="text-sm font-semibold text-foreground truncate">{cat.label}</span>
+                    <span className="text-sm font-semibold text-foreground break-words ">{cat.label}</span>
                     <div className="flex items-center gap-1 shrink-0">
                       <Button 
                         variant="ghost" 
@@ -1206,8 +1206,8 @@ export default function Documents({
                 </div>
               )}
               <div className="min-w-0 flex-1">
-                <p className="font-bold text-sm text-foreground truncate">{settings?.company?.name || 'Kormiis Ltd.'}</p>
-                <p className="text-[11px] text-muted-foreground truncate">{settings?.company?.email || 'hr@company.com'} • Letterhead Brand Active</p>
+                <p className="font-bold text-sm text-foreground break-words ">{settings?.company?.name || 'Kormiis Ltd.'}</p>
+                <p className="text-[11px] text-muted-foreground break-words ">{settings?.company?.email || 'hr@company.com'} • Letterhead Brand Active</p>
               </div>
             </div>
 

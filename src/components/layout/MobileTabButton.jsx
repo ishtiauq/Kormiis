@@ -1,4 +1,4 @@
-export default function MobileTabButton({ active, label, onClick, children, badge, className = "" }) {
+export default function MobileTabButton({ active, label, onClick, children, badge, className ="" }) {
   return (
     <button
       role="tab"

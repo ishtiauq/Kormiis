@@ -27,8 +27,8 @@ export function Calendar({ className, ...props }) {
                 cn(
                   "w-9 h-9 outline-none flex items-center justify-center rounded-xl text-sm font-semibold cursor-pointer transition-colors focus-visible:ring-2 ring-ring ring-offset-background",
                   isSelected ? "bg-primary text-primary-foreground font-bold shadow-sm" : "hover:bg-muted text-foreground",
-                  isOutsideVisibleRange ? "text-muted-foreground/40 opacity-40" : "",
-                  isDisabled ? "opacity-30 cursor-not-allowed" : ""
+                  isOutsideVisibleRange ? "text-muted-foreground/40 opacity-40" :"",
+                  isDisabled ? "opacity-30 cursor-not-allowed" :""
                 )
               }
             />

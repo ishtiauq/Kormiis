@@ -370,7 +370,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
                           <div key={p.employeeId || p.id} className="flex items-center justify-between p-3 rounded-xl bg-muted/30 border border-border/60">
                             <div className="flex items-center gap-2.5">
                               <div className="size-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[11px] font-bold">#{i + 1}</div>
-                              <span className="text-sm font-bold text-foreground truncate max-w-[120px]" title={p.employeeName}>{p.employeeName}</span>
+                              <span className="text-sm font-bold text-foreground break-words max-w-[120px]" title={p.employeeName}>{p.employeeName}</span>
                             </div>
                             <div className="flex items-center gap-2">
                               <span className="text-xs font-bold text-muted-foreground tabular-nums">{p.totalScore || p.score} pts</span>
@@ -401,7 +401,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
                       <div key={p.employeeId || p.id} className="flex items-center justify-between p-3 rounded-xl bg-muted/30 border border-border/60">
                         <div className="flex items-center gap-2.5">
                           <div className="size-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[11px] font-bold">#{i + 1}</div>
-                          <span className="text-sm font-bold text-foreground truncate max-w-[120px]" title={p.employeeName}>{p.employeeName}</span>
+                          <span className="text-sm font-bold text-foreground break-words max-w-[120px]" title={p.employeeName}>{p.employeeName}</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-bold text-muted-foreground tabular-nums">{p.totalScore || p.score} pts</span>

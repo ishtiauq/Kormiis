@@ -24,7 +24,7 @@ const DashboardWidget = ({
           <div className="shrink-0 flex items-center justify-center [&_.msr]:!text-foreground">
             {icon}
           </div>
-          <CardTitle className="text-fluid-lg font-bold tracking-tight text-foreground m-0 leading-snug truncate">{title}</CardTitle>
+          <CardTitle className="text-fluid-lg font-bold tracking-tight text-foreground m-0 leading-snug break-words ">{title}</CardTitle>
         </div>
         {action}
       </CardHeader>
@@ -375,7 +375,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
               >
                 <Icon name="rss_feed" size={24} className="text-foreground shrink-0"/>
                 <div className="flex-1 min-w-0 pr-2">
-                  <p className="m-0 text-fluid-xs font-bold text-foreground truncate">{ann.title}</p>
+                  <p className="m-0 text-fluid-xs font-bold text-foreground break-words ">{ann.title}</p>
                   <p className="m-0 mt-0.5 text-[11px] font-medium text-muted-foreground">
                     {getEmployeeName(ann.authorId)} &middot; {new Date(ann.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                   </p>
@@ -573,8 +573,8 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
                             </AvatarFallback>
                           </Avatar>
                           <div className="flex flex-col min-w-0">
-                            <span className="text-xs font-bold text-foreground truncate">{emp.name}</span>
-                            <span className="text-[10px] text-muted-foreground truncate">{emp.role || 'Teammate'}</span>
+                            <span className="text-xs font-bold text-foreground break-words ">{emp.name}</span>
+                            <span className="text-[10px] text-muted-foreground break-words ">{emp.role || 'Teammate'}</span>
                           </div>
                         </div>
                         {emp.time ? (
@@ -675,7 +675,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
               {tasks.filter(t => t.status !== 'Done').slice(0, 2).map((t, i) => (
                 <div key={i} className="flex items-center gap-3 p-2.5 px-3 rounded-2xl liquid-widget-item cursor-pointer">
                   <div className="size-2 rounded-full bg-foreground shrink-0" />
-                  <p className="text-fluid-sm font-medium text-foreground truncate flex-1 m-0">{t.title}</p>
+                  <p className="text-fluid-sm font-medium text-foreground break-words flex-1 m-0">{t.title}</p>
                   <Badge variant="outline" className="text-[10px] shrink-0 rounded-full px-2 py-0.5 border-black/10 dark:border-white/10">{t.status}</Badge>
                 </div>
               ))}
@@ -713,8 +713,8 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
                     <AvatarFallback className="bg-primary/10 text-primary rounded-xl font-bold"><Icon name="person" size={16}/></AvatarFallback>
                   </Avatar>
                   <div className="flex-1 flex flex-col gap-0.5 min-w-0">
-                    <p className="m-0 text-fluid-xs font-bold text-foreground truncate">{milestone.empName}</p>
-                    <p className="m-0 text-[11px] font-medium text-muted-foreground truncate">{milestone.label}</p>
+                    <p className="m-0 text-fluid-xs font-bold text-foreground break-words ">{milestone.empName}</p>
+                    <p className="m-0 text-[11px] font-medium text-muted-foreground break-words ">{milestone.label}</p>
                   </div>
                   <Badge variant="default" className="uppercase text-[10px] rounded-full px-2.5 py-0.5 shadow-xs font-bold">
                     {milestone.daysRemaining === 0 ? 'Today' : `${milestone.daysRemaining}d`}
@@ -777,7 +777,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
             {recentDocuments.length > 0 ? recentDocuments.map((doc, i) => (
               <div key={i} className="flex flex-col gap-1 p-2.5 px-3 rounded-2xl bg-white/60 dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] hover:bg-white/90 dark:hover:bg-white/[0.08] transition-all shadow-[0_2px_8px_rgba(0,0,0,0.02)] dark:shadow-none">
                 <div className="flex justify-between items-center">
-                  <span className="text-xs font-bold text-foreground truncate pr-2">{doc.name}</span>
+                  <span className="text-xs font-bold text-foreground break-words pr-2">{doc.name}</span>
                   <Badge variant="secondary" className="text-[10px] shrink-0 rounded-full px-2 py-0.5">{doc.category || 'Doc'}</Badge>
                 </div>
                 <span className="text-[11px] text-muted-foreground">Updated {formatDateShort(doc.uploadDate || doc.date || new Date().toISOString())}</span>

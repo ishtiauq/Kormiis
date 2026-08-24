@@ -413,7 +413,7 @@ export default function ProfileView({
           {/* User Details & Badges */}
           <div className="flex-1 space-y-3 min-w-0">
             <div className="flex flex-wrap items-center gap-2.5">
-              <h2 className="text-fluid-xl sm:text-fluid-2xl font-bold tracking-tight text-foreground truncate">
+              <h2 className="text-fluid-xl sm:text-fluid-2xl font-bold tracking-tight text-foreground break-words ">
                 {currentUser?.name || 'User Profile'}
               </h2>
               <Badge variant="default" className="rounded-full px-3 py-0.5 text-xs font-semibold shadow-xs">
@@ -453,7 +453,7 @@ export default function ProfileView({
                   title="Click to copy Email"
                 >
                   <Icon name="mail" size={14} className="text-muted-foreground group-hover:text-primary transition-colors" />
-                  <span className="truncate max-w-[200px]">{workEmail}</span>
+                  <span className=" break-words max-w-[200px]">{workEmail}</span>
                   <Icon name="content_copy" size={12} className="text-muted-foreground/60 group-hover:text-foreground ml-0.5" />
                 </button>
               )}

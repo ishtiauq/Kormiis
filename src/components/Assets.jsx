@@ -113,7 +113,7 @@ function AssetInventory({ filteredAssets, stats, assets, search, setSearch, filt
                   <span className="text-primary flex items-center justify-center shrink-0">
                     {categoryIcons[group.key] || <Icon name="monitor" size={22}/>}
                   </span>
-                  <span className="flex-1 font-semibold text-foreground truncate">{group.label}</span>
+                  <span className="flex-1 font-semibold text-foreground break-words ">{group.label}</span>
                   <Badge variant="secondary" className="text-xs shrink-0">{group.items.length}</Badge>
                 </button>
 
@@ -181,7 +181,7 @@ function AssetCard({ asset, alert, onClick }) {
       <CardContent className="p-4 flex flex-col gap-3">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <div className="font-bold text-foreground text-sm truncate">{asset.name}</div>
+            <div className="font-bold text-foreground text-sm break-words ">{asset.name}</div>
             <div className="text-[11px] text-muted-foreground font-sans mt-0.5">{asset.id} • SN: {asset.serialNumber}</div>
           </div>
           <Badge className={`shrink-0 border ${statusClass[asset.status] || 'bg-red-500/10 text-red-700 border-red-500/20 dark:text-red-400'}`}>
@@ -252,7 +252,7 @@ function MetricBreakdownModal({ metricKey, metrics, assets, onClose }) {
                 {list.map(a => (
                   <div key={a.id} className="p-3 rounded-lg border border-border bg-card flex items-center justify-between gap-3">
                     <div className="min-w-0">
-                      <div className="font-medium text-sm truncate">{a.name}</div>
+                      <div className="font-medium text-sm break-words ">{a.name}</div>
                       <div className="text-[11px] text-muted-foreground font-sans">{a.id} • {a.serialNumber}</div>
                     </div>
                     <Badge variant="outline" className="shrink-0 text-xs">{a.category}</Badge>

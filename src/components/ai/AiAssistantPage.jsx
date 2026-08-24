@@ -573,12 +573,12 @@ export default function AiAssistantPage({
                       <div className="flex-1 min-w-0 pr-1">
                         <div className="flex items-center gap-1.5">
                           <Icon name="chat_bubble_outline" size={14} className={isActive ? 'text-foreground' : 'text-muted-foreground'} />
-                          <p className="m-0 text-xs font-bold truncate text-foreground">
+                          <p className="m-0 text-xs font-bold break-words text-foreground">
                             {session.title || 'Conversation'}
                           </p>
                         </div>
                         {lastMsg && (
-                          <p className="m-0 mt-1 text-[11px] text-muted-foreground truncate leading-relaxed">
+                          <p className="m-0 mt-1 text-[11px] text-muted-foreground break-words leading-relaxed">
                             {lastMsg.text}
                           </p>
                         )}
@@ -663,7 +663,7 @@ export default function AiAssistantPage({
                     {msg.fileData && (
                       <div className="mb-2.5 p-2 rounded-xl bg-black/[0.04] dark:bg-white/10 flex items-center gap-2 text-xs">
                         <Icon name="attachment" size={16} />
-                        <span className="truncate font-semibold">{msg.fileData.name}</span>
+                        <span className=" break-words font-semibold">{msg.fileData.name}</span>
                       </div>
                     )}
 
@@ -725,10 +725,10 @@ export default function AiAssistantPage({
                       <div className="grid grid-cols-2 gap-2 text-xs">
                         {Object.entries(action.args || {}).map(([k, v]) => (
                           <div key={k} className="p-2 rounded-xl bg-black/[0.03] dark:bg-white/[0.04]">
-                            <span className="text-[10px] font-bold uppercase text-muted-foreground block truncate">
+                            <span className="text-[10px] font-bold uppercase text-muted-foreground block break-words ">
                               {k}
                             </span>
-                            <span className="font-semibold text-foreground truncate block mt-0.5">
+                            <span className="font-semibold text-foreground break-words block mt-0.5">
                               {String(v)}
                             </span>
                           </div>
@@ -787,9 +787,9 @@ export default function AiAssistantPage({
               {/* File Attachment Chip */}
               {attachedFile && (
                 <div className="flex items-center justify-between p-1.5 px-2.5 rounded-xl bg-foreground/10 border border-foreground/20 text-xs text-foreground">
-                  <div className="flex items-center gap-2 truncate">
+                  <div className="flex items-center gap-2 break-words ">
                     <Icon name="attach_file" size={14} className="text-foreground shrink-0" />
-                    <span className="truncate font-semibold text-[11px]">{attachedFile.name}</span>
+                    <span className=" break-words font-semibold text-[11px]">{attachedFile.name}</span>
                     <span className="text-[9px] text-muted-foreground">({Math.round(attachedFile.size / 1024)} KB)</span>
                   </div>
                   <button

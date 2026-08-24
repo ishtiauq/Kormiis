@@ -951,7 +951,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
                   >
                     <Icon name={isOpen ? 'expand_more' : 'chevron_right'} className="text-muted-foreground shrink-0 transition-transform" size={20}/>
                     <Icon name="apartment" className="text-primary shrink-0" size={22}/>
-                    <span className="flex-1 font-semibold text-foreground truncate">{group.key}</span>
+                    <span className="flex-1 font-semibold text-foreground break-words ">{group.key}</span>
                     <Badge variant="secondary" className="text-xs shrink-0">{group.items.length}</Badge>
                   </button>
                   {isOpen && (
@@ -1076,10 +1076,10 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
 
                                   {/* Right: Name & Designation */}
                                   <div className="flex flex-col min-w-0 flex-1 text-left justify-center">
-                                    <h4 className="font-bold text-fluid-lg text-foreground tracking-tight truncate group-hover:text-primary transition-colors leading-tight">
+                                    <h4 className="font-bold text-fluid-lg text-foreground tracking-tight break-words group-hover:text-primary transition-colors leading-tight">
                                       {emp.name}
                                     </h4>
-                                    <p className="text-fluid-xs font-semibold text-muted-foreground truncate mt-1">
+                                    <p className="text-fluid-xs font-semibold text-muted-foreground break-words mt-1">
                                       {emp.designation && emp.designation.toLowerCase() !== 'teammate' ? emp.designation : (emp.role && emp.role.toLowerCase() !== 'teammate' ? emp.role : '')}
                                     </p>
                                   </div>
@@ -1089,13 +1089,13 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
                                 <div className="grid grid-cols-2 gap-2 mt-3.5 pt-3.5 border-t border-border/80 dark:border-white/12 relative z-10">
                                   <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 min-w-0 shadow-xs">
                                     <Icon name="apartment" size={13} className="text-primary shrink-0" />
-                                    <span className="text-[11px] font-medium text-foreground/90 truncate">
+                                    <span className="text-[11px] font-medium text-foreground/90 break-words ">
                                       {emp.department}
                                     </span>
                                   </div>
                                   <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 min-w-0 font-mono shadow-xs">
                                     <Icon name="badge" size={13} className="text-primary shrink-0" />
-                                    <span className="text-[11px] font-medium text-muted-foreground truncate">
+                                    <span className="text-[11px] font-medium text-muted-foreground break-words ">
                                       {emp.id}
                                     </span>
                                   </div>
@@ -1105,27 +1105,27 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
                                 <div className={`overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.175,0.885,0.32,1.15)] ${isExpanded ? 'max-h-[220px] opacity-100 mt-2.5' : 'max-h-0 opacity-0'}`}>
                                   <div className="rounded-2xl border border-border/80 dark:border-white/12 bg-black/5 dark:bg-white/5 p-3 flex flex-col gap-1.5 text-fluid-xs text-muted-foreground">
                                     {emp.email && (
-                                      <div className="flex items-center gap-2 truncate">
+                                      <div className="flex items-center gap-2 break-words ">
                                         <Icon name="mail" size={13} className="text-primary/80 shrink-0" />
-                                        <span className="truncate">{emp.email}</span>
+                                        <span className=" break-words ">{emp.email}</span>
                                       </div>
                                     )}
                                     {emp.phone && (
-                                      <div className="flex items-center gap-2 truncate">
+                                      <div className="flex items-center gap-2 break-words ">
                                         <Icon name="call" size={13} className="text-primary/80 shrink-0" />
-                                        <span className="truncate">{emp.phone}</span>
+                                        <span className=" break-words ">{emp.phone}</span>
                                       </div>
                                     )}
                                     {emp.dob && (
-                                      <div className="flex items-center gap-2 truncate">
+                                      <div className="flex items-center gap-2 break-words ">
                                         <Icon name="cake" size={13} className="text-primary/80 shrink-0" />
-                                        <span className="truncate">DOB: {formatDate(emp.dob)}</span>
+                                        <span className=" break-words ">DOB: {formatDate(emp.dob)}</span>
                                       </div>
                                     )}
                                     {emp.joiningDate && (
-                                      <div className="flex items-center gap-2 truncate">
+                                      <div className="flex items-center gap-2 break-words ">
                                         <Icon name="calendar_month" size={13} className="text-primary/80 shrink-0" />
-                                        <span className="truncate">Joined: {formatDate(emp.joiningDate)}</span>
+                                        <span className=" break-words ">Joined: {formatDate(emp.joiningDate)}</span>
                                       </div>
                                     )}
                                   </div>

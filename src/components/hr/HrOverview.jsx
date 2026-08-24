@@ -12,7 +12,7 @@ const stat = (icon, label, value, toneColor, iconBg, view, setCurrentView) => (
   >
     <Icon name={icon} size={28} className="text-foreground shrink-0"/>
     <span className="text-fluid-xl font-black tabular-nums text-foreground leading-tight mt-1.5">{value}</span>
-    <span className="text-[11px] font-semibold text-muted-foreground truncate w-full">{label}</span>
+    <span className="text-[11px] font-semibold text-muted-foreground break-words w-full">{label}</span>
   </button>
 )
 

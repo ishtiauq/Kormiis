@@ -307,7 +307,7 @@ export default function Topbar({
             disabled={isSyncing}
             className="flex-1 bg-destructive hover:bg-destructive/90 text-white font-bold text-xs h-8.5 rounded-xl flex items-center justify-center gap-1.5 shadow-sm active:scale-98 transition-all cursor-pointer disabled:opacity-60"
           >
-            <Icon name={isSyncing ? "sync" : "build_circle"} size={15} className={isSyncing ? "animate-spin" : ""} />
+            <Icon name={isSyncing ? "sync" : "build_circle"} size={15} className={isSyncing ? "animate-spin" :""} />
             <span>{isSyncing ? 'Repairing...' : 'Auto-Repair Database'}</span>
           </button>
 

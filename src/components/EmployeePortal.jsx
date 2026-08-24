@@ -580,7 +580,7 @@ export default function EmployeePortal({
                   <div className={`shrink-0 flex items-center justify-center ${active ? 'text-primary' : 'text-foreground/80'}`}>
                     {item.icon}
                   </div>
-                  <span className="text-[12px] font-semibold truncate leading-tight text-left">{item.label}</span>
+                  <span className="text-[12px] font-semibold break-words leading-tight text-left">{item.label}</span>
                 </button>
               )
             })}
@@ -672,10 +672,10 @@ function DashboardView({ currentUser, attendance, setAttendance, addToast, expen
                 <CardContent className="p-4 flex flex-col h-full justify-between">
                   <div>
                     <div className="flex justify-between items-start mb-2 gap-2">
-                      <span className="font-semibold leading-tight line-clamp-2">{ann.title}</span>
+                      <span className="font-semibold leading-tight ">{ann.title}</span>
                       <span className="text-xs text-muted-foreground whitespace-nowrap shrink-0">{formatDateShort(ann.date)}</span>
                     </div>
-                    <p className="text-fluid-sm text-muted-foreground m-0 break-words line-clamp-2">{ann.content}</p>
+                    <p className="text-fluid-sm text-muted-foreground m-0 break-words ">{ann.content}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -705,7 +705,7 @@ function DashboardView({ currentUser, attendance, setAttendance, addToast, expen
               <Icon name="calendar_month" size={18}/>
               <h3 className="text-fluid-sm font-bold uppercase tracking-wider text-muted-foreground m-0">Next Event</h3>
             </div>
-            <div className="text-fluid-xl font-bold truncate text-foreground mb-1">
+            <div className="text-fluid-xl font-bold break-words text-foreground mb-1">
               {nextEvent ? nextEvent.title : 'None Scheduled'}
             </div>
             <div className="text-fluid-sm font-medium text-muted-foreground">

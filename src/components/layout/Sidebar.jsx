@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useLayoutEffect, useRef } from 'react'
 import Icon from "@/components/ui/Icon.jsx"
 import TooltipPopover from '../TooltipPopover.jsx'
 
@@ -77,6 +77,28 @@ export default function Sidebar({
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [isOpen])
 
+  // Expanded width hugs the widest menu label (bare-minimum chrome around it)
+  const [maxLabelWidth, setMaxLabelWidth] = useState(0)
+  const measurerRef = useRef(null)
+
+  const measureLabels = () => {
+    if (measurerRef.current) {
+      setMaxLabelWidth(Math.ceil(measurerRef.current.getBoundingClientRect().width))
+    }
+  }
+
+  useLayoutEffect(() => {
+    measureLabels()
+    if (document.fonts?.ready) document.fonts.ready.then(measureLabels)
+    window.addEventListener('resize', measureLabels)
+    return () => window.removeEventListener('resize', measureLabels)
+  }, [visibleNavItems])
+
+  // px-2.5 x2 (20) + icon 22 + gap 10 + row borders 2 + sidebar p-1.5 x2 (12)
+  // + aside glass border 2 + scrollbar up to 12 + rounding safety 14
+  const EXPANDED_CHROME_PX = 84
+  const expandedWidth = maxLabelWidth > 0 ? maxLabelWidth + EXPANDED_CHROME_PX : 176
+
   // On mobile screens (<768px), do not render desktop floating sidebar (mobile uses bottom dock/sheet)
   if (!isDesktopOrTablet) {
     return null
@@ -95,16 +117,21 @@ export default function Sidebar({
       aria-label="Floating navigation sidebar"
       className={`hidden md:flex flex-col fixed left-3 sm:left-4 z-50 glass-kormiis text-sidebar-foreground shadow-2xl transition-[width,height,max-height,box-shadow] duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] overflow-hidden ${
         isOpen
-          ? 'w-[176px] h-[min(calc(100vh_-_5rem),510px)] p-2.5 pt-3 pb-2.5 rounded-3xl shadow-2xl'
-          : 'w-10 h-auto p-1 py-2.5 rounded-2xl sm:rounded-3xl shadow-xl'
+          ? 'h-[min(calc(100vh_-_5rem),510px)] p-1.5 pt-2 pb-1.5 rounded-3xl shadow-2xl'
+          : 'p-1.5 py-3 rounded-2xl sm:rounded-3xl shadow-xl'
       }`}
-      style={{ top: '50%', transform: 'translateY(-50%)', isolation: 'isolate' }}
+      style={{
+        top: '50%',
+        transform: 'translateY(-50%)',
+        isolation: 'isolate',
+        width: isOpen ? `${expandedWidth}px` : '48px',
+      }}
     >
       {/* NAVIGATION ITEMS */}
       <nav 
         ref={navRef}
         aria-label="Main navigation" 
-        className={`sidebar-nav-scroll flex-1 w-full flex flex-col gap-1.5 items-center cursor-default ${
+        className={`sidebar-nav-scroll flex-1 w-full flex flex-col gap-2 items-center cursor-default ${
           isOpen 
             ? 'overflow-y-auto overflow-x-hidden select-none overscroll-contain pr-1' 
             : 'overflow-hidden justify-center'
@@ -127,9 +154,9 @@ export default function Sidebar({
                 className={`${isActive 
                   ? 'nav-capsule-active font-semibold' 
                   : 'text-sidebar-foreground/75 hover:text-sidebar-foreground hover:bg-white/20 dark:hover:bg-white/[0.08] hover:border-white/15 dark:hover:border-white/10 border border-transparent font-medium active:scale-[0.98]'
-                } flex items-center cursor-pointer box-border transition-[background-color,border-color,color,transform] duration-200 relative no-underline shrink-0 select-none overflow-hidden ${
-                  isOpen ? 'gap-3 px-3 h-10 w-full rounded-2xl' : 'justify-center size-8 rounded-xl sm:rounded-2xl'
-                }`}
+                 } flex items-center cursor-pointer box-border transition-[background-color,border-color,color,transform] duration-200 relative no-underline shrink-0 select-none overflow-hidden ${
+                   isOpen ? 'gap-2.5 px-2.5 h-10 w-full rounded-2xl' : 'justify-center size-8 rounded-xl sm:rounded-2xl'
+                 }`}
                 data-active={isActive ? 'true' : 'false'}
                 data-label={item.label}
                 onClick={(e) => { 
@@ -154,7 +181,7 @@ export default function Sidebar({
                 
                 {/* Label (Revealed on hover / tap expansion) */}
                 {isOpen && (
-                  <span className="flex-1 min-w-0 truncate text-sm font-medium leading-5 whitespace-nowrap text-left">
+                  <span className="flex-1 min-w-0 break-words text-sm font-medium leading-5 whitespace-nowrap text-left">
                     {item.label}
                   </span>
                 )}
@@ -176,7 +203,7 @@ export default function Sidebar({
       {/* EXPANDED FOOTER: LOGOUT ONLY */}
       <div 
         className={`shrink-0 w-full flex flex-col border-t border-white/12 dark:border-white/8 transition-all duration-300 overflow-hidden ${
-          isOpen ? 'max-h-16 pt-2 mt-1 opacity-100' : 'max-h-0 opacity-0 pointer-events-none p-0 m-0 border-none'
+          isOpen ? 'max-h-16 pt-1.5 mt-0.5 opacity-100' : 'max-h-0 opacity-0 pointer-events-none p-0 m-0 border-none'
         }`}
       >
         <button
@@ -191,6 +218,19 @@ export default function Sidebar({
           <Icon name="logout" size={16} className="!text-white text-white" style={{ color: '#ffffff' }}/>
           <span className="font-semibold text-xs !text-white text-white" style={{ color: '#ffffff' }}>Logout</span>
         </button>
+      </div>
+
+      {/* Hidden measurer: widest label dictates expanded width */}
+      <div
+        ref={measurerRef}
+        aria-hidden="true"
+        className="absolute -left-[9999px] top-0 w-max invisible pointer-events-none"
+      >
+        {visibleNavItems.map((item) => (
+          <span key={item.id} className="block whitespace-nowrap text-sm font-medium leading-5">
+            {item.label}
+          </span>
+        ))}
       </div>
 
       {/* Scoped icon & scrollbar styles */}

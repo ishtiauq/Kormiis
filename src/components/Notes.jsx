@@ -197,7 +197,7 @@ export default function Notes({ notes = [], setNotes, currentUser, addToast }) {
       </h3>}
       
       {note.type === 'text' && note.content && (
-        <p className="text-fluid-sm text-foreground/80 whitespace-pre-wrap line-clamp-6">{note.content}</p>
+        <p className="text-fluid-sm text-foreground/80 whitespace-pre-wrap ">{note.content}</p>
       )}
 
       {note.type === 'checklist' && note.items && note.items.length > 0 && (
@@ -210,7 +210,7 @@ export default function Notes({ notes = [], setNotes, currentUser, addToast }) {
               >
                 {item.done && <Icon name="check" size={14}/>}
               </button>
-              <span className={`text-sm truncate transition-all ${item.done ? 'text-foreground/40 line-through' : 'text-foreground/90'}`}>
+              <span className={`text-sm break-words transition-all ${item.done ? 'text-foreground/40 line-through' : 'text-foreground/90'}`}>
                 {item.text}
               </span>
             </div>

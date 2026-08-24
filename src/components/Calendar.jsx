@@ -437,7 +437,7 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
             <div className="flex items-center justify-between gap-2 border-b border-border/80 dark:border-white/12 pb-2">
               <div className="flex items-center gap-1.5 min-w-0">
                 <Icon name="calendar_month" size={15} className="text-primary shrink-0"/>
-                <span className="text-xs font-bold text-foreground truncate">
+                <span className="text-xs font-bold text-foreground break-words ">
                   {formatDate(hoveredDay.dateStr)}
                 </span>
               </div>
@@ -472,13 +472,13 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
                         {typeInfo.icon}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="text-xs font-bold text-foreground truncate">{ev.title}</div>
+                        <div className="text-xs font-bold text-foreground break-words ">{ev.title}</div>
                         <div className="flex items-center gap-2 mt-0.5 text-[10px] font-medium text-muted-foreground flex-wrap">
                           <span className="capitalize">{typeInfo.label}</span>
                           {ev.time && <span>• {ev.time}</span>}
                         </div>
                         {ev.description && (
-                          <p className="text-[11px] text-muted-foreground/80 line-clamp-2 mt-1 leading-snug">{ev.description}</p>
+                          <p className="text-[11px] text-muted-foreground/80 mt-1 leading-snug">{ev.description}</p>
                         )}
                       </div>
                     </div>

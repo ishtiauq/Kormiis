@@ -115,7 +115,7 @@ export default function DailyLogs({ employees, attendance, setAttendance, addToa
                       className="relative group w-full sm:flex-none sm:w-[125px] h-10 rounded-xl border border-input bg-background/80 text-sm font-semibold flex items-center justify-center gap-1 sm:gap-2 hover:border-primary hover:text-primary transition-all shadow-sm"
                     >
                       <Icon name="schedule" className="text-muted-foreground group-hover:text-primary transition-colors shrink-0" size={14}/>
-                      <span className="truncate">{log.checkIn}</span>
+                      <span className=" break-words ">{log.checkIn}</span>
                     </button>
                     
                     <span className="text-muted-foreground/60 font-semibold flex justify-center w-full sm:w-auto shrink-0 mx-auto text-sm select-none">-</span>
@@ -125,7 +125,7 @@ export default function DailyLogs({ employees, attendance, setAttendance, addToa
                       className="relative group w-full sm:flex-none sm:w-[125px] h-10 rounded-xl border border-input bg-background/80 text-sm font-semibold flex items-center justify-center gap-1 sm:gap-2 hover:border-primary hover:text-primary transition-all shadow-sm"
                     >
                       <Icon name="schedule" className="text-muted-foreground group-hover:text-primary transition-colors shrink-0" size={14}/>
-                      <span className="truncate">{log.checkOut}</span>
+                      <span className=" break-words ">{log.checkOut}</span>
                     </button>
                   </div>
 
@@ -134,7 +134,7 @@ export default function DailyLogs({ employees, attendance, setAttendance, addToa
                   <div className="grid grid-cols-[1fr_24px_1fr] items-center w-full sm:flex sm:w-auto gap-2 sm:gap-4">
                     <div className="relative w-full sm:flex-none sm:w-[125px] h-10 rounded-xl border border-input bg-background/80 text-sm font-semibold flex items-center justify-center gap-1 shadow-sm">
                       <span className="text-xs text-muted-foreground uppercase tracking-wider font-bold">Total:</span>
-                      <span className="text-foreground tabular-nums truncate">{log.hours}<span className="text-[10px] opacity-50 ml-0.5">h</span></span>
+                      <span className="text-foreground tabular-nums break-words ">{log.hours}<span className="text-[10px] opacity-50 ml-0.5">h</span></span>
                     </div>
 
                     <div className="h-6 w-px bg-muted-foreground/30 sm:hidden flex justify-center mx-auto shrink-0"></div>
@@ -143,7 +143,7 @@ export default function DailyLogs({ employees, attendance, setAttendance, addToa
                       <button role="status" onClick={(e) => { e.stopPropagation(); setOpenStatusEmp(v => v === emp.id ? null : emp.id) }}
                         className="inline-flex w-full items-center justify-center sm:justify-between h-10 rounded-xl px-2 sm:px-4 text-[11px] sm:text-xs font-bold shadow-sm hover:scale-[1.02] transition-transform cursor-pointer"
                         style={{ background: ps.bg, color: ps.color, border: 'none' }}>
-                        <span className="truncate">{log.status}</span>
+                        <span className=" break-words ">{log.status}</span>
                         <svg width="10" height="6" viewBox="0 0 10 6" fill="none" className="opacity-70 ml-1 sm:ml-2 shrink-0"><path d="M1 1l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                       </button>
                       {openStatusEmp === emp.id && (
