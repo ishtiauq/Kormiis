@@ -658,13 +658,13 @@ export default function AiCoPilotModal({
               </button>
 
               <div className="relative">
-                <Icon name="search" size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <Icon name="search" size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <input
                   type="text"
                   placeholder="Search past conversations..."
                   value={historySearch}
                   onChange={e => setHistorySearch(e.target.value)}
-                  className="w-full h-9 pl-9 pr-3 rounded-xl border border-black/10 dark:border-white/12 bg-white/50 dark:bg-white/[0.05] text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 backdrop-blur-md shadow-[inset_0_1px_1.5px_rgba(0,0,0,0.03)]"
+                  className="w-full h-11 pl-11 pr-3.5 rounded-2xl border border-black/15 dark:border-white/14 bg-white/85 dark:bg-white/[0.07] text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)]"
                 />
               </div>
             </div>
@@ -771,12 +771,12 @@ export default function AiCoPilotModal({
 
                   {/* Message Bubble */}
                   <div
-                    className={`max-w-[88%] sm:max-w-[80%] rounded-2xl p-3.5 sm:p-4 text-xs sm:text-sm leading-relaxed relative shadow-xs backdrop-blur-md ${
+                    className={`max-w-[88%] sm:max-w-[80%] rounded-2xl p-3.5 sm:p-4 text-xs sm:text-sm leading-relaxed relative backdrop-blur-xl saturate-[1.4] ${
                       msg.role === 'user'
-                        ? 'glass-card border border-white/45 dark:border-white/12 text-foreground rounded-tr-xs bg-white/65 dark:bg-white/[0.06]'
+                        ? 'rounded-tr-md bg-white/70 dark:bg-white/[0.08] border border-white/60 dark:border-white/14 text-foreground shadow-[0_2px_10px_-2px_rgba(0,0,0,0.08),inset_0_1px_1px_0_rgba(255,255,255,0.50)]'
                         : msg.isError
-                        ? 'bg-destructive/15 border border-destructive/30 text-destructive rounded-tl-xs'
-                        : 'glass-card border border-white/35 dark:border-white/10 text-foreground rounded-tl-xs bg-white/40 dark:bg-white/[0.03]'
+                        ? 'rounded-tl-md bg-destructive/15 border border-destructive/30 text-destructive'
+                        : 'rounded-tl-md bg-white/45 dark:bg-white/[0.04] border border-white/45 dark:border-white/10 text-foreground shadow-[inset_0_1px_1px_0_rgba(255,255,255,0.38)]'
                     }`}
                   >
                     {/* Attached File Preview inside Message */}
@@ -820,7 +820,7 @@ export default function AiCoPilotModal({
                   {msg.pendingActions?.map(action => (
                     <div
                       key={action.actionId}
-                      className="w-full max-w-[92%] sm:max-w-[85%] rounded-2xl p-4 glass-card border border-white/30 dark:border-white/15 bg-white/40 dark:bg-white/[0.04] shadow-md space-y-3 animate-in fade-in duration-300"
+                      className="w-full max-w-[92%] sm:max-w-[85%] p-4 glass-card space-y-3 animate-in fade-in duration-300"
                     >
                       <div className="flex items-center justify-between gap-2 border-b border-border/60 pb-2">
                         <div className="flex items-center gap-2">
@@ -866,7 +866,7 @@ export default function AiCoPilotModal({
                           </button>
                           <button
                             onClick={() => handleExecuteAction(msg.id, action.actionId, action.name, action.args)}
-                            className="px-4 py-1.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 dark:bg-white dark:hover:bg-neutral-100 text-white dark:text-neutral-900 text-xs font-bold cursor-pointer active:scale-95 transition-all shadow-sm flex items-center gap-1.5"
+                            className="px-4 py-1.5 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold cursor-pointer active:scale-95 transition-all shadow-sm flex items-center gap-1.5"
                           >
                             <Icon name="check" size={14} /> Approve & Apply
                           </button>
@@ -879,7 +879,7 @@ export default function AiCoPilotModal({
 
               {/* Loading Indicator Bubble */}
               {isLoading && (
-                <div className="flex items-center gap-2 p-3 rounded-2xl glass-card text-xs text-muted-foreground w-fit animate-pulse">
+                <div className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-white/55 dark:bg-white/[0.07] backdrop-blur-xl border border-white/45 dark:border-white/12 shadow-[inset_0_1px_1px_0_rgba(255,255,255,0.40)] text-xs text-muted-foreground w-fit animate-pulse">
                   <Icon name="auto_awesome" size={16} className="text-foreground animate-spin" />
                   <span>Kormiis AI is thinking and preparing actions...</span>
                 </div>
@@ -934,7 +934,7 @@ export default function AiCoPilotModal({
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   aria-label="Upload document, excel sheet, or receipt"
-                  className="apple-glass-btn size-10 rounded-2xl flex items-center justify-center text-muted-foreground hover:text-foreground cursor-pointer shrink-0 border border-white/35 dark:border-white/15"
+                  className="apple-glass-btn size-11 rounded-2xl flex items-center justify-center text-muted-foreground hover:text-foreground cursor-pointer shrink-0 border border-white/35 dark:border-white/15"
                   title="Upload file or receipt"
                 >
                   <Icon name="upload_file" size={18} />
@@ -952,7 +952,7 @@ export default function AiCoPilotModal({
                   type="button"
                   onClick={toggleVoice}
                   aria-label="Voice input"
-                  className={`apple-glass-btn size-10 rounded-2xl flex items-center justify-center transition-all cursor-pointer shrink-0 border border-white/35 dark:border-white/15 ${
+                  className={`apple-glass-btn size-11 rounded-2xl flex items-center justify-center transition-all cursor-pointer shrink-0 border border-white/35 dark:border-white/15 ${
                     isRecording
                       ? 'bg-rose-500 text-white animate-pulse border-rose-400'
                       : 'text-muted-foreground hover:text-foreground'
@@ -969,7 +969,7 @@ export default function AiCoPilotModal({
                   value={input}
                   onChange={e => setInput(e.target.value)}
                   disabled={isLoading}
-                  className="flex-1 h-10 sm:h-11 px-4 rounded-2xl border border-black/12 dark:border-white/14 bg-white/85 dark:bg-white/[0.07] text-xs sm:text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)] placeholder:text-muted-foreground"
+                  className="flex-1 h-11 px-4 rounded-2xl border border-black/15 dark:border-white/14 bg-white/85 dark:bg-white/[0.07] text-xs sm:text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)] placeholder:text-muted-foreground"
                 />
 
                 {/* Send Button (MonoGlass Liquid Glass Button) */}
@@ -977,7 +977,7 @@ export default function AiCoPilotModal({
                   type="submit"
                   disabled={isLoading || (!input.trim() && !attachedFile)}
                   aria-label="Send command"
-                  className="apple-glass-btn size-10 sm:size-11 rounded-2xl flex items-center justify-center cursor-pointer text-foreground active:scale-95 transition-all disabled:opacity-30 disabled:cursor-not-allowed shrink-0 border border-white/40 dark:border-white/18 shadow-xs hover:scale-102"
+                  className="apple-glass-btn size-11 rounded-2xl flex items-center justify-center cursor-pointer text-foreground active:scale-95 transition-all disabled:opacity-30 disabled:cursor-not-allowed shrink-0 border border-white/40 dark:border-white/18 shadow-xs hover:scale-102"
                   title="Send command (Enter)"
                 >
                   <Icon name="send" size={18} className="text-foreground" />
