@@ -581,7 +581,7 @@ export default function AiCoPilotModal({
       )}
 
       {/* MODAL HEADER */}
-        <div className="flex items-center justify-between px-4.5 py-3.5 border-b border-border/80 dark:border-white/12 shrink-0 bg-white/40 dark:bg-white/[0.04] backdrop-blur-md">
+        <div className="flex items-center justify-between px-4.5 py-3.5 border-b border-border/80 dark:border-white/12 shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="size-8.5 rounded-xl bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 flex items-center justify-center shadow-xs shrink-0">
               <Icon name={showHistoryDrawer ? "history" : "auto_awesome"} size={18} className="text-white dark:text-neutral-900" />
@@ -648,7 +648,7 @@ export default function AiCoPilotModal({
           /* FULL-VIEW CHAT HISTORY */
           <div className="flex-1 flex flex-col overflow-hidden animate-in fade-in duration-200">
             {/* Search & New Chat Action Bar */}
-            <div className="p-3 sm:p-4 border-b border-border/60 dark:border-white/10 space-y-2.5 bg-white/35 dark:bg-white/[0.03] backdrop-blur-md">
+            <div className="p-3 sm:p-4 border-b border-border/60 dark:border-white/10 space-y-2.5">
               <button
                 onClick={handleNewChat}
                 className="apple-glass-btn w-full h-10 rounded-2xl flex items-center justify-center gap-2 text-xs font-bold text-foreground border border-white/40 dark:border-white/18 shadow-xs active:scale-98 cursor-pointer select-none group"
@@ -726,7 +726,7 @@ export default function AiCoPilotModal({
 
             {/* Clear All History Footer */}
             {historySessions.length > 0 && (
-              <div className="p-3 pb-22 sm:pb-3 border-t border-border/60 dark:border-white/10 bg-white/35 dark:bg-white/[0.03] backdrop-blur-md shrink-0">
+              <div className="p-3 pb-22 sm:pb-3 border-t border-border/60 dark:border-white/10 shrink-0">
                 <button
                   onClick={handleClearAllHistory}
                   className="w-full h-8.5 rounded-xl border border-destructive/30 hover:bg-destructive/10 text-destructive text-[11px] font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-98"
@@ -903,7 +903,7 @@ export default function AiCoPilotModal({
             )}
 
             {/* INPUT & ATTACHMENT DOCK */}
-            <div className="p-2.5 sm:p-3 pb-22 sm:pb-3 border-t border-border/70 dark:border-white/12 bg-white/45 dark:bg-white/[0.05] backdrop-blur-xl shrink-0 space-y-2">
+            <div className="p-2.5 sm:p-3 pb-22 sm:pb-3 border-t border-border/70 dark:border-white/12 shrink-0 space-y-2">
               {/* File Attachment Chip */}
               {attachedFile && (
                 <div className="flex items-center justify-between p-1.5 px-2.5 rounded-xl bg-foreground/10 border border-foreground/20 text-xs text-foreground">

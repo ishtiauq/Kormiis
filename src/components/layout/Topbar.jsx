@@ -4,8 +4,7 @@ import { Button } from "@/components/ui/button"
 import kormiisLogo from '../../Assets/Kormiis Logo Final.svg'
 import kormiisWhiteLogo from '../../Assets/Kormiis white Logo.svg'
 
-import { useState, useEffect, useRef } from 'react'
-import { createPortal } from 'react-dom'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Badge } from "@/components/ui/badge"
 import { getRelativeTime } from '../../services/date.js'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
@@ -194,51 +193,22 @@ export default function Topbar({
     return () => { clearTimeout(resizeTimer); window.removeEventListener('resize', handleResize) }
   }, [])
 
-  const [aiPanelMounted, setAiPanelMounted] = useState(false)
-  const [aiPanelExiting, setAiPanelExiting] = useState(false)
-  const aiUnmountTimerRef = useRef(null)
+  const topbarRef = useRef(null)
+
+  const closePanels = useCallback(() => {
+    if (isAiOpen && onOpenAi) onOpenAi()
+    if (showNotifications) setShowNotifications(false)
+  }, [isAiOpen, onOpenAi, showNotifications, setShowNotifications])
 
   useEffect(() => {
-    if (isAiOpen) {
-      clearTimeout(aiUnmountTimerRef.current)
-      setAiPanelMounted(true)
-      setAiPanelExiting(false)
-    } else {
-      aiUnmountTimerRef.current = setTimeout(() => {
-        setAiPanelMounted(false)
-        setAiPanelExiting(false)
-      }, 280)
-    }
-    return () => clearTimeout(aiUnmountTimerRef.current)
-  }, [isAiOpen])
-
-  const [notifPanelMounted, setNotifPanelMounted] = useState(false)
-  const [notifPanelExiting, setNotifPanelExiting] = useState(false)
-  const notifUnmountTimerRef = useRef(null)
-
-  useEffect(() => {
-    if (showNotifications) {
-      clearTimeout(notifUnmountTimerRef.current)
-      setNotifPanelMounted(true)
-      setNotifPanelExiting(false)
-    } else {
-      notifUnmountTimerRef.current = setTimeout(() => {
-        setNotifPanelMounted(false)
-        setNotifPanelExiting(false)
-      }, 280)
-    }
-    return () => clearTimeout(notifUnmountTimerRef.current)
-  }, [showNotifications])
-
-  // Outside click + Escape closes the notification panel (same behaviour as AI Co-Pilot panel)
-  useEffect(() => {
-    if (!showNotifications) return
+    if (!isAiOpen && !showNotifications) return
     const handleOutside = (e) => {
-      if (e.target.closest?.('#notification-trigger') || e.target.closest?.('[data-notif-panel]')) return
-      setShowNotifications(false)
+      if (topbarRef.current && !topbarRef.current.contains(e.target)) {
+        closePanels()
+      }
     }
     const handleEscape = (e) => {
-      if (e.key === 'Escape') setShowNotifications(false)
+      if (e.key === 'Escape') closePanels()
     }
     document.addEventListener('mousedown', handleOutside)
     document.addEventListener('touchstart', handleOutside, { passive: true })
@@ -248,7 +218,7 @@ export default function Topbar({
       document.removeEventListener('touchstart', handleOutside)
       window.removeEventListener('keydown', handleEscape)
     }
-  }, [showNotifications])
+  }, [isAiOpen, showNotifications, closePanels])
 
   const renderDataIntegrityCard = () => {
     if (!hasIntegrityIssues) return null
@@ -327,7 +297,7 @@ export default function Topbar({
   }
 
   return (
-    <>
+    <div ref={topbarRef} className="relative w-full flex flex-col items-center pointer-events-auto">
       {/* Mobile: Liquid Glass Top Bar */}
       {isMobile ? (
         <header aria-label="Top bar" className="topbar topbar-mobile-bar pointer-events-auto w-full h-14 px-4 flex items-center justify-between glass-apple text-foreground transition-all duration-300 rounded-none border-x-0 border-t-0 border-b border-border/80 dark:border-white/12">
@@ -397,7 +367,7 @@ export default function Topbar({
           </div>
         </header>
       ) : (
-        <header aria-label="Top bar" className="topbar pointer-events-auto w-[98%] min-[400px]:w-[94%] sm:w-[85%] max-w-3xl mx-auto h-14 sm:h-16 px-3 sm:px-4 md:px-5 flex items-center justify-between rounded-full glass-apple text-foreground transition-all duration-300">
+        <header aria-label="Top bar" className="topbar pointer-events-auto w-[98%] min-[400px]:w-[94%] sm:w-[85%] max-w-3xl mx-auto h-14 sm:h-16 px-3 sm:px-4 md:px-5 flex items-center justify-between text-foreground transition-all duration-300">
           
           {/* Left: Brand Logo & Quick Search */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
@@ -437,7 +407,7 @@ export default function Topbar({
             {/* AI Co-Pilot Trigger Button (Visible on Tablet/iPad & Desktop) */}
             {onOpenAi && (
               <button
-                onClick={onOpenAi}
+                onClick={() => { if (showNotifications) setShowNotifications(false); onOpenAi(); }}
                 title="Kormiis AI Co-Pilot"
                 aria-label="Toggle Kormiis AI"
                 className={`rounded-full size-9 sm:size-9 text-foreground apple-glass-btn shrink-0 flex items-center justify-center cursor-pointer active:scale-95 transition-all ${
@@ -466,6 +436,7 @@ export default function Topbar({
               <button
                 ref={buttonRef}
                 onClick={() => { 
+                  if (isAiOpen && onOpenAi) onOpenAi()
                   setShowNotifications(prev => !prev); 
                   if (markNotificationsRead) markNotificationsRead();
                 }}
@@ -499,309 +470,232 @@ export default function Topbar({
         </header>
       )}
 
-      {/* Kormiis AI Co-Pilot: floating panel anchored below the topbar on desktop,
-          and a bottom sheet that slides up like the mobile menu drawer on mobile.
-          Page layout stays untouched — the panel floats above all content.
-          Expands out of the topbar/bottom edge on open, collapses back on close. */}
-      {aiPanelMounted && createPortal(
-        <>
-          {/* Backdrop Scrim (Smooth dark blur for true MonoGlass modal contrast and click-outside dismissal) */}
-          <div
-            className={`fixed inset-0 z-[44] bg-black/25 dark:bg-black/55 backdrop-blur-xs transition-opacity duration-300 pointer-events-auto ${
-              aiPanelExiting ? 'opacity-0' : 'opacity-100 animate-in fade-in duration-200'
-            }`}
-            onClick={() => onOpenAi && onOpenAi()}
-            aria-hidden="true"
-          />
-          <div className={`fixed inset-x-0 flex justify-center pointer-events-none ${
-            isMobile
-              ? `bottom-0 z-50 ${aiPanelExiting ? 'ai-panel-exit-bottom' : 'ai-panel-enter-bottom'}`
-              : `top-16 sm:top-20 md:top-24 z-[45] px-3 sm:px-4 ${aiPanelExiting ? 'ai-panel-exit' : 'ai-panel-enter'}`
-          }`}>
-            <div className={`pointer-events-auto flex flex-col overflow-hidden text-foreground ${
-              isMobile
-                ? 'w-full h-[min(85dvh,640px)] rounded-t-[32px] glass-mobile-drawer border-t border-white/35 dark:border-white/16 shadow-[0_-12px_40px_rgba(0,0,0,0.40)]'
-                : 'w-full min-[400px]:w-[94%] sm:w-[85%] max-w-3xl h-[min(72vh,600px)] rounded-[28px] sm:rounded-[32px] glass-kormiis-modal border border-white/35 dark:border-white/16 shadow-[0_32px_80px_-20px_rgba(0,0,0,0.55),0_0_0_1px_rgba(0,0,0,0.04)]'
-            }`}>
-              {isMobile && (
-                <div className="w-10 h-1 rounded-full bg-foreground/25 mx-auto mt-2.5 mb-1 shrink-0" />
-              )}
-              <AiCoPilotModal
-                isMorphMode={true}
-                isOpen={true}
-                onClose={() => onOpenAi && onOpenAi()}
-                currentUser={user}
-                employees={employees}
-                setEmployees={setEmployees}
-                payroll={payroll}
-                setPayroll={setPayroll}
-                attendance={attendance}
-                setAttendance={setAttendance}
-                expenses={expenses}
-                setExpenses={setExpenses}
-                announcements={announcements}
-                setAnnouncements={setAnnouncements}
-                tasks={tasks}
-                setTasks={setTasks}
-                settings={settings}
-                setCurrentView={setCurrentView}
-                addToast={addToast}
-                initialAction={aiModalAction}
-              />
-            </div>
+      {/* Inline AI Co-Pilot Panel — expands below the topbar */}
+      {isAiOpen && (
+        <div className={`pointer-events-auto z-50 ${isMobile ? 'px-3 sm:px-4 mt-2 glass-mobile-drawer rounded-t-[28px] border-t border-white/25 dark:border-white/12' : 'absolute top-full left-1/2 -translate-x-1/2 w-[98%] min-[400px]:w-[94%] sm:w-[85%] max-w-3xl glass-kormiis rounded-[28px] border border-white/25 dark:border-white/12 shadow-[0_32px_80px_-20px_rgba(0,0,0,0.55),0_0_0_1px_rgba(0,0,0,0.04)] animate-in slide-in-from-top-2 fade-in duration-200 data-[exiting]:animate-out data-[exiting]:slide-out-to-top-2 data-[exiting]:fade-out data-[exiting]:duration-150'}`}>
+          {isMobile && <div className="w-10 h-1 rounded-full bg-foreground/25 mx-auto mt-2.5 mb-1 shrink-0" />}
+          <div className={isMobile ? '' : 'max-h-[min(65vh,540px)] overflow-y-auto'}>
+            <AiCoPilotModal
+              isMorphMode={true}
+              isOpen={true}
+              onClose={() => onOpenAi && onOpenAi()}
+              currentUser={user}
+              employees={employees}
+              setEmployees={setEmployees}
+              payroll={payroll}
+              setPayroll={setPayroll}
+              attendance={attendance}
+              setAttendance={setAttendance}
+              expenses={expenses}
+              setExpenses={setExpenses}
+              announcements={announcements}
+              setAnnouncements={setAnnouncements}
+              tasks={tasks}
+              setTasks={setTasks}
+              settings={settings}
+              setCurrentView={setCurrentView}
+              addToast={addToast}
+              initialAction={aiModalAction}
+            />
           </div>
-        </>,
-        document.body
+        </div>
       )}
 
-      {/* Notification Panel - Identical Liquid Glass architecture to AI Co-Pilot panel.
-          Floating drop-down anchored below the topbar, expands/collapses with spring physics. */}
-      {notifPanelMounted && createPortal(
-        <>
-          {/* Backdrop Scrim */}
-          <div
-            className={`fixed inset-0 z-[44] bg-black/25 dark:bg-black/55 backdrop-blur-xs transition-opacity duration-300 pointer-events-auto ${
-              notifPanelExiting ? 'opacity-0' : 'opacity-100 animate-in fade-in duration-200'
-            }`}
-            onClick={() => setShowNotifications(false)}
-            aria-hidden="true"
-          />
-          <div className={`fixed inset-x-0 top-16 sm:top-20 md:top-24 z-[45] flex justify-center px-3 sm:px-4 pointer-events-none ${notifPanelExiting ? 'ai-panel-exit' : 'ai-panel-enter'}`}>
-            <div data-notif-panel className="pointer-events-auto w-full min-[400px]:w-[94%] sm:w-[85%] max-w-3xl h-[min(72vh,600px)] flex flex-col rounded-[28px] sm:rounded-[32px] glass-kormiis-modal text-foreground overflow-hidden border border-white/35 dark:border-white/16 shadow-[0_32px_80px_-20px_rgba(0,0,0,0.55),0_0_0_1px_rgba(0,0,0,0.04)]">
-            <div className="flex flex-col flex-1 min-h-0 p-5 sm:p-6">
-          <div className="flex-row items-center justify-between border-b border-border/80 dark:border-white/12 pb-3.5 mb-1 space-y-0 shrink-0">
-            <div className="flex items-center gap-2.5">
-              <div className="size-8.5 rounded-2xl flex items-center justify-center bg-primary/10 text-primary shrink-0 shadow-inner">
-                <Icon name="notifications" size={19} />
-              </div>
-              <div className="flex flex-col">
-                <h2 className="text-fluid-lg font-black tracking-tight text-foreground m-0 leading-tight">
-                  Notifications
-                </h2>
-                <p className="text-[11px] font-medium text-muted-foreground m-0 mt-0.5">
-                  {totalUnreadCount > 0 ? `${totalUnreadCount} unread update${totalUnreadCount > 1 ? 's' : ''}` : 'All caught up'}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              {unreadCount > 0 && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (markNotificationsRead) markNotificationsRead();
-                  }}
-                  title="Mark all as read"
-                  className="apple-glass-btn text-xs font-semibold px-2.5 py-1 rounded-full text-foreground/80 hover:text-primary flex items-center gap-1 cursor-pointer transition-all active:scale-95"
-                >
-                  <Icon name="done_all" size={14} />
-                  <span className="hidden min-[400px]:inline">Mark Read</span>
-                </button>
-              )}
-              <Badge variant="secondary" className="text-[11px] font-bold px-2.5 py-0.5 rounded-full">
-                {totalItemCount} Total
-              </Badge>
-            </div>
-          </div>
-
-          {/* Segmented Tab Filter Switcher */}
-          <div className="flex items-center gap-1.5 p-1 bg-muted/40 dark:bg-white/[0.05] rounded-2xl border border-border/60 dark:border-white/[0.08] my-1 shrink-0">
-            <button 
-              onClick={() => setNotificationTab('all')}
-              className={`flex-1 h-7.5 text-xs font-bold rounded-xl transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
-                notificationTab === 'all' 
-                  ? 'bg-white text-foreground shadow-xs border border-border/50 dark:bg-white/20 dark:border-white/10' 
-                  : 'text-muted-foreground hover:text-foreground bg-transparent'
-              }`}
-            >
-              <span>All</span>
-              <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${notificationTab === 'all' ? 'bg-black/[0.06] dark:bg-white/20 text-foreground' : 'bg-black/[0.04] dark:bg-white/10 text-muted-foreground'}`}>
-                {notifications.length + (hasIntegrityIssues ? 1 : 0)}
-              </span>
-            </button>
-            <button 
-              onClick={() => setNotificationTab('unread')}
-              className={`flex-1 h-7.5 text-xs font-bold rounded-xl transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
-                notificationTab === 'unread' 
-                  ? 'bg-primary text-white shadow-xs' 
-                  : 'text-muted-foreground hover:text-foreground bg-transparent'
-              }`}
-            >
-              <span>Unread</span>
-              {totalUnreadCount > 0 && (
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${notificationTab === 'unread' ? 'bg-white/20 text-white' : 'bg-destructive/15 text-destructive'}`}>
-                  {totalUnreadCount}
-                </span>
-              )}
-            </button>
-          </div>
-
-          {/* List Content */}
-          <div className="flex-1 min-h-0 overflow-y-auto py-2 pr-1 flex flex-col gap-2.5">
-            {renderDataIntegrityCard()}
-
-            {filteredNotifications.length === 0 && !hasIntegrityIssues ? (
-              <div className="py-12 px-4 text-center flex flex-col items-center justify-center gap-2.5">
-                <div className="size-13 rounded-2xl bg-primary/[0.08] dark:bg-primary/[0.15] flex items-center justify-center text-primary/70 mb-0.5">
-                  <Icon name="notifications_off" size={26} />
+      {/* Inline Notification Panel — expands below the topbar */}
+      {showNotifications && (
+        <div data-notif-panel className={`pointer-events-auto z-50 ${isMobile ? 'px-3 sm:px-4 mt-2 glass-mobile-drawer rounded-t-[28px] border-t border-white/25 dark:border-white/12' : 'absolute top-full left-1/2 -translate-x-1/2 w-[98%] min-[400px]:w-[94%] sm:w-[85%] max-w-3xl glass-kormiis rounded-[28px] border border-white/25 dark:border-white/12 shadow-[0_32px_80px_-20px_rgba(0,0,0,0.55),0_0_0_1px_rgba(0,0,0,0.04)] animate-in slide-in-from-top-2 fade-in duration-200 data-[exiting]:animate-out data-[exiting]:slide-out-to-top-2 data-[exiting]:fade-out data-[exiting]:duration-150'}`}>
+          <div className="flex flex-col max-h-[min(65vh,540px)] overflow-y-auto p-4 sm:p-5">
+            {/* Header */}
+            <div className="flex-row items-center justify-between border-b border-border/80 dark:border-white/12 pb-3.5 mb-3 space-y-0 shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="size-8.5 rounded-2xl flex items-center justify-center bg-primary/10 text-primary shrink-0 shadow-inner">
+                  <Icon name="notifications" size={19} />
                 </div>
-                <p className="text-fluid-sm font-bold text-foreground m-0">All caught up!</p>
-                <p className="text-fluid-xs font-normal text-muted-foreground max-w-[220px] m-0 leading-relaxed">
-                  {notificationTab === 'unread' ? 'No unread notifications right now.' : 'You have no new notifications right now.'}
-                </p>
+                <div className="flex flex-col">
+                  <h2 className="text-fluid-lg font-black tracking-tight text-foreground m-0 leading-tight">Notifications</h2>
+                  <p className="text-[11px] font-medium text-muted-foreground m-0 mt-0.5">
+                    {totalUnreadCount > 0 ? `${totalUnreadCount} unread update${totalUnreadCount > 1 ? 's' : ''}` : 'All caught up'}
+                  </p>
+                </div>
               </div>
-            ) : (
-              filteredNotifications.map(n => {
-                const meta = CATEGORY_META[n.category] || CATEGORY_META[n.view] || CATEGORY_META.notice || CATEGORY_META.system
-                const isUnread = !n.read
-
-                return (
-                  <div 
-                    role="listitem" 
-                    key={n.id} 
-                    onClick={() => navigateToView(n.view, n.id)}
-                    className={`group p-3 sm:p-3.5 rounded-2xl transition-all duration-200 cursor-pointer border relative select-none flex items-start gap-3 active:scale-[0.99] ${
-                      isUnread 
-                        ? 'bg-primary/[0.07] dark:bg-primary/[0.14] hover:bg-primary/[0.11] dark:hover:bg-primary/[0.20] border-primary/25 shadow-xs' 
-                        : 'bg-white/60 dark:bg-white/[0.04] hover:bg-white/90 dark:hover:bg-white/[0.08] border-black/[0.06] dark:border-white/[0.08] shadow-[0_2px_8px_rgba(0,0,0,0.02)] dark:shadow-none'
-                    }`}
+              <div className="flex items-center gap-2">
+                {unreadCount > 0 && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); if (markNotificationsRead) markNotificationsRead(); }}
+                    title="Mark all as read"
+                    className="apple-glass-btn text-xs font-semibold px-2.5 py-1 rounded-full text-foreground/80 hover:text-primary flex items-center gap-1 cursor-pointer transition-all active:scale-95"
                   >
-                    {/* Category Icon */}
-                    <Icon name={meta.icon} size={26} className="shrink-0 text-foreground transition-transform group-hover:scale-105 mt-0.5" />
+                    <Icon name="done_all" size={14} />
+                    <span className="hidden min-[400px]:inline">Mark Read</span>
+                  </button>
+                )}
+                <Badge variant="secondary" className="text-[11px] font-bold px-2.5 py-0.5 rounded-full">{totalItemCount} Total</Badge>
+                <button
+                  onClick={(e) => { e.stopPropagation(); setShowNotifications(false); }}
+                  title="Close notifications"
+                  aria-label="Close notifications"
+                  className="rounded-full size-8 text-foreground/60 hover:text-foreground hover:bg-white/10 dark:hover:bg-white/10 flex items-center justify-center cursor-pointer transition-all active:scale-90"
+                >
+                  <Icon name="close" size={18} />
+                </button>
+              </div>
+            </div>
 
-                    {/* Content */}
-                    <div className="min-w-0 flex-1 flex flex-col gap-0.5">
-                      <div className="flex items-center justify-between gap-2">
-                        <span 
-                          className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md"
-                          style={{ 
-                            background: `${meta.color}15`, 
-                            color: meta.color 
-                          }}
-                        >
-                          {meta.label || 'Notice'}
-                        </span>
-                        {isUnread && (
-                          <span className="flex items-center gap-1 text-[10px] font-bold text-primary">
-                            <span className="size-1.5 rounded-full bg-primary animate-pulse" />
-                            NEW
+            {/* Segmented Tab Filter Switcher */}
+            <div className="flex items-center gap-1.5 p-1 bg-muted/40 dark:bg-white/[0.05] rounded-2xl border border-border/60 dark:border-white/[0.08] mb-3 shrink-0">
+              <button 
+                onClick={() => setNotificationTab('all')}
+                className={`flex-1 h-7.5 text-xs font-bold rounded-xl transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
+                  notificationTab === 'all' 
+                    ? 'bg-white text-foreground shadow-xs border border-border/50 dark:bg-white/20 dark:border-white/10' 
+                    : 'text-muted-foreground hover:text-foreground bg-transparent'
+                }`}
+              >
+                <span>All</span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${notificationTab === 'all' ? 'bg-black/[0.06] dark:bg-white/20 text-foreground' : 'bg-black/[0.04] dark:bg-white/10 text-muted-foreground'}`}>
+                  {notifications.length + (hasIntegrityIssues ? 1 : 0)}
+                </span>
+              </button>
+              <button 
+                onClick={() => setNotificationTab('unread')}
+                className={`flex-1 h-7.5 text-xs font-bold rounded-xl transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
+                  notificationTab === 'unread' 
+                    ? 'bg-primary text-white shadow-xs' 
+                    : 'text-muted-foreground hover:text-foreground bg-transparent'
+                }`}
+              >
+                <span>Unread</span>
+                {totalUnreadCount > 0 && (
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${notificationTab === 'unread' ? 'bg-white/20 text-white' : 'bg-destructive/15 text-destructive'}`}>
+                    {totalUnreadCount}
+                  </span>
+                )}
+              </button>
+            </div>
+
+            {/* List Content */}
+            <div className="flex-1 min-h-0 flex flex-col gap-2.5">
+              {renderDataIntegrityCard()}
+
+              {filteredNotifications.length === 0 && !hasIntegrityIssues ? (
+                <div className="py-12 px-4 text-center flex flex-col items-center justify-center gap-2.5">
+                  <div className="size-13 rounded-2xl bg-primary/[0.08] dark:bg-primary/[0.15] flex items-center justify-center text-primary/70 mb-0.5">
+                    <Icon name="notifications_off" size={26} />
+                  </div>
+                  <p className="text-fluid-sm font-bold text-foreground m-0">All caught up!</p>
+                  <p className="text-fluid-xs font-normal text-muted-foreground max-w-[220px] m-0 leading-relaxed">
+                    {notificationTab === 'unread' ? 'No unread notifications right now.' : 'You have no new notifications right now.'}
+                  </p>
+                </div>
+              ) : (
+                filteredNotifications.map(n => {
+                  const meta = CATEGORY_META[n.category] || CATEGORY_META[n.view] || CATEGORY_META.notice || CATEGORY_META.system
+                  const isUnread = !n.read
+
+                  return (
+                    <div 
+                      role="listitem" 
+                      key={n.id} 
+                      onClick={() => navigateToView(n.view, n.id)}
+                      className={`group p-3 sm:p-3.5 rounded-2xl transition-all duration-200 cursor-pointer border relative select-none flex items-start gap-3 active:scale-[0.99] ${
+                        isUnread 
+                          ? 'bg-primary/[0.07] dark:bg-primary/[0.14] hover:bg-primary/[0.11] dark:hover:bg-primary/[0.20] border-primary/25 shadow-xs' 
+                          : 'bg-white/60 dark:bg-white/[0.04] hover:bg-white/90 dark:hover:bg-white/[0.08] border-black/[0.06] dark:border-white/[0.08] shadow-[0_2px_8px_rgba(0,0,0,0.02)] dark:shadow-none'
+                      }`}
+                    >
+                      <Icon name={meta.icon} size={26} className="shrink-0 text-foreground transition-transform group-hover:scale-105 mt-0.5" />
+
+                      <div className="min-w-0 flex-1 flex flex-col gap-0.5">
+                        <div className="flex items-center justify-between gap-2">
+                          <span 
+                            className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md"
+                            style={{ background: `${meta.color}15`, color: meta.color }}
+                          >
+                            {meta.label || 'Notice'}
                           </span>
-                        )}
-                      </div>
-
-                      {n.title && n.title !== n.text && (
-                        <p className="text-fluid-sm font-bold m-0 mt-1 leading-snug text-foreground break-words">
-                          {n.title}
-                        </p>
-                      )}
-
-                      <p className={`text-fluid-xs m-0 mt-0.5 leading-relaxed text-foreground/85 dark:text-foreground/90 break-words ${isUnread ? 'font-semibold' : 'font-medium text-muted-foreground'}`}>
-                        {n.text}
-                      </p>
-
-                      {/* Bottom row: Timestamp + Quick Action buttons */}
-                      <div className="flex flex-wrap items-center justify-between gap-2 mt-2.5 pt-1.5 border-t border-black/[0.04] dark:border-white/[0.06]">
-                        <div className="flex items-center gap-1.5 text-[10px] font-medium text-muted-foreground">
-                          <Icon name="schedule" size={12} className="opacity-70" />
-                          <span>{getRelativeTime(n.timestamp || n.time) || n.time || 'Just now'}</span>
+                          {isUnread && (
+                            <span className="flex items-center gap-1 text-[10px] font-bold text-primary">
+                              <span className="size-1.5 rounded-full bg-primary animate-pulse" />
+                              NEW
+                            </span>
+                          )}
                         </div>
 
-                        <div className="flex items-center gap-1.5 ml-auto">
-                          {/* Leave Quick Actions for Admin/HR */}
-                          {isManagerOrAdmin && (n.category === 'leave' || n.category === 'leaves') && (n.title?.toLowerCase().includes('request') || n.text?.toLowerCase().includes('request')) && (
-                            <>
-                              <button
-                                type="button"
-                                onClick={(e) => handleQuickAction(e, n, 'approve_leave')}
-                                className="h-6.5 px-2.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-600 dark:text-emerald-400 text-[11px] font-bold border border-emerald-500/30 flex items-center gap-1 cursor-pointer transition-all active:scale-95 shadow-2xs"
-                              >
-                                <Icon name="check" size={12} />
-                                <span>Approve</span>
-                              </button>
-                              <button
-                                type="button"
-                                onClick={(e) => handleQuickAction(e, n, 'reject_leave')}
-                                className="h-6.5 px-2 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 text-rose-600 dark:text-rose-400 text-[11px] font-bold border border-rose-500/30 flex items-center gap-1 cursor-pointer transition-all active:scale-95 shadow-2xs"
-                              >
-                                <Icon name="close" size={12} />
-                                <span>Reject</span>
-                              </button>
-                            </>
-                          )}
+                        {n.title && n.title !== n.text && (
+                          <p className="text-fluid-sm font-bold m-0 mt-1 leading-snug text-foreground break-words">{n.title}</p>
+                        )}
 
-                          {/* Expense Quick Actions for Admin/HR */}
-                          {isManagerOrAdmin && (n.category === 'expense' || n.category === 'expenses') && (n.title?.toLowerCase().includes('submitted') || n.text?.toLowerCase().includes('claim') || n.text?.toLowerCase().includes('submitted')) && (
-                            <>
-                              <button
-                                type="button"
-                                onClick={(e) => handleQuickAction(e, n, 'approve_expense')}
-                                className="h-6.5 px-2.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-600 dark:text-emerald-400 text-[11px] font-bold border border-emerald-500/30 flex items-center gap-1 cursor-pointer transition-all active:scale-95 shadow-2xs"
-                              >
-                                <Icon name="check" size={12} />
-                                <span>Approve</span>
-                              </button>
-                              <button
-                                type="button"
-                                onClick={(e) => handleQuickAction(e, n, 'reject_expense')}
-                                className="h-6.5 px-2 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 text-rose-600 dark:text-rose-400 text-[11px] font-bold border border-rose-500/30 flex items-center gap-1 cursor-pointer transition-all active:scale-95 shadow-2xs"
-                              >
-                                <Icon name="close" size={12} />
-                                <span>Reject</span>
-                              </button>
-                            </>
-                          )}
+                        <p className={`text-fluid-xs m-0 mt-0.5 leading-relaxed text-foreground/85 dark:text-foreground/90 break-words ${isUnread ? 'font-semibold' : 'font-medium text-muted-foreground'}`}>
+                          {n.text}
+                        </p>
 
-                          {/* Task Quick Action */}
-                          {(n.category === 'task' || n.category === 'tasks') && !n.text?.toLowerCase().includes('completed') && (
-                            <button
-                              type="button"
-                              onClick={(e) => handleQuickAction(e, n, 'complete_task')}
-                              className="h-6.5 px-2.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-600 dark:text-emerald-400 text-[11px] font-bold border border-emerald-500/30 flex items-center gap-1 cursor-pointer transition-all active:scale-95 shadow-2xs"
-                            >
-                              <Icon name="check_circle" size={12} />
-                              <span>Mark Done</span>
-                            </button>
-                          )}
+                        <div className="flex flex-wrap items-center justify-between gap-2 mt-2.5 pt-1.5 border-t border-black/[0.04] dark:border-white/[0.06]">
+                          <div className="flex items-center gap-1.5 text-[10px] font-medium text-muted-foreground">
+                            <Icon name="schedule" size={12} className="opacity-70" />
+                            <span>{getRelativeTime(n.timestamp || n.time) || n.time || 'Just now'}</span>
+                          </div>
 
-                          {/* View link button */}
-                          {n.view && (
-                            <button
-                              type="button"
-                              onClick={(e) => handleQuickAction(e, n, 'view')}
-                              className="h-6.5 px-2.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-[11px] font-bold border border-primary/25 flex items-center gap-1 cursor-pointer transition-all active:scale-95 shadow-2xs"
-                            >
-                              <span>Open</span>
-                              <Icon name="arrow_forward" size={11} />
-                            </button>
-                          )}
+                          <div className="flex items-center gap-1.5 ml-auto">
+                            {isManagerOrAdmin && (n.category === 'leave' || n.category === 'leaves') && (n.title?.toLowerCase().includes('request') || n.text?.toLowerCase().includes('request')) && (
+                              <>
+                                <button type="button" onClick={(e) => handleQuickAction(e, n, 'approve_leave')} className="h-6.5 px-2.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-600 dark:text-emerald-400 text-[11px] font-bold border border-emerald-500/30 flex items-center gap-1 cursor-pointer transition-all active:scale-95 shadow-2xs">
+                                  <Icon name="check" size={12} /><span>Approve</span>
+                                </button>
+                                <button type="button" onClick={(e) => handleQuickAction(e, n, 'reject_leave')} className="h-6.5 px-2 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 text-rose-600 dark:text-rose-400 text-[11px] font-bold border border-rose-500/30 flex items-center gap-1 cursor-pointer transition-all active:scale-95 shadow-2xs">
+                                  <Icon name="close" size={12} /><span>Reject</span>
+                                </button>
+                              </>
+                            )}
+
+                            {isManagerOrAdmin && (n.category === 'expense' || n.category === 'expenses') && (n.title?.toLowerCase().includes('submitted') || n.text?.toLowerCase().includes('claim') || n.text?.toLowerCase().includes('submitted')) && (
+                              <>
+                                <button type="button" onClick={(e) => handleQuickAction(e, n, 'approve_expense')} className="h-6.5 px-2.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-600 dark:text-emerald-400 text-[11px] font-bold border border-emerald-500/30 flex items-center gap-1 cursor-pointer transition-all active:scale-95 shadow-2xs">
+                                  <Icon name="check" size={12} /><span>Approve</span>
+                                </button>
+                                <button type="button" onClick={(e) => handleQuickAction(e, n, 'reject_expense')} className="h-6.5 px-2 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 text-rose-600 dark:text-rose-400 text-[11px] font-bold border border-rose-500/30 flex items-center gap-1 cursor-pointer transition-all active:scale-95 shadow-2xs">
+                                  <Icon name="close" size={12} /><span>Reject</span>
+                                </button>
+                              </>
+                            )}
+
+                            {(n.category === 'task' || n.category === 'tasks') && !n.text?.toLowerCase().includes('completed') && (
+                              <button type="button" onClick={(e) => handleQuickAction(e, n, 'complete_task')} className="h-6.5 px-2.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-600 dark:text-emerald-400 text-[11px] font-bold border border-emerald-500/30 flex items-center gap-1 cursor-pointer transition-all active:scale-95 shadow-2xs">
+                                <Icon name="check_circle" size={12} /><span>Mark Done</span>
+                              </button>
+                            )}
+
+                            {n.view && (
+                              <button type="button" onClick={(e) => handleQuickAction(e, n, 'view')} className="h-6.5 px-2.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-[11px] font-bold border border-primary/25 flex items-center gap-1 cursor-pointer transition-all active:scale-95 shadow-2xs">
+                                <span>Open</span><Icon name="arrow_forward" size={11} />
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                )
-              })
-            )}
-          </div>
+                  )
+                })
+              )}
+            </div>
 
-          <div className="flex flex-row items-center justify-between pt-4 mt-2 border-t border-border/80 dark:border-white/12 shrink-0">
-            <button
-              onClick={(e) => { e.stopPropagation(); if(clearNotifications) clearNotifications(); }}
-              className="text-xs font-semibold text-muted-foreground hover:text-destructive transition-colors cursor-pointer flex items-center gap-1.5 active:scale-95"
-            >
-              <Icon name="delete_sweep" size={16} />
-              <span>Clear All</span>
-            </button>
-            <button
-              onClick={(e) => { e.stopPropagation(); setShowNotifications(false); }}
-              className="liquid-glass-btn h-8 px-4.5 rounded-full text-xs font-bold cursor-pointer"
-            >
-              Close
-            </button>
-          </div>
+            {/* Footer */}
+            <div className="flex flex-row items-center justify-between pt-3 mt-3 border-t border-border/80 dark:border-white/12 shrink-0">
+              <button
+                onClick={(e) => { e.stopPropagation(); if(clearNotifications) clearNotifications(); }}
+                className="text-xs font-semibold text-muted-foreground hover:text-destructive transition-colors cursor-pointer flex items-center gap-1.5 active:scale-95"
+              >
+                <Icon name="delete_sweep" size={16} />
+                <span>Clear All</span>
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); setShowNotifications(false); }}
+                className="liquid-glass-btn h-8 px-4.5 rounded-full text-xs font-bold cursor-pointer"
+              >
+                Close
+              </button>
             </div>
           </div>
         </div>
-        </>,
-        document.body
       )}
 
       {/* Corruption / Data Integrity Modal */}
@@ -846,6 +740,6 @@ export default function Topbar({
           </DialogContent>
         </Dialog>
       )}
-    </>
+    </div>
   )
 }
