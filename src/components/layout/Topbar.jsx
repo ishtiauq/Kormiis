@@ -504,51 +504,70 @@ export default function Topbar({
           Page layout stays untouched — the panel floats above all content.
           Expands out of the topbar/bottom edge on open, collapses back on close. */}
       {aiPanelMounted && createPortal(
-        <div className={`fixed inset-x-0 flex justify-center pointer-events-none ${
-          isMobile
-            ? `bottom-0 z-50 ${aiPanelExiting ? 'ai-panel-exit-bottom' : 'ai-panel-enter-bottom'}`
-            : `top-16 sm:top-20 md:top-24 z-[45] px-3 sm:px-4 ${aiPanelExiting ? 'ai-panel-exit' : 'ai-panel-enter'}`
-        }`}>
-          <div className={`pointer-events-auto flex flex-col overflow-hidden text-foreground ${
+        <>
+          {/* Backdrop Scrim (Smooth dark blur for true MonoGlass modal contrast and click-outside dismissal) */}
+          <div
+            className={`fixed inset-0 z-[44] bg-black/25 dark:bg-black/55 backdrop-blur-xs transition-opacity duration-300 pointer-events-auto ${
+              aiPanelExiting ? 'opacity-0' : 'opacity-100 animate-in fade-in duration-200'
+            }`}
+            onClick={() => onOpenAi && onOpenAi()}
+            aria-hidden="true"
+          />
+          <div className={`fixed inset-x-0 flex justify-center pointer-events-none ${
             isMobile
-              ? 'w-full h-[min(85dvh,640px)] rounded-t-[32px] glass-mobile-drawer border-t border-white/35 dark:border-white/16 shadow-[0_-12px_40px_rgba(0,0,0,0.40)]'
-              : 'w-full min-[400px]:w-[94%] sm:w-[85%] max-w-3xl h-[min(72vh,600px)] rounded-[28px] sm:rounded-[32px] glass-kormiis-modal border border-white/35 dark:border-white/16 shadow-[0_32px_80px_-20px_rgba(0,0,0,0.55),0_0_0_1px_rgba(0,0,0,0.04)]'
+              ? `bottom-0 z-50 ${aiPanelExiting ? 'ai-panel-exit-bottom' : 'ai-panel-enter-bottom'}`
+              : `top-16 sm:top-20 md:top-24 z-[45] px-3 sm:px-4 ${aiPanelExiting ? 'ai-panel-exit' : 'ai-panel-enter'}`
           }`}>
-            {isMobile && (
-              <div className="w-10 h-1 rounded-full bg-foreground/25 mx-auto mt-2.5 mb-1 shrink-0" />
-            )}
-            <AiCoPilotModal
-              isMorphMode={true}
-              isOpen={true}
-              onClose={() => onOpenAi && onOpenAi()}
-              currentUser={user}
-              employees={employees}
-              setEmployees={setEmployees}
-              payroll={payroll}
-              setPayroll={setPayroll}
-              attendance={attendance}
-              setAttendance={setAttendance}
-              expenses={expenses}
-              setExpenses={setExpenses}
-              announcements={announcements}
-              setAnnouncements={setAnnouncements}
-              tasks={tasks}
-              setTasks={setTasks}
-              settings={settings}
-              setCurrentView={setCurrentView}
-              addToast={addToast}
-              initialAction={aiModalAction}
-            />
+            <div className={`pointer-events-auto flex flex-col overflow-hidden text-foreground ${
+              isMobile
+                ? 'w-full h-[min(85dvh,640px)] rounded-t-[32px] glass-mobile-drawer border-t border-white/35 dark:border-white/16 shadow-[0_-12px_40px_rgba(0,0,0,0.40)]'
+                : 'w-full min-[400px]:w-[94%] sm:w-[85%] max-w-3xl h-[min(72vh,600px)] rounded-[28px] sm:rounded-[32px] glass-kormiis-modal border border-white/35 dark:border-white/16 shadow-[0_32px_80px_-20px_rgba(0,0,0,0.55),0_0_0_1px_rgba(0,0,0,0.04)]'
+            }`}>
+              {isMobile && (
+                <div className="w-10 h-1 rounded-full bg-foreground/25 mx-auto mt-2.5 mb-1 shrink-0" />
+              )}
+              <AiCoPilotModal
+                isMorphMode={true}
+                isOpen={true}
+                onClose={() => onOpenAi && onOpenAi()}
+                currentUser={user}
+                employees={employees}
+                setEmployees={setEmployees}
+                payroll={payroll}
+                setPayroll={setPayroll}
+                attendance={attendance}
+                setAttendance={setAttendance}
+                expenses={expenses}
+                setExpenses={setExpenses}
+                announcements={announcements}
+                setAnnouncements={setAnnouncements}
+                tasks={tasks}
+                setTasks={setTasks}
+                settings={settings}
+                setCurrentView={setCurrentView}
+                addToast={addToast}
+                initialAction={aiModalAction}
+              />
+            </div>
           </div>
-        </div>,
+        </>,
         document.body
       )}
 
       {/* Notification Panel - Identical Liquid Glass architecture to AI Co-Pilot panel.
           Floating drop-down anchored below the topbar, expands/collapses with spring physics. */}
       {notifPanelMounted && createPortal(
-        <div className={`fixed inset-x-0 top-16 sm:top-20 md:top-24 z-[45] flex justify-center px-3 sm:px-4 pointer-events-none ${notifPanelExiting ? 'ai-panel-exit' : 'ai-panel-enter'}`}>
-          <div data-notif-panel className="pointer-events-auto w-full min-[400px]:w-[94%] sm:w-[85%] max-w-3xl h-[min(72vh,600px)] flex flex-col rounded-[28px] sm:rounded-[32px] glass-kormiis-modal text-foreground overflow-hidden border border-white/35 dark:border-white/16 shadow-[0_32px_80px_-20px_rgba(0,0,0,0.55),0_0_0_1px_rgba(0,0,0,0.04)]">
+        <>
+          {/* Backdrop Scrim */}
+          <div
+            className={`fixed inset-0 z-[44] bg-black/25 dark:bg-black/55 backdrop-blur-xs transition-opacity duration-300 pointer-events-auto ${
+              notifPanelExiting ? 'opacity-0' : 'opacity-100 animate-in fade-in duration-200'
+            }`}
+            onClick={() => setShowNotifications(false)}
+            aria-hidden="true"
+          />
+          <div className={`fixed inset-x-0 top-16 sm:top-20 md:top-24 z-[45] flex justify-center px-3 sm:px-4 pointer-events-none ${notifPanelExiting ? 'ai-panel-exit' : 'ai-panel-enter'}`}>
+            <div data-notif-panel className="pointer-events-auto w-full min-[400px]:w-[94%] sm:w-[85%] max-w-3xl h-[min(72vh,600px)] flex flex-col rounded-[28px] sm:rounded-[32px] glass-kormiis-modal text-foreground overflow-hidden border border-white/35 dark:border-white/16 shadow-[0_32px_80px_-20px_rgba(0,0,0,0.55),0_0_0_1px_rgba(0,0,0,0.04)]">
             <div className="flex flex-col flex-1 min-h-0 p-5 sm:p-6">
           <div className="flex-row items-center justify-between border-b border-border/80 dark:border-white/12 pb-3.5 mb-1 space-y-0 shrink-0">
             <div className="flex items-center gap-2.5">
@@ -780,7 +799,8 @@ export default function Topbar({
           </div>
             </div>
           </div>
-        </div>,
+        </div>
+        </>,
         document.body
       )}
 

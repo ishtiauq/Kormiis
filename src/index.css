@@ -303,15 +303,15 @@ html.dark .liquid-glass-drawer,
 /* Modals & Popovers (iOS 26 Ultra-Liquid Glass) */
 .glass-kormiis-modal,
 .glass-popover {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.52) 0%, rgba(255, 255, 255, 0.25) 100%) !important;
-  -webkit-backdrop-filter: saturate(190%) blur(32px) brightness(103%) !important;
-  backdrop-filter: saturate(190%) blur(32px) brightness(103%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.35) !important;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.82) 0%, rgba(255, 255, 255, 0.65) 100%) !important;
+  -webkit-backdrop-filter: saturate(190%) blur(32px) brightness(102%) !important;
+  backdrop-filter: saturate(190%) blur(32px) brightness(102%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.40) !important;
   box-shadow: 
-    0 24px 48px -12px rgba(0, 0, 0, 0.12),
-    0 4px 12px 0 rgba(0, 0, 0, 0.04),
-    inset 0 1px 1px 0 rgba(255, 255, 255, 0.50),
-    inset 1px 0 1px 0 rgba(255, 255, 255, 0.20) !important;
+    0 28px 60px -15px rgba(0, 0, 0, 0.15),
+    0 4px 12px 0 rgba(0, 0, 0, 0.05),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.60),
+    inset 1px 0 1px 0 rgba(255, 255, 255, 0.25) !important;
   isolation: isolate;
   border-radius: 1.75rem !important; /* 28px continuous corner */
 }
@@ -324,24 +324,24 @@ html.dark .glass-kormiis-modal,
 .dark .glass-popover,
 html.dark .glass-popover,
 [data-theme="dark"] .glass-popover {
-  background: linear-gradient(135deg, rgba(28, 28, 40, 0.45) 0%, rgba(14, 14, 22, 0.30) 100%) !important;
-  -webkit-backdrop-filter: saturate(190%) blur(32px) brightness(105%) !important;
-  backdrop-filter: saturate(190%) blur(32px) brightness(105%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  background: linear-gradient(135deg, rgba(24, 24, 34, 0.82) 0%, rgba(14, 14, 22, 0.72) 100%) !important;
+  -webkit-backdrop-filter: saturate(190%) blur(36px) brightness(105%) !important;
+  backdrop-filter: saturate(190%) blur(36px) brightness(105%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
   box-shadow: 
-    0 24px 50px -12px rgba(0, 0, 0, 0.75),
-    0 3px 8px 0 rgba(0, 0, 0, 0.45),
-    inset 0 1px 1px 0 rgba(255, 255, 255, 0.15),
-    inset 1px 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 32px 80px -20px rgba(0, 0, 0, 0.75),
+    0 4px 12px 0 rgba(0, 0, 0, 0.50),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.20),
+    inset 1px 0 1px 0 rgba(255, 255, 255, 0.10),
     inset 0 -1px 1px 0 rgba(0, 0, 0, 0.4) !important;
 }
 
 /* Mobile Bottom Sheet Drawer (Emerges directly from bottom of screen with iOS 26 Ultra-Liquid Glass) */
 .glass-mobile-drawer {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.58) 0%, rgba(255, 255, 255, 0.32) 100%) !important;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.70) 100%) !important;
   -webkit-backdrop-filter: saturate(190%) blur(36px) brightness(104%) !important;
   backdrop-filter: saturate(190%) blur(36px) brightness(104%) !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.45) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.50) !important;
   border-left: none !important;
   border-right: none !important;
   border-bottom: none !important;
@@ -360,10 +360,10 @@ html.dark .glass-popover,
 .dark .glass-mobile-drawer,
 html.dark .glass-mobile-drawer,
 [data-theme="dark"] .glass-mobile-drawer {
-  background: linear-gradient(135deg, rgba(24, 24, 34, 0.60) 0%, rgba(10, 10, 16, 0.45) 100%) !important;
+  background: linear-gradient(135deg, rgba(24, 24, 34, 0.88) 0%, rgba(10, 10, 16, 0.78) 100%) !important;
   -webkit-backdrop-filter: saturate(190%) blur(36px) brightness(105%) !important;
   backdrop-filter: saturate(190%) blur(36px) brightness(105%) !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.18) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.20) !important;
   border-left: none !important;
   border-right: none !important;
   border-bottom: none !important;

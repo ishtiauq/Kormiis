@@ -467,7 +467,7 @@ export default function AiAssistantPage({
       <div className="w-full h-[calc(100dvh_-_130px)] sm:h-[calc(100dvh_-_140px)] md:h-[calc(100vh_-_140px)] flex flex-col rounded-[24px] sm:rounded-[32px] glass-kormiis border border-white/35 dark:border-white/16 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.30)] overflow-hidden backdrop-blur-3xl relative">
         
         {/* HEADER BAR */}
-        <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-border/60 dark:border-white/10 shrink-0 bg-white/20 dark:bg-white/[0.03]">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-border/80 dark:border-white/12 shrink-0 bg-white/40 dark:bg-white/[0.04] backdrop-blur-md">
           <div className="flex items-center gap-2.5">
             <div className="size-8 sm:size-9 rounded-xl bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 flex items-center justify-center shadow-xs shrink-0">
               <Icon name={showHistoryView ? "history" : "auto_awesome"} size={18} className="text-white dark:text-neutral-900" />
@@ -651,12 +651,12 @@ export default function AiAssistantPage({
 
                   {/* Message Bubble */}
                   <div
-                    className={`max-w-[92%] sm:max-w-[80%] rounded-2xl p-3.5 sm:p-4 text-xs sm:text-sm leading-relaxed relative shadow-xs backdrop-blur-md ${
+                    className={`max-w-[92%] sm:max-w-[80%] rounded-2xl p-3.5 sm:p-4 text-xs sm:text-sm leading-relaxed relative backdrop-blur-xl saturate-[1.4] ${
                       msg.role === 'user'
-                        ? 'glass-card border border-white/45 dark:border-white/12 text-foreground rounded-tr-xs bg-white/65 dark:bg-white/[0.06]'
+                        ? 'rounded-tr-xs bg-white/90 dark:bg-white/[0.14] border border-white/70 dark:border-white/18 text-foreground shadow-[0_4px_16px_-4px_rgba(0,0,0,0.08),inset_0_1px_1px_0_rgba(255,255,255,0.60)]'
                         : msg.isError
-                        ? 'bg-destructive/15 border border-destructive/30 text-destructive rounded-tl-xs'
-                        : 'glass-card border border-white/35 dark:border-white/10 text-foreground rounded-tl-xs bg-white/40 dark:bg-white/[0.03]'
+                        ? 'rounded-tl-xs bg-destructive/15 border border-destructive/30 text-destructive'
+                        : 'rounded-tl-xs bg-white/70 dark:bg-white/[0.07] border border-white/50 dark:border-white/12 text-foreground shadow-[0_2px_10px_-2px_rgba(0,0,0,0.04),inset_0_1px_1px_0_rgba(255,255,255,0.40)]'
                     }`}
                   >
                     {/* Attached File Preview inside Message */}

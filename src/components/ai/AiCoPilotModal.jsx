@@ -581,7 +581,7 @@ export default function AiCoPilotModal({
       )}
 
       {/* MODAL HEADER */}
-        <div className="flex items-center justify-between px-4.5 py-3.5 border-b border-border/80 dark:border-white/12 shrink-0 bg-white/20 dark:bg-white/[0.03]">
+        <div className="flex items-center justify-between px-4.5 py-3.5 border-b border-border/80 dark:border-white/12 shrink-0 bg-white/40 dark:bg-white/[0.04] backdrop-blur-md">
           <div className="flex items-center gap-2.5">
             <div className="size-8.5 rounded-xl bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 flex items-center justify-center shadow-xs shrink-0">
               <Icon name={showHistoryDrawer ? "history" : "auto_awesome"} size={18} className="text-white dark:text-neutral-900" />
@@ -648,10 +648,10 @@ export default function AiCoPilotModal({
           /* FULL-VIEW CHAT HISTORY */
           <div className="flex-1 flex flex-col overflow-hidden animate-in fade-in duration-200">
             {/* Search & New Chat Action Bar */}
-            <div className="p-3 sm:p-4 border-b border-border/50 dark:border-white/10 space-y-2.5 bg-white/15 dark:bg-white/[0.02]">
+            <div className="p-3 sm:p-4 border-b border-border/60 dark:border-white/10 space-y-2.5 bg-white/35 dark:bg-white/[0.03] backdrop-blur-md">
               <button
                 onClick={handleNewChat}
-                className="apple-glass-btn w-full h-10 rounded-2xl flex items-center justify-center gap-2 text-xs font-bold text-foreground border border-white/40 dark:border-white/18 shadow-sm active:scale-98 cursor-pointer select-none group"
+                className="apple-glass-btn w-full h-10 rounded-2xl flex items-center justify-center gap-2 text-xs font-bold text-foreground border border-white/40 dark:border-white/18 shadow-xs active:scale-98 cursor-pointer select-none group"
               >
                 <Icon name="add" size={16} className="text-foreground group-hover:rotate-90 transition-transform duration-300" />
                 <span>Start New Conversation</span>
@@ -664,7 +664,7 @@ export default function AiCoPilotModal({
                   placeholder="Search past conversations..."
                   value={historySearch}
                   onChange={e => setHistorySearch(e.target.value)}
-                  className="w-full h-11 pl-11 pr-3.5 rounded-2xl border border-black/15 dark:border-white/14 bg-white/85 dark:bg-white/[0.07] text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)]"
+                  className="w-full h-11 pl-11 pr-3.5 rounded-2xl border border-black/15 dark:border-white/16 bg-white/85 dark:bg-white/[0.08] text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)]"
                 />
               </div>
             </div>
@@ -686,13 +686,13 @@ export default function AiCoPilotModal({
                       onClick={() => handleSelectSession(session.id)}
                       className={`group relative p-3 rounded-2xl border transition-all cursor-pointer select-none flex items-start justify-between gap-3 shadow-xs backdrop-blur-md ${
                         isActive
-                          ? 'bg-foreground/12 dark:bg-white/15 border-foreground/30 dark:border-white/25 text-foreground font-semibold shadow-xs'
-                          : 'border-white/40 dark:border-white/10 bg-white/35 hover:bg-white/60 dark:bg-white/[0.04] dark:hover:bg-white/[0.08] text-foreground'
+                          ? 'bg-primary/15 dark:bg-primary/25 border-primary/40 dark:border-primary/45 text-foreground font-bold shadow-xs'
+                          : 'border-white/40 dark:border-white/12 bg-white/50 hover:bg-white/75 dark:bg-white/[0.06] dark:hover:bg-white/[0.12] text-foreground'
                       }`}
                     >
                       <div className="flex-1 min-w-0 pr-1">
                         <div className="flex items-center gap-1.5">
-                          <Icon name="chat_bubble_outline" size={14} className={isActive ? 'text-foreground' : 'text-muted-foreground'} />
+                          <Icon name="chat_bubble_outline" size={14} className={isActive ? 'text-primary' : 'text-muted-foreground'} />
                           <p className="m-0 text-xs font-bold break-words text-foreground">
                             {session.title || 'Conversation'}
                           </p>
@@ -726,7 +726,7 @@ export default function AiCoPilotModal({
 
             {/* Clear All History Footer */}
             {historySessions.length > 0 && (
-              <div className="p-3 pb-22 sm:pb-3 border-t border-border/50 dark:border-white/10 bg-white/20 dark:bg-white/[0.02] backdrop-blur-md shrink-0">
+              <div className="p-3 pb-22 sm:pb-3 border-t border-border/60 dark:border-white/10 bg-white/35 dark:bg-white/[0.03] backdrop-blur-md shrink-0">
                 <button
                   onClick={handleClearAllHistory}
                   className="w-full h-8.5 rounded-xl border border-destructive/30 hover:bg-destructive/10 text-destructive text-[11px] font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-98"
@@ -773,10 +773,10 @@ export default function AiCoPilotModal({
                   <div
                     className={`max-w-[88%] sm:max-w-[80%] rounded-2xl p-3.5 sm:p-4 text-xs sm:text-sm leading-relaxed relative backdrop-blur-xl saturate-[1.4] ${
                       msg.role === 'user'
-                        ? 'rounded-tr-md bg-white/70 dark:bg-white/[0.08] border border-white/60 dark:border-white/14 text-foreground shadow-[0_2px_10px_-2px_rgba(0,0,0,0.08),inset_0_1px_1px_0_rgba(255,255,255,0.50)]'
+                        ? 'rounded-tr-xs bg-white/90 dark:bg-white/[0.14] border border-white/70 dark:border-white/18 text-foreground shadow-[0_4px_16px_-4px_rgba(0,0,0,0.08),inset_0_1px_1px_0_rgba(255,255,255,0.60)]'
                         : msg.isError
-                        ? 'rounded-tl-md bg-destructive/15 border border-destructive/30 text-destructive'
-                        : 'rounded-tl-md bg-white/45 dark:bg-white/[0.04] border border-white/45 dark:border-white/10 text-foreground shadow-[inset_0_1px_1px_0_rgba(255,255,255,0.38)]'
+                        ? 'rounded-tl-xs bg-destructive/15 border border-destructive/30 text-destructive'
+                        : 'rounded-tl-xs bg-white/70 dark:bg-white/[0.07] border border-white/50 dark:border-white/12 text-foreground shadow-[0_2px_10px_-2px_rgba(0,0,0,0.04),inset_0_1px_1px_0_rgba(255,255,255,0.40)]'
                     }`}
                   >
                     {/* Attached File Preview inside Message */}
@@ -800,7 +800,7 @@ export default function AiCoPilotModal({
                             key={qa.label}
                             onClick={() => handleSend(qa.prompt)}
                             disabled={isLoading}
-                            className="px-2.5 py-1.5 rounded-xl border border-white/40 dark:border-white/15 bg-white/60 dark:bg-white/[0.08] hover:bg-white/90 dark:hover:bg-white/[0.18] text-[11px] font-semibold text-foreground/90 hover:text-foreground cursor-pointer transition-all active:scale-95 disabled:opacity-50 shadow-xs flex items-center gap-1.5"
+                            className="px-2.5 py-1.5 rounded-xl border border-white/45 dark:border-white/16 bg-white/75 dark:bg-white/[0.10] hover:bg-white/95 dark:hover:bg-white/[0.20] text-[11px] font-semibold text-foreground/90 hover:text-foreground cursor-pointer transition-all active:scale-95 disabled:opacity-50 shadow-xs flex items-center gap-1.5"
                           >
                             <span>{qa.label}</span>
                           </button>
@@ -820,7 +820,7 @@ export default function AiCoPilotModal({
                   {msg.pendingActions?.map(action => (
                     <div
                       key={action.actionId}
-                      className="w-full max-w-[92%] sm:max-w-[85%] p-4 glass-card space-y-3 animate-in fade-in duration-300"
+                      className="w-full max-w-[92%] sm:max-w-[85%] p-4 glass-card border border-white/50 dark:border-white/14 bg-white/60 dark:bg-white/[0.06] shadow-md space-y-3 animate-in fade-in duration-300"
                     >
                       <div className="flex items-center justify-between gap-2 border-b border-border/60 pb-2">
                         <div className="flex items-center gap-2">
@@ -879,7 +879,7 @@ export default function AiCoPilotModal({
 
               {/* Loading Indicator Bubble */}
               {isLoading && (
-                <div className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-white/55 dark:bg-white/[0.07] backdrop-blur-xl border border-white/45 dark:border-white/12 shadow-[inset_0_1px_1px_0_rgba(255,255,255,0.40)] text-xs text-muted-foreground w-fit animate-pulse">
+                <div className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-white/80 dark:bg-white/[0.10] backdrop-blur-xl border border-white/60 dark:border-white/16 shadow-[inset_0_1px_1px_0_rgba(255,255,255,0.40)] text-xs text-foreground font-medium w-fit animate-pulse">
                   <Icon name="auto_awesome" size={16} className="text-foreground animate-spin" />
                   <span>Kormiis AI is thinking and preparing actions...</span>
                 </div>
@@ -903,7 +903,7 @@ export default function AiCoPilotModal({
             )}
 
             {/* INPUT & ATTACHMENT DOCK */}
-            <div className="p-2.5 sm:p-3 pb-22 sm:pb-3 border-t border-border/60 dark:border-white/10 bg-white/30 dark:bg-white/[0.04] shrink-0 space-y-2">
+            <div className="p-2.5 sm:p-3 pb-22 sm:pb-3 border-t border-border/70 dark:border-white/12 bg-white/45 dark:bg-white/[0.05] backdrop-blur-xl shrink-0 space-y-2">
               {/* File Attachment Chip */}
               {attachedFile && (
                 <div className="flex items-center justify-between p-1.5 px-2.5 rounded-xl bg-foreground/10 border border-foreground/20 text-xs text-foreground">
@@ -969,7 +969,7 @@ export default function AiCoPilotModal({
                   value={input}
                   onChange={e => setInput(e.target.value)}
                   disabled={isLoading}
-                  className="flex-1 h-11 px-4 rounded-2xl border border-black/15 dark:border-white/14 bg-white/85 dark:bg-white/[0.07] text-xs sm:text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)] placeholder:text-muted-foreground"
+                  className="flex-1 h-11 px-4 rounded-2xl border border-black/15 dark:border-white/16 bg-white/90 dark:bg-white/[0.10] text-xs sm:text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)] placeholder:text-muted-foreground"
                 />
 
                 {/* Send Button (MonoGlass Liquid Glass Button) */}
@@ -994,8 +994,15 @@ export default function AiCoPilotModal({
   }
 
   return (
-    <div className="fixed inset-0 z-[60] pointer-events-none flex flex-col justify-end sm:items-center sm:justify-start sm:pt-[76px] md:pt-[84px] sm:px-4 md:px-6 bg-transparent animate-in fade-in duration-200">
-      {modalInner}
-    </div>
+    <>
+      <div 
+        className="fixed inset-0 z-[59] bg-black/25 dark:bg-black/55 backdrop-blur-xs transition-opacity duration-300 pointer-events-auto animate-in fade-in duration-200"
+        onClick={onClose}
+        aria-hidden="true"
+      />
+      <div className="fixed inset-0 z-[60] pointer-events-none flex flex-col justify-end sm:items-center sm:justify-start sm:pt-[76px] md:pt-[84px] sm:px-4 md:px-6 bg-transparent animate-in fade-in duration-200">
+        {modalInner}
+      </div>
+    </>
   )
 }
