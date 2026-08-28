@@ -194,21 +194,22 @@ export default function Topbar({
   }, [])
 
   const topbarRef = useRef(null)
-
-  const closePanels = useCallback(() => {
-    if (isAiOpen && onOpenAi) onOpenAi()
-    if (showNotifications) setShowNotifications(false)
-  }, [isAiOpen, onOpenAi, showNotifications, setShowNotifications])
+  const isAiOpenRef = useRef(isAiOpen)
+  const showNotifRef = useRef(showNotifications)
+  isAiOpenRef.current = isAiOpen
+  showNotifRef.current = showNotifications
 
   useEffect(() => {
     if (!isAiOpen && !showNotifications) return
     const handleOutside = (e) => {
-      if (topbarRef.current && !topbarRef.current.contains(e.target)) {
-        closePanels()
-      }
+      if (topbarRef.current && topbarRef.current.contains(e.target)) return
+      if (isAiOpenRef.current && onOpenAi) onOpenAi()
+      if (showNotifRef.current) setShowNotifications(false)
     }
     const handleEscape = (e) => {
-      if (e.key === 'Escape') closePanels()
+      if (e.key !== 'Escape') return
+      if (isAiOpenRef.current && onOpenAi) onOpenAi()
+      if (showNotifRef.current) setShowNotifications(false)
     }
     document.addEventListener('mousedown', handleOutside)
     document.addEventListener('touchstart', handleOutside, { passive: true })
@@ -218,7 +219,7 @@ export default function Topbar({
       document.removeEventListener('touchstart', handleOutside)
       window.removeEventListener('keydown', handleEscape)
     }
-  }, [isAiOpen, showNotifications, closePanels])
+  }, [isAiOpen, showNotifications])
 
   const renderDataIntegrityCard = () => {
     if (!hasIntegrityIssues) return null
@@ -407,7 +408,7 @@ export default function Topbar({
             {/* AI Co-Pilot Trigger Button (Visible on Tablet/iPad & Desktop) */}
             {onOpenAi && (
               <button
-                onClick={() => { if (showNotifications) setShowNotifications(false); onOpenAi(); }}
+                onClick={onOpenAi}
                 title="Kormiis AI Co-Pilot"
                 aria-label="Toggle Kormiis AI"
                 className={`rounded-full size-9 sm:size-9 text-foreground apple-glass-btn shrink-0 flex items-center justify-center cursor-pointer active:scale-95 transition-all ${

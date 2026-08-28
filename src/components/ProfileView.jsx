@@ -985,7 +985,7 @@ export default function ProfileView({
 
       {/* Account Deletion Confirmation Modal */}
       <Dialog open={deleteModalOpen} onOpenChange={setDeleteModalOpen}>
-        <DialogContent className="sm:max-w-[480px]">
+        <DialogContent className="sm:max-w-[480px] glass-kormiis-modal">
           <DialogHeader className="pb-3 border-b border-border/80 dark:border-white/12 space-y-0">
             <div className="flex items-center gap-2.5">
               <div className={`size-9 rounded-2xl flex items-center justify-center shrink-0 shadow-inner ${
