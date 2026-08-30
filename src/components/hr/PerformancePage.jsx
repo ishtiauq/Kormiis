@@ -125,8 +125,8 @@ export default function PerformancePage({ adminUid, currentUser, addToast, defau
   const topPerformers = scores.length ? [...scores].sort((a, b) => (b.totalScore || b.score || 0) - (a.totalScore || a.score || 0)).slice(0, 3) : []
 
   const performanceTabs = [
-    { id: 'performance', label: 'Performance & Appraisals', icon: <Icon name="insights" size={15}/> },
-    { id: 'wellbeing', label: 'Team Well-being', icon: <Icon name="favorite" size={15}/> },
+    { id: 'performance', label: 'Performance', icon: <Icon name="insights" size={15}/> },
+    { id: 'wellbeing', label: 'Well-being', icon: <Icon name="favorite" size={15}/> },
   ]
 
   return (

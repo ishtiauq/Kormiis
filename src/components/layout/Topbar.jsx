@@ -205,7 +205,7 @@ export default function Topbar({
     if (!isAiOpen && !showNotifications) return
     const handleOutside = (e) => {
       if (topbarRef.current && topbarRef.current.contains(e.target)) return
-      if (e.target.closest('[data-ai-fab]') || e.target.closest('[data-ai-panel]')) return
+      if (e.target.closest('[data-ai-fab]') || e.target.closest('[data-ai-panel]') || e.target.closest('.bottom-bar')) return
       if (isAiOpenRef.current && onOpenAi) onOpenAi()
       if (showNotifRef.current) setShowNotifications(false)
     }
@@ -452,8 +452,8 @@ export default function Topbar({
             </button>
           )}
 
-          {/* Notifications Trigger (Containerless) */}
-          <div className="relative flex items-center justify-center">
+          {/* Notifications Trigger (Containerless - Desktop only, shown in bottom bar on mobile/tablet) */}
+          <div className="relative hidden lg:flex items-center justify-center">
             <button
               ref={buttonRef}
               onClick={() => { 

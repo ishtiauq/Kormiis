@@ -386,7 +386,7 @@ export default function EmployeePortal({
         <div className="w-full max-w-[1920px] flex flex-col relative">
           
           {/* Sticky Header Wrapper */}
-          <div className={`sticky top-0 z-40 w-full sm:pt-4 md:pt-5 pb-1.5 sm:pb-2.5 md:pb-3 px-1 sm:px-2 md:px-2 pointer-events-none transition-transform duration-300 ease-in-out ${isMobile && isScrollingDown && !showMobileMenu ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
+          <div className={`sticky top-0 z-40 w-full sm:pt-4 md:pt-5 pb-1.5 sm:pb-2.5 md:pb-3 px-1 sm:px-2 md:px-2 pointer-events-none transition-transform duration-300 ease-in-out ${isMobile && isScrollingDown && !showMobileMenu && !showNotifications ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
             <Topbar
                 isDarkMode={resolvedIsDark}
                 toggleSidebar={() => setShowMobileMenu(prev => !prev)}
@@ -492,14 +492,19 @@ export default function EmployeePortal({
 
       {/* Bottom Tab Bar (Mobile) — Floating Pill */}
       {isMobile && (
-        <div className={`fixed bottom-0 left-0 right-0 z-40 flex justify-center pointer-events-none px-4 pb-3.5 sm:pb-4 transition-all duration-300 ${isScrollingDown && !showMobileMenu ? 'translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
-          <nav className="bottom-bar bottom-bar-pill pointer-events-auto w-auto max-w-[185px] flex items-center justify-center gap-1.5 px-2.5 h-13.5 transition-all duration-300 rounded-full glass-kormiis text-foreground border border-white/30 dark:border-white/14 shadow-2xl backdrop-blur-3xl" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
+        <div className={`fixed bottom-0 left-0 right-0 z-40 flex justify-center pointer-events-none px-4 pb-3.5 sm:pb-4 transition-all duration-300 ${isScrollingDown && !showMobileMenu && !showNotifications ? 'translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
+          <nav className="bottom-bar bottom-bar-pill pointer-events-auto w-auto max-w-[240px] flex items-center justify-center gap-1.5 px-2.5 h-13.5 transition-all duration-300 rounded-full glass-kormiis text-foreground border border-white/30 dark:border-white/14 shadow-2xl backdrop-blur-3xl" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
             <MobileTabButton
-              active={activeTab === 'dashboard'}
+              active={activeTab === 'dashboard' && !showMobileMenu && !showNotifications && !showAiModal}
               label="Dashboard"
-              onClick={() => { setActiveTab('dashboard'); setShowMobileMenu(false) }}
+              onClick={() => { 
+                setActiveTab('dashboard')
+                setShowMobileMenu(false)
+                setShowNotifications(false)
+                setShowAiModal(false)
+              }}
             >
-              <Icon name="dashboard" size={24}/>
+              <Icon name="home" size={24}/>
             </MobileTabButton>
             <MobileTabButton
               active={showAiModal}
@@ -512,17 +517,46 @@ export default function EmployeePortal({
                   return next
                 })
                 setShowMobileMenu(false)
+                setShowNotifications(false)
               }}
             >
               <AiQuantumGlyph size={24} className="transition-transform duration-300" />
             </MobileTabButton>
             <MobileTabButton
-              active={showMobileMenu}
-              label={showMobileMenu ? "Close Menu" : "Menu"}
-              onClick={() => setShowMobileMenu(!showMobileMenu)}
+              active={showNotifications}
+              label="Notifications"
+              onClick={() => {
+                if (showAiModal) setShowAiModal(false)
+                setShowMobileMenu(false)
+                setShowNotifications(prev => !prev)
+                if (markNotificationsRead) markNotificationsRead()
+              }}
+              badge={
+                (notifications ? notifications.filter(n => !n.read).length : 0) > 0 ? (
+                  <span className="absolute top-2.5 right-2.5 flex size-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
+                    <span className="relative inline-flex rounded-full size-2 bg-destructive"></span>
+                  </span>
+                ) : null
+              }
             >
               <Icon 
-                name={showMobileMenu ? "close" : "menu"} 
+                name={(notifications ? notifications.filter(n => !n.read).length : 0) > 0 ? "notifications_active" : "notifications"} 
+                size={24}
+                className={`transition-transform duration-300 ${showNotifications ? 'text-primary scale-105' : ''}`}
+              />
+            </MobileTabButton>
+            <MobileTabButton
+              active={showMobileMenu}
+              label={showMobileMenu ? "Close Menu" : "Modules"}
+              onClick={() => {
+                setShowMobileMenu(!showMobileMenu)
+                setShowNotifications(false)
+                setShowAiModal(false)
+              }}
+            >
+              <Icon 
+                name={showMobileMenu ? "close" : "grid_view"} 
                 size={24}
                 className={`transition-transform duration-300 ${showMobileMenu ? 'rotate-90 text-primary' : 'rotate-0'}`}
               />
