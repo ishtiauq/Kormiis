@@ -641,7 +641,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
           initial={{ opacity: 0, y: -24, filter: 'blur(8px)' }}
           animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
           transition={{ duration: 0.85, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-          className="pointer-events-auto max-w-6xl mx-auto h-14 sm:h-15 md:h-16 px-4 sm:px-6 flex items-center justify-between landing-glass-header text-white transition-all duration-300"
+          className="pointer-events-auto max-w-6xl mx-auto h-14 sm:h-15 md:h-16 px-4 sm:px-6 flex items-center justify-between glass-kormiis rounded-full text-white transition-all duration-300"
         >
           {/* Brand Logo */}
           <a href="#" className="flex items-center gap-2 shrink-0 outline-none select-none">
@@ -692,7 +692,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
         animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
         transition={{ duration: 0.85, delay: 0.25, type: 'spring', damping: 20, stiffness: 260 }}
         style={{ left: '50%', x: '-50%' }}
-        className="sm:hidden fixed bottom-4 z-40 pointer-events-auto w-max max-w-[calc(100vw-1.5rem)] landing-glass-bottom-bar h-12 px-2.5 flex items-center gap-1.5 rounded-full text-white transition-all duration-300"
+        className="sm:hidden fixed bottom-4 z-40 pointer-events-auto w-max max-w-[calc(100vw-1.5rem)] glass-kormiis h-12 px-2.5 flex items-center gap-1.5 rounded-full text-white transition-all duration-300"
       >
         <nav className="flex items-center gap-1.5 w-full">
           {/* Install App Button */}
@@ -925,29 +925,42 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
         onOpenLegal={(type) => setLegalModal(type)}
       />
 
-      {/* Authentication & Workspace Access Dialog Modal */}
+      {/* Authentication & Workspace Access Dialog Modal (True MonoGlass Standard) */}
       <Dialog open={authModalOpen} onOpenChange={setAuthModalOpen}>
-        <DialogContent className="max-w-md w-full force-dark-mode glass-kormiis rounded-[28px] p-5 sm:p-7 md:p-8 shadow-2xl text-white">
+        <DialogContent 
+          overlayClassName="bg-transparent"
+          className="relative max-w-md w-full dark force-dark-mode glass-kormiis rounded-[28px] p-6 sm:p-8 text-white"
+        >
           <DialogHeader className="sr-only">
             <DialogTitle>Workspace Access</DialogTitle>
             <DialogDescription>Sign in or create a business space for your squad.</DialogDescription>
           </DialogHeader>
 
+          {/* Top Right Tactile MonoGlass Close Button */}
+          <button
+            type="button"
+            onClick={() => setAuthModalOpen(false)}
+            className="absolute top-4 sm:top-5 right-4 sm:right-5 size-8 sm:size-9 rounded-full bg-white/[0.08] hover:bg-white/[0.16] border border-white/12 text-white/70 hover:text-white flex items-center justify-center active:scale-90 transition-all cursor-pointer z-20 outline-none"
+            aria-label="Close modal"
+          >
+            <Icon name="close" size={18} />
+          </button>
+
           {/* Card Brand Header */}
           <div className="flex flex-col items-center justify-center gap-1.5 mb-5 text-center">
-            <img src={kormiisWhiteLogo} alt="Kormiis" className="h-7 sm:h-8 object-contain drop-shadow-md" />
-            <p className="text-xs text-white/70 font-medium">
+            <img src={kormiisWhiteLogo} alt="Kormiis" className="h-7 sm:h-8 object-contain select-none" />
+            <p className="text-xs text-white/70 font-medium leading-relaxed">
               Free for your whole squad. No credit card required.
             </p>
           </div>
 
-          {/* Segmented Tab Switcher */}
-          <div className="flex items-center p-1 rounded-full bg-white/[0.08] border border-white/12 mb-5 backdrop-blur-md">
+          {/* MonoGlass Segmented Tab Switcher */}
+          <div className="flex items-center p-1 rounded-full bg-white/[0.06] border border-white/12 mb-5 backdrop-blur-md">
             <button
               type="button"
               onClick={() => switchAuthTab('in')}
-              className={`flex-1 rounded-full py-2 text-xs font-bold transition-all cursor-pointer ${
-                authTab === 'in' ? 'bg-white/20 text-white shadow-sm border border-white/20' : 'text-white/70 hover:text-white'
+              className={`flex-1 rounded-full py-2.5 text-xs font-bold transition-all cursor-pointer ${
+                authTab === 'in' ? 'bg-white/20 text-white border border-white/20 shadow-none' : 'text-white/70 hover:text-white hover:bg-white/[0.04]'
               }`}
             >
               Sign in
@@ -955,8 +968,8 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
             <button
               type="button"
               onClick={() => switchAuthTab('up')}
-              className={`flex-1 rounded-full py-2 text-xs font-bold transition-all cursor-pointer ${
-                authTab === 'up' ? 'bg-white/20 text-white shadow-sm border border-white/20' : 'text-white/70 hover:text-white'
+              className={`flex-1 rounded-full py-2.5 text-xs font-bold transition-all cursor-pointer ${
+                authTab === 'up' ? 'bg-white/20 text-white border border-white/20 shadow-none' : 'text-white/70 hover:text-white hover:bg-white/[0.04]'
               }`}
             >
               Sign up
@@ -969,14 +982,14 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
               <motion.div 
                 initial={{ opacity: 0, y: -6 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="p-3 text-xs font-medium bg-destructive/15 border border-destructive/30 text-destructive rounded-xl flex items-start gap-2"
+                className="p-3 text-xs font-medium bg-destructive/15 border border-destructive/30 text-destructive rounded-2xl flex items-start gap-2"
               >
                 <Icon name="warning" size={16} className="text-destructive shrink-0 mt-0.5" />
                 <span className="leading-snug">{error}</span>
               </motion.div>
             )}
 
-{loginMode === 'create' && pendingUser ? (
+            {loginMode === 'create' && pendingUser ? (
               <form onSubmit={handleCreateBusinessSpace} className="flex flex-col gap-3">
                 <div>
                   <label htmlFor="space-name" className="block text-xs font-bold text-white mb-1.5">
@@ -989,7 +1002,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                       value={spaceName}
                       onChange={(e) => setSpaceName(e.target.value)}
                       placeholder="e.g. Acme Studio"
-                      className="h-11 rounded-xl text-xs sm:text-sm !pl-10.5 bg-black/40 border-white/20 text-white placeholder:text-white/45 focus:border-primary focus:bg-black/60 transition-colors backdrop-blur-sm shadow-inner"
+                      className="h-11 rounded-2xl text-xs sm:text-sm !pl-11 bg-white/[0.07] border border-white/[0.14] text-white placeholder:text-white/40 focus:border-white/30 focus:bg-white/[0.10] shadow-[inset_0_1px_1.5px_rgba(0,0,0,0.3)] transition-all duration-200"
                       autoFocus
                     />
                   </div>
@@ -1000,7 +1013,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full py-3 bg-primary text-primary-foreground rounded-full text-xs font-bold shadow-sm hover:opacity-90 active:scale-[0.99] transition disabled:opacity-50 mt-1 flex items-center justify-center gap-2 cursor-pointer"
+                  className="h-11 sm:h-12 w-full bg-primary text-primary-foreground rounded-full text-xs sm:text-sm font-bold shadow-none hover:brightness-105 active:scale-[0.97] transition-all duration-200 mt-1 flex items-center justify-center gap-2 cursor-pointer border-none"
                 >
                   {isLoading ? (
                     <>
@@ -1030,7 +1043,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                       placeholder={isPhoneInput ? "Phone number (e.g. 017...)" : "Work Email or Phone"}
                       value={emailOrPhone}
                       onChange={(e) => setEmailOrPhone(e.target.value)}
-                      className="h-11 rounded-xl text-xs sm:text-sm !pl-10.5 !pr-16 bg-black/40 border-white/20 text-white placeholder:text-white/45 focus:border-primary focus:bg-black/60 transition-colors backdrop-blur-sm shadow-inner"
+                      className="h-11 rounded-2xl text-xs sm:text-sm !pl-11 !pr-16 bg-white/[0.07] border border-white/[0.14] text-white placeholder:text-white/40 focus:border-white/30 focus:bg-white/[0.10] shadow-[inset_0_1px_1.5px_rgba(0,0,0,0.3)] transition-all duration-200"
                       autoFocus
                     />
                     {emailOrPhone.trim() && (
@@ -1046,7 +1059,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                       placeholder="Password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="h-11 rounded-xl text-xs sm:text-sm !pl-10.5 !pr-10.5 bg-black/40 border-white/20 text-white placeholder:text-white/45 focus:border-primary focus:bg-black/60 transition-colors backdrop-blur-sm shadow-inner"
+                      className="h-11 rounded-2xl text-xs sm:text-sm !pl-11 !pr-11 bg-white/[0.07] border border-white/[0.14] text-white placeholder:text-white/40 focus:border-white/30 focus:bg-white/[0.10] shadow-[inset_0_1px_1.5px_rgba(0,0,0,0.3)] transition-all duration-200"
                     />
                     <button
                       type="button"
@@ -1080,7 +1093,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full py-3 bg-primary rounded-full text-xs sm:text-sm font-bold text-primary-foreground hover:opacity-90 active:scale-[0.99] transition disabled:opacity-50 shadow-sm mt-1 flex items-center justify-center gap-2 cursor-pointer"
+                    className="h-11 sm:h-12 w-full bg-primary rounded-full text-xs sm:text-sm font-bold text-primary-foreground hover:brightness-105 active:scale-[0.97] transition-all duration-200 disabled:opacity-50 shadow-none mt-1 flex items-center justify-center gap-2 cursor-pointer border-none"
                   >
                     {isLoading && loadingMode === 'join' ? (
                       <>
@@ -1103,7 +1116,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                   type="button"
                   onClick={() => handleFirebaseGoogleLogin('join')}
                   disabled={isLoading}
-                  className="w-full flex items-center justify-center gap-2.5 py-2.5 bg-white/[0.08] hover:bg-white/[0.14] border border-white/12 rounded-full text-xs sm:text-sm font-bold text-white active:scale-[0.99] transition disabled:opacity-50 shadow-sm cursor-pointer backdrop-blur-md"
+                  className="h-11 sm:h-12 w-full flex items-center justify-center gap-2.5 bg-white/[0.07] hover:bg-white/[0.12] border border-white/[0.14] rounded-full text-xs sm:text-sm font-bold text-white active:scale-[0.97] transition-all duration-200 disabled:opacity-50 shadow-none cursor-pointer backdrop-blur-md"
                   title="Choose your Google Account"
                 >
                   <svg width="18" height="18" viewBox="0 0 48 48" className="shrink-0"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59a14.5 14.5 0 0 1 0-9.18l-7.98-6.19a24.01 24.01 0 0 0 0 21.56l7.98-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
@@ -1120,7 +1133,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                       placeholder={isPhoneInput ? "Mobile number" : "Work Email or Phone"}
                       value={emailOrPhone}
                       onChange={(e) => setEmailOrPhone(e.target.value)}
-                      className="h-11 rounded-xl text-xs sm:text-sm !pl-10.5 !pr-16 bg-black/40 border-white/20 text-white placeholder:text-white/45 focus:border-primary focus:bg-black/60 transition-colors backdrop-blur-sm shadow-inner"
+                      className="h-11 rounded-2xl text-xs sm:text-sm !pl-11 !pr-16 bg-white/[0.07] border border-white/[0.14] text-white placeholder:text-white/40 focus:border-white/30 focus:bg-white/[0.10] shadow-[inset_0_1px_1.5px_rgba(0,0,0,0.3)] transition-all duration-200"
                       autoFocus
                     />
                     {emailOrPhone.trim() && (
@@ -1136,7 +1149,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                       placeholder="Create Password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="h-11 rounded-xl text-xs sm:text-sm !pl-10.5 !pr-10.5 bg-black/40 border-white/20 text-white placeholder:text-white/45 focus:border-primary focus:bg-black/60 transition-colors backdrop-blur-sm shadow-inner"
+                      className="h-11 rounded-2xl text-xs sm:text-sm !pl-11 !pr-11 bg-white/[0.07] border border-white/[0.14] text-white placeholder:text-white/40 focus:border-white/30 focus:bg-white/[0.10] shadow-[inset_0_1px_1.5px_rgba(0,0,0,0.3)] transition-all duration-200"
                     />
                     <button
                       type="button"
@@ -1154,7 +1167,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                       placeholder="Company / Business Name"
                       value={spaceName}
                       onChange={(e) => setSpaceName(e.target.value)}
-                      className="h-11 rounded-xl text-xs sm:text-sm !pl-10.5 bg-black/40 border-white/20 text-white placeholder:text-white/45 focus:border-primary focus:bg-black/60 transition-colors backdrop-blur-sm shadow-inner"
+                      className="h-11 rounded-2xl text-xs sm:text-sm !pl-11 bg-white/[0.07] border border-white/[0.14] text-white placeholder:text-white/40 focus:border-white/30 focus:bg-white/[0.10] shadow-[inset_0_1px_1.5px_rgba(0,0,0,0.3)] transition-all duration-200"
                     />
                   </div>
 
@@ -1180,7 +1193,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full py-3 bg-primary rounded-full text-xs sm:text-sm font-bold text-primary-foreground hover:opacity-90 active:scale-[0.99] transition disabled:opacity-50 shadow-sm mt-1 flex items-center justify-center gap-2 cursor-pointer"
+                    className="h-11 sm:h-12 w-full bg-primary rounded-full text-xs sm:text-sm font-bold text-primary-foreground hover:brightness-105 active:scale-[0.97] transition-all duration-200 disabled:opacity-50 shadow-none mt-1 flex items-center justify-center gap-2 cursor-pointer border-none"
                   >
                     {isLoading && loadingMode === 'create' ? (
                       <>
@@ -1203,7 +1216,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                   type="button"
                   onClick={() => handleFirebaseGoogleLogin('create')}
                   disabled={isLoading}
-                  className="w-full flex items-center justify-center gap-2.5 py-2.5 bg-white/[0.08] hover:bg-white/[0.14] border border-white/12 rounded-full text-xs sm:text-sm font-bold text-white active:scale-[0.99] transition disabled:opacity-50 shadow-sm cursor-pointer backdrop-blur-md"
+                  className="h-11 sm:h-12 w-full flex items-center justify-center gap-2.5 bg-white/[0.07] hover:bg-white/[0.12] border border-white/[0.14] rounded-full text-xs sm:text-sm font-bold text-white active:scale-[0.97] transition-all duration-200 disabled:opacity-50 shadow-none cursor-pointer backdrop-blur-md"
                   title="Choose your Google Account"
                 >
                   <svg width="18" height="18" viewBox="0 0 48 48" className="shrink-0"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59a14.5 14.5 0 0 1 0-9.18l-7.98-6.19a24.01 24.01 0 0 0 0 21.56l7.98-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
@@ -1214,7 +1227,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
           </div>
 
           <div className="mt-4 pt-3 border-t border-white/10 text-center">
-            <p className="text-[11px] text-[#bbbbbb] leading-relaxed">
+            <p className="text-[11px] text-white/60 leading-relaxed">
               By continuing, you agree to our{' '}
               <button 
                 type="button" 
@@ -1242,19 +1255,22 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
 
       {/* Already in a Business Space Popup */}
       <Dialog open={showAlreadyInSpace} onOpenChange={(open) => { if (!open) setShowAlreadyInSpace(false) }}>
-        <DialogContent className="max-w-[420px] force-dark-mode rounded-2xl bg-[#09090b] border-white/10 text-white">
+        <DialogContent 
+          overlayClassName="bg-transparent"
+          className="max-w-[420px] dark force-dark-mode glass-kormiis rounded-[28px] p-6 text-white"
+        >
           <DialogHeader>
             <DialogTitle className="text-base font-bold text-white">Already Part of a Business Space</DialogTitle>
             <DialogDescription className="text-xs text-[#bbbbbb]">
               This account is already linked to a Business Space. Sign in to enter your workspace.
             </DialogDescription>
           </DialogHeader>
-          <div className="p-3 rounded-xl bg-[#141416] border border-white/10 text-xs text-[#bbbbbb] flex items-start gap-2">
+          <div className="p-3 rounded-xl bg-white/[0.06] border border-white/10 text-xs text-white/70 flex items-start gap-2">
             <Icon name="info" className="shrink-0 mt-0.5 text-primary" size={16} />
             <span>You can only belong to one workspace at a time.</span>
           </div>
           <DialogFooter className="gap-2">
-            <Button variant="outline" className="rounded-full text-xs border-white/10 text-white hover:bg-[#141416]" onClick={() => setShowAlreadyInSpace(false)}>
+            <Button variant="outline" className="rounded-full text-xs border-white/10 text-white hover:bg-white/[0.08]" onClick={() => setShowAlreadyInSpace(false)}>
               Cancel
             </Button>
             <Button className="rounded-full text-xs bg-primary text-white hover:opacity-90" onClick={useJoinFromPopup}>
@@ -1266,7 +1282,10 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
 
       {/* Legal & Policies Dialog Modal */}
       <Dialog open={!!legalModal} onOpenChange={(open) => { if (!open) setLegalModal(null) }}>
-        <DialogContent className="max-w-[540px] force-dark-mode rounded-2xl bg-[#09090b] border-white/10 text-white max-h-[85vh] overflow-y-auto">
+        <DialogContent 
+          overlayClassName="bg-transparent"
+          className="max-w-[540px] dark force-dark-mode glass-kormiis rounded-[28px] p-6 sm:p-8 text-white max-h-[85vh] overflow-y-auto"
+        >
           <DialogHeader>
             <DialogTitle className="text-base sm:text-lg font-bold text-white">
               {legalModal === 'privacy' ? 'Privacy Policy' : 'Terms of Service'}

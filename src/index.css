@@ -156,16 +156,22 @@ html.dark,
 .force-dark-mode {
   --background: #090a0f !important;
   --foreground: #ffffff !important;
-  --card: rgba(18, 18, 26, 0.48) !important;
+  --card: rgba(18, 18, 26, 0.40) !important;
   --card-foreground: #ffffff !important;
-  --popover: rgba(18, 18, 26, 0.60) !important;
+  --popover: rgba(18, 18, 26, 0.55) !important;
   --popover-foreground: #ffffff !important;
-  --muted: rgba(28, 28, 40, 0.45) !important;
-  --muted-foreground: #bbbbbb !important;
+  --muted: rgba(28, 28, 40, 0.40) !important;
+  --muted-foreground: #a1a1aa !important;
   --border: rgba(255, 255, 255, 0.09) !important;
   --input: rgba(255, 255, 255, 0.07) !important;
-  background-color: #090a0f !important;
-  background-image: none !important;
+  --glass-bg: linear-gradient(135deg, rgba(28, 28, 40, 0.42) 0%, rgba(14, 14, 22, 0.30) 100%) !important;
+  --glass-border: rgba(255, 255, 255, 0.15) !important;
+  --glass-border-color: rgba(255, 255, 255, 0.15) !important;
+  --glass-btn-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.03) 100%) !important;
+  --glass-btn-border: rgba(255, 255, 255, 0.10) !important;
+  --glass-btn-color: #ffffff !important;
+  color-scheme: dark !important;
+  color: #ffffff !important;
 }
 
 .force-light-mode {
