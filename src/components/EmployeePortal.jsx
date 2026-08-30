@@ -386,7 +386,7 @@ export default function EmployeePortal({
         <div className="w-full max-w-[1920px] flex flex-col relative">
           
           {/* Sticky Header Wrapper */}
-          <div className={`sticky top-0 z-40 w-full sm:pt-4 md:pt-5 pb-0 sm:pb-1 px-1 sm:px-2 md:px-2 pointer-events-none transition-transform duration-300 ease-in-out ${isMobile && isScrollingDown && !showMobileMenu ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
+          <div className={`sticky top-0 z-40 w-full sm:pt-4 md:pt-5 pb-1.5 sm:pb-2.5 md:pb-3 px-1 sm:px-2 md:px-2 pointer-events-none transition-transform duration-300 ease-in-out ${isMobile && isScrollingDown && !showMobileMenu ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
             <Topbar
                 isDarkMode={resolvedIsDark}
                 toggleSidebar={() => setShowMobileMenu(prev => !prev)}
@@ -420,8 +420,8 @@ export default function EmployeePortal({
                 }}
                 isAiOpen={showAiModal}
                 employees={employees}
-                setEmployees={setEmployees}
-                payroll={payroll}
+                setEmployees={null}
+                payroll={null}
                 setPayroll={null}
                 attendance={attendance}
                 setAttendance={setAttendance}
@@ -437,7 +437,7 @@ export default function EmployeePortal({
             />
           </div>
 
-          <div className="w-full flex-1 px-1 sm:px-2 md:px-2 pt-0.5 sm:pt-1 md:pt-1.5">
+          <div className="w-full flex-1 px-1 sm:px-2 md:px-2 pt-2.5 sm:pt-4 md:pt-5 lg:pt-6">
             {renderContent()}
           </div>
         </div>
