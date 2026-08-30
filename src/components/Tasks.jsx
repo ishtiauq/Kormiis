@@ -7,8 +7,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog"
 import { Select, SelectItem } from "@/components/ui/select"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import Notes from './Notes.jsx'
 
-export default function Tasks({ tasks = [], setTasks, employees = [], currentUser, addToast, addLog, addNotification }) {
+export default function Tasks({ tasks = [], setTasks, employees = [], currentUser, addToast, addLog, addNotification, notes = [], setNotes, defaultTab = 'tasks' }) {
+  const [mainSectionTab, setMainSectionTab] = useState(defaultTab)
   const [activeStatusTab, setActiveStatusTab] = useState('To Do')
   const [search, setSearch] = useState('')
   const [showTaskModal, setShowTaskModal] = useState(false)
@@ -199,10 +201,37 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
 
   const canEditDetails = currentUser?.role !== 'Teammate' || !editingTask || editingTask.createdBy === currentUser?.id;
 
+  const taskMainTabs = [
+    { id: 'tasks', label: 'Tasks & To-Dos', icon: <Icon name="check_box" size={15}/> },
+    { id: 'notes', label: 'Quick Notes', icon: <Icon name="sticky_note_2" size={15}/> },
+  ]
+
   return (
-    <div className="w-full flex flex-col gap-6 animate-fade-in p-2 sm:p-4">
-      
-      <div className="flex flex-wrap gap-4 mb-4 items-center w-full justify-between">
+    <div className="w-full flex flex-col gap-6 animate-fade-in p-2 sm:p-4 pb-10">
+      {/* Sub-navigation Switcher */}
+      <div className="bg-card p-2 rounded-xl border border-border/50 shadow-sm w-full max-w-full">
+        <div role="tablist" aria-label="Tasks sections" className="menu-bar">
+          {taskMainTabs.map(t => (
+            <Button
+              key={t.id}
+              role="tab"
+              aria-selected={mainSectionTab === t.id}
+              variant={mainSectionTab === t.id ? 'default' : 'ghost'}
+              size="sm"
+              className={`rounded-full px-4 justify-center ${mainSectionTab !== t.id ? 'text-muted-foreground hover:bg-muted hover:text-foreground' : ''}`}
+              onClick={() => setMainSectionTab(t.id)}
+            >
+              {t.icon} {t.label}
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      {mainSectionTab === 'notes' ? (
+        <Notes notes={notes} setNotes={setNotes} currentUser={currentUser} addToast={addToast} />
+      ) : (
+        <>
+          <div className="flex flex-wrap gap-4 mb-4 items-center w-full justify-between">
         <div className="relative flex-1 min-w-[250px] lg:max-w-md w-full flex items-center">
           <Icon name="search" className="absolute left-3.5 text-muted-foreground z-10 pointer-events-none" size={18}/>
           <Input 
@@ -657,6 +686,8 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
       >
         <Icon name="add" size={24}/>
       </Button>
+        </>
+      )}
     </div>
   )
 }

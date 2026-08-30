@@ -9,6 +9,7 @@ import { Select, SelectItem } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import AdSlot from './AdSlot'
+import Calendar from './Calendar.jsx'
 import { formatDateTime } from '../services/date.js'
 
 const HoverTooltip = ({ content, children, position = 'center' }) => {
@@ -23,7 +24,8 @@ const HoverTooltip = ({ content, children, position = 'center' }) => {
   )
 }
 
-export default function Announcements({ employees, announcements, setAnnouncements, addLog, addToast, currentUser, addNotification, headline = 'Announcements' }) {
+export default function Announcements({ employees, announcements, setAnnouncements, addLog, addToast, currentUser, addNotification, headline = 'Announcements', events = [], setEvents, defaultTab = 'announcements' }) {
+  const [activeHubTab, setActiveHubTab] = useState(defaultTab)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingPostId, setEditingPostId] = useState(null)
 
@@ -464,11 +466,47 @@ export default function Announcements({ employees, announcements, setAnnouncemen
     }
   }, [filterCategory, currentUser, announcements, setAnnouncements])
 
+  const companyHubTabs = [
+    { id: 'announcements', label: 'Announcements', icon: <Icon name="rss_feed" size={15}/> },
+    { id: 'calendar', label: 'Events Calendar', icon: <Icon name="calendar_month" size={15}/> },
+  ]
+
   return (
-    <div className="fade-in pb-10 max-w-5xl mx-auto">
-      <div className="flex items-center justify-end mb-4">
-        <div className="flex gap-3">
-          <Dialog open={isDialogOpen} onOpenChange={(open) => {
+    <div className="fade-in pb-10 max-w-5xl mx-auto flex flex-col gap-6">
+      {/* Sub-navigation Switcher */}
+      <div className="bg-card p-2 rounded-xl border border-border/50 shadow-sm w-full max-w-full">
+        <div role="tablist" aria-label="Company Hub sections" className="menu-bar">
+          {companyHubTabs.map(t => (
+            <Button
+              key={t.id}
+              role="tab"
+              aria-selected={activeHubTab === t.id}
+              variant={activeHubTab === t.id ? 'default' : 'ghost'}
+              size="sm"
+              className={`rounded-full px-4 justify-center ${activeHubTab !== t.id ? 'text-muted-foreground hover:bg-muted hover:text-foreground' : ''}`}
+              onClick={() => setActiveHubTab(t.id)}
+            >
+              {t.icon} {t.label}
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      {activeHubTab === 'calendar' ? (
+        <Calendar
+          events={events}
+          setEvents={setEvents}
+          employees={employees}
+          addLog={addLog}
+          addToast={addToast}
+          currentUser={currentUser}
+          addNotification={addNotification}
+        />
+      ) : (
+        <>
+          <div className="flex items-center justify-end mb-4">
+            <div className="flex gap-3">
+              <Dialog open={isDialogOpen} onOpenChange={(open) => {
             if (!open) handleCancelDialog()
             else setIsDialogOpen(true)
           }}>
@@ -941,6 +979,8 @@ export default function Announcements({ employees, announcements, setAnnouncemen
       </Dialog>
       <ConfirmDialog />
       <AdSlot />
+        </>
+      )}
     </div>
   )
 }

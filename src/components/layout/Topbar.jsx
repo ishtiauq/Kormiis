@@ -1,10 +1,10 @@
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import Icon from "@/components/ui/Icon.jsx"
 import { CATEGORY_META } from "../../services/pushNotifications.js"
 import { Button } from "@/components/ui/button"
 import kormiisLogo from '../../Assets/Kormiis Logo Final.svg'
 import kormiisWhiteLogo from '../../Assets/Kormiis white Logo.svg'
-
-import { useState, useEffect, useRef, useCallback } from 'react'
 import { Badge } from "@/components/ui/badge"
 import { getRelativeTime } from '../../services/date.js'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
@@ -53,7 +53,7 @@ export default function Topbar({
   visibleNavItems = [],
   currentView
 }) {
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024)
   const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true)
   const buttonRef = useRef(null)
   const [notificationTab, setNotificationTab] = useState('all')
@@ -189,7 +189,7 @@ export default function Topbar({
     let resizeTimer
     const handleResize = () => {
       clearTimeout(resizeTimer)
-      resizeTimer = setTimeout(() => setIsMobile(window.innerWidth < 768), 150)
+      resizeTimer = setTimeout(() => setIsMobile(window.innerWidth < 1024), 150)
     }
     window.addEventListener('resize', handleResize)
     return () => { clearTimeout(resizeTimer); window.removeEventListener('resize', handleResize) }
@@ -300,42 +300,86 @@ export default function Topbar({
     )
   }
 
-  // Render navigation dock helper (used inline on XL+ screens, and full-width on < XL screens)
-  const renderNavigationDock = (isFullWidthRow = false) => {
+  // Render navigation dock helper (Optimized micro-spacing to fit all icons at once with Apple fluid spring physics)
+  const renderNavigationDock = (isFullWidthRow = false, prefix = 'desktop') => {
     if (!visibleNavItems || visibleNavItems.length === 0) return null
     return (
-      <div className={`w-fit max-w-full h-[48px] sm:h-[54px] glass-kormiis rounded-2xl sm:rounded-full p-1 sm:p-1.5 flex items-center justify-center border border-black/8 dark:border-white/8 menu-bar-dock ${isFullWidthRow ? 'mx-auto' : ''}`}>
+      <div className={`w-fit max-w-full h-10.5 sm:h-11 md:h-11.5 glass-kormiis rounded-full p-1 flex items-center justify-center border border-black/8 dark:border-white/8 menu-bar-dock shadow-none ${isFullWidthRow ? 'mx-auto' : ''}`}>
         <nav 
           aria-label="Main page navigation" 
-          className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto no-scrollbar scrollbar-none select-none scroll-smooth h-full max-w-full menu-bar-dock"
+          className="flex items-center gap-0.5 sm:gap-1 md:gap-1.5 overflow-x-auto no-scrollbar scrollbar-none select-none scroll-smooth h-full max-w-full menu-bar-dock px-0.5"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
         >
           {visibleNavItems.filter(item => item.id !== 'profile' && item.id !== 'settings').map(item => {
             const isActive = currentView === item.id;
             return (
-              <button
+              <motion.button
                 key={item.id}
                 type="button"
+                layout
                 title={item.label}
                 aria-label={item.label}
                 onClick={() => {
                   if (setCurrentView) setCurrentView(item.id);
                 }}
-                className={`h-8.5 sm:h-9.5 rounded-xl sm:rounded-full flex items-center justify-center shrink-0 transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] cursor-pointer select-none active:scale-95 ${
+                whileTap={{ scale: 0.94 }}
+                whileHover={!isActive ? { scale: 1.05 } : undefined}
+                transition={{
+                  layout: { type: "spring", stiffness: 440, damping: 32, mass: 0.7 },
+                  scale: { duration: 0.15 }
+                }}
+                className={`relative h-8 sm:h-8.5 rounded-full flex items-center justify-center shrink-0 cursor-pointer select-none border-0 !border-none outline-none focus-visible:ring-2 focus-visible:ring-primary/40 transition-colors duration-150 ${
                   isActive
-                    ? 'nav-capsule-active px-3.5 sm:px-4 gap-1.5 sm:gap-2 font-bold'
-                    : 'w-8.5 sm:w-9.5 text-neutral-600 dark:text-neutral-300 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10 border border-transparent'
+                    ? 'nav-capsule-active px-3 sm:px-3.5 gap-1.5 font-bold z-10 !text-white'
+                    : 'w-8 sm:w-8.5 text-foreground/65 hover:text-foreground hover:bg-white/20 dark:hover:bg-white/8 bg-transparent p-0'
                 }`}
+                style={isActive ? { background: 'linear-gradient(135deg, #FE3501 0%, #e62f00 100%)', backgroundColor: '#FE3501', color: '#ffffff', border: 'none', outline: 'none' } : { background: 'transparent', border: 'none', boxShadow: 'none', outline: 'none' }}
               >
-                <span className={`shrink-0 flex items-center justify-center ${isActive ? 'scale-105' : 'opacity-80'}`}>
+                {/* Gliding morphing pill indicator (Brand Color) */}
+                {isActive && (
+                  <motion.div
+                    layoutId={`${prefix}-active-nav-pill`}
+                    className="absolute inset-0 rounded-full nav-capsule-active z-0 pointer-events-none !border-none"
+                    style={{ border: 'none', outline: 'none' }}
+                    transition={{
+                      type: "spring",
+                      stiffness: 450,
+                      damping: 32,
+                      mass: 0.75
+                    }}
+                  />
+                )}
+
+                {/* Icon */}
+                <span 
+                  className={`relative z-10 shrink-0 flex items-center justify-center transition-all duration-200 ${
+                    isActive ? '!text-white scale-105' : 'text-foreground/75'
+                  }`}
+                >
                   {item.icon}
                 </span>
-                {isActive && (
-                  <span className="text-xs sm:text-sm font-bold tracking-tight whitespace-nowrap animate-in fade-in zoom-in-95 duration-200">
-                    {item.label}
-                  </span>
-                )}
-              </button>
+
+                {/* Smooth spring expanding label */}
+                <AnimatePresence mode="popLayout" initial={false}>
+                  {isActive && (
+                    <motion.span
+                      key={`nav-label-${item.id}`}
+                      initial={{ opacity: 0, width: 0, filter: 'blur(3px)', x: -3 }}
+                      animate={{ opacity: 1, width: 'auto', filter: 'blur(0px)', x: 0 }}
+                      exit={{ opacity: 0, width: 0, filter: 'blur(3px)', x: -3 }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 440,
+                        damping: 30,
+                        mass: 0.65
+                      }}
+                      className="relative z-10 text-[12px] sm:text-xs md:text-sm font-semibold tracking-tight whitespace-nowrap overflow-hidden inline-block leading-none !text-white"
+                    >
+                      {item.label}
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </motion.button>
             );
           })}
         </nav>
@@ -387,7 +431,14 @@ export default function Topbar({
           )}
         </div>
 
-        {/* 2. Rightmost: Actions Group (Containerless Standalone Icons, Ultra-Compact gap-[1.6px]) */}
+        {/* 2. Center: Centered Menu Bar Dock (Desktop lg+ only; completely hidden on mobile & tablet) */}
+        {!isMobile && (
+          <div className="hidden lg:flex flex-1 items-center justify-center min-w-0 px-2 sm:px-3 md:px-4">
+            {renderNavigationDock(false, 'desktop')}
+          </div>
+        )}
+
+        {/* 3. Rightmost: Actions Group (Containerless Standalone Icons, Ultra-Compact gap-[1.6px]) */}
         <div className="flex items-center gap-[1.6px] shrink-0 h-[48px] sm:h-[54px]">
           {showThemeToggle && (
             <button
@@ -426,12 +477,12 @@ export default function Topbar({
             </button>
           </div>
 
-          {/* Settings Trigger Button (Placed next to Profile, Containerless) */}
+          {/* Settings Trigger Button (Desktop lg+ only; hidden on mobile & tablet next to profile) */}
           <button
             onClick={() => setCurrentView && setCurrentView('settings')}
             title="Settings"
             aria-label="Settings"
-            className={`size-9 sm:size-10 bg-transparent border-none shadow-none outline-none shrink-0 flex items-center justify-center cursor-pointer active:scale-90 transition-all p-0 ${
+            className={`hidden lg:flex size-9 sm:size-10 bg-transparent border-none shadow-none outline-none shrink-0 items-center justify-center cursor-pointer active:scale-90 transition-all p-0 ${
               currentView === 'settings' ? 'text-primary' : 'text-foreground/75 hover:text-foreground'
             }`}
             style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}
@@ -459,13 +510,6 @@ export default function Topbar({
           )}
         </div>
       </header>
-
-      {/* Row 2: Universal Full-Width Centered Menu Bar Row (Desktop, Laptop, Tablet, Mobile) sitting right above announcement widget */}
-      {visibleNavItems && visibleNavItems.length > 0 && (
-        <div className="relative z-10 pointer-events-auto w-full max-w-[1920px] mx-auto px-2 sm:px-4 pt-0.5 sm:pt-1 pb-0.5 flex justify-center items-center">
-          {renderNavigationDock(true)}
-        </div>
-      )}
 
       {/* Floating Notification Popover / Dropdown — absolute floating overlay */}
       {showNotifications && (

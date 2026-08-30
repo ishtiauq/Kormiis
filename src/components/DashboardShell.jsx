@@ -8,7 +8,7 @@ import Icon from "@/components/ui/Icon.jsx"
 import ToastContainer from './layout/ToastContainer.jsx'
 import CommandPalette from './layout/CommandPalette.jsx'
 import AppContent from './AppContent.jsx'
-import AiExpandableFab from './ai/AiExpandableFab.jsx'
+import AiExpandableFab, { AiQuantumGlyph } from './ai/AiExpandableFab.jsx'
 import { allNavItems } from '../utils/helpers.js'
 import { useCommandPalette } from '../hooks/useCommandPalette.jsx'
 import LoadingScreen from './layout/LoadingScreen.jsx'
@@ -238,20 +238,13 @@ export default function DashboardShell({ user, themeMode, isDarkMode, toggleThem
       {/* Bottom Tab Bar (Mobile) - Floating Pill */}
       {isMobile && (
         <div className={`fixed bottom-0 left-0 right-0 z-40 flex justify-center pointer-events-none px-4 pb-3.5 sm:pb-4 transition-all duration-300 ${isScrollingDown && !showMobileMenu ? 'translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
-          <nav className="bottom-bar bottom-bar-pill pointer-events-auto w-full max-w-[280px] flex items-center justify-around px-2 h-15 transition-all duration-300 rounded-full glass-kormiis text-foreground border border-white/30 dark:border-white/14 shadow-2xl backdrop-blur-3xl" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
+          <nav className="bottom-bar bottom-bar-pill pointer-events-auto w-auto max-w-[185px] flex items-center justify-center gap-1.5 px-2.5 h-13.5 transition-all duration-300 rounded-full glass-kormiis text-foreground border border-white/30 dark:border-white/14 shadow-2xl backdrop-blur-3xl" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
             <MobileTabButton
               active={currentView === 'dashboard'}
-              label="Home"
+              label="Dashboard"
               onClick={() => { setCurrentView('dashboard'); setShowMobileMenu(false) }}
             >
-              <Icon name="home" size={24}/>
-            </MobileTabButton>
-            <MobileTabButton
-              active={currentView === 'announcements'}
-              label="Announcements"
-              onClick={() => { setCurrentView('announcements'); setShowMobileMenu(false) }}
-            >
-              <Icon name="rss_feed" size={24}/>
+              <Icon name="dashboard" size={24}/>
             </MobileTabButton>
             <MobileTabButton
               active={showAiModal}
@@ -266,7 +259,7 @@ export default function DashboardShell({ user, themeMode, isDarkMode, toggleThem
                 setShowMobileMenu(false)
               }}
             >
-              <Icon name="auto_awesome" size={24}/>
+              <AiQuantumGlyph size={24} className="transition-transform duration-300" />
             </MobileTabButton>
             <MobileTabButton
               active={showMobileMenu}
@@ -283,17 +276,17 @@ export default function DashboardShell({ user, themeMode, isDarkMode, toggleThem
         </div>
       )}
 
-      {/* Mobile Menu Backdrop Click Catcher (Zero visual overlay) */}
+      {/* Mobile & Tablet Menu Backdrop Click Catcher (Zero visual overlay) */}
       {showMobileMenu && (
         <div 
-          className="fixed inset-0 z-40 md:hidden bg-transparent pointer-events-auto"
+          className="fixed inset-0 z-40 lg:hidden bg-transparent pointer-events-auto"
           onClick={() => setShowMobileMenu(false)}
           aria-hidden="true"
         />
       )}
       
       <div 
-        className={`fixed bottom-0 left-0 right-0 w-full z-50 flex flex-col glass-mobile-drawer shadow-2xl transition-transform duration-350 ease-[cubic-bezier(0.16,1,0.3,1)] md:hidden overflow-hidden ${showMobileMenu ? 'translate-y-0' : 'translate-y-full pointer-events-none'}`}
+        className={`fixed bottom-0 left-0 right-0 w-full z-50 flex flex-col glass-mobile-drawer shadow-2xl transition-transform duration-350 ease-[cubic-bezier(0.16,1,0.3,1)] lg:hidden overflow-hidden ${showMobileMenu ? 'translate-y-0' : 'translate-y-full pointer-events-none'}`}
         aria-hidden={!showMobileMenu}
       >
         {/* Pull handle indicator */}
@@ -311,7 +304,7 @@ export default function DashboardShell({ user, themeMode, isDarkMode, toggleThem
         </div>
         <div className="px-3.5 pt-2.5 pb-7 sm:pb-8">
           <div className="grid grid-cols-2 gap-1.5">
-            {visibleNavItems.filter(i => !['dashboard', 'announcements', 'profile'].includes(i.id)).map(item => {
+            {visibleNavItems.filter(i => !['dashboard', 'profile'].includes(i.id)).map(item => {
               const active = currentView === item.id
               return (
                 <button
@@ -331,20 +324,10 @@ export default function DashboardShell({ user, themeMode, isDarkMode, toggleThem
               )
             })}
           </div>
-          
-          <div className="h-px bg-border/80 dark:bg-white/10 my-2.5 shrink-0" />
-          
-          <button 
-            className="w-full flex items-center justify-center gap-2 h-9.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs cursor-pointer shadow-sm active:scale-[0.97] transition-all"
-            onClick={() => { handleLogout(); setShowMobileMenu(false) }}
-          >
-            <Icon name="logout" size={16}/>
-            <span>Logout</span>
-          </button>
         </div>
       </div>
 
-      {/* Floating AI Co-Pilot Widget (Desktop & Mobile Portal) */}
+      {/* Floating AI Co-Pilot Widget (Collapsed FAB hidden on mobile via CSS) */}
       {createPortal(
         <AiExpandableFab
           isOpen={showAiModal}

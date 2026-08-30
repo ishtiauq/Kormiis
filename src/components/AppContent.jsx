@@ -1,4 +1,5 @@
 import { lazy, Suspense } from 'react'
+import { motion } from 'framer-motion'
 import LoadingScreen from './layout/LoadingScreen.jsx'
 
 const Dashboard = lazy(() => import('./Dashboard.jsx'))
@@ -62,19 +63,19 @@ export default function AppContent({ currentView, setCurrentView, isAppLoading, 
       view = <Employees employees={data.employees} setEmployees={data.handleSetEmployees} addLog={data.addLog} addAuditLog={data.addAuditLog} pendingProfileEdits={data.pendingProfileEdits} setPendingProfileEdits={data.setPendingProfileEdits} addToast={data.addToast} selectedEmployeeId={data.selectedEmployeeId} setSelectedEmployeeId={data.setSelectedEmployeeId} isSidebarCollapsed={isSidebarCollapsed} adminUid={data.adminUid} currentUser={user} settings={data.settings} />
       break
     case 'payroll':
-      view = <Payroll employees={data.employees} payroll={data.payroll} setPayroll={data.handleSetPayroll} addLog={data.addLog} settings={data.settings} addAuditLog={data.addAuditLog} />
+      view = <Payroll employees={data.employees} payroll={data.payroll} setPayroll={data.handleSetPayroll} addLog={data.addLog} settings={data.settings} addAuditLog={data.addAuditLog} expenses={data.expenses} setExpenses={data.handleSetExpenses} addToast={data.addToast} currentUser={user} addNotification={data.addNotification} defaultTab="payroll" />
       break
     case 'attendance':
-      view = <Attendance employees={data.employees} attendance={data.attendance} setAttendance={data.handleSetAttendance} roster={data.roster} setRoster={data.setRoster} shiftSwaps={data.shiftSwaps} setShiftSwaps={data.setShiftSwaps} shiftTemplates={data.settings?.shiftTemplates} overtimeClaims={data.overtimeClaims} setOvertimeClaims={data.setOvertimeClaims} addLog={data.addLog} addToast={data.addToast} addNotification={data.addNotification} addAuditLog={data.addAuditLog} settings={data.settings} setSettings={data.handleSetSettings} />
+      view = <Attendance employees={data.employees} attendance={data.attendance} setAttendance={data.handleSetAttendance} roster={data.roster} setRoster={data.setRoster} shiftSwaps={data.shiftSwaps} setShiftSwaps={data.setShiftSwaps} shiftTemplates={data.settings?.shiftTemplates} overtimeClaims={data.overtimeClaims} setOvertimeClaims={data.setOvertimeClaims} addLog={data.addLog} addToast={data.addToast} addNotification={data.addNotification} addAuditLog={data.addAuditLog} settings={data.settings} setSettings={data.handleSetSettings} defaultTab="daily" />
       break
     case 'leaves':
-      view = <Leaves employees={data.employees} attendance={data.attendance} setAttendance={data.handleSetAttendance} addLog={data.addLog} addToast={data.addToast} settings={data.settings} setSettings={data.handleSetSettings} addAuditLog={data.addAuditLog} addNotification={data.addNotification} />
+      view = <Attendance employees={data.employees} attendance={data.attendance} setAttendance={data.handleSetAttendance} roster={data.roster} setRoster={data.setRoster} shiftSwaps={data.shiftSwaps} setShiftSwaps={data.setShiftSwaps} shiftTemplates={data.settings?.shiftTemplates} overtimeClaims={data.overtimeClaims} setOvertimeClaims={data.setOvertimeClaims} addLog={data.addLog} addToast={data.addToast} addNotification={data.addNotification} addAuditLog={data.addAuditLog} settings={data.settings} setSettings={data.handleSetSettings} defaultTab="leave" />
       break
     case 'announcements':
-      view = <Announcements employees={data.employees} announcements={data.announcements} setAnnouncements={data.setAnnouncements} addLog={data.addLog} addToast={data.addToast} currentUser={user} addNotification={data.addNotification} />
+      view = <Announcements employees={data.employees} announcements={data.announcements} setAnnouncements={data.setAnnouncements} addLog={data.addLog} addToast={data.addToast} currentUser={user} addNotification={data.addNotification} events={data.events} setEvents={data.handleSetEvents} defaultTab="announcements" />
       break
     case 'calendar':
-      view = <Calendar events={data.events} setEvents={data.handleSetEvents} employees={data.employees} addLog={data.addLog} addToast={data.addToast} currentUser={user} addNotification={data.addNotification} />
+      view = <Announcements employees={data.employees} announcements={data.announcements} setAnnouncements={data.setAnnouncements} addLog={data.addLog} addToast={data.addToast} currentUser={user} addNotification={data.addNotification} events={data.events} setEvents={data.handleSetEvents} defaultTab="calendar" />
       break
     case 'documents':
       view = <Documents documents={data.documents} setDocuments={data.handleSetDocuments} employees={data.employees} addLog={data.addLog} addToast={data.addToast} currentUser={user} adminUid={data.adminUid} addNotification={data.addNotification} settings={data.settings} />
@@ -83,10 +84,10 @@ export default function AppContent({ currentView, setCurrentView, isAppLoading, 
       view = <Assets employees={data.employees} assets={data.assets} setAssets={data.setAssets} assetRequests={data.assetRequests} setAssetRequests={data.setAssetRequests} assetCategories={data.assetCategories} setAssetCategories={data.setAssetCategories} addLog={data.addLog} addToast={data.addToast} currentUser={user} addNotification={data.addNotification} settings={data.settings} />
       break
     case 'tasks':
-      view = <Tasks tasks={data.tasks} setTasks={data.handleSetTasks} employees={data.employees} currentUser={user} addToast={data.addToast} addLog={data.addLog} addNotification={data.addNotification} />
+      view = <Tasks tasks={data.tasks} setTasks={data.handleSetTasks} employees={data.employees} currentUser={user} addToast={data.addToast} addLog={data.addLog} addNotification={data.addNotification} notes={data.notes} setNotes={data.handleSetNotes} defaultTab="tasks" />
       break
     case 'expenses':
-      view = <Expenses employees={data.employees} expenses={data.expenses} setExpenses={data.handleSetExpenses} settings={data.settings} addLog={data.addLog} addToast={data.addToast} addAuditLog={data.addAuditLog} currentUser={user} addNotification={data.addNotification} />
+      view = <Payroll employees={data.employees} payroll={data.payroll} setPayroll={data.handleSetPayroll} addLog={data.addLog} settings={data.settings} addAuditLog={data.addAuditLog} expenses={data.expenses} setExpenses={data.handleSetExpenses} addToast={data.addToast} currentUser={user} addNotification={data.addNotification} defaultTab="expenses" />
       break
     case 'settings':
       view = <Settings settings={data.settings} setSettings={data.handleSetSettings} addLog={data.addLog} addToast={data.addToast} auditLogs={data.auditLogs} themeMode={themeMode} toggleTheme={toggleTheme} employees={data.employees} setEmployees={data.handleSetEmployees} currentUser={user} />
@@ -95,16 +96,16 @@ export default function AppContent({ currentView, setCurrentView, isAppLoading, 
       view = <ProfileView currentUser={user} pendingProfileEdits={data.pendingProfileEdits} setPendingProfileEdits={data.setPendingProfileEdits} addToast={data.addToast} addLog={data.addLog} settings={data.settings} setSettings={data.handleSetSettings} employees={data.employees} setEmployees={data.handleSetEmployees} handleLogout={data.handleLogout} announcements={data.announcements} setAnnouncements={data.setAnnouncements} addNotification={data.addNotification} />
       break
     case 'notes':
-      view = <Notes notes={data.notes} setNotes={data.handleSetNotes} currentUser={user} addToast={data.addToast} />
+      view = <Tasks tasks={data.tasks} setTasks={data.handleSetTasks} employees={data.employees} currentUser={user} addToast={data.addToast} addLog={data.addLog} addNotification={data.addNotification} notes={data.notes} setNotes={data.handleSetNotes} defaultTab="notes" />
       break
     case 'gigs':
       view = <GigBoardPage adminUid={data.adminUid} currentUser={user} employees={data.employees} addToast={data.addToast} />
       break
     case 'performance':
-      view = <PerformancePage adminUid={data.adminUid} currentUser={user} addToast={data.addToast} />
+      view = <PerformancePage adminUid={data.adminUid} currentUser={user} employees={data.employees} addToast={data.addToast} defaultTab="performance" />
       break
     case 'wellbeing':
-      view = <WellbeingPage adminUid={data.adminUid} currentUser={user} employees={data.employees} addToast={data.addToast} />
+      view = <PerformancePage adminUid={data.adminUid} currentUser={user} employees={data.employees} addToast={data.addToast} defaultTab="wellbeing" />
       break
     case 'ai':
       view = <AiAssistantPage currentUser={user} employees={data.employees} setEmployees={data.handleSetEmployees} payroll={data.payroll} setPayroll={data.handleSetPayroll} attendance={data.attendance} setAttendance={data.handleSetAttendance} expenses={data.expenses} setExpenses={data.handleSetExpenses} announcements={data.announcements} setAnnouncements={data.setAnnouncements} tasks={data.tasks} setTasks={data.setTasks} settings={data.settings} setCurrentView={setCurrentView} addToast={data.addToast} />
@@ -115,7 +116,15 @@ export default function AppContent({ currentView, setCurrentView, isAppLoading, 
 
   return (
     <Suspense fallback={<ViewSkeleton />}>
-      {view}
+      <motion.div
+        key={currentView}
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+        className="w-full"
+      >
+        {view}
+      </motion.div>
     </Suspense>
   )
 }

@@ -19,7 +19,7 @@ export default function App() {
     return hash || localStorage.getItem('kormiis_current_view') || 'dashboard'
   })
 
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024)
 
   // Unified navigation handler with browser history support
   const setCurrentView = (newView, pushState = true) => {
@@ -69,7 +69,7 @@ export default function App() {
     let resizeTimer
     const handleResize = () => {
       clearTimeout(resizeTimer)
-      resizeTimer = setTimeout(() => setIsMobile(window.innerWidth < 768), 150)
+      resizeTimer = setTimeout(() => setIsMobile(window.innerWidth < 1024), 150)
     }
     window.addEventListener('resize', handleResize)
     return () => { clearTimeout(resizeTimer); window.removeEventListener('resize', handleResize) }

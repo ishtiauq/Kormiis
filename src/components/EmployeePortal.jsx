@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import Icon from "@/components/ui/Icon.jsx"
 import AiCoPilotModal from './ai/AiCoPilotModal.jsx'
-import AiExpandableFab from './ai/AiExpandableFab.jsx'
+import AiExpandableFab, { AiQuantumGlyph } from './ai/AiExpandableFab.jsx'
 import DailyChecklistWidget from './DailyChecklistWidget.jsx'
 import { useModal } from '../services/useModal.js'
 import { formatDate, formatDateShort, formatDateTime, formatMonthYear, formatDateWithWeekday } from '../services/date.js'
@@ -112,7 +112,7 @@ export default function EmployeePortal({
     if (setCurrentView) setCurrentView(tab)
     else setLocalActiveTab(tab)
   }
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024)
   const [showAiModal, setShowAiModal] = useState(false)
   const [showAiHistory, setShowAiHistory] = useState(false)
   const [aiModalAction, setAiModalAction] = useState(null)
@@ -163,7 +163,7 @@ export default function EmployeePortal({
   }
 
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768)
+    const handleResize = () => setIsMobile(window.innerWidth < 1024)
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
   }, [])
@@ -222,10 +222,13 @@ export default function EmployeePortal({
         return <DashboardView currentUser={currentUser} attendance={attendance} setAttendance={setAttendance} addToast={addToast} expenses={expenses} announcements={announcements} setActiveTab={setActiveTab} setShowPunchModal={setShowPunchModal} settings={settings} notes={notes} setNotes={setNotes} />
       case 'attendance':
       case 'schedule':
+      case 'leave':
+      case 'leaves':
         return <AttendanceView 
                  currentUser={currentUser} 
                  employees={employees}
                  attendance={attendance} 
+                 setAttendance={setAttendance}
                  roster={roster}
                  shiftSwaps={shiftSwaps}
                  setShiftSwaps={setShiftSwaps}
@@ -234,9 +237,13 @@ export default function EmployeePortal({
                  setOvertimeClaims={setOvertimeClaims}
                  settings={settings}
                  addToast={addToast} 
+                 addLog={addLog}
                  addNotification={addNotification}
+                 initialSubTab={activeTab === 'leave' || activeTab === 'leaves' ? 'leave' : undefined}
                />
       case 'announcements':
+      case 'events':
+      case 'calendar':
         return <Announcements 
                  currentUser={currentUser} 
                  employees={employees} 
@@ -245,13 +252,26 @@ export default function EmployeePortal({
                  addToast={addToast}
                  addLog={addLog}
                  addNotification={addNotification}
+                 events={events}
+                 setEvents={setEvents}
                  headline="Feed"
+                 defaultTab={activeTab === 'events' || activeTab === 'calendar' ? 'calendar' : 'announcements'}
                />
       case 'payslips':
-        return <PayslipsView currentUser={currentUser} payroll={payroll} addToast={addToast} settings={settings} />
-      case 'leave':
-      case 'leaves':
-        return <LeaveView currentUser={currentUser} attendance={attendance} setAttendance={setAttendance} addToast={addToast} addLog={addLog} settings={settings} addNotification={addNotification} />
+      case 'payroll':
+      case 'expenses':
+        return <PayslipsView 
+                 currentUser={currentUser} 
+                 payroll={payroll} 
+                 employees={employees}
+                 expenses={expenses}
+                 setExpenses={setExpenses}
+                 addLog={addLog}
+                 addToast={addToast} 
+                 settings={settings}
+                 addNotification={addNotification}
+                 initialSubTab={activeTab === 'expenses' ? 'expenses' : 'payslips'}
+               />
       case 'profile':
         return <ProfileView 
           currentUser={currentUser} 
@@ -283,20 +303,15 @@ export default function EmployeePortal({
                />
       case 'tasks':
       case 'my-tasks':
-        return <div className="max-w-[1200px] mx-auto w-full"><Tasks tasks={tasks} setTasks={setTasks} employees={employees} currentUser={currentUser} addToast={addToast} addLog={addLog} addNotification={addNotification} /></div>
-      case 'calendar':
-      case 'events':
-        return <div className="max-w-[1200px] mx-auto w-full"><Calendar events={events} setEvents={setEvents} employees={employees} addLog={addLog} addToast={addToast} currentUser={currentUser} addNotification={addNotification} /></div>
-      case 'expenses':
-        return <div className="max-w-[1200px] mx-auto w-full"><Expenses employees={employees} expenses={expenses} setExpenses={setExpenses} settings={settings} addLog={addLog} addToast={addToast} addAuditLog={addLog} currentUser={currentUser} addNotification={addNotification} /></div>
+      case 'notes':
+        return <div className="max-w-[1200px] mx-auto w-full"><Tasks tasks={tasks} setTasks={setTasks} employees={employees} currentUser={currentUser} addToast={addToast} addLog={addLog} addNotification={addNotification} notes={notes} setNotes={setNotes} defaultTab={activeTab === 'notes' ? 'notes' : 'tasks'} /></div>
       case 'documents':
         return <div className="max-w-[1200px] mx-auto w-full"><Documents documents={documents} setDocuments={setDocuments} addLog={addLog} addToast={addToast} currentUser={currentUser} addNotification={addNotification} /></div>
-      case 'notes':
-        return <div className="max-w-[1200px] mx-auto w-full"><Notes notes={notes} setNotes={setNotes} currentUser={currentUser} addToast={addToast} /></div>
       case 'gigs':
         return <div className="max-w-[1200px] mx-auto w-full"><GigBoardPage adminUid={currentUser.adminUid} currentUser={currentUser} employees={employees} addToast={addToast} /></div>
       case 'performance':
-        return <div className="max-w-[1200px] mx-auto w-full"><PerformancePage adminUid={currentUser.adminUid} currentUser={currentUser} addToast={addToast} /></div>
+      case 'wellbeing':
+        return <div className="max-w-[1200px] mx-auto w-full"><PerformancePage adminUid={currentUser.adminUid} currentUser={currentUser} employees={employees} addToast={addToast} defaultTab={activeTab === 'wellbeing' ? 'wellbeing' : 'performance'} /></div>
       case 'ai':
         return (
           <div className="w-full">
@@ -350,12 +365,8 @@ export default function EmployeePortal({
     { id: 'attendance', icon: <Icon name="schedule" size={18}/>, label: 'Attendance' },
     { id: 'my-tasks', icon: <Icon name="check_box" size={18}/>, label: 'Tasks' },
     { id: 'announcements', icon: <Icon name="rss_feed" size={18}/>, label: 'Announcements' },
-    { id: 'events', icon: <Icon name="calendar_month" size={18}/>, label: 'Events' },
-    { id: 'leave', icon: <Icon name="event_busy" size={18}/>, label: 'Leave' },
-    { id: 'payslips', icon: <Icon name="account_balance" size={18}/>, label: 'Payslips' },
-    { id: 'expenses', icon: <Icon name="wallet" size={18}/>, label: 'Expenses' },
+    { id: 'payslips', icon: <Icon name="account_balance" size={18}/>, label: 'Payroll' },
     { id: 'documents', icon: <Icon name="folder_open" size={18}/>, label: 'Documents' },
-    { id: 'notes', icon: <Icon name="sticky_note_2" size={18}/>, label: 'Notes' },
     { id: 'my-assets', icon: <Icon name="devices_other" size={18}/>, label: 'Assets' },
     { id: 'gigs', icon: <Icon name="handshake" size={18}/>, label: 'Help Hub' },
     { id: 'performance', icon: <Icon name="insights" size={18}/>, label: 'Performance' },
@@ -482,20 +493,13 @@ export default function EmployeePortal({
       {/* Bottom Tab Bar (Mobile) — Floating Pill */}
       {isMobile && (
         <div className={`fixed bottom-0 left-0 right-0 z-40 flex justify-center pointer-events-none px-4 pb-3.5 sm:pb-4 transition-all duration-300 ${isScrollingDown && !showMobileMenu ? 'translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
-          <nav className="bottom-bar bottom-bar-pill pointer-events-auto w-full max-w-[280px] flex items-center justify-around px-2 h-15 transition-all duration-300 rounded-full glass-kormiis text-foreground border border-white/30 dark:border-white/14 shadow-2xl backdrop-blur-3xl" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
+          <nav className="bottom-bar bottom-bar-pill pointer-events-auto w-auto max-w-[185px] flex items-center justify-center gap-1.5 px-2.5 h-13.5 transition-all duration-300 rounded-full glass-kormiis text-foreground border border-white/30 dark:border-white/14 shadow-2xl backdrop-blur-3xl" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
             <MobileTabButton
               active={activeTab === 'dashboard'}
-              label="Home"
+              label="Dashboard"
               onClick={() => { setActiveTab('dashboard'); setShowMobileMenu(false) }}
             >
-              <Icon name="home" size={24}/>
-            </MobileTabButton>
-            <MobileTabButton
-              active={activeTab === 'announcements'}
-              label="Announcements"
-              onClick={() => { setActiveTab('announcements'); setShowMobileMenu(false) }}
-            >
-              <Icon name="rss_feed" size={24}/>
+              <Icon name="dashboard" size={24}/>
             </MobileTabButton>
             <MobileTabButton
               active={showAiModal}
@@ -510,7 +514,7 @@ export default function EmployeePortal({
                 setShowMobileMenu(false)
               }}
             >
-              <Icon name="auto_awesome" size={24}/>
+              <AiQuantumGlyph size={24} className="transition-transform duration-300" />
             </MobileTabButton>
             <MobileTabButton
               active={showMobileMenu}
@@ -527,17 +531,17 @@ export default function EmployeePortal({
         </div>
       )}
 
-      {/* Mobile Menu Backdrop Click Catcher (Zero visual overlay) */}
+      {/* Mobile & Tablet Menu Backdrop Click Catcher (Zero visual overlay) */}
       {showMobileMenu && (
         <div 
-          className="fixed inset-0 z-40 md:hidden bg-transparent pointer-events-auto"
+          className="fixed inset-0 z-40 lg:hidden bg-transparent pointer-events-auto"
           onClick={() => setShowMobileMenu(false)}
           aria-hidden="true"
         />
       )}
       
       <div 
-        className={`fixed bottom-0 left-0 right-0 w-full z-50 flex flex-col glass-mobile-drawer shadow-2xl transition-transform duration-350 ease-[cubic-bezier(0.16,1,0.3,1)] md:hidden overflow-hidden ${showMobileMenu ? 'translate-y-0' : 'translate-y-full pointer-events-none'}`}
+        className={`fixed bottom-0 left-0 right-0 w-full z-50 flex flex-col glass-mobile-drawer shadow-2xl transition-transform duration-350 ease-[cubic-bezier(0.16,1,0.3,1)] lg:hidden overflow-hidden ${showMobileMenu ? 'translate-y-0' : 'translate-y-full pointer-events-none'}`}
         aria-hidden={!showMobileMenu}
       >
         {/* Pull handle indicator */}
@@ -555,7 +559,7 @@ export default function EmployeePortal({
         </div>
         <div className="px-3.5 pt-2.5 pb-7 sm:pb-8">
           <div className="grid grid-cols-2 gap-1.5">
-            {navItems.filter(i => !['dashboard', 'announcements', 'profile'].includes(i.id)).map(item => {
+            {navItems.filter(i => !['dashboard', 'profile'].includes(i.id)).map(item => {
               const active = activeTab === item.id
               return (
                 <button
@@ -575,20 +579,10 @@ export default function EmployeePortal({
               )
             })}
           </div>
-          
-          <div className="h-px bg-border/80 dark:bg-white/10 my-2.5 shrink-0" />
-          
-          <button 
-            className="w-full flex items-center justify-center gap-2 h-9.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs cursor-pointer shadow-sm active:scale-[0.97] transition-all"
-            onClick={() => { handleLogout(); setShowMobileMenu(false) }}
-          >
-            <Icon name="logout" size={16}/>
-            <span>Logout</span>
-          </button>
         </div>
       </div>
 
-      {/* Floating AI Co-Pilot Widget (Desktop & Mobile Portal) */}
+      {/* Floating AI Co-Pilot Widget (Collapsed FAB hidden on mobile via CSS) */}
       {createPortal(
         <AiExpandableFab
           isOpen={showAiModal}
@@ -783,6 +777,7 @@ function AttendanceView({
   currentUser, 
   employees,
   attendance, 
+  setAttendance,
   roster,
   shiftSwaps,
   setShiftSwaps,
@@ -791,10 +786,12 @@ function AttendanceView({
   setOvertimeClaims,
   settings,
   addToast,
-  addNotification
+  addLog,
+  addNotification,
+  initialSubTab = 'history'
 }) {
   const currentMonth = formatMonthYear(new Date().toISOString().split('T')[0])
-  const [activeSubTab, setActiveSubTab] = useState('history') // 'history', 'roster', 'swap', 'overtime', 'offday'
+  const [activeSubTab, setActiveSubTab] = useState(initialSubTab) // 'history', 'leave', 'roster', 'swap', 'overtime', 'offday'
 
   const today = new Date()
   const currentDay = today.getDay()
@@ -913,6 +910,16 @@ function AttendanceView({
           </Button>
           <Button
             role="tab"
+            aria-selected={activeSubTab === 'leave'}
+            variant={activeSubTab === 'leave' ? 'default' : 'ghost'}
+            size="sm"
+            className={`rounded-full px-4 justify-center ${activeSubTab !== 'leave' ? 'text-muted-foreground hover:bg-muted hover:text-foreground' : ''}`}
+            onClick={() => setActiveSubTab('leave')}
+          >
+            <Icon name="event_busy" size={15}/> Leaves
+          </Button>
+          <Button
+            role="tab"
             aria-selected={activeSubTab === 'roster'}
             variant={activeSubTab === 'roster' ? 'default' : 'ghost'}
             size="sm"
@@ -953,6 +960,18 @@ function AttendanceView({
           </Button>
         </div>
       </div>
+
+      {activeSubTab === 'leave' && (
+        <LeaveView
+          currentUser={currentUser}
+          attendance={attendance}
+          setAttendance={setAttendance}
+          addToast={addToast}
+          addLog={addLog}
+          settings={settings}
+          addNotification={addNotification}
+        />
+      )}
 
       {activeSubTab === 'history' && (() => {
         const myHistory = Object.entries(attendance?.dailyLogs || {})
@@ -1171,7 +1190,8 @@ function AttendanceView({
   )
 }
 
-function PayslipsView({ currentUser, payroll, addToast, settings }) {
+function PayslipsView({ currentUser, payroll, employees, expenses, setExpenses, addLog, addToast, settings, addNotification, initialSubTab = 'payslips' }) {
+  const [subTab, setSubTab] = useState(initialSubTab)
   const myPayslips = (payroll?.history || []).filter(p => p.employeeId === currentUser.id)
 
   const downloadSlipPDF = async (slip) => {
@@ -1230,62 +1250,102 @@ function PayslipsView({ currentUser, payroll, addToast, settings }) {
           ['Net Disbursed Salary', `${pdfCurrency} ${Number(slip.net || 0).toFixed(2)}`]
         ],
         theme: 'striped',
-        headStyles: { fillColor: [254, 53, 1] },
-        styles: { fontSize: 10, cellPadding: 4 }
+        headStyles: { fillColor: [30, 41, 59] }
       })
 
-      const finalY = (doc.lastAutoTable?.finalY ?? (startY + 45)) + 15
-      doc.setFontSize(8)
-      doc.setFont('helvetica', 'italic')
-      doc.setTextColor(120, 120, 120)
-      doc.text(`This is a computer-generated payslip for ${currentUser.name}. Issued by ${companyName}.`, 14, finalY)
-
-      doc.save(`Payslip_${currentUser.name.replace(/\s+/g, '_')}_${slip.date}.pdf`)
+      doc.save(`Payslip_${currentUser.name}_${slip.date}.pdf`)
       addToast('Payslip PDF downloaded successfully', 'success')
     } catch (err) {
       console.error(err)
-      addToast('Failed to download PDF', 'error')
+      addToast('Failed to generate PDF', 'destructive')
     }
   }
 
   return (
     <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[1000px] mx-auto pb-10">
-      
-      {myPayslips.length === 0 ? (
-        <Card>
-          <CardContent className="p-10 text-center text-muted-foreground">
-            No payslips available yet.
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="rounded-md border bg-card">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Gross Pay</TableHead>
-                <TableHead>Deductions</TableHead>
-                <TableHead>Net Pay</TableHead>
-                <TableHead>Action</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {myPayslips.map((slip, i) => (
-                <TableRow key={i}>
-                  <TableCell>{slip.date}</TableCell>
-                  <TableCell>{settings?.currency || '$'}{slip.gross}</TableCell>
-                  <TableCell>{settings?.currency || '$'}{slip.deductions}</TableCell>
-                  <TableCell className="font-semibold text-green-600 dark:text-green-400">{settings?.currency || '$'}{slip.net}</TableCell>
-                  <TableCell>
-                    <Button variant="outline" size="sm" onClick={() => downloadSlipPDF(slip)}>
-                      <Icon name="download" className="h-4 w-4 mr-2" size={16}/> PDF
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+      <div className="bg-card p-2 rounded-xl border border-border/50 shadow-sm w-full max-w-full">
+        <div role="tablist" aria-label="Finance sections" className="menu-bar">
+          <Button
+            role="tab"
+            aria-selected={subTab === 'payslips'}
+            variant={subTab === 'payslips' ? 'default' : 'ghost'}
+            size="sm"
+            className={`rounded-full px-4 justify-center ${subTab !== 'payslips' ? 'text-muted-foreground hover:bg-muted hover:text-foreground' : ''}`}
+            onClick={() => setSubTab('payslips')}
+          >
+            <Icon name="account_balance" size={15}/> My Payslips
+          </Button>
+          <Button
+            role="tab"
+            aria-selected={subTab === 'expenses'}
+            variant={subTab === 'expenses' ? 'default' : 'ghost'}
+            size="sm"
+            className={`rounded-full px-4 justify-center ${subTab !== 'expenses' ? 'text-muted-foreground hover:bg-muted hover:text-foreground' : ''}`}
+            onClick={() => setSubTab('expenses')}
+          >
+            <Icon name="wallet" size={15}/> Expense Claims
+          </Button>
         </div>
+      </div>
+
+      {subTab === 'expenses' ? (
+        <Expenses
+          employees={employees}
+          expenses={expenses}
+          setExpenses={setExpenses}
+          settings={settings}
+          addLog={addLog}
+          addToast={addToast}
+          addAuditLog={addLog}
+          currentUser={currentUser}
+          addNotification={addNotification}
+        />
+      ) : (
+        <>
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl sm:text-2xl font-bold tracking-tight">My Payslips</h2>
+              <p className="text-sm text-muted-foreground">View and download your monthly salary statements.</p>
+            </div>
+          </div>
+
+          {myPayslips.length === 0 ? (
+            <Card>
+              <CardContent className="p-10 text-center text-muted-foreground">
+                No payslips available yet.
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="rounded-md border bg-card">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Gross Pay</TableHead>
+                    <TableHead>Deductions</TableHead>
+                    <TableHead>Net Pay</TableHead>
+                    <TableHead>Action</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {myPayslips.map((slip, i) => (
+                    <TableRow key={i}>
+                      <TableCell>{slip.date}</TableCell>
+                      <TableCell>{settings?.currency || '$'}{slip.gross}</TableCell>
+                      <TableCell>{settings?.currency || '$'}{slip.deductions}</TableCell>
+                      <TableCell className="font-semibold text-green-600 dark:text-green-400">{settings?.currency || '$'}{slip.net}</TableCell>
+                      <TableCell>
+                        <Button variant="outline" size="sm" onClick={() => downloadSlipPDF(slip)}>
+                          <Icon name="download" className="h-4 w-4 mr-2" size={16}/> PDF
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </>
       )}
     </div>
   )

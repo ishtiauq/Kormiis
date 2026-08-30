@@ -7,6 +7,7 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import GlassMonthPicker from "@/components/ui/GlassMonthPicker.jsx"
+import WellbeingPage from './WellbeingPage.jsx'
 import { performanceApi, currentMonthKey, lastMonthKey } from '../../services/hr.js'
 
 const gradeTone = {
@@ -25,7 +26,8 @@ const DEFAULT_WEIGHTS = {
   gig_contribution: 20,
 }
 
-export default function PerformancePage({ adminUid, currentUser, addToast }) {
+export default function PerformancePage({ adminUid, currentUser, addToast, defaultTab = 'performance', employees = [] }) {
+  const [activeSection, setActiveSection] = useState(defaultTab)
   const isAdmin = currentUser?.role === 'Admin' || currentUser?.role === 'HR'
   const currentUserId = currentUser?.employeeId || currentUser?.id || currentUser?.uid
   const [month, setMonth] = useState(isAdmin ? lastMonthKey() : currentMonthKey())
@@ -122,13 +124,41 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
 
   const topPerformers = scores.length ? [...scores].sort((a, b) => (b.totalScore || b.score || 0) - (a.totalScore || a.score || 0)).slice(0, 3) : []
 
+  const performanceTabs = [
+    { id: 'performance', label: 'Performance & Appraisals', icon: <Icon name="insights" size={15}/> },
+    { id: 'wellbeing', label: 'Team Well-being', icon: <Icon name="favorite" size={15}/> },
+  ]
+
   return (
-    <div className="animate-fade-in flex flex-col gap-5 max-w-[1200px] mx-auto w-full">
-      <div className="flex items-center justify-end gap-2.5">
-        <GlassMonthPicker 
-          value={month} 
-          onChange={(e) => setMonth(e.target.value)} 
-        />
+    <div className="animate-fade-in flex flex-col gap-6 max-w-[1200px] mx-auto w-full pb-10">
+      {/* Sub-navigation Switcher */}
+      <div className="bg-card p-2 rounded-xl border border-border/50 shadow-sm w-full max-w-full">
+        <div role="tablist" aria-label="Performance sections" className="menu-bar">
+          {performanceTabs.map(t => (
+            <Button
+              key={t.id}
+              role="tab"
+              aria-selected={activeSection === t.id}
+              variant={activeSection === t.id ? 'default' : 'ghost'}
+              size="sm"
+              className={`rounded-full px-4 justify-center ${activeSection !== t.id ? 'text-muted-foreground hover:bg-muted hover:text-foreground' : ''}`}
+              onClick={() => setActiveSection(t.id)}
+            >
+              {t.icon} {t.label}
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      {activeSection === 'wellbeing' ? (
+        <WellbeingPage adminUid={adminUid} currentUser={currentUser} employees={employees} addToast={addToast} />
+      ) : (
+        <>
+          <div className="flex items-center justify-end gap-2.5">
+            <GlassMonthPicker 
+              value={month} 
+              onChange={(e) => setMonth(e.target.value)} 
+            />
         {isAdmin && (
           <Button size="sm" variant="default" onClick={handleCalculate} disabled={calculating} className="rounded-2xl shadow-sm h-10 px-4">
             <Icon name="calculate" className="mr-1.5" size={15}/> {calculating ? 'Calculating...' : 'Calculate month'}
@@ -562,6 +592,8 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
           </div>
         </DialogContent>
       </Dialog>
+        </>
+      )}
     </div>
   )
 }

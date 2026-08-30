@@ -325,14 +325,14 @@ export default function ProfileView({
     <div className="flex flex-col gap-6 max-w-[920px] mx-auto pb-12 w-full animate-in fade-in duration-300">
       {/* Action Toolbar */}
       {!editMode && (
-        <div className="flex items-center justify-end gap-2">
+        <div className="flex items-center justify-end gap-2.5">
           {!hasPending ? (
             <Button 
               variant="outline" 
               onClick={handleStartEdit}
-              className="rounded-2xl liquid-glass-btn h-11 px-5 font-medium flex items-center gap-2"
+              className="rounded-2xl liquid-glass-btn h-11 px-4.5 font-medium flex items-center gap-2 text-fluid-xs sm:text-fluid-sm"
             >
-              <Icon name="edit" size={18} />
+              <Icon name="edit" size={17} />
               <span>Edit Profile</span>
             </Button>
           ) : (
@@ -340,6 +340,19 @@ export default function ProfileView({
               <span className="size-2 rounded-full bg-amber-500 animate-pulse" />
               Pending HR Review
             </Badge>
+          )}
+
+          {/* Dedicated High-Tactile Log Out Button (Desktop, Laptop, Tablet, Mobile) */}
+          {handleLogout && (
+            <Button 
+              variant="destructive"
+              onClick={handleLogout}
+              className="rounded-2xl h-11 px-4.5 font-bold flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white shadow-xs cursor-pointer active:scale-95 transition-all text-fluid-xs sm:text-fluid-sm"
+              title="Log out of this session"
+            >
+              <Icon name="logout" size={17} />
+              <span>Log Out</span>
+            </Button>
           )}
         </div>
       )}
@@ -882,6 +895,44 @@ export default function ProfileView({
                   </Button>
                 </div>
               </form>
+            </CardContent>
+          </Card>
+
+          {/* Session Management & Sign Out */}
+          <Card className="glass-kormiis rounded-3xl border border-white/25 dark:border-white/10 shadow-sm overflow-hidden mt-6">
+            <CardHeader className="p-6 sm:p-8 pb-4 border-b border-border/80 dark:border-white/10">
+              <div className="flex items-center gap-3">
+                <div className="size-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                  <Icon name="meeting_room" size={20} />
+                </div>
+                <div>
+                  <CardTitle className="text-fluid-lg font-bold text-foreground">Session Management</CardTitle>
+                  <CardDescription className="text-fluid-xs text-muted-foreground mt-0.5">
+                    End your active session securely across this device
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-6 sm:p-8 pt-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4.5 rounded-2xl bg-white/40 dark:bg-white/[0.04] border border-white/40 dark:border-white/10">
+                <div className="space-y-1">
+                  <h4 className="text-fluid-sm font-bold text-foreground m-0">Sign Out of Kormiis</h4>
+                  <p className="text-fluid-xs text-muted-foreground m-0">
+                    Logged in as <span className="font-semibold text-foreground">{currentUser?.email || currentUser?.name || 'Current User'}</span> ({currentUser?.role || 'Team Member'})
+                  </p>
+                </div>
+                {handleLogout && (
+                  <Button 
+                    type="button" 
+                    variant="destructive"
+                    onClick={handleLogout}
+                    className="h-11 px-5 rounded-2xl font-bold shrink-0 shadow-sm bg-red-600 hover:bg-red-700 text-white flex items-center gap-2 active:scale-95 transition-all cursor-pointer"
+                  >
+                    <Icon name="logout" size={17} />
+                    <span>Log Out</span>
+                  </Button>
+                )}
+              </div>
             </CardContent>
           </Card>
 

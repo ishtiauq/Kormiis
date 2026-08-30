@@ -1441,38 +1441,58 @@ div[class*="text-rose-"]:not([class*="bg-"]):not([class*="size-"]):not([class*="
   border-color: rgba(255, 255, 255, 0.16) !important;
 }
 
-/* Navigation Bar Active Capsule: High-Contrast Solid Black in Light Mode / Solid White in Dark Mode (Zero Shadow) */
-.nav-capsule-active {
-  background-color: #09090b !important;
+/* Navigation Bar Active Capsule: Kormiis Brand Color Standard (Zero Border & Zero Shadow) */
+.nav-capsule-active,
+button.nav-capsule-active {
+  background: linear-gradient(135deg, #FE3501 0%, #e62f00 100%) !important;
+  background-color: #FE3501 !important;
   color: #ffffff !important;
   box-shadow: none !important;
   -webkit-box-shadow: none !important;
   filter: none !important;
-  border: 1px solid rgba(255, 255, 255, 0.20) !important;
+  border: none !important;
+  border-width: 0px !important;
+  border-color: transparent !important;
+  outline: none !important;
 }
 .nav-capsule-active *,
 .nav-capsule-active span,
-.nav-capsule-active svg {
+.nav-capsule-active svg,
+button.nav-capsule-active *,
+button.nav-capsule-active span,
+button.nav-capsule-active svg {
   color: #ffffff !important;
   fill: currentColor !important;
 }
 
 .dark .nav-capsule-active,
-[data-theme="dark"] .nav-capsule-active {
-  background-color: #ffffff !important;
-  color: #09090b !important;
+.dark button.nav-capsule-active,
+[data-theme="dark"] .nav-capsule-active,
+[data-theme="dark"] button.nav-capsule-active {
+  background: linear-gradient(135deg, #FE3501 0%, #e62f00 100%) !important;
+  background-color: #FE3501 !important;
+  color: #ffffff !important;
   box-shadow: none !important;
   -webkit-box-shadow: none !important;
   filter: none !important;
-  border: 1px solid rgba(0, 0, 0, 0.12) !important;
+  border: none !important;
+  border-width: 0px !important;
+  border-color: transparent !important;
+  outline: none !important;
 }
 .dark .nav-capsule-active *,
 .dark .nav-capsule-active span,
 .dark .nav-capsule-active svg,
+.dark button.nav-capsule-active *,
+.dark button.nav-capsule-active span,
+.dark button.nav-capsule-active svg,
 [data-theme="dark"] .nav-capsule-active *,
 [data-theme="dark"] .nav-capsule-active span,
-[data-theme="dark"] .nav-capsule-active svg {
-  color: #09090b !important;
+[data-theme="dark"] .nav-capsule-active svg,
+[data-theme="dark"] button.nav-capsule-active *,
+[data-theme="dark"] button.nav-capsule-active span,
+[data-theme="dark"] button.nav-capsule-active svg {
+  color: #ffffff !important;
   fill: currentColor !important;
 }
 

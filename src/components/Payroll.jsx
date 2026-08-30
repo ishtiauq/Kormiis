@@ -10,9 +10,11 @@ import { Badge } from "@/components/ui/badge"
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
 
 import AdSlot from './AdSlot.jsx'
+import Expenses from './Expenses.jsx'
 import { formatDate } from '../services/date.js'
 
-export default function Payroll({ employees, payroll, setPayroll, addLog, settings, addAuditLog }) {
+export default function Payroll({ employees, payroll, setPayroll, addLog, settings, addAuditLog, expenses, setExpenses, addToast, currentUser, addNotification, defaultTab = 'payroll' }) {
+  const [activeMainTab, setActiveMainTab] = useState(defaultTab)
   const now = new Date()
   const [selectedMonth, setSelectedMonth] = useState(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`)
   const [searchTerm, setSearchTerm] = useState('')
@@ -673,11 +675,47 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
     doc.save(`Payroll_Sheet_${monthLabel.replace(' ', '_')}.pdf`)
   }
 
+  const mainTabs = [
+    { id: 'payroll', label: 'Salary & Payslips', icon: <Icon name="account_balance" size={15}/> },
+    { id: 'expenses', label: 'Expense Claims', icon: <Icon name="wallet" size={15}/> },
+  ]
+
   return (
     <div className="animate-fade-in flex flex-col gap-6 w-full pb-10">
-      
-      
-      <div ref={pickerRef} className="flex flex-wrap gap-2 items-center justify-between">
+      {/* Sub-navigation Switcher */}
+      <div className="bg-card p-2 rounded-xl border border-border/50 shadow-sm w-full max-w-full">
+        <div role="tablist" aria-label="Finance sections" className="menu-bar">
+          {mainTabs.map(t => (
+            <Button
+              key={t.id}
+              role="tab"
+              aria-selected={activeMainTab === t.id}
+              variant={activeMainTab === t.id ? 'default' : 'ghost'}
+              size="sm"
+              className={`rounded-full px-4 justify-center ${activeMainTab !== t.id ? 'text-muted-foreground hover:bg-muted hover:text-foreground' : ''}`}
+              onClick={() => setActiveMainTab(t.id)}
+            >
+              {t.icon} {t.label}
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      {activeMainTab === 'expenses' ? (
+        <Expenses
+          employees={employees}
+          expenses={expenses || []}
+          setExpenses={setExpenses}
+          settings={settings}
+          addLog={addLog}
+          addToast={addToast}
+          addAuditLog={addAuditLog}
+          currentUser={currentUser}
+          addNotification={addNotification}
+        />
+      ) : (
+        <>
+          <div ref={pickerRef} className="flex flex-wrap gap-2 items-center justify-between">
         <Button variant="outline" size="sm" onClick={handleDownloadPayrollPDF} disabled={!entries} className="rounded-full text-xs font-semibold hover:text-primary hover:border-primary/50 transition-colors shadow-sm">
           <Icon name="picture_as_pdf" size={16} className="mr-1.5" /> Download Sheet PDF
         </Button>
@@ -978,6 +1016,8 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
       </Dialog>
 
       <AdSlot type="horizontal" className="mt-4" />
+        </>
+      )}
     </div>
   )
 }
