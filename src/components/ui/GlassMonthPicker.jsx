@@ -110,7 +110,7 @@ export default function GlassMonthPicker({
           onClick={handlePrevMonth}
           disabled={disabled}
           title="Previous Month"
-          className="size-9 rounded-2xl glass-card liquid-glass-btn flex items-center justify-center text-foreground/80 hover:text-foreground transition-all duration-200 cursor-pointer active:scale-95 shadow-2xs hover:shadow-xs disabled:opacity-50 disabled:cursor-not-allowed"
+          className="size-9 rounded-2xl glass-kormiis liquid-glass-btn flex items-center justify-center text-foreground/80 hover:text-foreground transition-all duration-200 cursor-pointer active:scale-95 shadow-2xs hover:shadow-xs disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Icon name="chevron_left" size={17} />
         </button>
@@ -121,7 +121,7 @@ export default function GlassMonthPicker({
         type="button"
         onClick={() => !disabled && setIsOpen(prev => !prev)}
         disabled={disabled}
-        className={`group h-9 px-3.5 rounded-2xl glass-card liquid-glass-btn transition-all duration-200 flex items-center gap-2 select-none cursor-pointer active:scale-[0.98] shadow-2xs hover:shadow-xs disabled:opacity-50 disabled:cursor-not-allowed ${
+        className={`group h-9 px-3.5 rounded-2xl glass-kormiis liquid-glass-btn transition-all duration-200 flex items-center gap-2 select-none cursor-pointer active:scale-[0.98] shadow-2xs hover:shadow-xs disabled:opacity-50 disabled:cursor-not-allowed ${
           isOpen ? 'ring-2 ring-primary/40 border-primary/50' : ''
         }`}
       >
@@ -147,16 +147,16 @@ export default function GlassMonthPicker({
           onClick={handleNextMonth}
           disabled={disabled}
           title="Next Month"
-          className="size-9 rounded-2xl glass-card liquid-glass-btn flex items-center justify-center text-foreground/80 hover:text-foreground transition-all duration-200 cursor-pointer active:scale-95 shadow-2xs hover:shadow-xs disabled:opacity-50 disabled:cursor-not-allowed"
+          className="size-9 rounded-2xl glass-kormiis liquid-glass-btn flex items-center justify-center text-foreground/80 hover:text-foreground transition-all duration-200 cursor-pointer active:scale-95 shadow-2xs hover:shadow-xs disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Icon name="chevron_right" size={17} />
         </button>
       )}
 
-      {/* Apple Liquid Glass Dropdown Popover (Exact glass-kormiis-modal architecture) */}
+      {/* Apple Liquid Glass Dropdown Popover */}
       {isOpen && (
         <div
-          className={`glass-kormiis-modal glass-popover absolute top-full mt-2 z-50 w-[270px] sm:w-[285px] p-4 text-foreground shadow-2xl animate-in fade-in-0 zoom-in-95 duration-200 ${
+          className={`glass-kormiis glass-popover absolute top-full mt-2 z-50 w-[270px] sm:w-[285px] p-4 text-foreground shadow-2xl animate-in fade-in-0 zoom-in-95 duration-200 ${
             align === 'left' ? 'left-0' : 'right-0'
           }`}
         >

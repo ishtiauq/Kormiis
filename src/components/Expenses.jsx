@@ -218,14 +218,6 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
   return (
     <div className="animate-fade-in flex flex-col gap-4 sm:gap-6 lg:gap-8">
 
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
-          <Icon name="wallet" className="text-foreground shrink-0" size={28}/>
-          Expenses
-        </h1>
-      </div>
-      <div className="border-t border-border border-headline" />
 
       {/* Navigation Tabs */}
       <div className="bg-card p-2 rounded-xl border border-border/50 shadow-sm w-full max-w-full">

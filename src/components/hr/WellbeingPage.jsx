@@ -62,19 +62,12 @@ export default function WellbeingPage({ adminUid, currentUser, addToast }) {
 
   return (
     <div className="animate-fade-in flex flex-col gap-5 max-w-[1200px] mx-auto w-full">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground m-0">
-          <Icon name="favorite" className="text-foreground shrink-0" size={28}/> Well-being Alerts
-        </h1>
-        <div className="flex items-center gap-2.5">
-          <GlassMonthPicker value={month} onChange={(e) => setMonth(e.target.value)} />
-          <Button variant="outline" size="sm" onClick={handleRunNow} disabled={running} className="rounded-2xl shadow-sm h-10 px-4">
-            <Icon name="refresh" className="mr-1.5" size={15}/> {running ? 'Running...' : 'Run analysis'}
-          </Button>
-        </div>
+      <div className="flex items-center justify-end gap-2.5">
+        <GlassMonthPicker value={month} onChange={(e) => setMonth(e.target.value)} />
+        <Button variant="outline" size="sm" onClick={handleRunNow} disabled={running} className="rounded-2xl shadow-sm h-10 px-4">
+          <Icon name="refresh" className="mr-1.5" size={15}/> {running ? 'Running...' : 'Run analysis'}
+        </Button>
       </div>
-
-      <div className="border-t border-border border-headline" />
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card>

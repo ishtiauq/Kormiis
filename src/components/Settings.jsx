@@ -14,6 +14,7 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@
 import { requestPushPermission, getPushPermission, registerPushSubscription } from "../services/pushNotifications.js"
 import { sendTestEmail } from "../services/emailService.js"
 import { getAiApiKey, setAiApiKey, getAiModel, setAiModel, testGeminiApiKey, GEMINI_MODELS } from "../services/aiAgent.js"
+import { AiQuantumGlyph } from './ai/AiExpandableFab.jsx'
 
 export default function Settings({ settings, setSettings, addLog, addToast, auditLogs, themeMode, toggleTheme, employees, setEmployees, currentUser }) {
   // Accordion open states
@@ -335,15 +336,6 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
 
   return (
     <div className="animate-fade-in flex flex-col gap-6 w-full pb-14 max-w-[1100px] mx-auto">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <Icon name="settings" className="text-foreground shrink-0" size={36}/>
-        <h1 className="text-fluid-xl font-extrabold tracking-tight text-foreground">
-          Settings
-        </h1>
-      </div>
-
-      <div className="border-t border-border border-headline" />
 
       {/* Accordion Stream */}
       <div className="flex flex-col gap-2.5 sm:gap-3">
@@ -898,14 +890,11 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
           <button
             type="button"
             onClick={() => toggleSection('ai')}
-            className="w-full py-2.5 px-4 sm:px-5 flex items-center justify-between gap-4 text-left transition-colors hover:bg-black/[0.02] dark:hover:bg-white/[0.03] cursor-pointer select-none border-0 outline-none"
+            className="w-full py-3 px-4 sm:px-5 flex items-center justify-between gap-4 text-left transition-colors hover:bg-black/[0.02] dark:hover:bg-white/[0.03] cursor-pointer select-none border-0 outline-none"
           >
-            <div className="flex items-center gap-3.5 min-w-0">
-              <Icon name="auto_awesome" className="text-primary shrink-0" size={32}/>
-              <div>
-                <h3 className="font-bold text-fluid text-foreground tracking-tight">Kormiis AI Agent</h3>
-                <p className="text-xs text-muted-foreground m-0">Configure free Google Gemini API key and AI models</p>
-              </div>
+            <div className="flex items-center gap-3 min-w-0">
+              <AiQuantumGlyph size={26} className="text-foreground shrink-0" />
+              <h3 className="font-bold text-fluid text-foreground tracking-tight m-0">Kormiis AI</h3>
             </div>
 
             <Icon 
@@ -917,21 +906,14 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
 
           {openSections.ai && (
             <div className="border-t border-border/60 dark:border-white/8 p-5 sm:p-6 flex flex-col gap-5 animate-in fade-in-50 duration-200">
-              <div className="p-4.5 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/25 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                <div className="flex items-center gap-3.5">
-                  <div className="size-11 rounded-2xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                    <Icon name="check_circle" size={26} />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h4 className="text-sm font-bold text-foreground m-0">Kormiis AI Engine is Active</h4>
-                      <Badge className="bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 text-[10px] uppercase font-bold">
-                        Built-in Free
-                      </Badge>
-                    </div>
-                    <p className="text-xs text-muted-foreground m-0 mt-0.5">
-                      All admins and teammates can seamlessly chat, execute actions, upload files, and give voice commands without any setup.
-                    </p>
+              <div className="p-4 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/25 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <Icon name="check_circle" size={24} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+                  <div className="flex items-center gap-2">
+                    <h4 className="text-sm font-bold text-foreground m-0">Kormiis AI Engine is Active</h4>
+                    <Badge className="bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 text-[10px] uppercase font-bold">
+                      Built-in Free
+                    </Badge>
                   </div>
                 </div>
               </div>

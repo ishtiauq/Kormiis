@@ -5,7 +5,7 @@ const Card = React.forwardRef(({ className, ...props }, ref) => (
   <div
     ref={ref}
     className={cn(
-      "rounded-3xl border border-white/30 dark:border-white/12 glass-card text-card-foreground shadow-xl transition-all duration-300 overflow-hidden",
+      "rounded-3xl border border-white/30 dark:border-white/12 glass-kormiis text-card-foreground shadow-xl transition-all duration-300 overflow-hidden",
       className
     )}
     {...props}
@@ -16,7 +16,7 @@ Card.displayName = "Card"
 const CardHeader = React.forwardRef(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("flex flex-col space-y-1.5 p-5 sm:p-6 pb-3.5 border-b border-border/80 dark:border-white/10 shrink-0", className)}
+    className={cn("flex flex-col space-y-1.5 p-5 sm:p-6 pb-2 shrink-0", className)}
     {...props}
   />
 ))
@@ -44,14 +44,14 @@ const CardDescription = React.forwardRef(({ className, ...props }, ref) => (
 CardDescription.displayName = "CardDescription"
 
 const CardContent = React.forwardRef(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("p-5 sm:p-6 pt-4 flex-1", className)} {...props} />
+  <div ref={ref} className={cn("p-5 sm:p-6 pt-2 flex-1", className)} {...props} />
 ))
 CardContent.displayName = "CardContent"
 
 const CardFooter = React.forwardRef(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("flex items-center p-5 sm:p-6 pt-3 gap-3 border-t border-border/80 dark:border-white/10 shrink-0", className)}
+    className={cn("flex items-center p-5 sm:p-6 pt-3 gap-3 shrink-0", className)}
     {...props}
   />
 ))

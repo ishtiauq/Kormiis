@@ -20,18 +20,16 @@ Whenever creating new components, pages, widgets, or modifying existing ones in 
 ## 1. Core Material Architecture (Ultra-Liquid Glass)
 
 ### Layered Translucency & Optical Refraction
-- **Backdrop Filter**: `backdrop-filter: saturate(190%) blur(28px - 36px)` on all primary glass containers (`.glass-kormiis`, `.glass-card`, `.bg-card`, `.glass-kormiis-modal`, `.glass-popover`).
+- **Backdrop Filter**: `backdrop-filter: saturate(190%) blur(28px - 36px)` on all primary glass containers (`.glass-kormiis`).
 - **Base Translucency Gradients**:
-  - **Light Mode**: High-clarity 22%–48% opacity: `linear-gradient(135deg, rgba(255, 255, 255, 0.48) 0%, rgba(255, 255, 255, 0.22) 100%)`.
+  - **Light Mode**: High-clarity 22%–48% opacity: `linear-gradient(135deg, rgba(255, 255, 255, 0.72) 0%, rgba(255, 255, 255, 0.42) 100%)`.
   - **Dark Mode**: High-clarity smoky 30%–45% opacity: `linear-gradient(135deg, rgba(28, 28, 40, 0.42) 0%, rgba(14, 14, 22, 0.30) 100%)`.
-- **Soft Specular Highlights**: Natural refined inner strokes:
-  `inset 0 1px 1px 0 rgba(255, 255, 255, 0.35), inset 1px 0 1px 0 rgba(255, 255, 255, 0.15)`.
 - **Borders & Continuous Curvature**:
-  - Border: 1px solid `rgba(255, 255, 255, 0.28 - 0.32)` in Light Mode, `rgba(255, 255, 255, 0.15)` in Dark Mode.
+  - Border: 1px solid `rgba(0, 0, 0, 0.12 - 0.15)` in Light Mode, `rgba(255, 255, 255, 0.15)` in Dark Mode.
   - Corner Radii: Continuous squircle corners — `rounded-2xl` to `rounded-3xl` (20px–32px) for cards/panels, `rounded-2xl` or `rounded-full` (16px–24px) for buttons/pills.
-- **Elevation & Shadows**:
-  - **Light Mode**: Diffuse natural depth `0 20px 40px -10px rgba(0, 0, 0, 0.07), 0 2px 4px 0 rgba(0, 0, 0, 0.04)`.
-  - **Dark Mode**: Deep atmospheric depth `0 24px 50px -12px rgba(0, 0, 0, 0.75), 0 3px 8px 0 rgba(0, 0, 0, 0.45)`.
+- **Universal Zero-Shadow Standard**:
+  - **Strictly NO depth shadows, drop shadows, ambient shadows, or cast shadows** anywhere in the application (`box-shadow: none !important;`).
+  - Containers, modals, dialogs, drawers, cards, buttons, and popovers rely purely on optical translucency, continuous curvature, and crisp contrast borders with zero shadow artifacts.
 
 ---
 
@@ -40,15 +38,15 @@ Whenever creating new components, pages, widgets, or modifying existing ones in 
 Buttons use physical tactile spring curves (`cubic-bezier(0.34, 1.56, 0.64, 1)`):
 
 - **Default State** (`.liquid-glass-btn`, `.apple-glass-btn`):
-  Translucent glass gradient, soft specular inner stroke, 90% opacity label text.
+  Translucent glass gradient, crisp border, 90% opacity label text, zero shadow.
 - **Hover State**:
-  Scale `1.02`, brightness `+5%`, shadow expands 10%, smooth cursor pointer.
+  Scale `1.02`, brightness `+5%`, zero shadow, smooth cursor pointer.
 - **Pressed State**:
-  Scale `0.97`, brightness `-5%`, shadow shrinks to contact shadow (`0 2px 4px rgba(...)`), tactile release feel.
+  Scale `0.97`, brightness `-5%`, zero shadow, tactile release feel.
 - **Release (Spring Overshoot)**:
   Returns with slight spring overshoot (scale `1.02 -> 1.0`) over 400–500ms.
 - **Focus-Visible**:
-  `2px ring rgba(255, 255, 255, 0.6)` + 4px glow, zero harsh outlines.
+  `2px ring rgba(255, 255, 255, 0.6)` + zero harsh outlines.
 - **Icon Buttons** (`.liquid-icon-btn`):
   On press, icon scales to 0.9 and rotates -3deg, then springs back smoothly.
 - **Loading State** (`.liquid-spinner`):
@@ -73,11 +71,11 @@ Buttons use physical tactile spring curves (`cubic-bezier(0.34, 1.56, 0.64, 1)`)
 
 ## 4. Modals, Popovers & Dialogs
 
-- **Class**: `.glass-kormiis-modal`, `.glass-popover`.
+- **Class**: `.glass-kormiis`.
 - **Corner Radius**: `rounded-[28px]` / `rounded-3xl` (1.75rem).
 - **Padding**: Internal padding minimum `p-6 sm:p-8`.
 - **Headers & Footers**:
-  - Separators use `border-border/80 dark:border-white/12` (crisply visible in both light & dark modes).
+  - Seamless unified canvas or crisp separators where appropriate.
 - **Backdrop**: Smooth dark blur `backdrop-blur-md bg-black/40` or `bg-black/60`.
 
 ---
@@ -120,13 +118,16 @@ Global fluid typography uses `clamp()` in `@layer base`:
 
 ---
 
-## 8. Device Breakpoint Standards (iPad Pro & Tablet Taxonomy)
+## 8. Unified Navigation Bar Standard (Top Horizontal Page Headlines)
 
-- **Mobile Handsets**: `< 640px` (`< sm`).
-- **Tablets & iPads (including iPad Pro 1024x1366)**: `640px` to `1024px` (`sm:` to `lg:` / `max-w-[1024px]`).
-  - **iPad Pro Requirement**: The iPad Pro screen size (`1024px × 1366px`) **MUST ALWAYS** be treated as a **Tablet screen**, NOT as a desktop.
-  - Tablet screens use the top unified navigation bar with viewport bottom-edge image anchoring (`h-[100dvh] pb-0`), single vertical feature marquee stream (`xl:hidden` / `< 1025px`), and tablet-proportional aspect scaling.
-- **Desktop & Widescreen Laptops**: `> 1024px` (`xl:` / `≥ 1025px`). Dual horizontal feature marquee streams and desktop widescreen layout.
+- **Layout Structure**: Top unified horizontal navigation stream in `.glass-kormiis` containing Brand Logo (left), scrollable horizontal page headlines/tabs (center), and Action Tools (theme toggle, notification badge, profile avatar on right).
+- **Tab Styles**:
+  - **Active Tab**: Apple high-contrast pill (`bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 border border-white/20 font-bold`).
+  - **Inactive Tab**: Frosted glass pill (`text-muted-foreground hover:text-foreground hover:bg-white/40 dark:hover:bg-white/10`).
+- **Device Breakpoints**:
+  - **Mobile Handsets**: `< 640px` (`< sm`). Mobile header + horizontal tab bar + bottom floating dock.
+  - **Tablets & iPads (including iPad Pro 1024x1366)**: `640px` to `1024px`. Unified top navigation bar with horizontal page headline stream.
+  - **Desktop & Widescreen Laptops**: `> 1024px` (`xl:` / `≥ 1025px`). Spacious top navigation bar with centered horizontal page headline stream.
 
 ---
 

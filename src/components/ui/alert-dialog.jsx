@@ -28,7 +28,7 @@ const AlertDialogContent = React.forwardRef(({ className, children, ...props }, 
     <AriaModal
       ref={ref}
       className={cn(
-        "w-full max-w-md flex flex-col overflow-hidden rounded-[28px] glass-kormiis-modal text-card-foreground shadow-2xl transition-all duration-200 data-[entering]:animate-in data-[entering]:zoom-in-95 data-[exiting]:animate-out data-[exiting]:zoom-out-95 p-0 relative",
+        "w-full max-w-md flex flex-col overflow-hidden rounded-[28px] glass-kormiis text-card-foreground shadow-2xl transition-all duration-200 data-[entering]:animate-in data-[entering]:zoom-in-95 data-[exiting]:animate-out data-[exiting]:zoom-out-95 p-0 relative",
         className
       )}
       {...props}

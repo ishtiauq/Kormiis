@@ -55,13 +55,6 @@ export default function AttendancePage({
 
   return (
     <div className="animate-fade-in flex flex-col gap-6 w-full pb-10">
-      <div className="flex items-center justify-between">
-        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
-          <Icon name={icon} className="text-foreground shrink-0" size={28}/>
-          {headline}
-        </h1>
-      </div>
-      <div className="border-t border-border border-headline" />
 
       <div className="bg-card p-2 rounded-xl border border-border/50 shadow-sm w-full max-w-full">
         <div role="tablist" aria-label="Attendance sections" className="menu-bar">

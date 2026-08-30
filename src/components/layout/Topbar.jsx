@@ -49,7 +49,9 @@ export default function Topbar({
   setTasks,
   settings = {},
   aiModalAction,
-  addToast
+  addToast,
+  visibleNavItems = [],
+  currentView
 }) {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true)
@@ -298,201 +300,207 @@ export default function Topbar({
     )
   }
 
+  // Render navigation dock helper (used inline on XL+ screens, and full-width on < XL screens)
+  const renderNavigationDock = (isFullWidthRow = false) => {
+    if (!visibleNavItems || visibleNavItems.length === 0) return null
+    return (
+      <div className={`w-fit max-w-full h-[48px] sm:h-[54px] glass-kormiis rounded-2xl sm:rounded-full p-1 sm:p-1.5 flex items-center justify-center border border-black/8 dark:border-white/8 menu-bar-dock ${isFullWidthRow ? 'mx-auto' : ''}`}>
+        <nav 
+          aria-label="Main page navigation" 
+          className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto no-scrollbar scrollbar-none select-none scroll-smooth h-full max-w-full menu-bar-dock"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
+        >
+          {visibleNavItems.filter(item => item.id !== 'profile' && item.id !== 'settings').map(item => {
+            const isActive = currentView === item.id;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                title={item.label}
+                aria-label={item.label}
+                onClick={() => {
+                  if (setCurrentView) setCurrentView(item.id);
+                }}
+                className={`h-8.5 sm:h-9.5 rounded-xl sm:rounded-full flex items-center justify-center shrink-0 transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] cursor-pointer select-none active:scale-95 ${
+                  isActive
+                    ? 'nav-capsule-active px-3.5 sm:px-4 gap-1.5 sm:gap-2 font-bold'
+                    : 'w-8.5 sm:w-9.5 text-neutral-600 dark:text-neutral-300 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10 border border-transparent'
+                }`}
+              >
+                <span className={`shrink-0 flex items-center justify-center ${isActive ? 'scale-105' : 'opacity-80'}`}>
+                  {item.icon}
+                </span>
+                {isActive && (
+                  <span className="text-xs sm:text-sm font-bold tracking-tight whitespace-nowrap animate-in fade-in zoom-in-95 duration-200">
+                    {item.label}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </nav>
+      </div>
+    )
+  }
+
   return (
     <div ref={topbarRef} className="relative w-full flex flex-col items-center pointer-events-auto">
-      {/* Mobile: Liquid Glass Top Bar */}
-      {isMobile ? (
-        <header aria-label="Top bar" className="topbar topbar-mobile-bar pointer-events-auto w-full h-14 px-4 flex items-center justify-between glass-apple text-foreground transition-all duration-300 rounded-none border-x-0 border-t-0 border-b border-border/80 dark:border-white/12">
-          <div className="flex items-center shrink-0">
-            <a
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                if (setCurrentView) setCurrentView('dashboard');
-              }}
-              className="flex items-center cursor-pointer transition-opacity hover:opacity-80 active:scale-95 outline-none no-underline border-none bg-transparent p-0 m-0 shadow-none"
-              style={{ background: 'transparent', border: 'none', boxShadow: 'none', padding: 0, margin: 0 }}
-              title="Kormiis Dashboard"
+      {/* Progressive Blur Layer Behind Top Navigation (Starting from Absolute Top Edge of Screen) */}
+      <div 
+        className="pointer-events-none absolute -top-8 sm:-top-10 md:-top-12 inset-x-[-100vw] h-[calc(100%+80px)] sm:h-[calc(100%+95px)] md:h-[calc(100%+105px)] z-0 progressive-blur-mask"
+        aria-hidden="true"
+      />
+
+      {/* Row 1: Unified Top Navigation Header (Logo Left, Inline Menu on XL+ screens, Actions Right) */}
+      <header aria-label="Top navigation bar" className="relative z-10 pointer-events-auto w-full max-w-[1920px] mx-auto h-16 sm:h-20 px-2 sm:px-4 md:px-6 flex items-center justify-between gap-2 sm:gap-4 text-foreground bg-transparent border-none shadow-none" style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}>
+        
+        {/* 1. Leftmost: Brand Logo (Containerless Pure Standalone) & Quick Integrity Alert */}
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0 h-[48px] sm:h-[54px]">
+          <a
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              if (setCurrentView) setCurrentView('dashboard');
+            }}
+            className="flex items-center justify-center cursor-pointer outline-none no-underline border-none bg-transparent p-0 m-0 shadow-none select-none h-full transition-transform active:scale-95"
+            style={{ background: 'transparent', border: 'none', boxShadow: 'none', padding: 0, margin: 0 }}
+            title="Kormiis Dashboard"
+          >
+            <img
+              src={isDark ? kormiisWhiteLogo : kormiisLogo}
+              alt="Kormiis Logo"
+              className="h-7 sm:h-8 md:h-8.5 w-auto max-w-[120px] sm:max-w-[140px] md:max-w-[150px] object-contain shrink-0 select-none block"
+              style={{ background: 'transparent', border: 'none', boxShadow: 'none', filter: 'none' }}
+            />
+          </a>
+
+          {/* Data Integrity / Auto-Repair Alert (if discrepancies exist) */}
+          {hasIntegrityIssues && (
+            <button
+              onClick={() => setShowCorruptionModal && setShowCorruptionModal(true)}
+              className="flex items-center gap-1 px-3 h-9 rounded-full text-xs font-bold bg-destructive/15 text-destructive border border-destructive/30 hover:bg-destructive/25 transition-all cursor-pointer animate-pulse shrink-0"
+              title={`${dataIntegrityIssues.length} data discrepancies detected`}
             >
-              <img
-                src={isDark ? kormiisWhiteLogo : kormiisLogo}
-                alt="Kormiis Logo"
-                className="h-7 sm:h-8 w-auto max-w-[120px] object-contain shrink-0 drop-shadow-sm transition-opacity"
-                style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}
-              />
-            </a>
-          </div>
+              <Icon name="warning" size={15} />
+              <span className="hidden sm:inline">{dataIntegrityIssues.length}</span>
+            </button>
+          )}
+        </div>
 
-          {/* Right: Actions Group (Theme, Notification, Profile) */}
-          <div className="flex items-center gap-1.5 shrink-0">
-            {showThemeToggle && (
-              <button
-                onClick={toggleTheme}
-                title={`Theme: ${themeMode}`}
-                aria-label="Toggle light/dark theme"
-                className="rounded-full size-9 text-foreground apple-glass-btn shrink-0 flex items-center justify-center cursor-pointer active:scale-95 transition-all"
-              >
-                {themeMode === 'light' ? <Icon name="light_mode" size={18} /> : <Icon name="dark_mode" size={18} />}
-              </button>
-            )}
-            <div className="relative">
-              <button
-                ref={buttonRef}
-                onClick={() => {
-                  setShowNotifications(prev => !prev);
-                  if (markNotificationsRead) markNotificationsRead();
-                }}
-                title="Notifications"
-                aria-label="Notifications"
-                className="rounded-full size-9 text-foreground apple-glass-btn relative shrink-0 flex items-center justify-center cursor-pointer active:scale-95 transition-all"
-                id="notification-trigger"
-              >
-                <Icon name="notifications_active" size={18} />
-                {totalUnreadCount > 0 && (
-                  <span className="absolute top-1 right-1 flex size-2.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
-                    <span className="relative inline-flex rounded-full size-2.5 bg-destructive"></span>
-                  </span>
-                )}
-              </button>
-            </div>
-            {user && (
-              <button
-                onClick={onProfileClick || (() => setCurrentView && setCurrentView('profile'))}
-                title={user?.name ? `${user.name} (My Profile)` : "My Profile"}
-                aria-label="Open Profile"
-                className="rounded-full size-9 text-foreground apple-glass-btn shrink-0 flex items-center justify-center cursor-pointer active:scale-95 transition-all"
-              >
-                <Icon name="person" size={19} />
-              </button>
-            )}
-          </div>
-        </header>
-      ) : (
-        <header aria-label="Top bar" className="topbar pointer-events-auto w-[98%] min-[400px]:w-[94%] sm:w-[85%] max-w-3xl mx-auto h-14 sm:h-16 px-3 sm:px-4 md:px-5 flex items-center justify-between text-foreground transition-all duration-300">
-          
-          {/* Left: Brand Logo & Quick Search */}
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            <a
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                if (setCurrentView) setCurrentView('dashboard');
-              }}
-              className="flex items-center cursor-pointer transition-opacity hover:opacity-80 active:scale-95 outline-none no-underline border-none bg-transparent p-0 m-0 shadow-none"
-              style={{ background: 'transparent', border: 'none', boxShadow: 'none', padding: 0, margin: 0 }}
-              title="Kormiis Dashboard"
+        {/* 2. Rightmost: Actions Group (Containerless Standalone Icons, Ultra-Compact gap-[1.6px]) */}
+        <div className="flex items-center gap-[1.6px] shrink-0 h-[48px] sm:h-[54px]">
+          {showThemeToggle && (
+            <button
+              onClick={toggleTheme}
+              title={`Switch Theme (Current: ${themeMode})`}
+              aria-label="Toggle light/dark theme"
+              className="size-9 sm:size-10 bg-transparent border-none shadow-none outline-none text-foreground/75 hover:text-foreground shrink-0 flex items-center justify-center cursor-pointer active:scale-90 transition-all p-0"
+              style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}
             >
-              <img
-                src={isDark ? kormiisWhiteLogo : kormiisLogo}
-                alt="Kormiis Logo"
-                className="h-7 sm:h-8 md:h-9 w-auto max-w-[120px] sm:max-w-[140px] object-contain shrink-0 drop-shadow-sm transition-opacity"
-                style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}
-              />
-            </a>
+              {themeMode === 'light' ? <Icon name="light_mode" size={24} /> : <Icon name="dark_mode" size={24} />}
+            </button>
+          )}
 
-            {/* Data Integrity / Auto-Repair Alert (if discrepancies exist) */}
-            {hasIntegrityIssues && (
-              <button
-                onClick={() => setShowCorruptionModal && setShowCorruptionModal(true)}
-                className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-destructive/15 text-destructive border border-destructive/30 hover:bg-destructive/25 transition-all cursor-pointer animate-pulse"
-                title={`${dataIntegrityIssues.length} data discrepancies detected`}
-              >
-                <Icon name="warning" size={14} />
-                <span className="hidden sm:inline">{dataIntegrityIssues.length}</span>
-              </button>
-            )}
+          {/* Notifications Trigger (Containerless) */}
+          <div className="relative flex items-center justify-center">
+            <button
+              ref={buttonRef}
+              onClick={() => { 
+                if (isAiOpen && onOpenAi) onOpenAi()
+                setShowNotifications(prev => !prev); 
+                if (markNotificationsRead) markNotificationsRead();
+              }}
+              title="Notifications"
+              aria-label="Notifications"
+              className="size-9 sm:size-10 bg-transparent border-none shadow-none outline-none text-foreground/75 hover:text-foreground relative shrink-0 flex items-center justify-center cursor-pointer active:scale-90 transition-all p-0"
+              style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}
+              id="notification-trigger"
+            >
+              <Icon name="notifications_active" size={24} />
+              {totalUnreadCount > 0 && (
+                <span className="absolute top-1.5 right-1.5 flex size-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
+                  <span className="relative inline-flex rounded-full size-2.5 bg-destructive"></span>
+                </span>
+              )}
+            </button>
           </div>
 
-          {/* Right: Actions Group (Theme, Notification, Profile) */}
-          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-            {showThemeToggle && (
-              <button
-                onClick={toggleTheme}
-                title={`Switch Theme (Current: ${themeMode})`}
-                aria-label="Toggle light/dark theme"
-                className="rounded-full size-9 sm:size-9 text-foreground apple-glass-btn shrink-0 flex items-center justify-center cursor-pointer active:scale-95 transition-all"
-              >
-                {themeMode === 'light' ? <Icon name="light_mode" size={18} /> : <Icon name="dark_mode" size={18} />}
-              </button>
-            )}
+          {/* Settings Trigger Button (Placed next to Profile, Containerless) */}
+          <button
+            onClick={() => setCurrentView && setCurrentView('settings')}
+            title="Settings"
+            aria-label="Settings"
+            className={`size-9 sm:size-10 bg-transparent border-none shadow-none outline-none shrink-0 flex items-center justify-center cursor-pointer active:scale-90 transition-all p-0 ${
+              currentView === 'settings' ? 'text-primary' : 'text-foreground/75 hover:text-foreground'
+            }`}
+            style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}
+          >
+            <Icon name="settings" size={24} />
+          </button>
 
-            {/* Notifications Trigger */}
-            <div className="relative">
-              <button
-                ref={buttonRef}
-                onClick={() => { 
-                  if (isAiOpen && onOpenAi) onOpenAi()
-                  setShowNotifications(prev => !prev); 
-                  if (markNotificationsRead) markNotificationsRead();
-                }}
-                title="Notifications"
-                aria-label="Notifications"
-                className="rounded-full size-9 sm:size-9 text-foreground apple-glass-btn relative shrink-0 flex items-center justify-center cursor-pointer active:scale-95 transition-all"
-                id="notification-trigger"
-              >
-                <Icon name="notifications_active" size={18} />
-                {totalUnreadCount > 0 && (
-                  <span className="absolute top-1 right-1 flex size-2.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
-                    <span className="relative inline-flex rounded-full size-2.5 bg-destructive"></span>
-                  </span>
-                )}
-              </button>
-            </div>
+          {/* User Profile Trigger Button (Containerless) */}
+          {user && (
+            <button
+              onClick={onProfileClick || (() => setCurrentView && setCurrentView('profile'))}
+              title={user?.name ? `${user.name} (My Profile)` : "My Profile"}
+              aria-label="Open Profile"
+              className={`size-9 sm:size-10 bg-transparent border-none shadow-none outline-none shrink-0 flex items-center justify-center cursor-pointer active:scale-90 transition-all p-0 ${
+                currentView === 'profile' ? 'text-primary ring-2 ring-primary/40 rounded-full' : 'text-foreground/75 hover:text-foreground'
+              }`}
+              style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}
+            >
+              {user?.avatar ? (
+                <img src={user.avatar} alt={user.name || 'User'} className="w-7.5 h-7.5 sm:w-8.5 sm:h-8.5 object-cover rounded-full select-none" />
+              ) : (
+                <Icon name="person" size={25} />
+              )}
+            </button>
+          )}
+        </div>
+      </header>
 
-            {/* User Profile Trigger Button */}
-            {user && (
-              <button
-                onClick={onProfileClick || (() => setCurrentView && setCurrentView('profile'))}
-                title={user?.name ? `${user.name} (My Profile)` : "My Profile"}
-                aria-label="Open Profile"
-                className="rounded-full size-9 sm:size-9 text-foreground apple-glass-btn shrink-0 flex items-center justify-center cursor-pointer active:scale-95 transition-all"
-              >
-                <Icon name="person" size={19} />
-              </button>
-            )}
-          </div>
-        </header>
+      {/* Row 2: Universal Full-Width Centered Menu Bar Row (Desktop, Laptop, Tablet, Mobile) sitting right above announcement widget */}
+      {visibleNavItems && visibleNavItems.length > 0 && (
+        <div className="relative z-10 pointer-events-auto w-full max-w-[1920px] mx-auto px-2 sm:px-4 pt-0.5 sm:pt-1 pb-0.5 flex justify-center items-center">
+          {renderNavigationDock(true)}
+        </div>
       )}
 
-      {/* Inline Notification Panel — expands below the topbar */}
+      {/* Floating Notification Popover / Dropdown — absolute floating overlay */}
       {showNotifications && (
-        <div data-notif-panel className={`pointer-events-auto z-50 ${isMobile ? 'px-3 sm:px-4 mt-2 glass-mobile-drawer rounded-t-[28px] border-t border-white/25 dark:border-white/12' : 'absolute top-full left-1/2 -translate-x-1/2 w-[98%] min-[400px]:w-[94%] sm:w-[85%] max-w-3xl glass-kormiis rounded-[28px] border border-white/25 dark:border-white/12 shadow-[0_32px_80px_-20px_rgba(0,0,0,0.55),0_0_0_1px_rgba(0,0,0,0.04)] animate-in slide-in-from-top-2 fade-in duration-200 data-[exiting]:animate-out data-[exiting]:slide-out-to-top-2 data-[exiting]:fade-out data-[exiting]:duration-150'}`}>
+        <div 
+          data-notif-panel 
+          className="pointer-events-auto z-50 absolute top-[calc(100%+12px)] sm:top-[calc(100%+16px)] right-2 sm:right-4 md:right-6 w-[94vw] sm:w-[480px] max-w-lg glass-kormiis rounded-[28px] border border-black/8 dark:border-white/8 shadow-none animate-in slide-in-from-top-2 fade-in duration-200"
+        >
+          {/* Topmost Right Close Button */}
+          <button
+            onClick={(e) => { e.stopPropagation(); setShowNotifications(false); }}
+            title="Close notifications"
+            aria-label="Close notifications"
+            className="absolute top-3.5 right-3.5 sm:top-4 sm:right-4 z-20 rounded-full size-8 apple-glass-btn text-foreground/70 hover:text-foreground flex items-center justify-center cursor-pointer transition-all active:scale-90"
+          >
+            <Icon name="close" size={18} />
+          </button>
+
           <div className="flex flex-col max-h-[min(65vh,540px)] overflow-y-auto p-4 sm:p-5">
             {/* Header */}
-            <div className="flex-row items-center justify-between border-b border-border/80 dark:border-white/12 pb-3.5 mb-3 space-y-0 shrink-0">
-              <div className="flex items-center gap-2.5">
-                <div className="size-8.5 rounded-2xl flex items-center justify-center bg-primary/10 text-primary shrink-0 shadow-inner">
-                  <Icon name="notifications" size={19} />
-                </div>
-                <div className="flex flex-col">
-                  <h2 className="text-fluid-lg font-black tracking-tight text-foreground m-0 leading-tight">Notifications</h2>
-                  <p className="text-[11px] font-medium text-muted-foreground m-0 mt-0.5">
-                    {totalUnreadCount > 0 ? `${totalUnreadCount} unread update${totalUnreadCount > 1 ? 's' : ''}` : 'All caught up'}
-                  </p>
-                </div>
+            <div className="flex items-center justify-between pb-3 mb-2.5 space-y-0 shrink-0 pr-10">
+              <div className="flex items-center gap-2">
+                <Icon name="notifications" size={24} className="text-foreground shrink-0" />
+                <h2 className="text-fluid-lg font-black tracking-tight text-foreground m-0 leading-tight">Notifications</h2>
               </div>
               <div className="flex items-center gap-2">
                 {unreadCount > 0 && (
                   <button
                     onClick={(e) => { e.stopPropagation(); if (markNotificationsRead) markNotificationsRead(); }}
                     title="Mark all as read"
-                    className="apple-glass-btn text-xs font-semibold px-2.5 py-1 rounded-full text-foreground/80 hover:text-primary flex items-center gap-1 cursor-pointer transition-all active:scale-95"
+                    className="apple-glass-btn text-xs font-semibold px-2.5 py-1 rounded-full text-foreground/80 hover:text-foreground flex items-center gap-1 cursor-pointer transition-all active:scale-95"
                   >
                     <Icon name="done_all" size={14} />
                     <span className="hidden min-[400px]:inline">Mark Read</span>
                   </button>
                 )}
-                <Badge variant="secondary" className="text-[11px] font-bold px-2.5 py-0.5 rounded-full">{totalItemCount} Total</Badge>
-                <button
-                  onClick={(e) => { e.stopPropagation(); setShowNotifications(false); }}
-                  title="Close notifications"
-                  aria-label="Close notifications"
-                  className="rounded-full size-8 text-foreground/60 hover:text-foreground hover:bg-white/10 dark:hover:bg-white/10 flex items-center justify-center cursor-pointer transition-all active:scale-90"
-                >
-                  <Icon name="close" size={18} />
-                </button>
               </div>
             </div>
 
@@ -515,13 +523,13 @@ export default function Topbar({
                 onClick={() => setNotificationTab('unread')}
                 className={`flex-1 h-7.5 text-xs font-bold rounded-xl transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
                   notificationTab === 'unread' 
-                    ? 'bg-primary text-white shadow-xs' 
+                    ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 shadow-xs' 
                     : 'text-muted-foreground hover:text-foreground bg-transparent'
                 }`}
               >
                 <span>Unread</span>
                 {totalUnreadCount > 0 && (
-                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${notificationTab === 'unread' ? 'bg-white/20 text-white' : 'bg-destructive/15 text-destructive'}`}>
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${notificationTab === 'unread' ? 'bg-white/20 text-white dark:bg-black/20 dark:text-black' : 'bg-destructive/15 text-destructive'}`}>
                     {totalUnreadCount}
                   </span>
                 )}
@@ -533,11 +541,9 @@ export default function Topbar({
               {renderDataIntegrityCard()}
 
               {filteredNotifications.length === 0 && !hasIntegrityIssues ? (
-                <div className="py-12 px-4 text-center flex flex-col items-center justify-center gap-2.5">
-                  <div className="size-13 rounded-2xl bg-primary/[0.08] dark:bg-primary/[0.15] flex items-center justify-center text-primary/70 mb-0.5">
-                    <Icon name="notifications_off" size={26} />
-                  </div>
-                  <p className="text-fluid-sm font-bold text-foreground m-0">All caught up!</p>
+                <div className="py-12 px-4 text-center flex flex-col items-center justify-center gap-2">
+                  <Icon name="notifications_off" size={36} className="text-foreground/40 dark:text-foreground/50 mb-0.5" />
+                  <p className="text-fluid-sm font-bold text-foreground m-0">No Notifications</p>
                   <p className="text-fluid-xs font-normal text-muted-foreground max-w-[220px] m-0 leading-relaxed">
                     {notificationTab === 'unread' ? 'No unread notifications right now.' : 'You have no new notifications right now.'}
                   </p>

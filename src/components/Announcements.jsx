@@ -466,12 +466,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
 
   return (
     <div className="fade-in pb-10 max-w-5xl mx-auto">
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
-          <Icon name="rss_feed" className="text-foreground shrink-0" size={28}/>
-          {headline}
-        </h1>
-        
+      <div className="flex items-center justify-end mb-4">
         <div className="flex gap-3">
           <Dialog open={isDialogOpen} onOpenChange={(open) => {
             if (!open) handleCancelDialog()
@@ -572,7 +567,6 @@ export default function Announcements({ employees, announcements, setAnnouncemen
         </Dialog>
         </div>
       </div>
-      <div className="border-t border-border border-headline mb-6" />
       
       <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2 scrollbar-none">
         {uniqueCategories.map(cat => (

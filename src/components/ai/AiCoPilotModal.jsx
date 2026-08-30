@@ -600,7 +600,7 @@ export default function AiCoPilotModal({
       className={
         isMorphMode
           ? "w-full h-full flex flex-col overflow-hidden relative animate-in fade-in duration-200"
-          : "pointer-events-auto w-full sm:w-[85%] sm:max-w-3xl mx-auto h-[min(82vh,620px)] sm:h-[min(72vh,560px)] flex flex-col rounded-t-[32px] sm:rounded-[28px] rounded-b-none sm:rounded-b-[28px] glass-mobile-drawer sm:glass-kormiis-modal border-t sm:border border-white/35 dark:border-white/16 shadow-[0_-12px_40px_rgba(0,0,0,0.40)] sm:shadow-[0_24px_50px_-12px_rgba(0,0,0,0.50),0_0_20px_0_rgba(0,0,0,0.20)] overflow-hidden backdrop-blur-3xl relative animate-in slide-in-from-bottom sm:slide-in-from-top-3 duration-300 sm:duration-200"
+          : "pointer-events-auto w-full sm:w-[85%] sm:max-w-3xl mx-auto h-[min(82vh,620px)] sm:h-[min(72vh,560px)] flex flex-col rounded-t-[32px] sm:rounded-[28px] rounded-b-none sm:rounded-b-[28px] glass-mobile-drawer sm:glass-kormiis border-t sm:border border-white/35 dark:border-white/16 shadow-[0_-12px_40px_rgba(0,0,0,0.40)] sm:shadow-[0_24px_50px_-12px_rgba(0,0,0,0.50),0_0_20px_0_rgba(0,0,0,0.20)] overflow-hidden backdrop-blur-3xl relative animate-in slide-in-from-bottom sm:slide-in-from-top-3 duration-300 sm:duration-200"
       }
     >
       {/* Mobile Drawer Pull Indicator Handle */}
@@ -610,14 +610,12 @@ export default function AiCoPilotModal({
 
       {/* MODAL HEADER — SEAMLESS MONOGLASS HEADER */}
       <div className="flex items-center justify-between px-4.5 sm:px-5 py-3.5 sm:py-4 shrink-0 bg-transparent">
-        <div className="flex items-center gap-2.5">
-          <div className="size-9 rounded-2xl bg-black/5 dark:bg-white/10 flex items-center justify-center shadow-xs shrink-0 border border-white/25 dark:border-white/15">
-            {showHistoryDrawer ? (
-              <Icon name="history" size={18} className="text-foreground" />
-            ) : (
-              <AiQuantumGlyph size={20} />
-            )}
-          </div>
+        <div className="flex items-center gap-2">
+          {showHistoryDrawer ? (
+            <Icon name="history" size={24} className="text-foreground shrink-0" />
+          ) : (
+            <AiQuantumGlyph size={24} className="shrink-0 text-foreground" />
+          )}
           <div>
             <h2 className="text-sm sm:text-base font-extrabold tracking-tight text-foreground m-0 leading-tight">
               {showHistoryDrawer ? 'Chat History' : 'Kormiis AI'}
@@ -796,9 +794,7 @@ export default function AiCoPilotModal({
                       </span>
                     ) : (
                       <div className="flex items-center gap-1.5">
-                        <div className="size-4.5 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center border border-white/20">
-                          <AiQuantumGlyph size={12} />
-                        </div>
+                        <AiQuantumGlyph size={14} className="shrink-0 text-foreground" />
                         <span className="text-[11px] font-extrabold tracking-tight text-foreground">
                           Kormiis AI
                         </span>
@@ -857,7 +853,7 @@ export default function AiCoPilotModal({
                   {msg.pendingActions?.map(action => (
                     <div
                       key={action.actionId}
-                      className="w-full max-w-[92%] sm:max-w-[85%] p-4.5 glass-card rounded-[22px] border border-white/45 dark:border-white/16 shadow-[0_12px_32px_-8px_rgba(0,0,0,0.12),inset_0_1px_1px_rgba(255,255,255,0.35)] space-y-3.5 animate-in fade-in duration-300 backdrop-blur-2xl"
+                      className="w-full max-w-[92%] sm:max-w-[85%] p-4.5 glass-kormiis rounded-[22px] border border-white/45 dark:border-white/16 shadow-[0_12px_32px_-8px_rgba(0,0,0,0.12),inset_0_1px_1px_rgba(255,255,255,0.35)] space-y-3.5 animate-in fade-in duration-300 backdrop-blur-2xl"
                     >
                       <div className="flex items-center justify-between gap-2 border-b border-border/70 dark:border-white/12 pb-2.5">
                         <div className="flex items-center gap-2">

@@ -134,7 +134,7 @@ export default function AiExpandableFab({
               mass: 0.7
             }}
             style={{ transformOrigin: 'bottom right' }}
-            className="pointer-events-auto w-[calc(100vw-2rem)] xs:w-[390px] sm:w-[450px] md:w-[470px] h-[min(82vh,620px)] sm:h-[min(76vh,640px)] glass-kormiis-modal rounded-[28px] border border-white/45 dark:border-white/16 shadow-[0_28px_70px_-12px_rgba(0,0,0,0.45),inset_0_1px_1px_0_rgba(255,255,255,0.45)] overflow-hidden flex flex-col backdrop-blur-3xl relative"
+            className="pointer-events-auto w-[calc(100vw-2rem)] xs:w-[390px] sm:w-[450px] md:w-[470px] h-[min(82vh,620px)] sm:h-[min(76vh,640px)] glass-kormiis rounded-[28px] border border-white/45 dark:border-white/16 shadow-[0_28px_70px_-12px_rgba(0,0,0,0.45),inset_0_1px_1px_0_rgba(255,255,255,0.45)] overflow-hidden flex flex-col backdrop-blur-3xl relative"
           >
             <AiCoPilotModal
               isMorphMode={true}
@@ -196,9 +196,9 @@ export default function AiExpandableFab({
               {/* Subtle Neutral Specular Highlight */}
               <div className="absolute inset-0 bg-white/[0.04] dark:bg-white/[0.04] opacity-50 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
 
-              {/* Monochrome AI Glyph Capsule */}
-              <div className="relative size-8 rounded-full bg-black/5 dark:bg-white/10 text-foreground flex items-center justify-center shadow-xs shrink-0 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-45 border border-white/20">
-                <AiQuantumGlyph size={18} />
+              {/* Monochrome AI Glyph (Boxless, Direct Sizing) */}
+              <div className="relative shrink-0 text-foreground flex items-center justify-center transition-transform duration-500 group-hover:scale-110 group-hover:rotate-45">
+                <AiQuantumGlyph size={24} />
               </div>
 
               {/* Dynamic Typography Badge */}

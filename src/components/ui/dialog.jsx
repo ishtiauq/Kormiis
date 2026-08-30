@@ -28,7 +28,7 @@ const DialogContent = React.forwardRef(({ className, overlayClassName, dialogCla
     <AriaModal
       ref={ref}
       className={cn(
-        "w-full max-w-lg max-h-[95vh] flex flex-col overflow-hidden rounded-[28px] glass-kormiis-modal text-foreground shadow-2xl p-0",
+        "w-full max-w-lg max-h-[95vh] flex flex-col overflow-hidden rounded-[28px] glass-kormiis text-foreground shadow-2xl p-0",
         className
       )}
       {...props}

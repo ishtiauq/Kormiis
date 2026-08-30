@@ -341,18 +341,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
         />
       )}
 
-      <div className="flex items-end justify-between flex-wrap gap-3 pt-1">
-        <div className="flex flex-col gap-1 min-w-0">
-          <h1 className="text-fluid-2xl font-black tracking-tight text-foreground m-0 leading-none">Dashboard</h1>
-          <p className="text-fluid-sm font-medium text-muted-foreground m-0">
-            {greeting}{firstName ? `, ${firstName}` : ''} — here's today at a glance.
-          </p>
-        </div>
-      </div>
-
-      <div className="border-t border-border border-headline" />
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3 gap-5 lg:gap-6 items-stretch">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3 gap-5 lg:gap-6 items-stretch pt-2">
         
         {canViewAnnouncements && (
           <DashboardWidget

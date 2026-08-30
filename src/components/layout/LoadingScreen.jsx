@@ -52,7 +52,8 @@ export default function LoadingScreen({
           <img
             src={kormiisWhiteLogo}
             alt="Kormiis Logo"
-            className="h-11 sm:h-13 w-auto object-contain drop-shadow-sm"
+            className="h-11 sm:h-13 w-auto object-contain select-none"
+            style={{ filter: 'none', boxShadow: 'none' }}
           />
         </motion.div>
 

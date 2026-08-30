@@ -477,10 +477,8 @@ export default function AiAssistantPage({
         
         {/* HEADER BAR */}
         <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-border/80 dark:border-white/12 shrink-0 bg-white/40 dark:bg-white/[0.04] backdrop-blur-md">
-          <div className="flex items-center gap-2.5">
-            <div className="size-8 sm:size-9 rounded-xl bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 flex items-center justify-center shadow-xs shrink-0">
-              <Icon name={showHistoryView ? "history" : "auto_awesome"} size={18} className="text-white dark:text-neutral-900" />
-            </div>
+          <div className="flex items-center gap-2">
+            <Icon name={showHistoryView ? "history" : "auto_awesome"} size={24} className="text-foreground shrink-0" />
             <div>
               <h2 className="text-sm sm:text-base font-black tracking-tight text-foreground m-0 leading-tight">
                 {showHistoryView ? 'Chat History' : 'Kormiis AI'}
@@ -648,9 +646,7 @@ export default function AiAssistantPage({
                       </span>
                     ) : (
                       <div className="flex items-center gap-1.5">
-                        <div className="size-4 rounded-full bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 flex items-center justify-center">
-                          <Icon name="auto_awesome" size={10} className="text-white dark:text-neutral-900" />
-                        </div>
+                        <Icon name="auto_awesome" size={13} className="text-foreground shrink-0" />
                         <span className="text-[11px] font-black tracking-tight text-foreground">
                           Kormiis AI
                         </span>
@@ -709,7 +705,7 @@ export default function AiAssistantPage({
                   {msg.pendingActions?.map(action => (
                     <div
                       key={action.actionId}
-                      className="w-full max-w-[95%] sm:max-w-[85%] rounded-2xl p-4 glass-card border border-white/30 dark:border-white/15 bg-white/40 dark:bg-white/[0.04] shadow-md space-y-3 animate-in fade-in duration-300"
+                      className="w-full max-w-[95%] sm:max-w-[85%] rounded-2xl p-4 glass-kormiis border border-white/30 dark:border-white/15 bg-white/40 dark:bg-white/[0.04] shadow-md space-y-3 animate-in fade-in duration-300"
                     >
                       <div className="flex items-center justify-between gap-2 border-b border-border/60 pb-2">
                         <div className="flex items-center gap-2">
@@ -768,7 +764,7 @@ export default function AiAssistantPage({
 
               {/* Loading Indicator Bubble */}
               {isLoading && (
-                <div className="flex items-center gap-2 p-3 rounded-2xl glass-card text-xs text-muted-foreground w-fit animate-pulse">
+                <div className="flex items-center gap-2 p-3 rounded-2xl glass-kormiis text-xs text-muted-foreground w-fit animate-pulse">
                   <Icon name="auto_awesome" size={16} className="text-foreground animate-spin" />
                   <span>Kormiis AI is thinking and preparing actions...</span>
                 </div>

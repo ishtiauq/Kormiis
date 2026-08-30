@@ -124,24 +124,17 @@ export default function PerformancePage({ adminUid, currentUser, addToast }) {
 
   return (
     <div className="animate-fade-in flex flex-col gap-5 max-w-[1200px] mx-auto w-full">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground m-0">
-          <Icon name="insights" className="text-foreground shrink-0" size={28}/> Performance Tracker
-        </h1>
-        <div className="flex items-center gap-2.5">
-          <GlassMonthPicker 
-            value={month} 
-            onChange={(e) => setMonth(e.target.value)} 
-          />
-          {isAdmin && (
-            <Button size="sm" variant="default" onClick={handleCalculate} disabled={calculating} className="rounded-2xl shadow-sm h-10 px-4">
-              <Icon name="calculate" className="mr-1.5" size={15}/> {calculating ? 'Calculating...' : 'Calculate month'}
-            </Button>
-          )}
-        </div>
+      <div className="flex items-center justify-end gap-2.5">
+        <GlassMonthPicker 
+          value={month} 
+          onChange={(e) => setMonth(e.target.value)} 
+        />
+        {isAdmin && (
+          <Button size="sm" variant="default" onClick={handleCalculate} disabled={calculating} className="rounded-2xl shadow-sm h-10 px-4">
+            <Icon name="calculate" className="mr-1.5" size={15}/> {calculating ? 'Calculating...' : 'Calculate month'}
+          </Button>
+        )}
       </div>
-
-      <div className="border-t border-border border-headline" />
 
       {/* --- EVALUATION CRITERIA OVERVIEW CARD --- */}
       <Card className="border border-border/80 shadow-sm rounded-2xl">

@@ -342,13 +342,6 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
 
   return (
     <div className="animate-fade-in flex flex-col gap-6 w-full pb-10">
-      <div className="flex items-center justify-between">
-        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
-          <Icon name="calendar_month" className="text-foreground shrink-0" size={28}/>
-          Events
-        </h1>
-      </div>
-      <div className="border-t border-border border-headline" />
 
       <div className={`grid gap-6 items-start ${selectedDate ? 'grid-cols-1 xl:grid-cols-[1fr_380px]' : 'grid-cols-1'}`}>
         {renderCalendarGrid()}

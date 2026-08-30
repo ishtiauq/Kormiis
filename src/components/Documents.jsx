@@ -505,27 +505,16 @@ export default function Documents({
   return (
     <div className="fade-in px-1 sm:px-0 pb-12 space-y-6">
       
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
-            <Icon name="folder_open" className="text-primary shrink-0" size={28}/>
-            Documents
-          </h1>
-        </div>
-
-        <div className="flex items-center gap-2.5 flex-wrap">
-          <Button 
-            variant="default" 
-            onClick={handleOpenUploadModal} 
-            className="rounded-2xl h-11 px-5 font-bold shadow-sm flex-1 sm:flex-none"
-          >
-            <Icon name="upload" className="mr-2 h-4 w-4" size={16}/> Upload Document
-          </Button>
-        </div>
+      {/* Action Toolbar */}
+      <div className="flex items-center justify-end gap-2.5">
+        <Button 
+          variant="default" 
+          onClick={handleOpenUploadModal} 
+          className="rounded-2xl h-11 px-5 font-bold shadow-sm"
+        >
+          <Icon name="upload" className="mr-2 h-4 w-4" size={16}/> Upload Document
+        </Button>
       </div>
-
-      <div className="border-t border-border border-headline" />
 
       {/* Official HR Document & Certificate Studio (Quick Action Cards) */}
       <div className="rounded-[28px] p-5 sm:p-6 glass-kormiis glass-apple text-foreground border border-white/30 dark:border-white/14 shadow-lg flex flex-col gap-4">
@@ -961,7 +950,7 @@ export default function Documents({
 
       {/* Upload / Edit Document Modal */}
       <Dialog open={showUploadModal} onOpenChange={(open) => { if (!open) { setShowUploadModal(false); resetForm() } }}>
-        <DialogContent className="sm:max-w-[540px] glass-kormiis-modal">
+        <DialogContent className="sm:max-w-[540px] glass-kormiis">
           <DialogHeader className="mb-4">
             <DialogTitle className="flex items-center gap-3 text-xl sm:text-2xl font-bold">
               <Icon name={editingDoc ? "edit" : "cloud_upload"} className="text-primary shrink-0" size={32}/>
@@ -1105,7 +1094,7 @@ export default function Documents({
 
       {/* Category Management Modal */}
       <Dialog open={showCategoryModal} onOpenChange={setShowCategoryModal}>
-        <DialogContent className="sm:max-w-[480px] glass-kormiis-modal">
+        <DialogContent className="sm:max-w-[480px] glass-kormiis">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Icon name="category" className="text-primary" size={20}/>
@@ -1179,7 +1168,7 @@ export default function Documents({
 
       {/* Official HR Letter & Certificate Generator Modal */}
       <Dialog open={showLetterModal} onOpenChange={setShowLetterModal}>
-        <DialogContent className="sm:max-w-[540px] glass-kormiis-modal">
+        <DialogContent className="sm:max-w-[540px] glass-kormiis">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2.5">
               <Icon name="assignment" className="text-primary shrink-0" size={28}/>

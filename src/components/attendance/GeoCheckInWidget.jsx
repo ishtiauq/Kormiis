@@ -217,7 +217,7 @@ export default function GeoCheckInWidget({ currentUser, attendance, setAttendanc
       </Dialog>
 
       <Card className="col-span-full xl:col-span-12 border-primary/20 bg-card overflow-hidden shadow-sm mb-6">
-        <CardHeader className="bg-primary/5 pb-4 border-b border-border">
+        <CardHeader className="bg-primary/5 pb-4">
           <div className="flex items-center gap-2.5">
             <Icon name="event_available" className="text-primary shrink-0" size={28}/>
             <CardTitle className="text-fluid-xl font-extrabold m-0 break-words ">Mark Attendance</CardTitle>

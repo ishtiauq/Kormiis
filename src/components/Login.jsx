@@ -625,11 +625,12 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
         transition={{ duration: 0.75, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
         className="sm:hidden absolute top-4 left-4 z-30 pointer-events-auto"
       >
-        <a href="#" className="flex items-center hover:opacity-80 active:scale-95 transition-all">
+        <a href="#" className="flex items-center outline-none select-none">
           <img 
             src={kormiisWhiteLogo} 
             alt="Kormiis Logo" 
-            className="h-5.5 w-auto object-contain drop-shadow-md" 
+            className="h-5.5 w-auto object-contain select-none" 
+            style={{ filter: 'none', boxShadow: 'none' }}
           />
         </a>
       </motion.div>
@@ -643,11 +644,12 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
           className="pointer-events-auto max-w-6xl mx-auto h-14 sm:h-15 md:h-16 px-4 sm:px-6 flex items-center justify-between landing-glass-header text-white transition-all duration-300"
         >
           {/* Brand Logo */}
-          <a href="#" className="flex items-center gap-2 shrink-0 hover:opacity-85 active:scale-95 transition-all">
+          <a href="#" className="flex items-center gap-2 shrink-0 outline-none select-none">
             <img 
               src={kormiisWhiteLogo} 
               alt="Kormiis Logo" 
-              className="h-6 sm:h-7 md:h-8 w-auto object-contain drop-shadow-md" 
+              className="h-6 sm:h-7 md:h-8 w-auto object-contain select-none" 
+              style={{ filter: 'none', boxShadow: 'none' }}
             />
           </a>
 
@@ -925,7 +927,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
 
       {/* Authentication & Workspace Access Dialog Modal */}
       <Dialog open={authModalOpen} onOpenChange={setAuthModalOpen}>
-        <DialogContent className="max-w-md w-full force-dark-mode glass-kormiis-modal rounded-[28px] p-5 sm:p-7 md:p-8 shadow-2xl text-white">
+        <DialogContent className="max-w-md w-full force-dark-mode glass-kormiis rounded-[28px] p-5 sm:p-7 md:p-8 shadow-2xl text-white">
           <DialogHeader className="sr-only">
             <DialogTitle>Workspace Access</DialogTitle>
             <DialogDescription>Sign in or create a business space for your squad.</DialogDescription>

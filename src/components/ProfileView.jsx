@@ -323,44 +323,30 @@ export default function ProfileView({
 
   return (
     <div className="flex flex-col gap-6 max-w-[920px] mx-auto pb-12 w-full animate-in fade-in duration-300">
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
-            <Icon name="person" size={28} className="text-foreground shrink-0"/>
-            My Profile
-          </h1>
-          <p className="text-fluid-xs sm:text-fluid-sm text-muted-foreground mt-1">
-            Manage your personal profile, workplace credentials, and security settings.
-          </p>
+      {/* Action Toolbar */}
+      {!editMode && (
+        <div className="flex items-center justify-end gap-2">
+          {!hasPending ? (
+            <Button 
+              variant="outline" 
+              onClick={handleStartEdit}
+              className="rounded-2xl liquid-glass-btn h-11 px-5 font-medium flex items-center gap-2"
+            >
+              <Icon name="edit" size={18} />
+              <span>Edit Profile</span>
+            </Button>
+          ) : (
+            <Badge variant="warning" className="px-3 py-1.5 rounded-full text-xs flex items-center gap-1.5 shadow-xs">
+              <span className="size-2 rounded-full bg-amber-500 animate-pulse" />
+              Pending HR Review
+            </Badge>
+          )}
         </div>
-
-        {!editMode && (
-          <div className="flex items-center gap-2">
-            {!hasPending ? (
-              <Button 
-                variant="outline" 
-                onClick={handleStartEdit}
-                className="rounded-2xl liquid-glass-btn h-11 px-5 font-medium flex items-center gap-2"
-              >
-                <Icon name="edit" size={18} />
-                <span>Edit Profile</span>
-              </Button>
-            ) : (
-              <Badge variant="warning" className="px-3 py-1.5 rounded-full text-xs flex items-center gap-1.5 shadow-xs">
-                <span className="size-2 rounded-full bg-amber-500 animate-pulse" />
-                Pending HR Review
-              </Badge>
-            )}
-          </div>
-        )}
-      </div>
-
-      <div className="border-t border-border border-headline" />
+      )}
 
       {/* Pending Update Alert Banner */}
       {hasPending && (
-        <div className="glass-card rounded-3xl p-4 sm:p-5 border border-amber-500/30 bg-amber-500/10 dark:bg-amber-500/15 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
+        <div className="glass-kormiis rounded-3xl p-4 sm:p-5 border border-amber-500/30 bg-amber-500/10 dark:bg-amber-500/15 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
           <div className="flex items-start sm:items-center gap-3.5">
             <Icon name="pending_actions" size={32} className="text-foreground shrink-0"/>
             <div>
@@ -470,7 +456,7 @@ export default function ProfileView({
       </div>
 
       {/* Segmented Section Navigation */}
-      <div className="flex items-center gap-1.5 p-1.5 rounded-2xl glass-card border border-white/30 dark:border-white/10 w-fit max-w-full overflow-x-auto shadow-xs">
+      <div className="flex items-center gap-1.5 p-1.5 rounded-2xl glass-kormiis border border-white/30 dark:border-white/10 w-fit max-w-full overflow-x-auto shadow-xs">
         <button
           onClick={() => { setActiveTab('personal'); setEditMode(false); }}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all cursor-pointer ${
@@ -510,7 +496,7 @@ export default function ProfileView({
 
       {/* TAB 1: Personal & Contact Information */}
       {activeTab === 'personal' && (
-        <Card className="glass-card rounded-3xl border border-white/30 dark:border-white/10 shadow-sm overflow-hidden">
+        <Card className="glass-kormiis rounded-3xl border border-white/30 dark:border-white/10 shadow-sm overflow-hidden">
           <CardHeader className="p-6 sm:p-8 pb-4 flex flex-row items-center justify-between border-b border-border/40 dark:border-white/5">
             <div>
               <CardTitle className="text-fluid-lg font-bold flex items-center gap-2">
@@ -671,7 +657,7 @@ export default function ProfileView({
 
       {/* TAB 2: Work & Workplace Details */}
       {activeTab === 'work' && (
-        <Card className="glass-card rounded-3xl border border-white/30 dark:border-white/10 shadow-sm overflow-hidden">
+        <Card className="glass-kormiis rounded-3xl border border-white/30 dark:border-white/10 shadow-sm overflow-hidden">
           <CardHeader className="p-6 sm:p-8 pb-4 border-b border-border/40 dark:border-white/5">
             <CardTitle className="text-fluid-lg font-bold flex items-center gap-2">
               <Icon name="domain" size={20} className="text-primary" />
@@ -783,7 +769,7 @@ export default function ProfileView({
       {/* TAB 3: Account Security & Password Change */}
       {activeTab === 'security' && (
         <>
-          <Card className="glass-card rounded-3xl border border-white/30 dark:border-white/10 shadow-sm overflow-hidden">
+          <Card className="glass-kormiis rounded-3xl border border-white/30 dark:border-white/10 shadow-sm overflow-hidden">
             <CardHeader className="p-6 sm:p-8 pb-4 border-b border-border/40 dark:border-white/5">
               <CardTitle className="text-fluid-lg font-bold flex items-center gap-2">
                 <Icon name="lock" size={20} className="text-primary" />
@@ -900,7 +886,7 @@ export default function ProfileView({
           </Card>
 
           {/* Danger Zone: Account Deletion */}
-          <Card className="glass-card rounded-3xl border border-destructive/25 shadow-sm overflow-hidden mt-6 bg-destructive/[0.02] dark:bg-destructive/[0.05]">
+          <Card className="glass-kormiis rounded-3xl border border-destructive/25 shadow-sm overflow-hidden mt-6 bg-destructive/[0.02] dark:bg-destructive/[0.05]">
             <CardHeader className="p-6 sm:p-8 pb-4 border-b border-destructive/15">
               <div className="flex items-center justify-between gap-3">
                 <div>
@@ -985,7 +971,7 @@ export default function ProfileView({
 
       {/* Account Deletion Confirmation Modal */}
       <Dialog open={deleteModalOpen} onOpenChange={setDeleteModalOpen}>
-        <DialogContent className="sm:max-w-[480px] glass-kormiis-modal">
+        <DialogContent className="sm:max-w-[480px] glass-kormiis">
           <DialogHeader className="pb-3 border-b border-border/80 dark:border-white/12 space-y-0">
             <div className="flex items-center gap-2.5">
               <div className={`size-9 rounded-2xl flex items-center justify-center shrink-0 shadow-inner ${

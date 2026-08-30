@@ -157,30 +157,15 @@ export default function DashboardShell({ user, themeMode, isDarkMode, toggleThem
 
   return (
     <div className="dashboard-root app-shell relative" style={{ display: 'flex', height: '100vh', width: '100vw', maxWidth: '100vw', overflow: 'hidden', boxSizing: 'border-box' }}>
-      {/* 1. Left Navigation Menu Sidebar (Fixed Stationary at calc(50% - 191px)) */}
-      <Sidebar
-        visibleNavItems={visibleNavItems}
-        isCollapsed={isCollapsed}
-        isDarkMode={isDarkMode}
-        currentView={currentView}
-        setCurrentView={setCurrentView}
-        mobileMenuOpen={showMobileMenu}
-        toggleSidebar={toggleSidebar}
-        user={user}
-        handleLogout={handleLogout}
-        setIsCollapsed={setIsCollapsed}
-        setMobileMenuOpen={setShowMobileMenu}
-      />
-
       <main 
-        className={`content dashboard-content ${isMobile ? 'pb-24' : 'pb-12 md:pl-16 md:pr-5 lg:pr-6 xl:pr-8'} flex-1 overflow-y-auto overflow-x-hidden flex flex-col items-center max-w-[100vw] transition-all duration-300`} 
+        className={`content dashboard-content ${isMobile ? 'pb-24' : 'pb-12 px-3 sm:px-5 md:px-6 lg:px-8'} flex-1 overflow-y-auto overflow-x-hidden flex flex-col items-center max-w-[100vw] transition-all duration-300`} 
         style={{ scrollbarGutter: 'stable' }}
         onScroll={handleScroll}
       >
         <div className="w-full max-w-[1920px] flex flex-col relative">
           
           {/* Sticky Header Wrapper */}
-          <div className={`sticky top-0 z-40 w-full sm:pt-4 md:pt-5 sm:pb-3 px-1 sm:px-2 md:px-2 pointer-events-none transition-transform duration-300 ease-in-out ${isMobile && isScrollingDown && !showMobileMenu ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
+          <div className={`sticky top-0 z-40 w-full sm:pt-4 md:pt-5 pb-0 sm:pb-1 px-1 sm:px-2 md:px-2 pointer-events-none transition-transform duration-300 ease-in-out ${isMobile && isScrollingDown && !showMobileMenu ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
             <Topbar
                 isDarkMode={isDarkMode}
                 toggleSidebar={toggleSidebar}
@@ -200,7 +185,9 @@ export default function DashboardShell({ user, themeMode, isDarkMode, toggleThem
                 clearNotifications={appData.clearNotifications}
                 onProfileClick={() => setCurrentView('profile')}
                 handleLogout={handleLogout}
+                currentView={currentView}
                 setCurrentView={setCurrentView}
+                visibleNavItems={visibleNavItems}
                 user={user}
                 onOpenSearch={() => setShowCommandPalette(true)}
                 onOpenAi={() => {
@@ -230,7 +217,7 @@ export default function DashboardShell({ user, themeMode, isDarkMode, toggleThem
               />
           </div>
 
-          <div className="w-full flex-1 px-1 sm:px-2 md:px-2 pt-4 sm:pt-2 md:pt-0">
+          <div className="w-full flex-1 px-1 sm:px-2 md:px-2 pt-0.5 sm:pt-1 md:pt-1.5">
             <AppContent
             currentView={currentView}
             setCurrentView={setCurrentView}

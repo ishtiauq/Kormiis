@@ -201,12 +201,6 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
 
   return (
     <div className="w-full flex flex-col gap-6 animate-fade-in p-2 sm:p-4">
-      {/* Header */}
-      <div className="flex flex-col pb-4 border-b border-border border-headline mb-2">
-        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
-          <Icon name="check_box" className="text-foreground shrink-0" size={28}/> Tasks
-        </h1>
-      </div>
       
       <div className="flex flex-wrap gap-4 mb-4 items-center w-full justify-between">
         <div className="relative flex-1 min-w-[250px] lg:max-w-md w-full flex items-center">

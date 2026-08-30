@@ -69,7 +69,7 @@ export default function ClockWidget({ employees = [], attendance = {}, setAttend
   const canCheckOut = clockEmpId && empLog && empLog.checkIn !== '--' && empLog.checkOut === '--'
 
   return (
-    <Card className="glass-card border border-white/30 dark:border-white/12 shadow-xl rounded-3xl p-0">
+    <Card className="glass-kormiis border border-white/30 dark:border-white/12 shadow-xl rounded-3xl p-0">
       <CardContent className="flex items-center justify-between flex-wrap gap-4 p-4 sm:p-6">
         <div className="flex items-center gap-3.5">
           <Icon name="schedule" className="text-foreground shrink-0" size={38}/>

@@ -311,16 +311,11 @@ export default function GigBoardPage({ adminUid, currentUser, addToast }) {
 
   return (
     <div className="animate-fade-in flex flex-col gap-5 max-w-[1200px] mx-auto w-full">
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-1">
-        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground m-0">
-          <Icon name="handshake" className="text-foreground shrink-0" size={28}/> Help Hub
-        </h1>
+      <div className="flex items-center justify-end gap-3 mb-1">
         <Button onClick={openCreateModal} className="hidden sm:inline-flex rounded-full shadow-sm">
           <Icon name="add" className="mr-1.5" size={16}/> Request Help
         </Button>
       </div>
-
-      <div className="border-t border-border border-headline my-4" />
 
       <div className="bg-card p-2 rounded-xl border border-border/50 shadow-sm w-full max-w-full">
         <div role="tablist" aria-label="Help Hub sections" className="menu-bar">

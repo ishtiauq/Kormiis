@@ -367,30 +367,15 @@ export default function EmployeePortal({
 
   return (
     <div className="dashboard-root app-shell relative" style={{ display: 'flex', height: '100vh', width: '100vw', maxWidth: '100vw', overflow: 'hidden', boxSizing: 'border-box' }}>
-      {/* 1. Left Navigation Menu Sidebar (Fixed Stationary at calc(50% - 191px)) */}
-      <Sidebar
-        visibleNavItems={navItems}
-        isCollapsed={isSidebarCollapsed}
-        isDarkMode={resolvedIsDark}
-        currentView={activeTab}
-        setCurrentView={setActiveTab}
-        mobileMenuOpen={showMobileMenu}
-        toggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-        user={currentUser}
-        handleLogout={handleLogout}
-        setIsCollapsed={setIsSidebarCollapsed}
-        setMobileMenuOpen={setShowMobileMenu}
-      />
-
       <main 
-        className={`content dashboard-content ${isMobile ? 'pb-24' : 'pb-12 md:pl-16 md:pr-5 lg:pr-6 xl:pr-8'} flex-1 overflow-y-auto overflow-x-hidden flex flex-col items-center max-w-[100vw] transition-all duration-300`} 
+        className={`content dashboard-content ${isMobile ? 'pb-24' : 'pb-12 px-3 sm:px-5 md:px-6 lg:px-8'} flex-1 overflow-y-auto overflow-x-hidden flex flex-col items-center max-w-[100vw] transition-all duration-300`} 
         style={{ scrollbarGutter: 'stable' }}
         onScroll={handleScroll}
       >
         <div className="w-full max-w-[1920px] flex flex-col relative">
           
           {/* Sticky Header Wrapper */}
-          <div className={`sticky top-0 z-40 w-full sm:pt-4 md:pt-5 sm:pb-3 px-1 sm:px-2 md:px-2 pointer-events-none transition-transform duration-300 ease-in-out ${isMobile && isScrollingDown && !showMobileMenu ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
+          <div className={`sticky top-0 z-40 w-full sm:pt-4 md:pt-5 pb-0 sm:pb-1 px-1 sm:px-2 md:px-2 pointer-events-none transition-transform duration-300 ease-in-out ${isMobile && isScrollingDown && !showMobileMenu ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
             <Topbar
                 isDarkMode={resolvedIsDark}
                 toggleSidebar={() => setShowMobileMenu(prev => !prev)}
@@ -410,7 +395,9 @@ export default function EmployeePortal({
                 clearNotifications={clearNotifications}
                 onProfileClick={() => setActiveTab('profile')}
                 handleLogout={handleLogout}
+                currentView={activeTab}
                 setCurrentView={setActiveTab}
+                visibleNavItems={navItems}
                 user={currentUser}
                 onOpenAi={() => {
                   setShowAiModal(prev => {
@@ -439,7 +426,7 @@ export default function EmployeePortal({
             />
           </div>
 
-          <div className="w-full flex-1 px-1 sm:px-2 md:px-2 pt-4 sm:pt-2 md:pt-0">
+          <div className="w-full flex-1 px-1 sm:px-2 md:px-2 pt-0.5 sm:pt-1 md:pt-1.5">
             {renderContent()}
           </div>
         </div>
@@ -667,13 +654,6 @@ function DashboardView({ currentUser, attendance, setAttendance, addToast, expen
 
   return (
     <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[1200px] mx-auto">
-      <div className="flex items-center justify-between">
-        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
-          <Icon name="dashboard" className="text-foreground shrink-0" size={28}/>
-          Dashboard
-        </h1>
-      </div>
-      <div className="border-t border-border border-headline" />
       <Card className="bg-card border-border shadow-sm">
         <CardContent className="p-6 sm:p-8 flex items-center gap-5 sm:gap-6">
           <div className="size-16 sm:size-20 bg-background rounded-full shadow-sm flex items-center justify-center p-1">
@@ -918,13 +898,6 @@ function AttendanceView({
 
   return (
     <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[1000px] mx-auto pb-10">
-      <div className="flex items-center justify-between">
-        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
-          <Icon name="schedule" className="text-foreground shrink-0" size={28}/>
-          Attendance
-        </h1>
-      </div>
-      <div className="border-t border-border border-headline" />
       
       <div className="bg-card p-2 rounded-xl border border-border/50 shadow-sm w-full max-w-full">
         <div role="tablist" aria-label="Attendance sections" className="menu-bar">
@@ -1277,13 +1250,6 @@ function PayslipsView({ currentUser, payroll, addToast, settings }) {
 
   return (
     <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[1000px] mx-auto pb-10">
-      <div className="flex items-center justify-between">
-        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
-          <Icon name="account_balance" className="text-foreground shrink-0" size={28}/>
-          Payslips
-        </h1>
-      </div>
-      <div className="border-t border-border border-headline" />
       
       {myPayslips.length === 0 ? (
         <Card>
@@ -1372,13 +1338,6 @@ function LeaveView({ currentUser, attendance, setAttendance, addToast, addLog, s
 
   return (
     <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[1000px] mx-auto pb-10">
-      <div className="flex items-center justify-between">
-        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
-          <Icon name="calendar_month" className="text-foreground shrink-0" size={28}/>
-          Leave
-        </h1>
-      </div>
-      <div className="border-t border-border border-headline" />
       
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {Object.entries(myBalance).map(([lType, days]) => (
@@ -1671,13 +1630,6 @@ function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetR
 
   return (
     <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[900px] mx-auto pb-10">
-      <div className="flex items-center justify-between">
-        <h1 className="text-fluid-xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
-          <Icon name="monitor" className="text-foreground shrink-0" size={28}/>
-          Assets
-        </h1>
-      </div>
-      <div className="border-t border-border border-headline" />
       <div className="bg-card p-1.5 rounded-xl border border-border/50 shadow-sm w-full sm:w-auto">
           <div className="menu-bar">
             <Button variant={activeTab === 'assigned' ? 'default' : 'ghost'} size="sm" className="rounded-full px-4" onClick={() => setActiveTab('assigned')}>
