@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, lazy, Suspense } from 'react'
+import { createPortal } from 'react-dom'
 
 import Sidebar from './layout/Sidebar.jsx'
 import Topbar from './layout/Topbar.jsx'
@@ -7,10 +8,12 @@ import Icon from "@/components/ui/Icon.jsx"
 import ToastContainer from './layout/ToastContainer.jsx'
 import CommandPalette from './layout/CommandPalette.jsx'
 import AppContent from './AppContent.jsx'
+import AiExpandableFab from './ai/AiExpandableFab.jsx'
 import { allNavItems } from '../utils/helpers.js'
 import { useCommandPalette } from '../hooks/useCommandPalette.jsx'
 import LoadingScreen from './layout/LoadingScreen.jsx'
 import useAppData from '../hooks/useAppData.js'
+import AiCoPilotModal from './ai/AiCoPilotModal.jsx'
 
 const EmployeePortal = lazy(() => import('./EmployeePortal.jsx'))
 
@@ -353,6 +356,44 @@ export default function DashboardShell({ user, themeMode, isDarkMode, toggleThem
           </button>
         </div>
       </div>
+
+      {/* Floating AI Co-Pilot Widget (Desktop & Mobile Portal) */}
+      {createPortal(
+        <AiExpandableFab
+          isOpen={showAiModal}
+          onToggle={() => {
+            setShowAiModal(prev => {
+              const next = !prev
+              setShowAiHistory(false)
+              if (next) setAiModalAction(`open_chat_${Date.now()}`)
+              return next
+            })
+          }}
+          onClose={() => {
+            setShowAiModal(false)
+            setShowAiHistory(false)
+          }}
+          currentUser={user}
+          employees={appData.employees}
+          setEmployees={appData.handleSetEmployees}
+          payroll={appData.payroll}
+          setPayroll={appData.handleSetPayroll}
+          attendance={appData.attendance}
+          setAttendance={appData.setAttendance || appData.handleSetAttendance}
+          expenses={appData.expenses}
+          setExpenses={appData.setExpenses || appData.handleSetExpenses}
+          announcements={appData.announcements}
+          setAnnouncements={appData.setAnnouncements}
+          tasks={appData.tasks}
+          setTasks={appData.setTasks || appData.handleSetTasks}
+          settings={appData.settings}
+          setCurrentView={setCurrentView}
+          addToast={addToast}
+          initialAction={aiModalAction}
+          isDarkMode={isDarkMode}
+        />,
+        document.body
+      )}
 
       <ToastContainer toasts={toasts} removeToast={removeToast} />
       <CommandPalette

@@ -54,7 +54,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
   const handleSaveAiSettings = () => {
     setAiApiKey(aiKey)
     setAiModel(aiModel)
-    if (addToast) addToast('AI Co-Pilot settings saved!', 'success')
+    if (addToast) addToast('Kormiis AI settings saved!', 'success')
     if (addLog) addLog('AI Settings Updated', `Updated Gemini Model to ${aiModel}`, 'info')
   }
 
@@ -903,7 +903,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
             <div className="flex items-center gap-3.5 min-w-0">
               <Icon name="auto_awesome" className="text-primary shrink-0" size={32}/>
               <div>
-                <h3 className="font-bold text-fluid text-foreground tracking-tight">AI Agent & Co-Pilot</h3>
+                <h3 className="font-bold text-fluid text-foreground tracking-tight">Kormiis AI Agent</h3>
                 <p className="text-xs text-muted-foreground m-0">Configure free Google Gemini API key and AI models</p>
               </div>
             </div>

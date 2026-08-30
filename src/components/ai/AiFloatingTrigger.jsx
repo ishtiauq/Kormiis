@@ -31,11 +31,11 @@ export default function AiFloatingTrigger({ onClick, onNewChat, onToggleHistory,
       } glass-apple text-foreground shadow-2xl transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] select-none border border-white/30 dark:border-white/12`}
       style={{ isolation: 'isolate' }}
     >
-      {/* 1. Main AI Co-Pilot Toggle Button (Monochrome Liquid Glass) */}
-      <TooltipPopover label={isOpen ? "Close AI Co-Pilot" : "Kormiis AI (Ctrl+Space)"} isCollapsed={true} isDarkMode={isDarkMode}>
+      {/* 1. Main AI Toggle Button (Monochrome Liquid Glass) */}
+      <TooltipPopover label={isOpen ? "Close Kormiis AI" : "Kormiis AI (Ctrl+Space)"} isCollapsed={true} isDarkMode={isDarkMode}>
         <button
           onClick={onClick}
-          aria-label="Toggle Kormiis AI Co-Pilot"
+          aria-label="Toggle Kormiis AI"
           className={`relative size-9 sm:size-10 rounded-full flex items-center justify-center cursor-pointer transition-all duration-200 active:scale-95 border ${
             isOpen
               ? 'bg-neutral-900 text-white border-neutral-900 dark:bg-white dark:text-neutral-900 dark:border-white shadow-md rotate-90 scale-102'

@@ -1,6 +1,11 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import Icon from "@/components/ui/Icon.jsx"
-import { sendChatMessage, fileToBase64, checkLocalScopeGuardrail } from '../../services/aiAgent.js'
+import { AiQuantumGlyph } from './AiExpandableFab.jsx'
+import { 
+  sendChatMessage, 
+  fileToBase64, 
+  checkLocalScopeGuardrail 
+} from '../../services/aiAgent.js'
 
 const QUICK_ACTIONS = [
   { label: 'Add Employee', prompt: 'Add a new employee: Name, Department, Position, Salary' },
@@ -18,7 +23,7 @@ function getGreetingText(userName = 'there') {
   else if (hour >= 17 && hour < 22) timeGreeting = 'Good evening'
   else timeGreeting = 'Hello'
 
-  return `${timeGreeting}, ${userName}! 👋 I'm your Kormiis AI Co-Pilot.
+  return `${timeGreeting}, ${userName}! 👋 I'm your Kormiis AI.
 
 How can I assist you with HR operations, payroll, attendance, or workspace tasks today?`
 }
@@ -181,6 +186,7 @@ export default function AiCoPilotModal({
     }
   }, [initialAction, isOpen])
 
+
   // Select an existing past session
   const handleSelectSession = (sessionId) => {
     setActiveSessionId(sessionId)
@@ -277,7 +283,9 @@ export default function AiCoPilotModal({
       if (
         modalRef.current && 
         !modalRef.current.contains(e.target) && 
-        !e.target.closest?.('[data-ai-trigger]')
+        !e.target.closest?.('[data-ai-trigger]') &&
+        !e.target.closest?.('[data-ai-fab]') &&
+        !e.target.closest?.('[data-ai-panel]')
       ) {
         onClose()
       }
@@ -438,6 +446,26 @@ export default function AiCoPilotModal({
     }
   }
 
+  // Listen for external prompt sends
+  const handleSendRef = useRef(handleSend)
+  handleSendRef.current = handleSend
+  useEffect(() => {
+    if (!isOpen) return
+    const pending = window.__aiPendingPrompt
+    if (pending) {
+      window.__aiPendingPrompt = null
+      setTimeout(() => handleSendRef.current?.(pending), 150)
+    }
+    const handleExternalPrompt = (e) => {
+      const text = e.detail?.text
+      if (text && handleSendRef.current) {
+        handleSendRef.current(text)
+      }
+    }
+    window.addEventListener('ai-send-prompt', handleExternalPrompt)
+    return () => window.removeEventListener('ai-send-prompt', handleExternalPrompt)
+  }, [isOpen])
+
   // Execute Approved Action from Action Card
   const handleExecuteAction = (messageId, actionId, actionName, args) => {
     try {
@@ -580,176 +608,185 @@ export default function AiCoPilotModal({
         <div className="w-10 h-1 rounded-full bg-foreground/25 mx-auto mt-2.5 mb-1 sm:hidden shrink-0" />
       )}
 
-      {/* MODAL HEADER */}
-        <div className="flex items-center justify-between px-4.5 py-3.5 border-b border-border/80 dark:border-white/12 shrink-0">
-          <div className="flex items-center gap-2.5">
-            <div className="size-8.5 rounded-xl bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 flex items-center justify-center shadow-xs shrink-0">
-              <Icon name={showHistoryDrawer ? "history" : "auto_awesome"} size={18} className="text-white dark:text-neutral-900" />
-            </div>
-            <div>
-              <h2 className="text-sm sm:text-base font-black tracking-tight text-foreground m-0 leading-tight">
-                {showHistoryDrawer ? 'Chat History' : 'Kormiis AI Co-Pilot'}
-              </h2>
-              {showHistoryDrawer && (
-                <p className="text-[10px] text-muted-foreground m-0 leading-tight mt-0.5 font-medium">
-                  {historySessions.length} conversation{historySessions.length !== 1 ? 's' : ''} saved
-                </p>
-              )}
-            </div>
-          </div>
-
-          {/* Action/Close buttons in Header (Available across all devices) */}
-          <div className="flex items-center gap-1.5">
+      {/* MODAL HEADER — SEAMLESS MONOGLASS HEADER */}
+      <div className="flex items-center justify-between px-4.5 sm:px-5 py-3.5 sm:py-4 shrink-0 bg-transparent">
+        <div className="flex items-center gap-2.5">
+          <div className="size-9 rounded-2xl bg-black/5 dark:bg-white/10 flex items-center justify-center shadow-xs shrink-0 border border-white/25 dark:border-white/15">
             {showHistoryDrawer ? (
-              <button
-                onClick={() => setShowHistoryDrawer(false)}
-                aria-label="Back to chat"
-                className="apple-glass-btn size-7.5 sm:size-8 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground cursor-pointer transition-all active:scale-95 border border-white/35 dark:border-white/15"
-                title="Back to conversation"
-              >
-                <Icon name="close" size={16} />
-              </button>
+              <Icon name="history" size={18} className="text-foreground" />
             ) : (
-              <div className="flex items-center gap-1.5">
-                <button
-                  type="button"
-                  onClick={handleNewChat}
-                  aria-label="New chat"
-                  className="apple-glass-btn size-7.5 sm:size-8 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground cursor-pointer transition-all active:scale-95 border border-white/35 dark:border-white/15"
-                  title="Start a new conversation"
-                >
-                  <Icon name="add" size={16} />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowHistoryDrawer(true)}
-                  aria-label="Chat history"
-                  className="apple-glass-btn size-7.5 sm:size-8 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground cursor-pointer transition-all active:scale-95 border border-white/35 dark:border-white/15"
-                  title="Past conversations"
-                >
-                  <Icon name="history" size={16} />
-                </button>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  aria-label="Close AI Co-Pilot"
-                  className="apple-glass-btn size-7.5 sm:size-8 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground cursor-pointer transition-all active:scale-95 border border-white/35 dark:border-white/15"
-                  title="Close modal"
-                >
-                  <Icon name="close" size={16} />
-                </button>
-              </div>
+              <AiQuantumGlyph size={20} />
+            )}
+          </div>
+          <div>
+            <h2 className="text-sm sm:text-base font-extrabold tracking-tight text-foreground m-0 leading-tight">
+              {showHistoryDrawer ? 'Chat History' : 'Kormiis AI'}
+            </h2>
+            {showHistoryDrawer && (
+              <p className="text-[10px] text-muted-foreground m-0 leading-tight mt-0.5 font-medium">
+                {historySessions.length} conversation{historySessions.length !== 1 ? 's' : ''} saved
+              </p>
             )}
           </div>
         </div>
 
-        {/* MAIN BODY: SWITCHES BETWEEN HISTORY VIEW AND ACTIVE CHAT FEED */}
-        {showHistoryDrawer ? (
-          /* FULL-VIEW CHAT HISTORY */
-          <div className="flex-1 flex flex-col overflow-hidden animate-in fade-in duration-200">
-            {/* Search & New Chat Action Bar */}
-            <div className="p-3 sm:p-4 border-b border-border/60 dark:border-white/10 space-y-2.5">
+        {/* Header Action / Close Buttons */}
+        <div className="flex items-center gap-1.5">
+          {showHistoryDrawer ? (
+            <button
+              onClick={() => setShowHistoryDrawer(false)}
+              aria-label="Back to chat"
+              className="apple-glass-btn size-8 sm:size-8.5 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground cursor-pointer transition-all active:scale-95 border border-white/35 dark:border-white/15"
+              title="Back to conversation"
+            >
+              <Icon name="close" size={16} />
+            </button>
+          ) : (
+            <div className="flex items-center gap-1.5">
               <button
+                type="button"
                 onClick={handleNewChat}
-                className="apple-glass-btn w-full h-10 rounded-2xl flex items-center justify-center gap-2 text-xs font-bold text-foreground border border-white/40 dark:border-white/18 shadow-xs active:scale-98 cursor-pointer select-none group"
+                aria-label="New chat"
+                className="apple-glass-btn size-8 sm:size-8.5 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground cursor-pointer transition-all active:scale-95 border border-white/35 dark:border-white/15"
+                title="Start a new conversation"
               >
-                <Icon name="add" size={16} className="text-foreground group-hover:rotate-90 transition-transform duration-300" />
-                <span>Start New Conversation</span>
+                <Icon name="add" size={16} />
               </button>
-
-              <div className="relative">
-                <Icon name="search" size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <input
-                  type="text"
-                  placeholder="Search past conversations..."
-                  value={historySearch}
-                  onChange={e => setHistorySearch(e.target.value)}
-                  className="w-full h-11 pl-11 pr-3.5 rounded-2xl border border-black/15 dark:border-white/16 bg-white/85 dark:bg-white/[0.08] text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)]"
-                />
-              </div>
+              <button
+                type="button"
+                onClick={() => setShowHistoryDrawer(true)}
+                aria-label="Chat history"
+                className="apple-glass-btn size-8 sm:size-8.5 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground cursor-pointer transition-all active:scale-95 border border-white/35 dark:border-white/15 relative"
+                title="Past conversations"
+              >
+                <Icon name="history" size={16} />
+                {historySessions.length > 0 && (
+                  <span className="absolute -top-1 -right-1 size-3.5 bg-foreground text-background text-[9px] font-extrabold rounded-full flex items-center justify-center shadow-xs">
+                    {historySessions.length > 9 ? '9+' : historySessions.length}
+                  </span>
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label="Close Kormiis AI"
+                className="apple-glass-btn size-8 sm:size-8.5 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground cursor-pointer transition-all active:scale-95 border border-white/35 dark:border-white/15"
+                title="Close modal"
+              >
+                <Icon name="close" size={16} />
+              </button>
             </div>
+          )}
+        </div>
+      </div>
 
-            {/* Sessions List */}
-            <div ref={historyScrollContainerRef} className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-2 overscroll-contain chat-scrollbar">
-              {filteredSessions.length === 0 ? (
-                <div className="text-center py-12 px-4 text-xs text-muted-foreground">
-                  <Icon name="search_off" size={28} className="mx-auto mb-2 opacity-50" />
-                  No past conversations found
-                </div>
-              ) : (
-                filteredSessions.map(session => {
-                  const isActive = session.id === activeSessionId
-                  const lastMsg = session.messages[session.messages.length - 1]
-                  return (
-                    <div
-                      key={session.id}
-                      onClick={() => handleSelectSession(session.id)}
-                      className={`group relative p-3 rounded-2xl border transition-all cursor-pointer select-none flex items-start justify-between gap-3 shadow-xs backdrop-blur-md ${
-                        isActive
-                          ? 'bg-primary/15 dark:bg-primary/25 border-primary/40 dark:border-primary/45 text-foreground font-bold shadow-xs'
-                          : 'border-white/40 dark:border-white/12 bg-white/50 hover:bg-white/75 dark:bg-white/[0.06] dark:hover:bg-white/[0.12] text-foreground'
-                      }`}
-                    >
-                      <div className="flex-1 min-w-0 pr-1">
-                        <div className="flex items-center gap-1.5">
-                          <Icon name="chat_bubble_outline" size={14} className={isActive ? 'text-primary' : 'text-muted-foreground'} />
-                          <p className="m-0 text-xs font-bold break-words text-foreground">
-                            {session.title || 'Conversation'}
-                          </p>
-                        </div>
-                        {lastMsg && (
-                          <p className="m-0 mt-1 text-[11px] text-muted-foreground break-words leading-relaxed">
-                            {lastMsg.text}
-                          </p>
-                        )}
-                        <span className="text-[9px] text-muted-foreground/80 mt-1.5 block font-medium">
-                          {new Date(session.updatedAt || session.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric' })}{' '}
-                          &middot;{' '}
-                          {new Date(session.updatedAt || session.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </span>
+      {/* MAIN BODY: SWITCHES BETWEEN HISTORY VIEW AND ACTIVE CHAT FEED */}
+      {showHistoryDrawer ? (
+        /* FULL-VIEW CHAT HISTORY */
+        <div className="flex-1 flex flex-col overflow-hidden animate-in fade-in duration-200">
+          {/* Search & New Chat Action Bar */}
+          <div className="p-3.5 sm:p-4 space-y-2.5 bg-transparent">
+            <button
+              onClick={handleNewChat}
+              className="apple-glass-btn w-full h-11 rounded-2xl flex items-center justify-center gap-2 text-xs font-bold text-foreground bg-white/80 dark:bg-white/[0.12] hover:bg-white/95 dark:hover:bg-white/[0.22] border border-white/40 dark:border-white/18 shadow-xs active:scale-98 cursor-pointer select-none group"
+            >
+              <Icon name="add" size={16} className="group-hover:rotate-90 transition-transform duration-300" />
+              <span>Start New Conversation</span>
+            </button>
+
+            <div className="relative">
+              <Icon name="search" size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Search past conversations..."
+                value={historySearch}
+                onChange={e => setHistorySearch(e.target.value)}
+                className="w-full h-11 pl-11 pr-4 rounded-2xl border border-black/15 dark:border-white/15 bg-white/85 dark:bg-white/[0.08] text-xs sm:text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-foreground/20 shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)]"
+              />
+            </div>
+          </div>
+
+          {/* Sessions List */}
+          <div ref={historyScrollContainerRef} className="flex-1 overflow-y-auto p-3.5 sm:p-4 space-y-2.5 overscroll-contain chat-scrollbar">
+            {filteredSessions.length === 0 ? (
+              <div className="text-center py-12 px-4 text-xs text-muted-foreground">
+                <Icon name="search_off" size={28} className="mx-auto mb-2 opacity-50" />
+                No past conversations found
+              </div>
+            ) : (
+              filteredSessions.map(session => {
+                const isActive = session.id === activeSessionId
+                const lastMsg = session.messages[session.messages.length - 1]
+                return (
+                  <div
+                    key={session.id}
+                    onClick={() => handleSelectSession(session.id)}
+                    className={`group relative p-3.5 rounded-2xl border transition-all cursor-pointer select-none flex items-start justify-between gap-3 shadow-xs backdrop-blur-xl ${
+                      isActive
+                        ? 'bg-black/10 dark:bg-white/15 border-foreground/30 text-foreground font-bold shadow-sm'
+                        : 'border-white/35 dark:border-white/12 bg-white/60 hover:bg-white/85 dark:bg-white/[0.06] dark:hover:bg-white/[0.12] text-foreground'
+                    }`}
+                  >
+                    <div className="flex-1 min-w-0 pr-1">
+                      <div className="flex items-center gap-1.5">
+                        <Icon name="chat_bubble_outline" size={14} className={isActive ? 'text-foreground' : 'text-muted-foreground'} />
+                        <p className="m-0 text-xs font-bold break-words text-foreground">
+                          {session.title || 'Conversation'}
+                        </p>
                       </div>
-
-                      {/* Delete Session Button on Hover */}
-                      <button
-                        onClick={(e) => handleDeleteSession(e, session.id)}
-                        aria-label="Delete chat"
-                        className="size-7 rounded-xl opacity-0 group-hover:opacity-100 hover:bg-destructive/15 text-muted-foreground hover:text-destructive flex items-center justify-center cursor-pointer transition-all shrink-0"
-                        title="Delete this conversation"
-                      >
-                        <Icon name="delete" size={15} />
-                      </button>
+                      {lastMsg && (
+                        <p className="m-0 mt-1 text-[11px] text-muted-foreground break-words leading-relaxed">
+                          {lastMsg.text}
+                        </p>
+                      )}
+                      <span className="text-[9px] text-muted-foreground/80 mt-1.5 block font-medium">
+                        {new Date(session.updatedAt || session.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric' })}{' '}
+                        &middot;{' '}
+                        {new Date(session.updatedAt || session.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
                     </div>
-                  )
-                })
-              )}
-            </div>
 
-            {/* Clear All History Footer */}
-            {historySessions.length > 0 && (
-              <div className="p-3 pb-22 sm:pb-3 border-t border-border/60 dark:border-white/10 shrink-0">
-                <button
-                  onClick={handleClearAllHistory}
-                  className="w-full h-8.5 rounded-xl border border-destructive/30 hover:bg-destructive/10 text-destructive text-[11px] font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-98"
-                >
-                  <Icon name="delete_sweep" size={15} />
-                  <span>Clear All Conversation History</span>
-                </button>
-              </div>
+                    {/* Delete Session Button on Hover */}
+                    <button
+                      onClick={(e) => handleDeleteSession(e, session.id)}
+                      aria-label="Delete chat"
+                      className="size-7.5 rounded-xl opacity-0 group-hover:opacity-100 hover:bg-destructive/15 text-muted-foreground hover:text-destructive flex items-center justify-center cursor-pointer transition-all shrink-0"
+                      title="Delete this conversation"
+                    >
+                      <Icon name="delete" size={15} />
+                    </button>
+                  </div>
+                )
+              })
             )}
           </div>
-        ) : (
-          /* ACTIVE CHAT FEED & INPUT VIEW */
-          <div className="flex-1 flex flex-col overflow-hidden animate-in fade-in duration-200 relative">
+
+          {/* Clear All History Footer */}
+          {historySessions.length > 0 && (
+            <div className="p-3.5 pb-22 sm:pb-3.5 shrink-0 bg-transparent">
+              <button
+                onClick={handleClearAllHistory}
+                className="apple-glass-btn w-full h-9 rounded-xl border border-destructive/35 hover:bg-destructive/15 text-destructive text-[11px] font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-98 shadow-xs"
+              >
+                <Icon name="delete_sweep" size={15} />
+                <span>Clear All Conversation History</span>
+              </button>
+            </div>
+          )}
+        </div>
+      ) : (
+        /* ACTIVE CHAT FEED & INPUT VIEW — MONOGLASS DESIGN */
+        <div className="flex-1 flex flex-col overflow-hidden animate-in fade-in duration-200 relative">
             {/* CHAT MESSAGES FEED */}
             <div 
               ref={chatScrollContainerRef}
               onScroll={handleChatScroll}
-              className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 overscroll-contain chat-scrollbar"
+              className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4.5 overscroll-contain chat-scrollbar"
             >
               {messages.map((msg, index) => (
                 <div
                   key={msg.id}
-                  className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'} space-y-1`}
+                  className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'} space-y-1.5`}
                 >
                   {/* Author Label Above Chatbox */}
                   <div className={`flex items-center gap-1.5 px-1.5 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
@@ -759,48 +796,48 @@ export default function AiCoPilotModal({
                       </span>
                     ) : (
                       <div className="flex items-center gap-1.5">
-                        <div className="size-4 rounded-full bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 flex items-center justify-center">
-                          <Icon name="auto_awesome" size={10} className="text-white dark:text-neutral-900" />
+                        <div className="size-4.5 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center border border-white/20">
+                          <AiQuantumGlyph size={12} />
                         </div>
-                        <span className="text-[11px] font-black tracking-tight text-foreground">
+                        <span className="text-[11px] font-extrabold tracking-tight text-foreground">
                           Kormiis AI
                         </span>
                       </div>
                     )}
                   </div>
 
-                  {/* Message Bubble */}
+                  {/* Message Bubble — MonoGlass Standard */}
                   <div
-                    className={`max-w-[88%] sm:max-w-[80%] rounded-2xl p-3.5 sm:p-4 text-xs sm:text-sm leading-relaxed relative backdrop-blur-xl saturate-[1.4] ${
+                    className={`max-w-[88%] sm:max-w-[82%] rounded-2xl p-3.5 sm:p-4 text-xs sm:text-sm leading-relaxed relative backdrop-blur-2xl ${
                       msg.role === 'user'
-                        ? 'rounded-tr-xs bg-white/90 dark:bg-white/[0.14] border border-white/70 dark:border-white/18 text-foreground shadow-[0_4px_16px_-4px_rgba(0,0,0,0.08),inset_0_1px_1px_0_rgba(255,255,255,0.60)]'
+                        ? 'rounded-tr-xs bg-neutral-900/90 text-white dark:bg-white/[0.16] dark:text-white border border-white/25 dark:border-white/20 shadow-[0_8px_24px_-4px_rgba(0,0,0,0.25),inset_0_1px_1px_rgba(255,255,255,0.3)]'
                         : msg.isError
-                        ? 'rounded-tl-xs bg-destructive/15 border border-destructive/30 text-destructive'
-                        : 'rounded-tl-xs bg-white/70 dark:bg-white/[0.07] border border-white/50 dark:border-white/12 text-foreground shadow-[0_2px_10px_-2px_rgba(0,0,0,0.04),inset_0_1px_1px_0_rgba(255,255,255,0.40)]'
+                        ? 'rounded-tl-xs bg-destructive/15 border border-destructive/30 text-destructive shadow-xs'
+                        : 'rounded-tl-xs glass-kormiis border border-white/40 dark:border-white/14 text-foreground shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06),inset_0_1px_1px_rgba(255,255,255,0.35)]'
                     }`}
                   >
                     {/* Attached File Preview inside Message */}
                     {msg.fileData && (
-                      <div className="mb-2.5 p-2 rounded-xl bg-black/[0.04] dark:bg-white/10 flex items-center gap-2 text-xs">
+                      <div className="mb-2.5 p-2 rounded-xl bg-black/[0.06] dark:bg-white/10 flex items-center gap-2 text-xs border border-white/20">
                         <Icon name="attachment" size={16} />
-                        <span className=" break-words font-semibold">{msg.fileData.name}</span>
+                        <span className="break-words font-semibold">{msg.fileData.name}</span>
                       </div>
                     )}
 
                     <div className="whitespace-pre-wrap">{msg.text}</div>
 
-                    {/* Quick Action Suggestion Pills inside the Welcome Bubble */}
+                    {/* Quick Action Suggestion Pills inside Welcome Bubble */}
                     {index === 0 && msg.role === 'model' && (
-                      <div className="mt-3 pt-2.5 border-t border-border/40 dark:border-white/10 flex flex-wrap gap-1.5">
-                        <span className="text-[10px] font-bold text-muted-foreground w-full block mb-0.5 uppercase tracking-wider">
-                          Suggested actions:
+                      <div className="mt-3.5 pt-3 border-t border-border/60 dark:border-white/12 flex flex-wrap gap-1.5">
+                        <span className="text-[10px] font-bold text-muted-foreground w-full block mb-1 uppercase tracking-wider">
+                          Suggested quick actions:
                         </span>
                         {QUICK_ACTIONS.map(qa => (
                           <button
                             key={qa.label}
                             onClick={() => handleSend(qa.prompt)}
                             disabled={isLoading}
-                            className="px-2.5 py-1.5 rounded-xl border border-white/45 dark:border-white/16 bg-white/75 dark:bg-white/[0.10] hover:bg-white/95 dark:hover:bg-white/[0.20] text-[11px] font-semibold text-foreground/90 hover:text-foreground cursor-pointer transition-all active:scale-95 disabled:opacity-50 shadow-xs flex items-center gap-1.5"
+                            className="apple-glass-btn px-3 py-1.5 rounded-full border border-white/40 dark:border-white/16 bg-white/75 dark:bg-white/[0.10] hover:bg-white/95 dark:hover:bg-white/[0.20] hover:border-white/60 dark:hover:border-white/30 text-[11px] font-bold text-foreground cursor-pointer transition-all active:scale-95 disabled:opacity-50 shadow-xs flex items-center gap-1.5"
                           >
                             <span>{qa.label}</span>
                           </button>
@@ -810,32 +847,32 @@ export default function AiCoPilotModal({
 
                     {/* Timestamp */}
                     {msg.timestamp && (
-                      <div className={`text-[10px] mt-1.5 font-medium text-muted-foreground ${msg.role === 'user' ? 'text-right' : 'text-left'}`}>
+                      <div className={`text-[9.5px] mt-1.5 font-medium ${msg.role === 'user' ? 'text-white/75 text-right' : 'text-muted-foreground text-left'}`}>
                         {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </div>
                     )}
                   </div>
 
-                  {/* ACTION CONFIRMATION CARDS */}
+                  {/* ACTION CONFIRMATION CARDS — MONOGLASS GLASS CARD */}
                   {msg.pendingActions?.map(action => (
                     <div
                       key={action.actionId}
-                      className="w-full max-w-[92%] sm:max-w-[85%] p-4 glass-card border border-white/50 dark:border-white/14 bg-white/60 dark:bg-white/[0.06] shadow-md space-y-3 animate-in fade-in duration-300"
+                      className="w-full max-w-[92%] sm:max-w-[85%] p-4.5 glass-card rounded-[22px] border border-white/45 dark:border-white/16 shadow-[0_12px_32px_-8px_rgba(0,0,0,0.12),inset_0_1px_1px_rgba(255,255,255,0.35)] space-y-3.5 animate-in fade-in duration-300 backdrop-blur-2xl"
                     >
-                      <div className="flex items-center justify-between gap-2 border-b border-border/60 pb-2">
+                      <div className="flex items-center justify-between gap-2 border-b border-border/70 dark:border-white/12 pb-2.5">
                         <div className="flex items-center gap-2">
-                          <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
-                          <span className="text-xs font-bold uppercase tracking-wider text-foreground">
+                          <span className="size-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                          <span className="text-xs font-black uppercase tracking-wider text-foreground">
                             Proposed Action: {action.name.replace(/_/g, ' ')}
                           </span>
                         </div>
                         {action.status === 'executed' && (
-                          <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/15 px-2 py-0.5 rounded-full border border-emerald-500/30 flex items-center gap-1">
+                          <span className="text-[10px] font-extrabold text-emerald-600 dark:text-emerald-400 bg-emerald-500/15 px-2.5 py-0.5 rounded-full border border-emerald-500/30 flex items-center gap-1 shadow-xs">
                             <Icon name="check" size={12} /> Applied
                           </span>
                         )}
                         {action.status === 'cancelled' && (
-                          <span className="text-[10px] font-bold text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                          <span className="text-[10px] font-bold text-muted-foreground bg-muted px-2.5 py-0.5 rounded-full">
                             Cancelled
                           </span>
                         )}
@@ -844,8 +881,8 @@ export default function AiCoPilotModal({
                       {/* Action Arguments Summary */}
                       <div className="grid grid-cols-2 gap-2 text-xs">
                         {Object.entries(action.args || {}).map(([k, v]) => (
-                          <div key={k} className="p-2 rounded-xl bg-black/[0.03] dark:bg-white/[0.04]">
-                            <span className="text-[10px] font-bold uppercase text-muted-foreground block break-words ">
+                          <div key={k} className="p-2.5 rounded-xl bg-black/[0.03] dark:bg-white/[0.05] border border-black/[0.04] dark:border-white/[0.06]">
+                            <span className="text-[10px] font-bold uppercase text-muted-foreground block break-words">
                               {k}
                             </span>
                             <span className="font-semibold text-foreground break-words block mt-0.5">
@@ -855,18 +892,18 @@ export default function AiCoPilotModal({
                         ))}
                       </div>
 
-                      {/* Action Buttons */}
+                      {/* Action Buttons — MonoGlass Pure Glass Buttons */}
                       {action.status === 'pending' && (
                         <div className="flex items-center justify-end gap-2 pt-1">
                           <button
                             onClick={() => handleCancelAction(msg.id, action.actionId)}
-                            className="px-3 py-1.5 rounded-xl border border-border text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted/50 cursor-pointer active:scale-95 transition-all"
+                            className="apple-glass-btn h-9 px-3.5 rounded-xl border border-white/35 dark:border-white/15 text-xs font-semibold text-muted-foreground hover:text-foreground cursor-pointer active:scale-95 transition-all"
                           >
                             Dismiss
                           </button>
                           <button
                             onClick={() => handleExecuteAction(msg.id, action.actionId, action.name, action.args)}
-                            className="px-4 py-1.5 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold cursor-pointer active:scale-95 transition-all shadow-sm flex items-center gap-1.5"
+                            className="apple-glass-btn h-9 px-4.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-700 dark:text-emerald-300 border border-emerald-500/35 text-xs font-bold cursor-pointer active:scale-95 transition-all shadow-xs flex items-center gap-1.5"
                           >
                             <Icon name="check" size={14} /> Approve & Apply
                           </button>
@@ -879,8 +916,8 @@ export default function AiCoPilotModal({
 
               {/* Loading Indicator Bubble */}
               {isLoading && (
-                <div className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-white/80 dark:bg-white/[0.10] backdrop-blur-xl border border-white/60 dark:border-white/16 shadow-[inset_0_1px_1px_0_rgba(255,255,255,0.40)] text-xs text-foreground font-medium w-fit animate-pulse">
-                  <Icon name="auto_awesome" size={16} className="text-foreground animate-spin" />
+                <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-full glass-kormiis border border-white/40 dark:border-white/16 shadow-[inset_0_1px_1px_0_rgba(255,255,255,0.40)] text-xs text-foreground font-semibold w-fit animate-pulse backdrop-blur-2xl">
+                  <Icon name="sync" size={16} className="text-foreground animate-spin" />
                   <span>Kormiis AI is thinking and preparing actions...</span>
                 </div>
               )}
@@ -893,7 +930,7 @@ export default function AiCoPilotModal({
                   type="button"
                   onClick={() => scrollToBottom(true)}
                   aria-label="Scroll to latest messages"
-                  className="apple-glass-btn h-8 px-3.5 rounded-full flex items-center gap-1.5 text-xs font-bold text-foreground border border-white/45 dark:border-white/20 shadow-[0_8px_20px_-4px_rgba(0,0,0,0.25)] backdrop-blur-xl bg-white/70 dark:bg-white/[0.10] hover:bg-white/90 dark:hover:bg-white/[0.18] active:scale-95 transition-all hover:scale-105 cursor-pointer select-none group"
+                  className="apple-glass-btn h-8.5 px-4 rounded-full flex items-center gap-1.5 text-xs font-bold text-foreground border border-white/45 dark:border-white/20 shadow-[0_8px_24px_-4px_rgba(0,0,0,0.25)] backdrop-blur-2xl bg-white/75 dark:bg-white/[0.12] hover:bg-white/95 dark:hover:bg-white/[0.20] active:scale-95 transition-all hover:scale-103 cursor-pointer select-none group"
                   title="Jump to latest message"
                 >
                   <Icon name="arrow_downward" size={15} className="text-foreground transition-transform duration-200 group-hover:translate-y-0.5" />
@@ -902,19 +939,19 @@ export default function AiCoPilotModal({
               </div>
             )}
 
-            {/* INPUT & ATTACHMENT DOCK */}
-            <div className="p-2.5 sm:p-3 pb-22 sm:pb-3 border-t border-border/70 dark:border-white/12 shrink-0 space-y-2">
+            {/* INPUT & ATTACHMENT DOCK — SEAMLESS MONOGLASS DOCK */}
+            <div className="p-3 sm:p-4 pb-22 sm:pb-3.5 shrink-0 bg-transparent space-y-2.5">
               {/* File Attachment Chip */}
               {attachedFile && (
-                <div className="flex items-center justify-between p-1.5 px-2.5 rounded-xl bg-foreground/10 border border-foreground/20 text-xs text-foreground">
-                  <div className="flex items-center gap-2 break-words ">
-                    <Icon name="attach_file" size={14} className="text-foreground shrink-0" />
-                    <span className=" break-words font-semibold text-[11px]">{attachedFile.name}</span>
-                    <span className="text-[9px] text-muted-foreground">({Math.round(attachedFile.size / 1024)} KB)</span>
+                <div className="flex items-center justify-between p-2 px-3 rounded-2xl bg-black/[0.04] dark:bg-white/10 border border-white/30 dark:border-white/14 text-xs text-foreground shadow-xs">
+                  <div className="flex items-center gap-2 break-words">
+                    <Icon name="attach_file" size={15} className="text-foreground shrink-0" />
+                    <span className="break-words font-semibold text-[11px]">{attachedFile.name}</span>
+                    <span className="text-[9px] text-muted-foreground font-medium">({Math.round(attachedFile.size / 1024)} KB)</span>
                   </div>
                   <button
                     onClick={() => setAttachedFile(null)}
-                    className="size-4.5 rounded-full flex items-center justify-center hover:bg-foreground/15 text-muted-foreground hover:text-foreground cursor-pointer"
+                    className="size-5 rounded-full flex items-center justify-center hover:bg-foreground/15 text-muted-foreground hover:text-foreground cursor-pointer transition-all"
                   >
                     <Icon name="close" size={12} />
                   </button>
@@ -927,14 +964,14 @@ export default function AiCoPilotModal({
                   e.preventDefault()
                   handleSend()
                 }}
-                className="flex items-center gap-1.5"
+                className="flex items-center gap-2"
               >
                 {/* File Upload Button */}
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   aria-label="Upload document, excel sheet, or receipt"
-                  className="apple-glass-btn size-11 rounded-2xl flex items-center justify-center text-muted-foreground hover:text-foreground cursor-pointer shrink-0 border border-white/35 dark:border-white/15"
+                  className="apple-glass-btn size-11 rounded-2xl flex items-center justify-center text-muted-foreground hover:text-foreground cursor-pointer shrink-0 border border-white/35 dark:border-white/15 active:scale-95 transition-all shadow-xs"
                   title="Upload file or receipt"
                 >
                   <Icon name="upload_file" size={18} />
@@ -952,9 +989,9 @@ export default function AiCoPilotModal({
                   type="button"
                   onClick={toggleVoice}
                   aria-label="Voice input"
-                  className={`apple-glass-btn size-11 rounded-2xl flex items-center justify-center transition-all cursor-pointer shrink-0 border border-white/35 dark:border-white/15 ${
+                  className={`apple-glass-btn size-11 rounded-2xl flex items-center justify-center transition-all cursor-pointer shrink-0 border border-white/35 dark:border-white/15 active:scale-95 shadow-xs ${
                     isRecording
-                      ? 'bg-rose-500 text-white animate-pulse border-rose-400'
+                      ? 'bg-rose-500 text-white animate-pulse border-rose-400 shadow-md'
                       : 'text-muted-foreground hover:text-foreground'
                   }`}
                   title="Speak voice command"
@@ -962,22 +999,22 @@ export default function AiCoPilotModal({
                   <Icon name={isRecording ? 'mic' : 'mic_none'} size={18} />
                 </button>
 
-                {/* Text Input */}
+                {/* Text Input — MonoGlass Input Standard */}
                 <input
                   type="text"
                   placeholder={isRecording ? 'Listening to voice...' : 'Ask AI to add employee, update payroll, log expense...'}
                   value={input}
                   onChange={e => setInput(e.target.value)}
                   disabled={isLoading}
-                  className="flex-1 h-11 px-4 rounded-2xl border border-black/15 dark:border-white/16 bg-white/90 dark:bg-white/[0.10] text-xs sm:text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)] placeholder:text-muted-foreground"
+                  className="flex-1 h-11 px-4 rounded-2xl border border-black/15 dark:border-white/15 bg-white/90 dark:bg-white/[0.08] text-xs sm:text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-foreground/20 shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)] placeholder:text-muted-foreground"
                 />
 
-                {/* Send Button (MonoGlass Liquid Glass Button) */}
+                {/* Send Button — Pure MonoGlass Glass Button */}
                 <button
                   type="submit"
                   disabled={isLoading || (!input.trim() && !attachedFile)}
                   aria-label="Send command"
-                  className="apple-glass-btn size-11 rounded-2xl flex items-center justify-center cursor-pointer text-foreground active:scale-95 transition-all disabled:opacity-30 disabled:cursor-not-allowed shrink-0 border border-white/40 dark:border-white/18 shadow-xs hover:scale-102"
+                  className="apple-glass-btn size-11 rounded-2xl flex items-center justify-center cursor-pointer active:scale-95 transition-all text-foreground bg-white/80 dark:bg-white/[0.12] hover:bg-white/95 dark:hover:bg-white/[0.22] border border-white/40 dark:border-white/18 shadow-xs disabled:opacity-30 disabled:cursor-not-allowed shrink-0 hover:scale-103"
                   title="Send command (Enter)"
                 >
                   <Icon name="send" size={18} className="text-foreground" />

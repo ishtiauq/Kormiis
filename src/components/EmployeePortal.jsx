@@ -1,5 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import Icon from "@/components/ui/Icon.jsx"
+import AiCoPilotModal from './ai/AiCoPilotModal.jsx'
+import AiExpandableFab from './ai/AiExpandableFab.jsx'
 import DailyChecklistWidget from './DailyChecklistWidget.jsx'
 import { useModal } from '../services/useModal.js'
 import { formatDate, formatDateShort, formatDateTime, formatMonthYear, formatDateWithWeekday } from '../services/date.js'
@@ -597,12 +600,48 @@ export default function EmployeePortal({
           </button>
         </div>
       </div>
+
+      {/* Floating AI Co-Pilot Widget (Desktop & Mobile Portal) */}
+      {createPortal(
+        <AiExpandableFab
+          isOpen={showAiModal}
+          onToggle={() => {
+            setShowAiModal(prev => {
+              const next = !prev
+              setShowAiHistory(false)
+              if (next) setAiModalAction(`open_chat_${Date.now()}`)
+              return next
+            })
+          }}
+          onClose={() => {
+            setShowAiModal(false)
+            setShowAiHistory(false)
+          }}
+          currentUser={currentUser}
+          employees={employees}
+          setEmployees={setEmployees}
+          payroll={payroll}
+          setPayroll={null}
+          attendance={attendance}
+          setAttendance={setAttendance}
+          expenses={expenses}
+          setExpenses={setExpenses}
+          announcements={announcements}
+          setAnnouncements={setAnnouncements}
+          tasks={tasks}
+          setTasks={setTasks}
+          settings={settings}
+          setCurrentView={setActiveTab}
+          addToast={addToast}
+          initialAction={aiModalAction}
+          isDarkMode={resolvedIsDark}
+        />,
+        document.body
+      )}
     </div>
   )
 }
 
-// ----------------------------------------------------
-// SUB-VIEWS
 // ----------------------------------------------------
 
 function DashboardView({ currentUser, attendance, setAttendance, addToast, expenses, announcements, tasks, events, setActiveTab, setShowPunchModal, settings, notes, setNotes }) {

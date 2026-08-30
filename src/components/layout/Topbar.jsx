@@ -203,6 +203,7 @@ export default function Topbar({
     if (!isAiOpen && !showNotifications) return
     const handleOutside = (e) => {
       if (topbarRef.current && topbarRef.current.contains(e.target)) return
+      if (e.target.closest('[data-ai-fab]') || e.target.closest('[data-ai-panel]')) return
       if (isAiOpenRef.current && onOpenAi) onOpenAi()
       if (showNotifRef.current) setShowNotifications(false)
     }
@@ -403,24 +404,8 @@ export default function Topbar({
             )}
           </div>
 
-          {/* Right: Actions Group (AI, Theme, Notification, Profile) */}
+          {/* Right: Actions Group (Theme, Notification, Profile) */}
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-            {/* AI Co-Pilot Trigger Button (Visible on Tablet/iPad & Desktop) */}
-            {onOpenAi && (
-              <button
-                onClick={onOpenAi}
-                title="Kormiis AI Co-Pilot"
-                aria-label="Toggle Kormiis AI"
-                className={`rounded-full size-9 sm:size-9 text-foreground apple-glass-btn shrink-0 flex items-center justify-center cursor-pointer active:scale-95 transition-all ${
-                  isAiOpen
-                    ? 'bg-primary/20 text-primary border-primary/40 shadow-xs'
-                    : 'text-foreground'
-                }`}
-              >
-                <Icon name="auto_awesome" size={18} className={isAiOpen ? 'text-primary' : 'text-foreground'} />
-              </button>
-            )}
-
             {showThemeToggle && (
               <button
                 onClick={toggleTheme}
@@ -469,37 +454,6 @@ export default function Topbar({
             )}
           </div>
         </header>
-      )}
-
-      {/* Inline AI Co-Pilot Panel — expands below the topbar */}
-      {isAiOpen && (
-        <div className={`pointer-events-auto z-50 ${isMobile ? 'px-3 sm:px-4 mt-2 glass-mobile-drawer rounded-t-[28px] border-t border-white/25 dark:border-white/12' : 'absolute top-full left-1/2 -translate-x-1/2 w-[98%] min-[400px]:w-[94%] sm:w-[85%] max-w-3xl glass-kormiis rounded-[28px] border border-white/25 dark:border-white/12 shadow-[0_32px_80px_-20px_rgba(0,0,0,0.55),0_0_0_1px_rgba(0,0,0,0.04)] animate-in slide-in-from-top-2 fade-in duration-200 data-[exiting]:animate-out data-[exiting]:slide-out-to-top-2 data-[exiting]:fade-out data-[exiting]:duration-150'}`}>
-          {isMobile && <div className="w-10 h-1 rounded-full bg-foreground/25 mx-auto mt-2.5 mb-1 shrink-0" />}
-          <div className={isMobile ? '' : 'max-h-[min(65vh,540px)] overflow-y-auto'}>
-            <AiCoPilotModal
-              isMorphMode={true}
-              isOpen={true}
-              onClose={() => onOpenAi && onOpenAi()}
-              currentUser={user}
-              employees={employees}
-              setEmployees={setEmployees}
-              payroll={payroll}
-              setPayroll={setPayroll}
-              attendance={attendance}
-              setAttendance={setAttendance}
-              expenses={expenses}
-              setExpenses={setExpenses}
-              announcements={announcements}
-              setAnnouncements={setAnnouncements}
-              tasks={tasks}
-              setTasks={setTasks}
-              settings={settings}
-              setCurrentView={setCurrentView}
-              addToast={addToast}
-              initialAction={aiModalAction}
-            />
-          </div>
-        </div>
       )}
 
       {/* Inline Notification Panel — expands below the topbar */}

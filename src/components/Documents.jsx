@@ -516,15 +516,6 @@ export default function Documents({
 
         <div className="flex items-center gap-2.5 flex-wrap">
           <Button 
-            variant="outline" 
-            onClick={() => handleOpenLetterModal('noc')} 
-            className="rounded-2xl h-11 px-4 text-xs sm:text-sm font-bold gap-2 border-primary/40 bg-primary/10 hover:bg-primary/20 text-primary flex-1 sm:flex-none shadow-sm transition-all"
-          >
-            <Icon name="assignment" size={18} className="text-primary"/>
-            <span>Auto-Generate Documents (NOC, Salary)</span>
-          </Button>
-
-          <Button 
             variant="default" 
             onClick={handleOpenUploadModal} 
             className="rounded-2xl h-11 px-5 font-bold shadow-sm flex-1 sm:flex-none"

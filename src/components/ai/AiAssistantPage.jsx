@@ -18,7 +18,7 @@ function getGreetingText(userName = 'there') {
   else if (hour >= 17 && hour < 22) timeGreeting = 'Good evening'
   else timeGreeting = 'Hello'
 
-  return `${timeGreeting}, ${userName}! 👋 I'm your Kormiis AI Co-Pilot.
+  return `${timeGreeting}, ${userName}! 👋 I'm your Kormiis AI.
 
 How can I assist you with HR operations, payroll, attendance, or workspace tasks today?`
 }
@@ -345,7 +345,11 @@ export default function AiAssistantPage({
         text: m.text
       }))
 
-      const response = await sendChatMessage(textToSend, context, history, attachedFile)
+      const response = await sendChatMessage({
+        messages: newMessages,
+        context,
+        fileData: attachedFile
+      })
 
       setMessagesForActiveSession(prev => [
         ...prev,
@@ -353,7 +357,12 @@ export default function AiAssistantPage({
           id: `model-${Date.now()}`,
           role: 'model',
           text: response.text,
-          pendingActions: response.actions || [],
+          pendingActions: response.functionCalls?.map((fc, idx) => ({
+            actionId: `action-${Date.now()}-${idx}`,
+            name: fc.name,
+            args: fc.args,
+            status: 'pending'
+          })) || response.actions || [],
           timestamp: new Date().toISOString()
         }
       ])
@@ -474,7 +483,7 @@ export default function AiAssistantPage({
             </div>
             <div>
               <h2 className="text-sm sm:text-base font-black tracking-tight text-foreground m-0 leading-tight">
-                {showHistoryView ? 'Chat History' : 'Kormiis AI Co-Pilot'}
+                {showHistoryView ? 'Chat History' : 'Kormiis AI'}
               </h2>
               <p className="text-[10px] sm:text-[11px] text-muted-foreground m-0 leading-tight mt-0.5 font-medium">
                 {showHistoryView 
