@@ -1280,64 +1280,74 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
         </DialogContent>
       </Dialog>
 
-      {/* Legal & Policies Dialog Modal */}
+      {/* Legal & Policies Dialog Modal (Uniform text-xs small font size) */}
       <Dialog open={!!legalModal} onOpenChange={(open) => { if (!open) setLegalModal(null) }}>
         <DialogContent 
           overlayClassName="bg-transparent"
-          className="max-w-[540px] dark force-dark-mode glass-kormiis rounded-[28px] p-6 sm:p-8 text-white max-h-[85vh] overflow-y-auto"
+          className="relative max-w-[540px] dark force-dark-mode glass-kormiis rounded-[28px] p-6 sm:p-7 text-white max-h-[85vh] overflow-y-auto"
         >
-          <DialogHeader>
-            <DialogTitle className="text-base sm:text-lg font-bold text-white">
+          {/* Top Right Tactile MonoGlass Close Button */}
+          <button
+            type="button"
+            onClick={() => setLegalModal(null)}
+            className="absolute top-4 sm:top-5 right-4 sm:right-5 size-8 rounded-full bg-white/[0.08] hover:bg-white/[0.16] border border-white/12 text-white/70 hover:text-white flex items-center justify-center active:scale-90 transition-all cursor-pointer z-20 outline-none"
+            aria-label="Close modal"
+          >
+            <Icon name="close" size={16} />
+          </button>
+
+          <DialogHeader className="pr-8">
+            <DialogTitle className="text-xs font-bold text-white tracking-wide">
               {legalModal === 'privacy' ? 'Privacy Policy' : 'Terms of Service'}
             </DialogTitle>
-            <DialogDescription className="text-xs text-[#bbbbbb]">
+            <DialogDescription className="text-xs text-white/50">
               Last updated: {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
             </DialogDescription>
           </DialogHeader>
           
-          <div className="py-2 text-xs sm:text-sm text-[#bbbbbb] space-y-4 leading-relaxed">
+          <div className="py-2 text-xs text-white/70 space-y-3.5 leading-relaxed">
             {legalModal === 'privacy' ? (
               <>
-                <p>
-                  At <strong>Kormiis</strong>, we are committed to protecting your privacy. This Privacy Policy explains how your information is collected, used, and safeguarded when using our workforce management software.
+                <p className="text-xs text-white/70 leading-relaxed">
+                  At <strong className="text-white font-semibold">Kormiis</strong>, we are committed to protecting your privacy. This Privacy Policy explains how your information is collected, used, and safeguarded when using our workforce management software.
                 </p>
-                <div>
-                  <h4 className="text-white font-bold mb-1">1. Information We Collect</h4>
-                  <p>We collect essential account details (name, work email, company name) and attendance records (time punches, verified GPS coordinates for check-ins) necessary to provide team scheduling and payroll services.</p>
+                <div className="space-y-1">
+                  <h4 className="text-xs font-bold text-white">1. Information We Collect</h4>
+                  <p className="text-xs text-white/70 leading-relaxed">We collect essential account details (name, work email, company name) and attendance records (time punches, verified GPS coordinates for check-ins) necessary to provide team scheduling and payroll services.</p>
                 </div>
-                <div>
-                  <h4 className="text-white font-bold mb-1">2. Data Security & Storage</h4>
-                  <p>Your team's data is securely stored and encrypted via modern cloud architecture. We do not sell or rent personal information to third parties.</p>
+                <div className="space-y-1">
+                  <h4 className="text-xs font-bold text-white">2. Data Security & Storage</h4>
+                  <p className="text-xs text-white/70 leading-relaxed">Your team's data is securely stored and encrypted via modern cloud architecture. We do not sell or rent personal information to third parties.</p>
                 </div>
-                <div>
-                  <h4 className="text-white font-bold mb-1">3. Your Rights</h4>
-                  <p>Admins and users may export, correct, or delete their profile information directly from their Workspace Settings at any time.</p>
+                <div className="space-y-1">
+                  <h4 className="text-xs font-bold text-white">3. Your Rights</h4>
+                  <p className="text-xs text-white/70 leading-relaxed">Admins and users may export, correct, or delete their profile information directly from their Workspace Settings at any time.</p>
                 </div>
               </>
             ) : (
               <>
-                <p>
-                  Welcome to <strong>Kormiis</strong>. By signing in or creating a Business Space, you agree to these Terms of Service.
+                <p className="text-xs text-white/70 leading-relaxed">
+                  Welcome to <strong className="text-white font-semibold">Kormiis</strong>. By signing in or creating a Business Space, you agree to these Terms of Service.
                 </p>
-                <div>
-                  <h4 className="text-white font-bold mb-1">1. Account & Workspace Integrity</h4>
-                  <p>You are responsible for maintaining the confidentiality of your login credentials and for all activities that occur within your Business Space.</p>
+                <div className="space-y-1">
+                  <h4 className="text-xs font-bold text-white">1. Account & Workspace Integrity</h4>
+                  <p className="text-xs text-white/70 leading-relaxed">You are responsible for maintaining the confidentiality of your login credentials and for all activities that occur within your Business Space.</p>
                 </div>
-                <div>
-                  <h4 className="text-white font-bold mb-1">2. Acceptable Use</h4>
-                  <p>You agree to use Kormiis only for lawful business operations, team coordination, time tracking, and HR operations in compliance with applicable local labor laws.</p>
+                <div className="space-y-1">
+                  <h4 className="text-xs font-bold text-white">2. Acceptable Use</h4>
+                  <p className="text-xs text-white/70 leading-relaxed">You agree to use Kormiis only for lawful business operations, team coordination, time tracking, and HR operations in compliance with applicable local labor laws.</p>
                 </div>
-                <div>
-                  <h4 className="text-white font-bold mb-1">3. Service Availability</h4>
-                  <p>We continuously optimize for 99.9% uptime. Automated backups ensure your team data remains safe and accessible.</p>
+                <div className="space-y-1">
+                  <h4 className="text-xs font-bold text-white">3. Service Availability</h4>
+                  <p className="text-xs text-white/70 leading-relaxed">We continuously optimize for 99.9% uptime. Automated backups ensure your team data remains safe and accessible.</p>
                 </div>
               </>
             )}
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="mt-2">
             <Button 
-              className="rounded-full text-xs font-bold bg-primary text-white hover:opacity-90 px-5" 
+              className="rounded-full text-xs font-bold bg-primary text-primary-foreground hover:opacity-90 active:scale-[0.97] px-5 py-2 h-9 cursor-pointer shadow-none border-none" 
               onClick={() => setLegalModal(null)}
             >
               Got it
