@@ -85,23 +85,23 @@
   --duration-standard: 400ms;
   --duration-modal: 600ms;
 
-  /* Apple Ultra-Liquid Glass Tokens (Light Mode - Subtle Refined Borders, Zero Shadow) */
-  --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.72) 0%, rgba(255, 255, 255, 0.42) 100%);
-  --glass-border: rgba(0, 0, 0, 0.075);
+  /* Apple Ultra-Liquid Glass Tokens (Zero Background Color / Pure Refraction Standard) */
+  --glass-bg: transparent;
+  --glass-border: rgba(0, 0, 0, 0.08);
   --glass-shadow: none;
   
-  --glass-btn-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.82) 0%, rgba(255, 255, 255, 0.48) 100%);
+  --glass-btn-bg: transparent;
   --glass-btn-border: rgba(0, 0, 0, 0.08);
   --glass-btn-shadow: none;
-  --glass-btn-hover-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(255, 255, 255, 0.65) 100%);
+  --glass-btn-hover-bg: rgba(0, 0, 0, 0.04);
   --glass-btn-hover-border: rgba(0, 0, 0, 0.14);
   --glass-btn-hover-shadow: none;
 
   /* Apple Ultra-Liquid Glass Drawer Tokens (Light Mode) */
-  --history-drawer-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.78) 0%, rgba(255, 255, 255, 0.48) 100%);
-  --history-card-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.72) 0%, rgba(255, 255, 255, 0.40) 100%);
+  --history-drawer-bg: transparent;
+  --history-card-bg: transparent;
   --history-card-border: rgba(0, 0, 0, 0.075);
-  --history-card-active-bg: rgba(254, 53, 1, 0.12);
+  --history-card-active-bg: rgba(254, 53, 1, 0.10);
   --history-card-active-border: rgba(254, 53, 1, 0.40);
 }
 
@@ -110,9 +110,9 @@ html.dark,
 [data-theme="dark"] {
   --background: #090a0f;
   --foreground: #ffffff;
-  --card: rgba(18, 18, 26, 0.40);
+  --card: transparent;
   --card-foreground: #ffffff;
-  --popover: rgba(18, 18, 26, 0.55);
+  --popover: transparent;
   --popover-foreground: #ffffff;
   --primary: #FE3501;
   --primary-foreground: #ffffff;
@@ -127,28 +127,28 @@ html.dark,
   --border: rgba(255, 255, 255, 0.09);
   --input: rgba(255, 255, 255, 0.07);
   --ring: rgba(255, 255, 255, 0.4);
-  --sidebar: rgba(12, 12, 18, 0.50);
+  --sidebar: transparent;
   --sidebar-foreground: var(--foreground);
   --sidebar-accent: rgba(28, 28, 40, 0.45);
   --sidebar-accent-foreground: var(--foreground);
   --sidebar-border: var(--border);
 
-  /* Apple Ultra-Liquid Glass Tokens (Dark Mode - Subtle Refined Borders, Zero Shadow) */
-  --glass-bg: linear-gradient(135deg, rgba(28, 28, 40, 0.42) 0%, rgba(14, 14, 22, 0.30) 100%);
+  /* Apple Ultra-Liquid Glass Tokens (Dark Mode - Zero Background Color / Pure Refraction Standard) */
+  --glass-bg: transparent;
   --glass-border: rgba(255, 255, 255, 0.09);
   --glass-shadow: none;
 
   /* Apple Ultra-Liquid Glass Drawer Tokens (Dark Mode) */
-  --history-drawer-bg: linear-gradient(135deg, rgba(28, 28, 40, 0.42) 0%, rgba(14, 14, 22, 0.30) 100%);
-  --history-card-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
+  --history-drawer-bg: transparent;
+  --history-card-bg: transparent;
   --history-card-border: rgba(255, 255, 255, 0.08);
-  --history-card-active-bg: rgba(254, 53, 1, 0.22);
+  --history-card-active-bg: rgba(254, 53, 1, 0.20);
   --history-card-active-border: rgba(254, 53, 1, 0.50);
   
-  --glass-btn-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.03) 100%);
+  --glass-btn-bg: transparent;
   --glass-btn-border: rgba(255, 255, 255, 0.10);
   --glass-btn-shadow: none;
-  --glass-btn-hover-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.20) 0%, rgba(255, 255, 255, 0.06) 100%);
+  --glass-btn-hover-bg: rgba(255, 255, 255, 0.06);
   --glass-btn-hover-border: rgba(255, 255, 255, 0.16);
   --glass-btn-hover-shadow: none;
 }
@@ -156,18 +156,18 @@ html.dark,
 .force-dark-mode {
   --background: #090a0f !important;
   --foreground: #ffffff !important;
-  --card: rgba(18, 18, 26, 0.40) !important;
+  --card: transparent !important;
   --card-foreground: #ffffff !important;
-  --popover: rgba(18, 18, 26, 0.55) !important;
+  --popover: transparent !important;
   --popover-foreground: #ffffff !important;
   --muted: rgba(28, 28, 40, 0.40) !important;
   --muted-foreground: #a1a1aa !important;
   --border: rgba(255, 255, 255, 0.09) !important;
   --input: rgba(255, 255, 255, 0.07) !important;
-  --glass-bg: linear-gradient(135deg, rgba(28, 28, 40, 0.42) 0%, rgba(14, 14, 22, 0.30) 100%) !important;
+  --glass-bg: transparent !important;
   --glass-border: rgba(255, 255, 255, 0.15) !important;
   --glass-border-color: rgba(255, 255, 255, 0.15) !important;
-  --glass-btn-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.03) 100%) !important;
+  --glass-btn-bg: transparent !important;
   --glass-btn-border: rgba(255, 255, 255, 0.10) !important;
   --glass-btn-color: #ffffff !important;
   color-scheme: dark !important;
@@ -253,6 +253,8 @@ html.dark,
 .glass-card,
 .glass-kormiis-modal,
 .glass-popover,
+.glass-tooltip,
+.tooltip,
 .bg-card,
 .liquid-glass-drawer,
 .liquid-glass-btn,
@@ -266,6 +268,7 @@ html.dark,
 .menu-bar-dock,
 [role="dialog"],
 [role="alertdialog"],
+[role="tooltip"],
 [data-notif-panel],
 [data-ai-trigger],
 .shadow-2xl,
@@ -284,13 +287,20 @@ html.dark,
 .glass-card,
 .glass-kormiis-modal,
 .glass-popover,
+.glass-tooltip,
 .bg-card {
-  background: var(--glass-bg) !important;
+  background: transparent !important;
+  background-color: transparent !important;
   -webkit-backdrop-filter: saturate(190%) blur(32px) !important;
   backdrop-filter: saturate(190%) blur(32px) !important;
   border: 1px solid var(--glass-border) !important;
   box-shadow: none !important;
   isolation: isolate !important;
+}
+
+.glass-tooltip {
+  border-radius: 1rem !important;
+  color: var(--foreground) !important;
 }
 
 .liquid-glass-drawer {
@@ -447,6 +457,18 @@ a.bg-primary:active {
   transition: transform 120ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
+/* Tooltip Reveal Down from beneath Pointer Animation */
+@keyframes tooltip-bloom {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 /* Liquid Wobble Spinner */
 @keyframes liquid-wobble-spin {
   0% { transform: rotate(0deg) scale(1); }
@@ -517,31 +539,26 @@ a.bg-primary:active {
   background-color: var(--foreground) !important;
 }
 
-/* Apple Liquid Glass Widget Item Card */
+/* Apple Liquid Glass Widget Item Card (Zero Background Color / Pure Refraction Standard) */
 .liquid-widget-item {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.65) 0%, rgba(255, 255, 255, 0.35) 100%);
-  -webkit-backdrop-filter: blur(16px) saturate(160%);
-  backdrop-filter: blur(16px) saturate(160%);
-  border: 1px solid rgba(255, 255, 255, 0.60);
-  box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.50), 0 2px 8px 0 rgba(0, 0, 0, 0.03);
-  transition: transform 250ms cubic-bezier(0.34, 1.56, 0.64, 1), background-color 200ms ease, box-shadow 250ms ease;
-}
-.dark .liquid-widget-item,
-[data-theme="dark"] .liquid-widget-item {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: transparent !important;
+  background-color: transparent !important;
+  -webkit-backdrop-filter: saturate(190%) blur(32px) !important;
+  backdrop-filter: saturate(190%) blur(32px) !important;
+  border: 1px solid var(--glass-border) !important;
   box-shadow: none !important;
+  transition: transform 250ms cubic-bezier(0.34, 1.56, 0.64, 1), background-color 200ms ease, border-color 200ms ease;
 }
 .liquid-widget-item:hover {
   transform: translateY(-1px) scale(1.01);
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.50) 100%);
-  border-color: rgba(255, 255, 255, 0.80);
+  background: rgba(0, 0, 0, 0.03) !important;
+  border-color: rgba(0, 0, 0, 0.12) !important;
   box-shadow: none !important;
 }
 .dark .liquid-widget-item:hover,
 [data-theme="dark"] .liquid-widget-item:hover {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.04) 100%);
-  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.16) !important;
   box-shadow: none !important;
 }
 .liquid-widget-item:active {
@@ -605,61 +622,6 @@ a.bg-primary:active {
 }
 
 @layer components {
-  /* Apple Ultra-Liquid Glass Progressive Blur Architecture (Strong High-Density Standard) */
-  .progressive-blur-mask {
-    background: linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.94) 0%,
-      rgba(255, 255, 255, 0.86) 25%,
-      rgba(255, 255, 255, 0.68) 50%,
-      rgba(255, 255, 255, 0.38) 72%,
-      rgba(255, 255, 255, 0.12) 88%,
-      rgba(255, 255, 255, 0) 100%
-    );
-    -webkit-backdrop-filter: blur(52px) saturate(240%) brightness(105%);
-    backdrop-filter: blur(52px) saturate(240%) brightness(105%);
-    mask-image: linear-gradient(
-      180deg,
-      rgba(0, 0, 0, 1) 0%,
-      rgba(0, 0, 0, 1) 25%,
-      rgba(0, 0, 0, 0.95) 42%,
-      rgba(0, 0, 0, 0.82) 58%,
-      rgba(0, 0, 0, 0.60) 72%,
-      rgba(0, 0, 0, 0.35) 84%,
-      rgba(0, 0, 0, 0.12) 93%,
-      rgba(0, 0, 0, 0) 100%
-    );
-    -webkit-mask-image: linear-gradient(
-      180deg,
-      rgba(0, 0, 0, 1) 0%,
-      rgba(0, 0, 0, 1) 25%,
-      rgba(0, 0, 0, 0.95) 42%,
-      rgba(0, 0, 0, 0.82) 58%,
-      rgba(0, 0, 0, 0.60) 72%,
-      rgba(0, 0, 0, 0.35) 84%,
-      rgba(0, 0, 0, 0.12) 93%,
-      rgba(0, 0, 0, 0) 100%
-    );
-    pointer-events: none;
-    transform: translateZ(0);
-    will-change: transform, opacity;
-  }
-
-  .dark .progressive-blur-mask,
-  [data-theme="dark"] .progressive-blur-mask {
-    background: linear-gradient(
-      180deg,
-      rgba(14, 16, 24, 0.94) 0%,
-      rgba(14, 16, 24, 0.86) 25%,
-      rgba(14, 16, 24, 0.68) 50%,
-      rgba(14, 16, 24, 0.38) 72%,
-      rgba(14, 16, 24, 0.12) 88%,
-      rgba(14, 16, 24, 0) 100%
-    );
-    -webkit-backdrop-filter: blur(52px) saturate(240%) brightness(103%);
-    backdrop-filter: blur(52px) saturate(240%) brightness(103%);
-  }
-
   /* Floating pill-shaped top and bottom bars (Ultra-Liquid Glass Zero Shadow Standard) */
   .topbar,
   .bottom-bar.bottom-bar-pill {

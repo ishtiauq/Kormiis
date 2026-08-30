@@ -20,12 +20,11 @@ Whenever creating new components, pages, widgets, or modifying existing ones in 
 ## 1. Core Material Architecture (Ultra-Liquid Glass)
 
 ### Layered Translucency & Optical Refraction
-- **Backdrop Filter**: `backdrop-filter: saturate(190%) blur(28px - 36px)` on all primary glass containers (`.glass-kormiis`).
-- **Base Translucency Gradients**:
-  - **Light Mode**: High-clarity 22%–48% opacity: `linear-gradient(135deg, rgba(255, 255, 255, 0.72) 0%, rgba(255, 255, 255, 0.42) 100%)`.
-  - **Dark Mode**: High-clarity smoky 30%–45% opacity: `linear-gradient(135deg, rgba(28, 28, 40, 0.42) 0%, rgba(14, 14, 22, 0.30) 100%)`.
+- **Backdrop Filter**: `backdrop-filter: saturate(190%) blur(32px)` / `-webkit-backdrop-filter: saturate(190%) blur(32px)` on all primary glass containers (`.glass-kormiis`).
+- **Zero Background Color Standard (Pure Refraction)**:
+  - **Light & Dark Mode**: `background: transparent !important;` (`--glass-bg: transparent`). Zero solid or tinted background fills — containers rely purely on backdrop blur, saturation, and contrast borders.
 - **Borders & Continuous Curvature**:
-  - Border: 1px solid `rgba(0, 0, 0, 0.12 - 0.15)` in Light Mode, `rgba(255, 255, 255, 0.15)` in Dark Mode.
+  - Border: 1px solid `rgba(0, 0, 0, 0.08)` in Light Mode, `rgba(255, 255, 255, 0.09)` in Dark Mode (`var(--glass-border)`).
   - Corner Radii: Continuous squircle corners — `rounded-2xl` to `rounded-3xl` (20px–32px) for cards/panels, `rounded-2xl` or `rounded-full` (16px–24px) for buttons/pills.
 - **Universal Zero-Shadow Standard**:
   - **Strictly NO depth shadows, drop shadows, ambient shadows, or cast shadows** anywhere in the application (`box-shadow: none !important;`).

@@ -12,14 +12,11 @@ import AdSlot from './AdSlot'
 import Calendar from './Calendar.jsx'
 import { formatDateTime } from '../services/date.js'
 
-const HoverTooltip = ({ content, children, position = 'center' }) => {
+const HoverTooltip = ({ content, children }) => {
   if (!content) return children
   return (
-    <div className="relative group/tooltip inline-flex items-center">
+    <div data-tooltip={content} className="contents">
       {children}
-      <div className={`absolute bottom-full mb-1 hidden group-hover/tooltip:block z-[999] w-max max-w-[250px] whitespace-normal bg-popover text-popover-foreground border border-border text-[10px] px-2.5 py-1.5 rounded-md shadow-lg pointer-events-none ${position === 'right' ? 'right-0' : 'left-1/2 -translate-x-1/2'}`}>
-        {content}
-      </div>
     </div>
   )
 }

@@ -156,7 +156,7 @@ export default function GlassMonthPicker({
       {/* Apple Liquid Glass Dropdown Popover */}
       {isOpen && (
         <div
-          className={`glass-kormiis glass-popover absolute top-full mt-2 z-50 w-[270px] sm:w-[285px] p-4 text-foreground shadow-2xl animate-in fade-in-0 zoom-in-95 duration-200 ${
+          className={`glass-kormiis glass-popover absolute top-full mt-2 z-50 w-[270px] sm:w-[285px] p-4 text-foreground shadow-none animate-in fade-in-0 zoom-in-95 duration-200 ${
             align === 'left' ? 'left-0' : 'right-0'
           }`}
         >
@@ -205,8 +205,8 @@ export default function GlassMonthPicker({
                   onClick={() => handleSelectMonth(idx)}
                   className={`group relative h-9.5 rounded-xl flex items-center justify-center transition-all duration-200 cursor-pointer border select-none ${
                     isSelected
-                      ? 'bg-primary text-white font-black border-primary shadow-xs scale-[1.03]'
-                      : 'bg-white/40 hover:bg-white/80 dark:bg-white/[0.06] dark:hover:bg-white/[0.14] text-foreground hover:text-primary border-black/[0.06] dark:border-white/10 hover:border-primary/30 font-bold text-fluid-xs shadow-2xs'
+                      ? 'bg-primary text-white font-black border-primary scale-[1.03]'
+                      : 'bg-transparent hover:bg-black/5 dark:hover:bg-white/10 text-foreground hover:text-primary border-black/[0.06] dark:border-white/10 hover:border-primary/30 font-bold text-fluid-xs'
                   }`}
                 >
                   <span className={`text-fluid-xs tracking-tight ${isSelected ? 'font-black text-white' : 'font-bold text-foreground group-hover:text-primary'}`}>

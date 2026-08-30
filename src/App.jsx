@@ -1,6 +1,7 @@
 import { useState, useEffect, lazy, Suspense } from 'react'
 
 import LoadingScreen from './components/layout/LoadingScreen.jsx'
+import GlobalTooltip from './components/GlobalTooltip.jsx'
 import { useTheme } from './hooks/useTheme.js'
 import { useToast } from './hooks/useToast.js'
 import { useAuth } from './hooks/useAuth.js'
@@ -77,27 +78,33 @@ export default function App() {
 
   if (!user) {
     return (
-      <Suspense fallback={<LoadingScreen isDarkMode={isDarkMode} message="Loading Kormiis..." />}>
-        <Login onLogin={handleLogin} themeMode={themeMode} toggleTheme={toggleTheme} setThemeMode={setThemeMode} />
-      </Suspense>
+      <>
+        <GlobalTooltip />
+        <Suspense fallback={<LoadingScreen isDarkMode={isDarkMode} message="Loading Kormiis..." />}>
+          <Login onLogin={handleLogin} themeMode={themeMode} toggleTheme={toggleTheme} setThemeMode={setThemeMode} />
+        </Suspense>
+      </>
     )
   }
 
   return (
-    <Suspense fallback={<LoadingScreen isDarkMode={isDarkMode} message="Loading your workspace..." />}>
-      <DashboardShell
-        user={user}
-        themeMode={themeMode}
-        isDarkMode={isDarkMode}
-        toggleTheme={toggleTheme}
-        addToast={addToast}
-        toasts={toasts}
-        removeToast={removeToast}
-        handleLogout={handleLogout}
-        currentView={currentView}
-        setCurrentView={setCurrentView}
-        isMobile={isMobile}
-      />
-    </Suspense>
+    <>
+      <GlobalTooltip />
+      <Suspense fallback={<LoadingScreen isDarkMode={isDarkMode} message="Loading your workspace..." />}>
+        <DashboardShell
+          user={user}
+          themeMode={themeMode}
+          isDarkMode={isDarkMode}
+          toggleTheme={toggleTheme}
+          addToast={addToast}
+          toasts={toasts}
+          removeToast={removeToast}
+          handleLogout={handleLogout}
+          currentView={currentView}
+          setCurrentView={setCurrentView}
+          isMobile={isMobile}
+        />
+      </Suspense>
+    </>
   )
 }

@@ -23,7 +23,7 @@ const Select = React.forwardRef(({ className, label, error, placeholder, childre
       </AriaButton>
       <AriaPopover 
         UNSTABLE_portalContainer={typeof window !== 'undefined' ? document.body : undefined}
-        className="z-[9999] w-[--trigger-width] rounded-2xl border border-border glass-popover p-1.5 text-popover-foreground shadow-2xl overflow-hidden"
+        className="z-[9999] w-[--trigger-width] rounded-2xl border border-border glass-popover p-1.5 text-popover-foreground shadow-none overflow-hidden"
       >
         <AriaListBox className="outline-none max-h-60 overflow-y-auto">
           {children}

@@ -158,14 +158,14 @@ export default function DashboardShell({ user, themeMode, isDarkMode, toggleThem
   return (
     <div className="dashboard-root app-shell relative" style={{ display: 'flex', height: '100vh', width: '100vw', maxWidth: '100vw', overflow: 'hidden', boxSizing: 'border-box' }}>
       <main 
-        className={`content dashboard-content ${isMobile ? 'pb-24' : 'pb-12 px-3 sm:px-5 md:px-6 lg:px-8'} flex-1 overflow-y-auto overflow-x-hidden flex flex-col items-center max-w-[100vw] transition-all duration-300`} 
+        className={`content dashboard-content ${isMobile ? 'pb-24' : 'pb-12'} px-0 flex-1 overflow-y-auto overflow-x-hidden flex flex-col items-center w-full max-w-[100vw] transition-all duration-300`} 
         style={{ scrollbarGutter: 'stable' }}
         onScroll={handleScroll}
       >
-        <div className="w-full max-w-[1920px] flex flex-col relative">
+        <div className="w-full flex flex-col relative">
           
           {/* Sticky Header Wrapper */}
-          <div className={`sticky top-0 z-40 w-full sm:pt-4 md:pt-5 pb-1.5 sm:pb-2.5 md:pb-3 px-1 sm:px-2 md:px-2 pointer-events-none transition-transform duration-300 ease-in-out ${isMobile && isScrollingDown && !showMobileMenu && !appData.showNotifications ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
+          <div className={`sticky top-0 z-40 w-full pointer-events-none transition-transform duration-300 ease-in-out ${isMobile && isScrollingDown && !showMobileMenu && !appData.showNotifications ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
             <Topbar
                 isDarkMode={isDarkMode}
                 toggleSidebar={toggleSidebar}
@@ -217,7 +217,7 @@ export default function DashboardShell({ user, themeMode, isDarkMode, toggleThem
               />
           </div>
 
-          <div className="w-full flex-1 px-1 sm:px-2 md:px-2 pt-2.5 sm:pt-4 md:pt-5 lg:pt-6">
+          <div className="w-full max-w-[1920px] mx-auto flex-1 px-3 sm:px-5 md:px-6 lg:px-8 pt-3 sm:pt-4 md:pt-5 lg:pt-6">
             <AppContent
             currentView={currentView}
             setCurrentView={setCurrentView}

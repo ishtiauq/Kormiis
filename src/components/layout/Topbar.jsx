@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { getRelativeTime } from '../../services/date.js'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import AiCoPilotModal from '../ai/AiCoPilotModal.jsx'
+import TooltipPopover from '../TooltipPopover.jsx'
 
 export default function Topbar({ 
   isDarkMode, 
@@ -310,76 +311,76 @@ export default function Topbar({
           className="flex items-center gap-0.5 sm:gap-1 md:gap-1.5 overflow-x-auto no-scrollbar scrollbar-none select-none scroll-smooth h-full max-w-full menu-bar-dock px-0.5"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
         >
-          {visibleNavItems.filter(item => item.id !== 'profile' && item.id !== 'settings').map(item => {
+          {visibleNavItems.filter(item => item.id !== 'profile').map(item => {
             const isActive = currentView === item.id;
             return (
-              <motion.button
-                key={item.id}
-                type="button"
-                layout
-                title={item.label}
-                aria-label={item.label}
-                onClick={() => {
-                  if (setCurrentView) setCurrentView(item.id);
-                }}
-                whileTap={{ scale: 0.94 }}
-                whileHover={!isActive ? { scale: 1.05 } : undefined}
-                transition={{
-                  layout: { type: "spring", stiffness: 440, damping: 32, mass: 0.7 },
-                  scale: { duration: 0.15 }
-                }}
-                className={`relative h-8 sm:h-8.5 rounded-full flex items-center justify-center shrink-0 cursor-pointer select-none border-0 !border-none outline-none focus-visible:ring-2 focus-visible:ring-primary/40 transition-colors duration-150 ${
-                  isActive
-                    ? 'nav-capsule-active px-3 sm:px-3.5 gap-1.5 font-bold z-10 !text-white'
-                    : 'w-8 sm:w-8.5 text-foreground/65 hover:text-foreground hover:bg-white/20 dark:hover:bg-white/8 bg-transparent p-0'
-                }`}
-                style={isActive ? { background: 'linear-gradient(135deg, #FE3501 0%, #e62f00 100%)', backgroundColor: '#FE3501', color: '#ffffff', border: 'none', outline: 'none' } : { background: 'transparent', border: 'none', boxShadow: 'none', outline: 'none' }}
-              >
-                {/* Gliding morphing pill indicator (Brand Color) */}
-                {isActive && (
-                  <motion.div
-                    layoutId={`${prefix}-active-nav-pill`}
-                    className="absolute inset-0 rounded-full nav-capsule-active z-0 pointer-events-none !border-none"
-                    style={{ border: 'none', outline: 'none' }}
-                    transition={{
-                      type: "spring",
-                      stiffness: 450,
-                      damping: 32,
-                      mass: 0.75
-                    }}
-                  />
-                )}
-
-                {/* Icon */}
-                <span 
-                  className={`relative z-10 shrink-0 flex items-center justify-center transition-all duration-200 ${
-                    isActive ? '!text-white scale-105' : 'text-foreground/75'
+              <TooltipPopover key={item.id} label={item.label} isCollapsed={!isActive} isDarkMode={isDark} side="bottom">
+                <motion.button
+                  type="button"
+                  layout
+                  aria-label={item.label}
+                  onClick={() => {
+                    if (setCurrentView) setCurrentView(item.id);
+                  }}
+                  whileTap={{ scale: 0.94 }}
+                  whileHover={!isActive ? { scale: 1.05 } : undefined}
+                  transition={{
+                    layout: { type: "spring", stiffness: 440, damping: 32, mass: 0.7 },
+                    scale: { duration: 0.15 }
+                  }}
+                  className={`relative h-8 sm:h-8.5 rounded-full flex items-center justify-center shrink-0 cursor-pointer select-none border-0 !border-none outline-none focus-visible:ring-2 focus-visible:ring-primary/40 transition-colors duration-150 ${
+                    isActive
+                      ? 'nav-capsule-active px-3 sm:px-3.5 gap-1.5 font-bold z-10 !text-white'
+                      : 'w-8 sm:w-8.5 text-foreground/65 hover:text-foreground hover:bg-white/20 dark:hover:bg-white/8 bg-transparent p-0'
                   }`}
+                  style={isActive ? { background: 'linear-gradient(135deg, #FE3501 0%, #e62f00 100%)', backgroundColor: '#FE3501', color: '#ffffff', border: 'none', outline: 'none' } : { background: 'transparent', border: 'none', boxShadow: 'none', outline: 'none' }}
                 >
-                  {item.icon}
-                </span>
-
-                {/* Smooth spring expanding label */}
-                <AnimatePresence mode="popLayout" initial={false}>
+                  {/* Gliding morphing pill indicator (Brand Color) */}
                   {isActive && (
-                    <motion.span
-                      key={`nav-label-${item.id}`}
-                      initial={{ opacity: 0, width: 0, filter: 'blur(3px)', x: -3 }}
-                      animate={{ opacity: 1, width: 'auto', filter: 'blur(0px)', x: 0 }}
-                      exit={{ opacity: 0, width: 0, filter: 'blur(3px)', x: -3 }}
+                    <motion.div
+                      layoutId={`${prefix}-active-nav-pill`}
+                      className="absolute inset-0 rounded-full nav-capsule-active z-0 pointer-events-none !border-none"
+                      style={{ border: 'none', outline: 'none' }}
                       transition={{
                         type: "spring",
-                        stiffness: 440,
-                        damping: 30,
-                        mass: 0.65
+                        stiffness: 450,
+                        damping: 32,
+                        mass: 0.75
                       }}
-                      className="relative z-10 text-[12px] sm:text-xs md:text-sm font-semibold tracking-tight whitespace-nowrap overflow-hidden inline-block leading-none !text-white"
-                    >
-                      {item.label}
-                    </motion.span>
+                    />
                   )}
-                </AnimatePresence>
-              </motion.button>
+
+                  {/* Icon */}
+                  <span 
+                    className={`relative z-10 shrink-0 flex items-center justify-center transition-all duration-200 ${
+                      isActive ? '!text-white scale-105' : 'text-foreground/75'
+                    }`}
+                  >
+                    {item.icon}
+                  </span>
+
+                  {/* Smooth spring expanding label */}
+                  <AnimatePresence mode="popLayout" initial={false}>
+                    {isActive && (
+                      <motion.span
+                        key={`nav-label-${item.id}`}
+                        initial={{ opacity: 0, width: 0, filter: 'blur(3px)', x: -3 }}
+                        animate={{ opacity: 1, width: 'auto', filter: 'blur(0px)', x: 0 }}
+                        exit={{ opacity: 0, width: 0, filter: 'blur(3px)', x: -3 }}
+                        transition={{
+                          type: "spring",
+                          stiffness: 440,
+                          damping: 30,
+                          mass: 0.65
+                        }}
+                        className="relative z-10 text-[12px] sm:text-xs md:text-sm font-semibold tracking-tight whitespace-nowrap overflow-hidden inline-block leading-none !text-white"
+                      >
+                        {item.label}
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </motion.button>
+              </TooltipPopover>
             );
           })}
         </nav>
@@ -389,14 +390,12 @@ export default function Topbar({
 
   return (
     <div ref={topbarRef} className="relative w-full flex flex-col items-center pointer-events-auto">
-      {/* Progressive Blur Layer Behind Top Navigation (Starting from Absolute Top Edge of Screen) */}
-      <div 
-        className="pointer-events-none absolute -top-8 sm:-top-10 md:-top-12 inset-x-[-100vw] h-[calc(100%+80px)] sm:h-[calc(100%+95px)] md:h-[calc(100%+105px)] z-0 progressive-blur-mask"
-        aria-hidden="true"
-      />
-
       {/* Row 1: Unified Top Navigation Header (Logo Left, Inline Menu on XL+ screens, Actions Right) */}
-      <header aria-label="Top navigation bar" className="relative z-10 pointer-events-auto w-full max-w-[1920px] mx-auto h-16 sm:h-20 px-2 sm:px-4 md:px-6 flex items-center justify-between gap-2 sm:gap-4 text-foreground bg-transparent border-none shadow-none" style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}>
+      <header 
+        aria-label="Top navigation bar" 
+        className="relative z-10 pointer-events-auto w-full h-20 sm:h-22 md:h-24 px-4 sm:px-6 md:px-8 flex items-center justify-between pt-3 sm:pt-4 md:pt-5 pb-2.5 sm:pb-3 md:pb-3.5 gap-2 sm:gap-4 text-foreground bg-transparent !bg-transparent border-none !border-none shadow-none backdrop-blur-[32px] backdrop-saturate-[190%]"
+        style={{ background: 'transparent', backgroundColor: 'transparent', border: 'none', boxShadow: 'none', backdropFilter: 'saturate(190%) blur(32px)', WebkitBackdropFilter: 'saturate(190%) blur(32px)' }}
+      >
         
         {/* 1. Leftmost: Brand Logo (Containerless Pure Standalone) & Quick Integrity Alert */}
         <div className="flex items-center gap-2 sm:gap-3 shrink-0 h-[48px] sm:h-[54px]">
@@ -441,72 +440,62 @@ export default function Topbar({
         {/* 3. Rightmost: Actions Group (Containerless Standalone Icons, Ultra-Compact gap-[1.6px]) */}
         <div className="flex items-center gap-[1.6px] shrink-0 h-[48px] sm:h-[54px]">
           {showThemeToggle && (
-            <button
-              onClick={toggleTheme}
-              title={`Switch Theme (Current: ${themeMode})`}
-              aria-label="Toggle light/dark theme"
-              className="size-9 sm:size-10 bg-transparent border-none shadow-none outline-none text-foreground/75 hover:text-foreground shrink-0 flex items-center justify-center cursor-pointer active:scale-90 transition-all p-0"
-              style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}
-            >
-              {themeMode === 'light' ? <Icon name="light_mode" size={24} /> : <Icon name="dark_mode" size={24} />}
-            </button>
+            <TooltipPopover label={themeMode === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'} side="bottom">
+              <button
+                onClick={toggleTheme}
+                aria-label="Toggle light/dark theme"
+                className="size-9 sm:size-10 bg-transparent border-none shadow-none outline-none text-foreground/75 hover:text-foreground shrink-0 flex items-center justify-center cursor-pointer active:scale-90 transition-all p-0"
+                style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}
+              >
+                {themeMode === 'light' ? <Icon name="light_mode" size={24} /> : <Icon name="dark_mode" size={24} />}
+              </button>
+            </TooltipPopover>
           )}
 
           {/* Notifications Trigger (Containerless - Desktop only, shown in bottom bar on mobile/tablet) */}
           <div className="relative hidden lg:flex items-center justify-center">
-            <button
-              ref={buttonRef}
-              onClick={() => { 
-                if (isAiOpen && onOpenAi) onOpenAi()
-                setShowNotifications(prev => !prev); 
-                if (markNotificationsRead) markNotificationsRead();
-              }}
-              title="Notifications"
-              aria-label="Notifications"
-              className="size-9 sm:size-10 bg-transparent border-none shadow-none outline-none text-foreground/75 hover:text-foreground relative shrink-0 flex items-center justify-center cursor-pointer active:scale-90 transition-all p-0"
-              style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}
-              id="notification-trigger"
-            >
-              <Icon name="notifications_active" size={24} />
-              {totalUnreadCount > 0 && (
-                <span className="absolute top-1.5 right-1.5 flex size-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
-                  <span className="relative inline-flex rounded-full size-2.5 bg-destructive"></span>
-                </span>
-              )}
-            </button>
+            <TooltipPopover label="Notifications" side="bottom">
+              <button
+                ref={buttonRef}
+                onClick={() => { 
+                  if (isAiOpen && onOpenAi) onOpenAi()
+                  setShowNotifications(prev => !prev); 
+                  if (markNotificationsRead) markNotificationsRead();
+                }}
+                aria-label="Notifications"
+                className="size-9 sm:size-10 bg-transparent border-none shadow-none outline-none text-foreground/75 hover:text-foreground relative shrink-0 flex items-center justify-center cursor-pointer active:scale-90 transition-all p-0"
+                style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}
+                id="notification-trigger"
+              >
+                <Icon name="notifications_active" size={24} />
+                {totalUnreadCount > 0 && (
+                  <span className="absolute top-1.5 right-1.5 flex size-2.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
+                    <span className="relative inline-flex rounded-full size-2.5 bg-destructive"></span>
+                  </span>
+                )}
+              </button>
+            </TooltipPopover>
           </div>
-
-          {/* Settings Trigger Button (Desktop lg+ only; hidden on mobile & tablet next to profile) */}
-          <button
-            onClick={() => setCurrentView && setCurrentView('settings')}
-            title="Settings"
-            aria-label="Settings"
-            className={`hidden lg:flex size-9 sm:size-10 bg-transparent border-none shadow-none outline-none shrink-0 items-center justify-center cursor-pointer active:scale-90 transition-all p-0 ${
-              currentView === 'settings' ? 'text-primary' : 'text-foreground/75 hover:text-foreground'
-            }`}
-            style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}
-          >
-            <Icon name="settings" size={24} />
-          </button>
 
           {/* User Profile Trigger Button (Containerless) */}
           {user && (
-            <button
-              onClick={onProfileClick || (() => setCurrentView && setCurrentView('profile'))}
-              title={user?.name ? `${user.name} (My Profile)` : "My Profile"}
-              aria-label="Open Profile"
-              className={`size-9 sm:size-10 bg-transparent border-none shadow-none outline-none shrink-0 flex items-center justify-center cursor-pointer active:scale-90 transition-all p-0 ${
-                currentView === 'profile' ? 'text-primary ring-2 ring-primary/40 rounded-full' : 'text-foreground/75 hover:text-foreground'
-              }`}
-              style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}
-            >
-              {user?.avatar ? (
-                <img src={user.avatar} alt={user.name || 'User'} className="w-7.5 h-7.5 sm:w-8.5 sm:h-8.5 object-cover rounded-full select-none" />
-              ) : (
-                <Icon name="person" size={25} />
-              )}
-            </button>
+            <TooltipPopover label={user?.name ? `${user.name} (Profile)` : "My Profile"} side="bottom">
+              <button
+                onClick={onProfileClick || (() => setCurrentView && setCurrentView('profile'))}
+                aria-label="Open Profile"
+                className={`size-9 sm:size-10 bg-transparent border-none shadow-none outline-none shrink-0 flex items-center justify-center cursor-pointer active:scale-90 transition-all p-0 ${
+                  currentView === 'profile' ? 'text-primary ring-2 ring-primary/40 rounded-full' : 'text-foreground/75 hover:text-foreground'
+                }`}
+                style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}
+              >
+                {user?.avatar ? (
+                  <img src={user.avatar} alt={user.name || 'User'} className="w-7.5 h-7.5 sm:w-8.5 sm:h-8.5 object-cover rounded-full select-none" />
+                ) : (
+                  <Icon name="person" size={25} />
+                )}
+              </button>
+            </TooltipPopover>
           )}
         </div>
       </header>
