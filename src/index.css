@@ -941,21 +941,135 @@ textarea:hover::-webkit-scrollbar-thumb {
   border: none !important;
 }
 
-/* 2. Accessibility: Reduced Motion */
-@media (prefers-reduced-motion: reduce) {
-  *, ::before, ::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 150ms !important;
-    scroll-behavior: auto !important;
+/* ==============================================================
+   RENDER PERFORMANCE: CSS CONTAINMENT & OPTIMIZATIONS
+   ============================================================== */
+
+/* Contain layout, style, paint for glass containers - prevents unnecessary reflows */
+.glass-kormiis,
+.glass-apple,
+.glass-card,
+.glass-kormiis-modal,
+.glass-popover,
+.glass-tooltip,
+.bg-card,
+.liquid-glass-drawer,
+.liquid-glass-btn,
+.apple-glass-btn,
+.topbar,
+.bottom-bar,
+.landing-glass-header,
+.landing-glass-bottom-bar,
+.glass-mobile-drawer,
+.liquid-widget-item,
+.menu-bar-dock,
+[role="dialog"],
+[role="alertdialog"],
+[role="tooltip"],
+[data-notif-panel],
+[data-ai-trigger] {
+  contain: layout style paint;
+}
+
+/* Optimize Dashboard widgets - contain their rendering */
+.dashboard-widget,
+.DashboardWidget,
+[class*="DashboardWidget"] {
+  contain: layout style paint;
+}
+
+/* Attendance list virtualization container */
+.virtualized-list,
+[class*="VirtualizedList"],
+.max-h-36.overflow-y-auto {
+  contain: layout style paint size;
+  content-visibility: auto;
+}
+
+/* Card content containment */
+.card-content,
+.CardContent,
+[class*="CardContent"] {
+  contain: layout style paint;
+}
+
+/* Prevent layout thrashing on scroll */
+.dashboard-content,
+.dashboard-root,
+main[class*="dashboard-content"] {
+  contain: layout style;
+}
+
+/* Content visibility for off-screen widgets */
+.lazy-widget,
+[class*="lazy-"] {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 500px;
+}
+
+/* Optimize images */
+img {
+  content-visibility: auto;
+}
+
+/* Reduce paint area for animated elements */
+.liquid-glass-btn,
+.apple-glass-btn,
+.liquid-icon-btn,
+.liquid-widget-item {
+  will-change: transform, opacity;
+}
+
+/* Remove will-change after animation completes */
+.liquid-glass-btn:not(:hover):not(:active),
+.apple-glass-btn:not(:hover):not(:active) {
+  will-change: auto;
+}
+
+/* ==============================================================
+   PROGRESSIVE LOADING: SUSPENSE & SKELETON STYLES
+   ============================================================== */
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--muted) 25%,
+    var(--muted-foreground) 37%,
+    var(--muted) 63%
+  );
+  background-size: 400% 100%;
+  animation: skeleton-loading 1.4s ease-in-out infinite;
+  border-radius: inherit;
+}
+
+@keyframes skeleton-loading {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
+}
+
+.skeleton-text {
+  height: 1em;
+  border-radius: 0.25rem;
+}
+
+.skeleton-avatar {
+  border-radius: 50%;
+}
+
+.skeleton-card {
+  border-radius: 1.5rem;
+}
+
+/* View transition for smooth page navigation */
+@media (prefers-reduced-motion: no-preference) {
+  .view-transition {
+    view-transition-name: view-content;
   }
-  .liquid-glass-btn,
-  .apple-glass-btn,
-  .glass-card,
-  .bg-card,
-  button {
-    transform: none !important;
-    transition: opacity 150ms ease-out, background 150ms ease-out !important;
+  
+  ::view-transition-old(view-content),
+  ::view-transition-new(view-content) {
+    animation-duration: 220ms;
+    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
   }
 }
 

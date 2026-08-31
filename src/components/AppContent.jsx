@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import LoadingScreen from './layout/LoadingScreen.jsx'
 
@@ -21,6 +21,27 @@ const PerformancePage = lazy(() => import('./hr/PerformancePage.jsx'))
 const WellbeingPage = lazy(() => import('./hr/WellbeingPage.jsx'))
 const AiAssistantPage = lazy(() => import('./ai/AiAssistantPage.jsx'))
 
+const viewPreloadMap = {
+  dashboard: () => import('./Dashboard.jsx'),
+  employees: () => import('./Employees.jsx'),
+  payroll: () => import('./Payroll.jsx'),
+  attendance: () => import('./Attendance.jsx'),
+  leaves: () => import('./Leaves.jsx'),
+  expenses: () => import('./Expenses.jsx'),
+  announcements: () => import('./Announcements.jsx'),
+  calendar: () => import('./Calendar.jsx'),
+  documents: () => import('./Documents.jsx'),
+  assets: () => import('./Assets.jsx'),
+  settings: () => import('./Settings.jsx'),
+  tasks: () => import('./Tasks.jsx'),
+  profile: () => import('./ProfileView.jsx'),
+  notes: () => import('./Notes.jsx'),
+  gigs: () => import('./hr/GigBoardPage.jsx'),
+  performance: () => import('./hr/PerformancePage.jsx'),
+  wellbeing: () => import('./hr/WellbeingPage.jsx'),
+  ai: () => import('./ai/AiAssistantPage.jsx'),
+}
+
 function ViewSkeleton() {
   return (
     <div className="w-full flex flex-col gap-4 animate-pulse" aria-hidden="true">
@@ -35,7 +56,25 @@ function ViewSkeleton() {
   )
 }
 
+function PreloadOnHover({ children, view }) {
+  const preload = useCallback(() => {
+    if (viewPreloadMap[view]) viewPreloadMap[view]()
+  }, [view])
+  return <div onMouseEnter={preload} onTouchStart={preload}>{children}</div>
+}
+
 export default function AppContent({ currentView, setCurrentView, isAppLoading, hasPermission, user, isSidebarCollapsed, themeMode, toggleTheme, ...data }) {
+  // Preload adjacent views on idle
+  useEffect(() => {
+    if ('requestIdleCallback' in window) {
+      const idleCallback = requestIdleCallback(() => {
+        const likelyNextViews = ['employees', 'attendance', 'payroll', 'tasks']
+        likelyNextViews.forEach(v => { if (v !== currentView && viewPreloadMap[v]) viewPreloadMap[v]() })
+      })
+      return () => cancelIdleCallback(idleCallback)
+    }
+  }, [currentView])
+
   if (isAppLoading) {
     return <LoadingScreen isDarkMode={themeMode === 'dark'} />
   }
