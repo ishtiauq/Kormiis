@@ -10,6 +10,7 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+dev-dist
 *.local
 
 # Editor directories and files
@@ -23,6 +24,9 @@ dist-ssr
 *.sln
 *.sw?
 .vercel
+.codegraph
+.superpowers
+.firebase
 
 # Environment variables
 .env*
