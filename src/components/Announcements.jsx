@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import AdSlot from './AdSlot'
 import Calendar from './Calendar.jsx'
 import { formatDateTime } from '../services/date.js'
+import { generateAnnouncementMessage, sendWhatsAppNotification, openWhatsAppDirect } from '../services/whatsappService.js'
 
 const HoverTooltip = ({ content, children }) => {
   if (!content) return children
@@ -21,7 +22,7 @@ const HoverTooltip = ({ content, children }) => {
   )
 }
 
-export default function Announcements({ employees, announcements, setAnnouncements, addLog, addToast, currentUser, addNotification, headline = 'Announcements', events = [], setEvents, defaultTab = 'announcements' }) {
+export default function Announcements({ employees, announcements, setAnnouncements, addLog, addToast, currentUser, addNotification, settings, headline = 'Announcements', events = [], setEvents, defaultTab = 'announcements' }) {
   const [activeHubTab, setActiveHubTab] = useState(defaultTab)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingPostId, setEditingPostId] = useState(null)
@@ -102,6 +103,26 @@ export default function Announcements({ employees, announcements, setAnnouncemen
       addToast('Announcement posted', 'success')
       addLog('Posted Announcement', title)
       if (addNotification) addNotification(`New announcement posted: "${title}"`, 'announcements', { title: 'New Announcement', category: 'announcement' })
+
+      // Broadcast WhatsApp announcement if enabled
+      if (settings?.whatsapp?.enabled && settings?.whatsapp?.notifyAnnouncements && settings?.whatsapp?.gatewayUrl) {
+        const msg = generateAnnouncementMessage({
+          companyName: settings?.company?.name || 'Kormiis HR',
+          title,
+          category,
+          content,
+          publishedBy: currentUser?.name || 'Management'
+        })
+        const phones = (employees || []).filter(e => e.phone).map(e => e.phone)
+        phones.forEach(p => {
+          sendWhatsAppNotification({
+            gatewayUrl: settings.whatsapp.gatewayUrl,
+            phone: p,
+            message: msg,
+            companyName: settings?.company?.name
+          }).catch(() => {})
+        })
+      }
     }
 
     setIsDialogOpen(false)
@@ -112,7 +133,18 @@ export default function Announcements({ employees, announcements, setAnnouncemen
     setHasPoll(false)
     setPollQuestion('')
     setPollOptions(['', ''])
-    setIsDialogOpen(false)
+  }
+
+  const handleShareAnnouncementWhatsApp = (post) => {
+    const msg = generateAnnouncementMessage({
+      companyName: settings?.company?.name || 'Kormiis HR',
+      title: post.title,
+      category: post.category,
+      content: post.content,
+      publishedBy: currentUser?.name || 'Management'
+    })
+    const url = `https://wa.me/?text=${encodeURIComponent(msg)}`
+    window.open(url, '_blank', 'noopener,noreferrer')
   }
 
   const handleSaveCategory = () => {
@@ -719,6 +751,15 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                     </HoverTooltip>
                     <Button variant="ghost" size="sm" onClick={() => toggleComments(post.id)} className="h-8 px-2 ml-1 text-muted-foreground hover:text-foreground hover:bg-muted/50">
                       <Icon name="chat" className="mr-1.5" size={14}/> <span className="text-xs font-medium">{(post.comments || []).length}</span>
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => handleShareAnnouncementWhatsApp(post)} 
+                      className="h-8 px-2 text-muted-foreground hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors"
+                      title="Share Announcement to WhatsApp"
+                    >
+                      <Icon name="share" className="mr-1" size={14}/> <span className="text-xs font-medium">WhatsApp</span>
                     </Button>
                   </div>
                   <HoverTooltip content={getReactionTitle(post.readBy)} position="right">

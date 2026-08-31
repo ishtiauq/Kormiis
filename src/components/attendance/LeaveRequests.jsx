@@ -6,21 +6,68 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog"
+import { generateLeaveStatusMessage, sendWhatsAppNotification, openWhatsAppDirect } from '../../services/whatsappService.js'
 
-export default function LeaveRequests({ employees, attendance, setAttendance, addToast, addNotification }) {
+export default function LeaveRequests({ employees, attendance, setAttendance, addToast, addNotification, settings }) {
   const { pendingLeaves, approveLeave, rejectLeave, pendingCount } = useLeaves(attendance, setAttendance, addToast, addNotification)
 
   const [pendingAction, setPendingAction] = useState(null) // { id, action: 'approve' | 'reject', empName }
 
-  const handleConfirmAction = () => {
+  const handleConfirmAction = async () => {
     if (pendingAction) {
+      const targetLeave = (attendance?.leaves || []).find(l => l.id === pendingAction.id)
+      const emp = employees.find(e => e.id === targetLeave?.employeeId)
+
       if (pendingAction.action === 'approve') {
         approveLeave(pendingAction.id)
       } else {
         rejectLeave(pendingAction.id)
       }
+
+      // Auto-dispatch WhatsApp update if configured
+      if (settings?.whatsapp?.enabled && settings?.whatsapp?.notifyLeaves && emp?.phone && targetLeave) {
+        const message = generateLeaveStatusMessage({
+          employeeName: emp.name,
+          companyName: settings?.company?.name || 'Kormiis HR',
+          leaveType: targetLeave.leaveType || 'Leave',
+          startDate: formatDateShort(targetLeave.startDate),
+          endDate: formatDateShort(targetLeave.endDate),
+          status: pendingAction.action === 'approve' ? 'Approved' : 'Rejected',
+          reason: targetLeave.reason
+        })
+
+        if (settings?.whatsapp?.gatewayUrl) {
+          sendWhatsAppNotification({
+            gatewayUrl: settings.whatsapp.gatewayUrl,
+            phone: emp.phone,
+            message,
+            companyName: settings?.company?.name
+          }).then(res => {
+            if (res.success && addToast) addToast(`WhatsApp update dispatched to ${emp.name}!`, 'success')
+          }).catch(() => {})
+        }
+      }
+
       setPendingAction(null)
     }
+  }
+
+  const handleDirectWhatsAppClick = (l) => {
+    const emp = employees.find(e => e.id === l.employeeId)
+    if (!emp?.phone) {
+      if (addToast) addToast(`No phone number recorded for ${emp?.name || 'this employee'}.`, 'warning')
+      return
+    }
+    const message = generateLeaveStatusMessage({
+      employeeName: emp.name,
+      companyName: settings?.company?.name || 'Kormiis HR',
+      leaveType: l.leaveType || 'Leave',
+      startDate: formatDateShort(l.startDate),
+      endDate: formatDateShort(l.endDate),
+      status: l.status || 'Pending',
+      reason: l.reason
+    })
+    openWhatsAppDirect(emp.phone, message)
   }
 
   return (
@@ -58,13 +105,24 @@ export default function LeaveRequests({ employees, attendance, setAttendance, ad
                       <TableCell className="text-center"><span className="text-sm font-semibold text-foreground">{l.days || '-'}</span></TableCell>
                       <TableCell><span className="text-xs text-muted-foreground block max-w-[200px] break-words">{l.reason || '-'}</span></TableCell>
                       <TableCell className="text-right">
-                        <div className="flex gap-2 justify-end">
+                        <div className="flex gap-2 justify-end items-center">
                           <Button size="sm" variant="default" onClick={() => setPendingAction({ id: l.id, action: 'approve', empName: emp?.name || l.employeeId })}>
                             <Icon name="check" className="mr-1" size={13}/> Approve
                           </Button>
                           <Button size="sm" variant="outline" className="text-destructive border-destructive/30 hover:text-destructive" onClick={() => setPendingAction({ id: l.id, action: 'reject', empName: emp?.name || l.employeeId })}>
                             <Icon name="close" className="mr-1" size={13}/> Reject
                           </Button>
+                          {emp?.phone && (
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              className="px-2 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10" 
+                              title="Chat / Notify on WhatsApp"
+                              onClick={() => handleDirectWhatsAppClick(l)}
+                            >
+                              <Icon name="chat" size={14}/>
+                            </Button>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>

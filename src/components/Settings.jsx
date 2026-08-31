@@ -13,6 +13,7 @@ import { Select, SelectItem } from "@/components/ui/select"
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
 import { requestPushPermission, getPushPermission, registerPushSubscription } from "../services/pushNotifications.js"
 import { sendTestEmail } from "../services/emailService.js"
+import { sendTestWhatsAppPing, openWhatsAppDirect, generateTestMessage } from "../services/whatsappService.js"
 import { getAiApiKey, setAiApiKey, getAiModel, setAiModel, testGeminiApiKey, GEMINI_MODELS } from "../services/aiAgent.js"
 import { AiQuantumGlyph } from './ai/AiExpandableFab.jsx'
 
@@ -126,6 +127,13 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
   const [resendFromEmail, setResendFromEmail] = useState(settings.company?.resendFromEmail || '')
   const [showApiKey, setShowApiKey] = useState(false)
   const [isTestingEmail, setIsTestingEmail] = useState(false)
+  const [whatsappEnabled, setWhatsappEnabled] = useState(settings.whatsapp?.enabled ?? false)
+  const [whatsappGatewayUrl, setWhatsappGatewayUrl] = useState(settings.whatsapp?.gatewayUrl || 'http://localhost:3001')
+  const [whatsappAdminPhone, setWhatsappAdminPhone] = useState(settings.whatsapp?.adminPhone || settings.company?.phone || '')
+  const [whatsappNotifyLeaves, setWhatsappNotifyLeaves] = useState(settings.whatsapp?.notifyLeaves ?? true)
+  const [whatsappNotifyPayroll, setWhatsappNotifyPayroll] = useState(settings.whatsapp?.notifyPayroll ?? true)
+  const [whatsappNotifyAnnouncements, setWhatsappNotifyAnnouncements] = useState(settings.whatsapp?.notifyAnnouncements ?? true)
+  const [isTestingWhatsApp, setIsTestingWhatsApp] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [showResetModal, setShowResetModal] = useState(false)
   useModal(() => setShowResetModal(false))
@@ -156,6 +164,14 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
       if (settings.notifications.syncAlerts !== undefined) setSyncAlerts(settings.notifications.syncAlerts)
       if (settings.notifications.emailDigests !== undefined) setEmailDigests(settings.notifications.emailDigests)
       if (settings.notifications.pushEnabled !== undefined) setPushEnabled(settings.notifications.pushEnabled)
+    }
+    if (settings.whatsapp) {
+      if (settings.whatsapp.enabled !== undefined) setWhatsappEnabled(settings.whatsapp.enabled)
+      if (settings.whatsapp.gatewayUrl !== undefined) setWhatsappGatewayUrl(settings.whatsapp.gatewayUrl)
+      if (settings.whatsapp.adminPhone !== undefined) setWhatsappAdminPhone(settings.whatsapp.adminPhone)
+      if (settings.whatsapp.notifyLeaves !== undefined) setWhatsappNotifyLeaves(settings.whatsapp.notifyLeaves)
+      if (settings.whatsapp.notifyPayroll !== undefined) setWhatsappNotifyPayroll(settings.whatsapp.notifyPayroll)
+      if (settings.whatsapp.notifyAnnouncements !== undefined) setWhatsappNotifyAnnouncements(settings.whatsapp.notifyAnnouncements)
     }
   }, [settings])
 
@@ -243,6 +259,35 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
     }
   }
 
+  const handleSendTestWhatsApp = async () => {
+    const phone = whatsappAdminPhone?.trim() || companyPhone?.trim()
+    if (!phone) {
+      if (addToast) addToast('Please provide an Admin / Test WhatsApp phone number first.', 'warning')
+      return
+    }
+    setIsTestingWhatsApp(true)
+    try {
+      const res = await sendTestWhatsAppPing({
+        gatewayUrl: whatsappGatewayUrl?.trim(),
+        phone,
+        companyName,
+        adminName: currentUser?.name || 'Admin'
+      })
+      if (res.success) {
+        if (addToast) addToast(`Test WhatsApp message dispatched successfully to ${phone}!`, 'success')
+      } else if (res.fallbackUrl) {
+        if (addToast) addToast('Gateway not reachable. Opening 1-Click WhatsApp instead...', 'info')
+        window.open(res.fallbackUrl, '_blank', 'noopener,noreferrer')
+      } else {
+        if (addToast) addToast(`WhatsApp Error: ${res.error}`, 'danger')
+      }
+    } catch (e) {
+      if (addToast) addToast(`Dispatch failed: ${e.message}`, 'danger')
+    } finally {
+      setIsTestingWhatsApp(false)
+    }
+  }
+
   const handleSave = () => {
     setIsSaving(true)
     Promise.resolve().then(() => {
@@ -259,7 +304,15 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
           resendApiKey: resendApiKey?.trim() || '',
           resendFromEmail: resendFromEmail?.trim() || ''
         },
-        notifications: { syncAlerts, emailDigests, pushEnabled }
+        notifications: { syncAlerts, emailDigests, pushEnabled },
+        whatsapp: {
+          enabled: whatsappEnabled,
+          gatewayUrl: whatsappGatewayUrl?.trim() || 'http://localhost:3001',
+          adminPhone: whatsappAdminPhone?.trim() || '',
+          notifyLeaves: whatsappNotifyLeaves,
+          notifyPayroll: whatsappNotifyPayroll,
+          notifyAnnouncements: whatsappNotifyAnnouncements
+        }
       })
       addLog?.('Settings Updated', 'Saved system settings and synced configurations', 'success')
       setIsSaving(false)
@@ -872,6 +925,146 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                     <span className="text-[11px] text-muted-foreground">
                       Default is <code className="font-mono bg-muted/60 px-1 py-0.5 rounded text-[10px]">onboarding@resend.dev</code> (or your verified domain).
                     </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* 4. Free WhatsApp Integration Card */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-black/[0.02] dark:bg-white/[0.02] border border-border/60 dark:border-white/10 flex flex-col gap-4 mt-1">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex flex-col gap-1 min-w-0">
+                    <div className="flex items-center gap-2.5 flex-wrap">
+                      <div className="flex items-center gap-2">
+                        <Icon name="chat" size={20} className="text-emerald-500" />
+                        <span className="font-bold text-sm text-foreground">WhatsApp Notifications (100% Free)</span>
+                      </div>
+                      {whatsappEnabled ? (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                          Active
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-muted text-muted-foreground border border-border/40">
+                          Disabled
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-fluid-xs text-muted-foreground">
+                      Delivers instant leave approval updates, payroll statements, and company announcements directly to employees' WhatsApp.
+                    </span>
+                  </div>
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={isTestingWhatsApp || (!whatsappAdminPhone && !companyPhone)}
+                    onClick={handleSendTestWhatsApp}
+                    className="h-9 px-4 rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95 shrink-0 gap-1.5"
+                  >
+                    {isTestingWhatsApp ? (
+                      <Icon name="monitoring" className="animate-spin" size={14} />
+                    ) : (
+                      <Icon name="send" size={14} />
+                    )}
+                    {isTestingWhatsApp ? 'Dispatching...' : 'Test WhatsApp Ping'}
+                  </Button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-border/40 dark:border-white/8">
+                  {/* Enable Switch & Admin Phone */}
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center justify-between p-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] border border-border/40">
+                      <div>
+                        <div className="text-xs font-bold text-foreground">Enable WhatsApp System</div>
+                        <div className="text-[11px] text-muted-foreground">Turn on automated/1-click notifications</div>
+                      </div>
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={whatsappEnabled}
+                        onClick={() => setWhatsappEnabled(prev => !prev)}
+                        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                          whatsappEnabled ? 'bg-emerald-500' : 'bg-muted'
+                        }`}
+                      >
+                        <span
+                          className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
+                            whatsappEnabled ? 'translate-x-5' : 'translate-x-0'
+                          }`}
+                        />
+                      </button>
+                    </div>
+
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-xs font-bold text-foreground">
+                        Admin WhatsApp Phone (for testing)
+                      </label>
+                      <Input
+                        type="text"
+                        value={whatsappAdminPhone}
+                        onChange={e => setWhatsappAdminPhone(e.target.value)}
+                        placeholder="017XXXXXXXX or +88017XXXXXXXX"
+                        className="h-10 text-xs"
+                      />
+                      <span className="text-[11px] text-muted-foreground">
+                        Your WhatsApp number to receive test messages.
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Gateway URL & Triggers */}
+                  <div className="flex flex-col gap-3">
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-xs font-bold text-foreground flex items-center justify-between">
+                        <span>Gateway Server URL (Optional)</span>
+                        <span className="text-[10px] font-mono text-muted-foreground">npm run whatsapp-server</span>
+                      </label>
+                      <Input
+                        type="text"
+                        value={whatsappGatewayUrl}
+                        onChange={e => setWhatsappGatewayUrl(e.target.value)}
+                        placeholder="http://localhost:3001"
+                        className="h-10 text-xs font-mono"
+                      />
+                      <span className="text-[11px] text-muted-foreground">
+                        Default local microservice: <code className="font-mono bg-muted/60 px-1 py-0.5 rounded text-[10px]">http://localhost:3001</code>. If offline, the app seamlessly provides 1-Click WhatsApp links.
+                      </span>
+                    </div>
+
+                    {/* Trigger Checkboxes */}
+                    <div className="flex flex-col gap-1.5 pt-1">
+                      <span className="text-xs font-bold text-foreground">Notification Triggers:</span>
+                      <div className="flex items-center gap-4 flex-wrap text-xs text-muted-foreground">
+                        <label className="flex items-center gap-1.5 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={whatsappNotifyLeaves}
+                            onChange={e => setWhatsappNotifyLeaves(e.target.checked)}
+                            className="rounded accent-emerald-500"
+                          />
+                          <span>Leave Updates</span>
+                        </label>
+                        <label className="flex items-center gap-1.5 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={whatsappNotifyPayroll}
+                            onChange={e => setWhatsappNotifyPayroll(e.target.checked)}
+                            className="rounded accent-emerald-500"
+                          />
+                          <span>Payroll Slips</span>
+                        </label>
+                        <label className="flex items-center gap-1.5 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={whatsappNotifyAnnouncements}
+                            onChange={e => setWhatsappNotifyAnnouncements(e.target.checked)}
+                            className="rounded accent-emerald-500"
+                          />
+                          <span>Announcements</span>
+                        </label>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

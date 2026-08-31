@@ -12,6 +12,7 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@
 import AdSlot from './AdSlot.jsx'
 import Expenses from './Expenses.jsx'
 import { formatDate } from '../services/date.js'
+import { generatePayrollSlipMessage, sendWhatsAppNotification, openWhatsAppDirect } from '../services/whatsappService.js'
 
 export default function Payroll({ employees, payroll, setPayroll, addLog, settings, addAuditLog, expenses, setExpenses, addToast, currentUser, addNotification, defaultTab = 'payroll' }) {
   const [activeMainTab, setActiveMainTab] = useState(defaultTab)
@@ -274,7 +275,53 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
 
       // Download Payslip text receipt
       generatePayslipReceipt(entry, today)
+
+      // Auto-dispatch WhatsApp Salary Slip if enabled
+      if (settings?.whatsapp?.enabled && settings?.whatsapp?.notifyPayroll && entry.employee?.phone) {
+        handleSendWhatsAppSlip(entry, true)
+      }
     }, 1200)
+  }
+
+  const handleSendWhatsAppSlip = async (entry, isAutomated = false) => {
+    const emp = entry.employee
+    if (!emp?.phone) {
+      if (!isAutomated && addToast) addToast(`No phone number found for ${emp?.name || 'this employee'}.`, 'warning')
+      return
+    }
+
+    const loanDeduction = Math.min(entry.loan?.remaining || 0, entry.loan?.installment || 0)
+    const netPay = entry.baseSalary + entry.allowance - entry.deductions - (entry.advance || 0) - loanDeduction
+    const message = generatePayrollSlipMessage({
+      employeeName: emp.name,
+      companyName: settings?.company?.name || 'Kormiis HR',
+      monthYear: selectedMonth,
+      netSalary: netPay,
+      basic: entry.baseSalary,
+      allowances: entry.allowance,
+      deductions: entry.deductions + (entry.advance || 0) + loanDeduction,
+      currency: currency || 'BDT'
+    })
+
+    const isGatewayActive = settings?.whatsapp?.enabled && settings?.whatsapp?.gatewayUrl
+    if (isGatewayActive) {
+      const res = await sendWhatsAppNotification({
+        gatewayUrl: settings.whatsapp.gatewayUrl,
+        phone: emp.phone,
+        message,
+        companyName: settings?.company?.name
+      })
+      if (res.success) {
+        if (addToast) addToast(`Salary statement sent to ${emp.name}'s WhatsApp!`, 'success')
+        return
+      }
+    }
+
+    // Direct 1-click fallback
+    if (!isAutomated) {
+      openWhatsAppDirect(emp.phone, message)
+      if (addToast) addToast(`Opening WhatsApp statement for ${emp.name}...`, 'info')
+    }
   }
 
   // Bulk Actions
@@ -911,17 +958,28 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
 
                     {/* Footer Actions */}
                     <div className="flex items-center gap-2 pt-1">
-                      <Button variant="outline" className="flex-1" onClick={() => openCompensationModal(entry)}>
-                        <Icon name="edit" className="mr-2 h-4 w-4 text-blue-500" size={16}/> Edit
+                      <Button variant="outline" size="sm" className="flex-1 text-xs" onClick={() => openCompensationModal(entry)}>
+                        <Icon name="edit" className="mr-1.5 h-3.5 w-3.5 text-blue-500" size={14}/> Edit
                       </Button>
                       {!isPaid ? (
-                        <Button className="flex-1" onClick={() => handleExecutePayment(entry)} disabled={isProcessing}>
+                        <Button size="sm" className="flex-1 text-xs" onClick={() => handleExecutePayment(entry)} disabled={isProcessing}>
                           {isProcessing ? '...' : 'Execute'}
                         </Button>
                       ) : (
-                        <Button variant="secondary" className="flex-1" onClick={() => generatePayslipReceipt(entry, entry.paymentDate)}>
-                          <Icon name="download" className="mr-2 h-4 w-4" size={16}/> Payslip
-                        </Button>
+                        <div className="flex-1 flex items-center gap-1.5">
+                          <Button variant="secondary" size="sm" className="flex-1 text-xs px-2" onClick={() => generatePayslipReceipt(entry, entry.paymentDate)}>
+                            <Icon name="download" className="mr-1 h-3.5 w-3.5" size={14}/> Payslip
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="px-2.5 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10 text-xs" 
+                            title="Send WhatsApp Salary Statement"
+                            onClick={() => handleSendWhatsAppSlip(entry)}
+                          >
+                            <Icon name="chat" size={14} />
+                          </Button>
+                        </div>
                       )}
                     </div>
                   </div>

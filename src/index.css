@@ -394,42 +394,55 @@ html.dark .liquid-glass-drawer,
 
 /* ==============================================================
    2. BUTTON COMPONENT: LIQUID GLASS BUTTON & MICRO-INTERACTIONS
-   Spring physics (stiffness 300, damping 25, mass 1)
+   MonoGlass Standard Apple Spring Physics:
+   Default (.glass-kormiis pure optical refraction & crisp border, ZERO shadow, NO background fill color)
    Hover (scale 1.02, brightness +5%)
    Pressed (scale 0.97, brightness -5%)
    Release (spring overshoot scale 1.02 -> 1.0 over 400-500ms)
    ============================================================== */
 
+button.glass-kormiis,
+a.glass-kormiis,
+[role="button"].glass-kormiis,
 .liquid-glass-btn,
 .apple-glass-btn {
-  background: var(--glass-btn-bg);
-  border: 1px solid var(--glass-btn-border);
+  background: transparent !important;
+  background-color: transparent !important;
+  border: 1px solid var(--glass-border) !important;
   box-shadow: none !important;
-  -webkit-backdrop-filter: saturate(180%) blur(40px);
-  backdrop-filter: saturate(180%) blur(40px);
+  -webkit-backdrop-filter: saturate(190%) blur(32px) !important;
+  backdrop-filter: saturate(190%) blur(32px) !important;
   transition: 
     transform 450ms cubic-bezier(0.34, 1.56, 0.64, 1),
     filter 250ms cubic-bezier(0.2, 0.8, 0.2, 1),
-    background 300ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    background 300ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    border-color 300ms cubic-bezier(0.2, 0.8, 0.2, 1);
   cursor: pointer;
-  border-radius: 1.125rem; /* 18px smooth radius */
+  isolation: isolate;
 }
 
-/* Label text at 90% opacity */
+/* Label text at 90-92% opacity */
+button.glass-kormiis > span,
+a.glass-kormiis > span,
+[role="button"].glass-kormiis > span,
 .liquid-glass-btn > span,
 .apple-glass-btn > span {
   opacity: 0.92;
 }
 
+button.glass-kormiis:hover,
+a.glass-kormiis:hover,
+[role="button"].glass-kormiis:hover,
 .liquid-glass-btn:hover,
 .apple-glass-btn:hover {
   transform: scale(1.02);
   filter: brightness(1.05);
-  background: var(--glass-btn-hover-bg);
-  border-color: var(--glass-btn-hover-border);
   box-shadow: none !important;
 }
 
+button.glass-kormiis:active,
+a.glass-kormiis:active,
+[role="button"].glass-kormiis:active,
 .liquid-glass-btn:active,
 .apple-glass-btn:active {
   transform: scale(0.97) !important;
@@ -439,6 +452,9 @@ html.dark .liquid-glass-drawer,
 }
 
 /* Focus-visible ring */
+button.glass-kormiis:focus-visible,
+a.glass-kormiis:focus-visible,
+[role="button"].glass-kormiis:focus-visible,
 .liquid-glass-btn:focus-visible,
 .apple-glass-btn:focus-visible {
   outline: none !important;
@@ -446,6 +462,9 @@ html.dark .liquid-glass-drawer,
 }
 
 /* Disabled State */
+button.glass-kormiis:disabled,
+a.glass-kormiis:disabled,
+[role="button"].glass-kormiis:disabled,
 .liquid-glass-btn:disabled,
 .apple-glass-btn:disabled {
   opacity: 0.4 !important;
