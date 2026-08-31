@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { validateDatabase } from '../services/validator.js'
 import { encryptJson, decryptJson } from '../services/crypto.js'
 import { EMPLOYEES_STORAGE_KEY, timestampArrayChanges, getDeviceInfo } from '../utils/helpers.js'
-import { subscribeToTable, writeToTable, fetchTableFromFirestore } from '../services/bridge.js'
+import { writeToTable, fetchTableFromFirestore } from '../services/bridge.js'
 import { initPushSync, broadcast, updateBadge, notifyOnHidden, showSystemNotification, registerPushSubscription } from '../services/pushNotifications.js'
 
 export default function useAppData({ user, addToast }) {
@@ -270,35 +270,34 @@ export default function useAppData({ user, addToast }) {
     persistEmployees()
   }, [employees, user?.token])
 
-  /* ─── Persistence effects ─── */
-  const persistStates = [
-    { key: 'kormiis_payroll', val: payroll },
-    { key: 'kormiis_attendance', val: attendance },
-    { key: 'kormiis_expenses', val: expenses },
-    { key: 'kormiis_sync_logs', val: syncLogs },
-    { key: 'kormiis_announcements', val: announcements },
-    { key: 'kormiis_assets', val: assets },
-    { key: 'kormiis_asset_requests', val: assetRequests },
-    { key: 'kormiis_asset_categories', val: assetCategories },
-    { key: 'kormiis_events', val: events },
-    { key: 'kormiis_documents', val: documents },
-    { key: 'kormiis_notes', val: notes },
-  ]
-  persistStates.forEach(({ key, val }) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useEffect(() => { localStorage.setItem(key, JSON.stringify(val)) }, [val])
-  })
+  /* ─── Debounced Persistence ─── */
+  const persistenceTimers = useRef(new Map());
+  const persistToStorage = useCallback((key, val) => {
+    const timer = persistenceTimers.current.get(key);
+    if (timer) clearTimeout(timer);
+    persistenceTimers.current.set(key, setTimeout(() => {
+      localStorage.setItem(key, JSON.stringify(val));
+      persistenceTimers.current.delete(key);
+    }, 300));
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      persistenceTimers.current.forEach(timer => clearTimeout(timer));
+      persistenceTimers.current.clear();
+    };
+  }, []);
 
   /* ─── Firebase Real-Time Subscriptions ─── */
   useEffect(() => {
     if (!adminUid) return;
 
+    let mounted = true;
+    const unsubscribers = [];
+
     const applyUpdate = (setter, tableName, data, lastUpdated) => {
+      if (!mounted) return;
       if (data) {
-        // Freshness guard: if this Firestore snapshot is older than the last
-        // local edit for this table, it is stale (e.g. a delete that was still
-        // in flight when the page refreshed). Skip it so deleted items are not
-        // resurrected.
         const localEdit = Number(localStorage.getItem(`kormiis_${tableName}_updatedAt`) || 0);
         const fbMs = lastUpdated
           ? (typeof lastUpdated.toMillis === 'function' ? lastUpdated.toMillis() : new Date(lastUpdated).getTime())
@@ -314,92 +313,138 @@ export default function useAppData({ user, addToast }) {
       }
     };
 
-    const unsubEmployees = subscribeToTable(adminUid, 'employees', (data, lastUpdated) => applyUpdate(setEmployeesRaw, 'employees', data, lastUpdated));
-    const unsubPayroll = subscribeToTable(adminUid, 'payroll', (data, lastUpdated) => applyUpdate(setPayrollRaw, 'payroll', data, lastUpdated));
-    const unsubSettings = subscribeToTable(adminUid, 'settings', (data, lastUpdated) => applyUpdate(setSettingsRaw, 'settings', data, lastUpdated));
-    const unsubTasks = subscribeToTable(adminUid, 'tasks', (data, lastUpdated) => applyUpdate(setTasks, 'tasks', data, lastUpdated));
-    const unsubNotes = subscribeToTable(adminUid, 'notes', (data, lastUpdated) => applyUpdate(setNotesRaw, 'notes', data, lastUpdated));
-    const unsubExpenses = subscribeToTable(adminUid, 'expenses', (data, lastUpdated) => applyUpdate(setExpensesRaw, 'expenses', data, lastUpdated));
-    const unsubEvents = subscribeToTable(adminUid, 'events', (data, lastUpdated) => applyUpdate(setEvents, 'events', data, lastUpdated));
-    const unsubDocuments = subscribeToTable(adminUid, 'documents', (data, lastUpdated) => applyUpdate(setDocuments, 'documents', data, lastUpdated));
-    const unsubRoster = subscribeToTable(adminUid, 'roster', (data, lastUpdated) => applyUpdate(setRoster, 'roster', data, lastUpdated));
-    const unsubShiftSwaps = subscribeToTable(adminUid, 'shift_swaps', (data, lastUpdated) => applyUpdate(setShiftSwaps, 'shift_swaps', data, lastUpdated));
-    const unsubOvertime = subscribeToTable(adminUid, 'overtime_claims', (data, lastUpdated) => applyUpdate(setOvertimeClaims, 'overtime_claims', data, lastUpdated));
-    const unsubAnnouncements = subscribeToTable(adminUid, 'announcements', (data, lastUpdated) => applyUpdate(setAnnouncements, 'announcements', data, lastUpdated));
-    const unsubAssets = subscribeToTable(adminUid, 'assets', (data, lastUpdated) => applyUpdate(setAssets, 'assets', data, lastUpdated));
-    const unsubAssetRequests = subscribeToTable(adminUid, 'asset_requests', (data, lastUpdated) => applyUpdate(setAssetRequests, 'asset_requests', data, lastUpdated));
-    const unsubAssetCategories = subscribeToTable(adminUid, 'asset_categories', (data, lastUpdated) => applyUpdate(setAssetCategories, 'asset_categories', data, lastUpdated));
-    const handleNotifUpdate = (data, lastUpdated) => {
-      if (Array.isArray(data)) {
-        const currentId = user?.id || user?.employeeId || user?.uid;
-        const currentEmail = user?.email?.toLowerCase();
-        const currentRole = user?.role || (user?.isEmployee ? 'Teammate' : 'Admin');
+    // Dynamic import for subscribeToTable - only loads Firestore when needed
+    const setupSubscriptions = async () => {
+      const { subscribeToTable } = await import('../services/bridge.js');
+      
+      if (!mounted) return;
 
-        setAllNotifications(prev => {
-          const prevIds = new Set((prev || []).map(n => n.id));
-          const newIncoming = data.filter(n => !prevIds.has(n.id));
+      // Phase 1: Critical subscriptions (needed immediately for UI)
+      const criticalTables = [
+        { name: 'employees', setter: setEmployeesRaw },
+        { name: 'payroll', setter: setPayrollRaw },
+        { name: 'settings', setter: setSettingsRaw },
+      ];
 
-          // For any new notification from another user, trigger native system push notification
-          newIncoming.forEach(n => {
-            const isOwn = n.actorId && (n.actorId === currentId || (currentEmail && n.actorEmail && n.actorEmail.toLowerCase() === currentEmail));
-            if (!isOwn) {
-              let isTargeted = true;
-              if (Array.isArray(n.targetEmployeeIds) && n.targetEmployeeIds.length > 0) {
-                isTargeted = n.targetEmployeeIds.includes(currentId) || currentRole === 'Admin';
-              }
-              if (Array.isArray(n.targetRoles) && n.targetRoles.length > 0) {
-                if (!n.targetRoles.includes(currentRole)) isTargeted = false;
-              }
-              if (n.targetId && n.targetId !== currentId && currentRole !== 'Admin') {
-                isTargeted = false;
-              }
+      for (const { name, setter } of criticalTables) {
+        const unsub = await subscribeToTable(adminUid, name, (data, lastUpdated) => applyUpdate(setter, name, data, lastUpdated));
+        unsubscribers.push(unsub);
+      }
 
-              if (isTargeted) {
-                showSystemNotification({
-                  title: n.title || 'Kormiis',
-                  body: n.text,
-                  url: n.view || '',
-                  tag: n.category || 'system',
-                });
+      // Phase 2: Deferred subscriptions (load after UI is interactive)
+      // Use requestIdleCallback or setTimeout to defer
+      const deferredTables = [
+        { name: 'tasks', setter: setTasks },
+        { name: 'notes', setter: setNotesRaw },
+        { name: 'expenses', setter: setExpensesRaw },
+        { name: 'events', setter: setEvents },
+        { name: 'documents', setter: setDocuments },
+        { name: 'roster', setter: setRoster },
+        { name: 'shift_swaps', setter: setShiftSwaps },
+        { name: 'overtime_claims', setter: setOvertimeClaims },
+        { name: 'announcements', setter: setAnnouncements },
+        { name: 'assets', setter: setAssets },
+        { name: 'asset_requests', setter: setAssetRequests },
+        { name: 'asset_categories', setter: setAssetCategories },
+      ];
+
+      // Defer non-critical subscriptions
+      const deferSubscriptions = () => {
+        if (!mounted) return;
+        for (const { name, setter } of deferredTables) {
+          subscribeToTable(adminUid, name, (data, lastUpdated) => applyUpdate(setter, name, data, lastUpdated))
+            .then(unsub => { if (mounted) unsubscribers.push(unsub); });
+        }
+      };
+
+      if (typeof requestIdleCallback !== 'undefined') {
+        requestIdleCallback(deferSubscriptions, { timeout: 2000 });
+      } else {
+        setTimeout(deferSubscriptions, 100);
+      }
+
+      // Notifications - always subscribe (needed for real-time updates)
+      const handleNotifUpdate = (data, lastUpdated) => {
+        if (!mounted) return;
+        if (Array.isArray(data)) {
+          const currentId = user?.id || user?.employeeId || user?.uid;
+          const currentEmail = user?.email?.toLowerCase();
+          const currentRole = user?.role || (user?.isEmployee ? 'Teammate' : 'Admin');
+
+          setAllNotifications(prev => {
+            const prevIds = new Set((prev || []).map(n => n.id));
+            const newIncoming = data.filter(n => !prevIds.has(n.id));
+
+            newIncoming.forEach(n => {
+              const isOwn = n.actorId && (n.actorId === currentId || (currentEmail && n.actorEmail && n.actorEmail.toLowerCase() === currentEmail));
+              if (!isOwn) {
+                let isTargeted = true;
+                if (Array.isArray(n.targetEmployeeIds) && n.targetEmployeeIds.length > 0) {
+                  isTargeted = n.targetEmployeeIds.includes(currentId) || currentRole === 'Admin';
+                }
+                if (Array.isArray(n.targetRoles) && n.targetRoles.length > 0) {
+                  if (!n.targetRoles.includes(currentRole)) isTargeted = false;
+                }
+                if (n.targetId && n.targetId !== currentId && currentRole !== 'Admin') {
+                  isTargeted = false;
+                }
+
+                if (isTargeted) {
+                  showSystemNotification({
+                    title: n.title || 'Kormiis',
+                    body: n.text,
+                    url: n.view || '',
+                    tag: n.category || 'system',
+                  });
+                }
               }
+            });
+
+            if (JSON.stringify(prev) !== JSON.stringify(data)) {
+              return data;
             }
+            return prev;
           });
+        }
+      };
+      const unsubNotifications = await subscribeToTable(adminUid, 'notifications', handleNotifUpdate);
+      if (mounted) unsubscribers.push(unsubNotifications);
 
-          if (JSON.stringify(prev) !== JSON.stringify(data)) {
-            return data;
-          }
-          return prev;
-        });
+      // Attendance sub-tables
+      const handleAttUpdate = (key, data, lastUpdated) => {
+        if (!mounted) return;
+        if(data) {
+          const tn = key === 'leaves' ? 'leave_requests' : key === 'balances' ? 'leave_balances' : 'attendance_logs';
+          const localEdit = Number(localStorage.getItem(`kormiis_${tn}_updatedAt`) || 0);
+          const fbMs = lastUpdated
+            ? (typeof lastUpdated.toMillis === 'function' ? lastUpdated.toMillis() : new Date(lastUpdated).getTime())
+            : 0;
+          if (fbMs && localEdit && fbMs < localEdit) return;
+
+          setAttendanceRaw(prev => {
+            if (JSON.stringify(prev[key]) !== JSON.stringify(data)) {
+              const next = { ...prev, [key]: data };
+              return next;
+            }
+            return prev;
+          });
+        }
+      };
+      const unsubLeaves = await subscribeToTable(adminUid, 'leave_requests', (data, lastUpdated) => handleAttUpdate('leaves', data, lastUpdated));
+      const unsubBalances = await subscribeToTable(adminUid, 'leave_balances', (data, lastUpdated) => handleAttUpdate('balances', data, lastUpdated));
+      const unsubLogs = await subscribeToTable(adminUid, 'attendance_logs', (data, lastUpdated) => handleAttUpdate('dailyLogs', data, lastUpdated));
+      if (mounted) {
+        unsubscribers.push(unsubLeaves, unsubBalances, unsubLogs);
       }
     };
-    const unsubNotifications = subscribeToTable(adminUid, 'notifications', handleNotifUpdate);
 
-    const handleAttUpdate = (key, data, lastUpdated) => {
-      if(data) {
-        const tn = key === 'leaves' ? 'leave_requests' : key === 'balances' ? 'leave_balances' : 'attendance_logs';
-        const localEdit = Number(localStorage.getItem(`kormiis_${tn}_updatedAt`) || 0);
-        const fbMs = lastUpdated
-          ? (typeof lastUpdated.toMillis === 'function' ? lastUpdated.toMillis() : new Date(lastUpdated).getTime())
-          : 0;
-        if (fbMs && localEdit && fbMs < localEdit) return;
-
-        setAttendanceRaw(prev => {
-          if (JSON.stringify(prev[key]) !== JSON.stringify(data)) {
-            const next = { ...prev, [key]: data };
-            return next;
-          }
-          return prev;
-        });
-      }
-    };
-    const unsubLeaves = subscribeToTable(adminUid, 'leave_requests', (data, lastUpdated) => handleAttUpdate('leaves', data, lastUpdated));
-    const unsubBalances = subscribeToTable(adminUid, 'leave_balances', (data, lastUpdated) => handleAttUpdate('balances', data, lastUpdated));
-    const unsubLogs = subscribeToTable(adminUid, 'attendance_logs', (data, lastUpdated) => handleAttUpdate('dailyLogs', data, lastUpdated));
+    setupSubscriptions();
 
     return () => {
-      unsubEmployees(); unsubPayroll(); unsubSettings(); unsubTasks(); unsubNotes(); unsubExpenses(); unsubEvents();
-      unsubDocuments(); unsubRoster(); unsubShiftSwaps(); unsubOvertime(); unsubAnnouncements(); unsubAssets();
-      unsubAssetRequests(); unsubAssetCategories(); unsubNotifications(); unsubLeaves(); unsubBalances(); unsubLogs();
+      mounted = false;
+      unsubscribers.forEach(unsub => {
+        if (typeof unsub === 'function') unsub();
+      });
     };
   }, [adminUid, user]);
 
@@ -624,6 +669,7 @@ export default function useAppData({ user, addToast }) {
   const handleSetPayroll = (updater) => {
     setPayrollRaw((prev) => {
       const next = typeof updater === 'function' ? updater(prev) : updater
+      persistToStorage('kormiis_payroll', next);
       if (adminUid) writeToTable(adminUid, 'payroll', next).catch(e => console.error(e));
       return next
     })
@@ -632,7 +678,7 @@ export default function useAppData({ user, addToast }) {
   const handleSetSettings = (updater) => {
     setSettingsRaw((prev) => {
       const next = typeof updater === 'function' ? updater(prev) : updater
-      localStorage.setItem('kormiis_settings', JSON.stringify(next))
+      persistToStorage('kormiis_settings', next);
       if (adminUid) writeToTable(adminUid, 'settings', next).catch(e => console.error(e));
       return next
     })
@@ -814,6 +860,7 @@ export default function useAppData({ user, addToast }) {
         writeToTable(adminUid, 'leave_balances', next.balances).catch(e => console.error(e));
         writeToTable(adminUid, 'attendance_logs', next.dailyLogs).catch(e => console.error(e));
       }
+      persistToStorage('kormiis_attendance', next);
       return next
     })
   }
@@ -821,6 +868,7 @@ export default function useAppData({ user, addToast }) {
   const handleSetExpenses = (updater) => {
     setExpensesRaw((prev) => {
       const next = timestampArrayChanges(prev, typeof updater === 'function' ? updater(prev) : updater)
+      persistToStorage('kormiis_expenses', next);
       if (adminUid) writeToTable(adminUid, 'expenses', next).catch(e => console.error(e));
       return next
     })
@@ -829,6 +877,7 @@ export default function useAppData({ user, addToast }) {
   const handleSetEvents = (updater) => {
     setEvents((prev) => {
       const next = typeof updater === 'function' ? updater(prev) : updater
+      persistToStorage('kormiis_events', next);
       if (adminUid) writeToTable(adminUid, 'events', next).catch(e => console.error(e));
       return next
     })
@@ -837,7 +886,7 @@ export default function useAppData({ user, addToast }) {
   const handleSetTasks = (updater) => {
     setTasks((prev) => {
       const next = typeof updater === 'function' ? updater(prev) : updater
-      localStorage.setItem('kormiis_tasks', JSON.stringify(next))
+      persistToStorage('kormiis_tasks', next);
       localStorage.setItem('kormiis_tasks_updatedAt', String(Date.now()))
       if (adminUid) writeToTable(adminUid, 'tasks', next).catch(e => console.error(e));
       return next
@@ -847,7 +896,7 @@ export default function useAppData({ user, addToast }) {
   const handleSetNotes = (updater) => {
     setNotesRaw((prev) => {
       const next = typeof updater === 'function' ? updater(prev) : updater
-      localStorage.setItem('kormiis_notes', JSON.stringify(next))
+      persistToStorage('kormiis_notes', next);
       localStorage.setItem('kormiis_notes_updatedAt', String(Date.now()))
       if (adminUid) writeToTable(adminUid, 'notes', next).catch(e => console.error(e));
       return next
@@ -857,6 +906,7 @@ export default function useAppData({ user, addToast }) {
   const handleSetDocuments = (updater) => {
     setDocuments((prev) => {
       const next = typeof updater === 'function' ? updater(prev) : updater
+      persistToStorage('kormiis_documents', next);
       if (adminUid) writeToTable(adminUid, 'documents', next).catch(e => console.error(e));
       return next
     })
@@ -865,9 +915,63 @@ export default function useAppData({ user, addToast }) {
   const handleSetAnnouncements = (updater) => {
     setAnnouncements((prev) => {
       const next = typeof updater === 'function' ? updater(prev) : updater
-      localStorage.setItem('kormiis_announcements', JSON.stringify(next))
+      persistToStorage('kormiis_announcements', next);
       localStorage.setItem('kormiis_announcements_updatedAt', String(Date.now()))
       if (adminUid) writeToTable(adminUid, 'announcements', next).catch(e => console.error(e));
+      return next
+    })
+  }
+
+  const handleSetRoster = (updater) => {
+    setRoster((prev) => {
+      const next = typeof updater === 'function' ? updater(prev) : updater
+      persistToStorage('kormiis_roster', next);
+      if (adminUid) writeToTable(adminUid, 'roster', next).catch(e => console.error(e));
+      return next
+    })
+  }
+
+  const handleSetShiftSwaps = (updater) => {
+    setShiftSwaps((prev) => {
+      const next = typeof updater === 'function' ? updater(prev) : updater
+      persistToStorage('kormiis_shift_swaps', next);
+      if (adminUid) writeToTable(adminUid, 'shift_swaps', next).catch(e => console.error(e));
+      return next
+    })
+  }
+
+  const handleSetOvertimeClaims = (updater) => {
+    setOvertimeClaims((prev) => {
+      const next = typeof updater === 'function' ? updater(prev) : updater
+      persistToStorage('kormiis_overtime_claims', next);
+      if (adminUid) writeToTable(adminUid, 'overtime_claims', next).catch(e => console.error(e));
+      return next
+    })
+  }
+
+  const handleSetAssets = (updater) => {
+    setAssets((prev) => {
+      const next = typeof updater === 'function' ? updater(prev) : updater
+      persistToStorage('kormiis_assets', next);
+      if (adminUid) writeToTable(adminUid, 'assets', next).catch(e => console.error(e));
+      return next
+    })
+  }
+
+  const handleSetAssetRequests = (updater) => {
+    setAssetRequests((prev) => {
+      const next = typeof updater === 'function' ? updater(prev) : updater
+      persistToStorage('kormiis_asset_requests', next);
+      if (adminUid) writeToTable(adminUid, 'asset_requests', next).catch(e => console.error(e));
+      return next
+    })
+  }
+
+  const handleSetAssetCategories = (updater) => {
+    setAssetCategories((prev) => {
+      const next = typeof updater === 'function' ? updater(prev) : updater
+      persistToStorage('kormiis_asset_categories', next);
+      if (adminUid) writeToTable(adminUid, 'asset_categories', next).catch(e => console.error(e));
       return next
     })
   }
@@ -897,10 +1001,10 @@ export default function useAppData({ user, addToast }) {
 
     /* Data */
     employees, payroll, attendance, expenses, events, documents, tasks, notes,
-    roster, setRoster, shiftSwaps, setShiftSwaps,
-    overtimeClaims, setOvertimeClaims,
+    roster, setRoster: handleSetRoster, shiftSwaps, setShiftSwaps: handleSetShiftSwaps,
+    overtimeClaims, setOvertimeClaims: handleSetOvertimeClaims,
     announcements, setAnnouncements: handleSetAnnouncements,
-    assets, setAssets, assetRequests, setAssetRequests, assetCategories, setAssetCategories,
+    assets, setAssets: handleSetAssets, assetRequests, setAssetRequests: handleSetAssetRequests, assetCategories, setAssetCategories: handleSetAssetCategories,
     settings: (() => {
       if (!settings) return settings;
       const mojibakeMap = { 'Ã Â§Â³': '৳', 'Ã¢â€šÂ¬': '€', 'Ã‚Â£': '£', 'Ã¢â€šÂ¹': '₹', 'Ã‚Â¥': '¥' }
@@ -912,6 +1016,8 @@ export default function useAppData({ user, addToast }) {
     /* Functions */
     handleSetEmployees, handleSetPayroll, handleSetSettings, handleSetTasks, handleSetNotes,
     handleSetAttendance, handleSetExpenses, handleSetEvents, handleSetDocuments,
+    handleSetRoster, handleSetShiftSwaps, handleSetOvertimeClaims,
+    handleSetAssets, handleSetAssetRequests, handleSetAssetCategories,
     handleAutoRepairDatabase, handleSync,
     addLog, addAuditLog, hasPermission,
     addNotification, markNotificationsRead, clearNotifications,

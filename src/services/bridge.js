@@ -1,11 +1,27 @@
-import { db, storage, doc, setDoc, getDoc, collection, getDocs, writeBatch, onSnapshot, serverTimestamp } from './firebase.js';
-import { ref, uploadBytesResumable, getDownloadURL, deleteObject, getBytes } from 'firebase/storage';
+// Dynamic imports for Firestore - only loads when actually needed
+let _firestoreModule = null;
+let _storageModule = null;
+
+async function getFirestoreModule() {
+  if (!_firestoreModule) {
+    _firestoreModule = await import('./firebase.js');
+  }
+  return _firestoreModule;
+}
+
+async function getStorageModule() {
+  if (!_storageModule) {
+    _storageModule = await import('./firebase.js');
+  }
+  return _storageModule;
+}
 
 /**
  * Subscribes to a specific table's snapshot in Firebase.
  * Returns an unsubscribe function.
  */
-export const subscribeToTable = (adminUid, tableName, onDataCallback) => {
+export const subscribeToTable = async (adminUid, tableName, onDataCallback) => {
+  const { db, doc, onSnapshot } = await getFirestoreModule();
   if (!db || !adminUid) return () => {};
   const tableRef = doc(db, 'companies', adminUid, 'snapshots', tableName);
   
@@ -24,6 +40,7 @@ export const subscribeToTable = (adminUid, tableName, onDataCallback) => {
  * Writes an entire table's snapshot to Firebase.
  */
 export const writeToTable = async (adminUid, tableName, data) => {
+  const { db, doc, setDoc, serverTimestamp } = await getFirestoreModule();
   if (!db || !adminUid) throw new Error('Firebase not connected or missing Admin ID.');
   const tableRef = doc(db, 'companies', adminUid, 'snapshots', tableName);
   await setDoc(tableRef, {
@@ -37,6 +54,7 @@ export const writeToTable = async (adminUid, tableName, data) => {
  * Returns null if the table doesn't exist yet.
  */
 export const fetchTableFromFirestore = async (adminUid, tableName) => {
+  const { db, doc, getDoc } = await getFirestoreModule();
   if (!db || !adminUid) return null;
   const tableRef = doc(db, 'companies', adminUid, 'snapshots', tableName);
   try {
@@ -52,6 +70,8 @@ export const fetchTableFromFirestore = async (adminUid, tableName) => {
  * Uploads a file to Firebase Storage temporarily for the File Bridge.
  */
 export const uploadToFirebaseStorage = async (adminUid, file, path) => {
+  const { storage } = await getStorageModule();
+  const { ref, uploadBytesResumable, getDownloadURL } = await import('firebase/storage');
   if (!storage) throw new Error('Firebase Storage is not initialized.');
   const storageRef = ref(storage, `companies/${adminUid}/pending_uploads/${path}`);
   const snapshot = await uploadBytesResumable(storageRef, file);
@@ -62,6 +82,8 @@ export const uploadToFirebaseStorage = async (adminUid, file, path) => {
  * Downloads a file from Firebase Storage as a Blob
  */
 export const downloadFromFirebaseStorage = async (adminUid, path) => {
+  const { storage } = await getStorageModule();
+  const { ref, getBytes } = await import('firebase/storage');
   if (!storage) throw new Error('Firebase Storage is not initialized.');
   const storageRef = ref(storage, `companies/${adminUid}/pending_uploads/${path}`);
   const arrayBuffer = await getBytes(storageRef);
@@ -72,6 +94,8 @@ export const downloadFromFirebaseStorage = async (adminUid, path) => {
  * Uploads a company document to Firebase Storage (with offline base64 fallback).
  */
 export const uploadDocumentFile = async (adminUid, file, docId) => {
+  const { storage } = await getStorageModule();
+  const { ref, uploadBytesResumable, getDownloadURL } = await import('firebase/storage');
   const cleanFileName = (file.name || 'document').replace(/[^a-zA-Z0-9._-]/g, '_');
   const path = `companies/${adminUid || 'general'}/documents/${docId}_${cleanFileName}`;
 
@@ -99,6 +123,8 @@ export const uploadDocumentFile = async (adminUid, file, docId) => {
  * Deletes a company document from Firebase Storage.
  */
 export const deleteDocumentFile = async (storagePath) => {
+  const { storage } = await getStorageModule();
+  const { ref, deleteObject } = await import('firebase/storage');
   if (!storage || !storagePath) return;
   try {
     const storageRef = ref(storage, storagePath);

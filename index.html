@@ -33,6 +33,11 @@
       });
     </script>
     <title>Kormiis</title>
+    <!-- Preload critical chunks -->
+    <link rel="preload" as="script" href="/src/main.jsx" />
+    <link rel="preload" as="script" href="/src/hooks/useAuth.js" />
+    <link rel="preload" as="script" href="/src/hooks/useTheme.js" />
+    <link rel="prefetch" as="script" href="/src/components/Login.jsx" />
     <script src="https://accounts.google.com/gsi/client" async defer></script>
   </head>
   <body>

@@ -298,6 +298,52 @@ html.dark,
   isolation: isolate !important;
 }
 
+/* Mobile Performance: Reduce blur radius to save GPU bandwidth */
+@media (max-width: 1023px) {
+  .glass-kormiis,
+  .glass-apple,
+  .glass-card,
+  .glass-kormiis-modal,
+  .glass-popover,
+  .glass-tooltip,
+  .bg-card,
+  .liquid-glass-drawer,
+  .liquid-glass-btn,
+  .apple-glass-btn,
+  .topbar,
+  .bottom-bar,
+  .landing-glass-header,
+  .landing-glass-bottom-bar,
+  .glass-mobile-drawer,
+  .liquid-widget-item {
+    -webkit-backdrop-filter: saturate(160%) blur(16px) !important;
+    backdrop-filter: saturate(160%) blur(16px) !important;
+  }
+}
+
+/* Low-end device media query - further reduce effects */
+@media (max-width: 1023px) and (prefers-reduced-motion: reduce) {
+  .glass-kormiis,
+  .glass-apple,
+  .glass-card,
+  .glass-kormiis-modal,
+  .glass-popover,
+  .glass-tooltip,
+  .bg-card,
+  .liquid-glass-drawer,
+  .liquid-glass-btn,
+  .apple-glass-btn,
+  .topbar,
+  .bottom-bar,
+  .landing-glass-header,
+  .landing-glass-bottom-bar,
+  .glass-mobile-drawer,
+  .liquid-widget-item {
+    -webkit-backdrop-filter: saturate(140%) blur(8px) !important;
+    backdrop-filter: saturate(140%) blur(8px) !important;
+  }
+}
+
 .glass-tooltip {
   border-radius: 1rem !important;
   color: var(--foreground) !important;
@@ -1024,6 +1070,44 @@ img {
 .liquid-glass-btn:not(:hover):not(:active),
 .apple-glass-btn:not(:hover):not(:active) {
   will-change: auto;
+}
+
+/* Virtualized list containers - skip rendering off-screen items */
+.virtualized-list,
+[class*="VirtualizedList"],
+.max-h-36.overflow-y-auto,
+.max-h-60.overflow-y-auto,
+.max-h-96.overflow-y-auto {
+  contain: layout style paint size;
+  content-visibility: auto;
+}
+
+/* Card grid - only render visible cards */
+.card-grid,
+[class*="card-grid"] {
+  contain: layout style;
+}
+
+/* Table optimization - contain table rendering */
+table,
+[role="grid"] {
+  contain: layout style;
+}
+
+/* Prevent layout shift on scroll */
+.dashboard-content,
+.dashboard-root,
+main[class*="dashboard-content"] {
+  contain: layout style;
+  overflow-anchor: auto;
+}
+
+/* Skip off-screen glass containers */
+.glass-kormiis,
+.glass-card,
+.bg-card {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 300px;
 }
 
 /* ==============================================================
