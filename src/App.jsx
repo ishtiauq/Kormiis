@@ -2,6 +2,7 @@ import { useState, useEffect, lazy, Suspense } from 'react'
 
 import LoadingScreen from './components/layout/LoadingScreen.jsx'
 import GlobalTooltip from './components/GlobalTooltip.jsx'
+import WhatsAppQueueModal from './components/WhatsAppQueueModal.jsx'
 import { useTheme } from './hooks/useTheme.js'
 import { useToast } from './hooks/useToast.js'
 import { useAuth } from './hooks/useAuth.js'
@@ -90,6 +91,7 @@ export default function App() {
   return (
     <>
       <GlobalTooltip />
+      <WhatsAppQueueModal />
       <Suspense fallback={<LoadingScreen isDarkMode={isDarkMode} message="Loading your workspace..." />}>
         <DashboardShell
           user={user}

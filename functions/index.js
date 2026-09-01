@@ -26,7 +26,6 @@ const burnout = require('./burnout');
 const gigs = require('./gigs');
 const performance = require('./performance');
 const push = require('./push');
-const whatsapp = require('./whatsapp');
 
 module.exports = {
   // Feature 1
@@ -55,14 +54,4 @@ module.exports = {
   unregisterDeviceToken: push.unregisterDeviceToken,
   sendPush: push.sendPush,
   sendTestPush: push.sendTestPush,
-
-  // Feature 9 — WhatsApp free notification gateway (Meta Cloud API)
-  getWhatsAppSetupInfo: whatsapp.getWhatsAppSetupInfo,
-  saveWhatsAppConfig: whatsapp.saveWhatsAppConfig,
-  verifyWhatsAppConfig: whatsapp.verifyWhatsAppConfig,
-  disconnectWhatsApp: whatsapp.disconnectWhatsApp,
-  testWhatsApp: whatsapp.testWhatsApp,
-  getWhatsAppLog: whatsapp.getWhatsAppLog,
-  waWebhook: whatsapp.waWebhook,
-  onWaOutboxCreated: whatsapp.onWaOutboxCreated,
 };

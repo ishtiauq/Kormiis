@@ -1,28 +1,15 @@
 'use strict';
 
 /**
- * Kormiis WhatsApp — Free 24h-window notification gateway (Meta Cloud API).
+ * DEPRECATED — LEGACY WhatsApp Cloud Function (Meta Cloud API).
  *
- * Option 1 ("Free only") semantics:
- *   - The client writes WhatsApp message docs to
- *       companies/{companyId}/wa_outbox/{msgId}
- *     with { phone, employeeName, event, message, requiresAdmin, createdBy, createdByRole }.
- *   - onWaOutboxCreated (Firestore trigger) attempts the send server-side.
- *   - A message is only sent for FREE (no template, no fee) when the employee
- *     has messaged the company's WhatsApp number within the last 24h
- *     (Meta "customer service window"). Otherwise it is parked as
- *     queued_no_window until the employee messages again.
- *   - waWebhook receives inbound employee messages (updates opt-in + window)
- *     and flushes any parked messages for that number — still free.
+ * This module is NO LONGER exported from index.js and is NOT deployed.
+ * The app now uses the Blaze-free "1-Click wa.me" Tier 1 mode:
+ *   - src/services/whatsappService.js  (queue + wa.me links + wa_log snapshot)
+ *   - src/components/WhatsAppQueueModal.jsx (delivery wizard)
+ * No Cloud Functions, no Meta tokens, no Blaze plan required.
  *
- * Meta one-time setup (per company, done in the app's Settings):
- *   - Meta developer app -> WhatsApp product -> WABA + phone number.
- *   - Permanent System User access token.
- *   - Phone Number ID, WABA ID.
- *   - Webhook configured with the returned URL + shared verify token.
- *
- * No templates are required because Option 1 never sends business-initiated
- * template messages outside the free 24h window.
+ * Kept only for reference / potential future Vercel-based Tier 2.
  */
 
 const crypto = require('crypto');

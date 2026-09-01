@@ -35,23 +35,28 @@ service cloud.firestore {
       allow write: if isAdmin(adminUid) || isMember(adminUid);
     }
 
-    // WhatsApp outbox — HR/admin and registered members can create message
-    // requests and read the delivery log. Only the Cloud Function (Admin SDK)
-    // updates status, so client updates are denied.
+    // WhatsApp outbox — LEGACY. The app now uses the 1-Click wa.me mode
+    // (no Cloud Function / Blaze). wa_outbox is kept read-only for any
+    // historical records; clients no longer write here.
     match /companies/{adminUid}/wa_outbox/{msgId} {
-      allow create, read: if isAdmin(adminUid) || isMember(adminUid);
-      allow update, delete: if false;
+      allow read: if isAdmin(adminUid) || isMember(adminUid);
+      allow create, update, delete: if false;
     }
 
-    // WhatsApp credentials (Meta access token etc.) — server only.
+    // WhatsApp credentials (Meta access token etc.) — LEGACY server-only.
+    // Unused in 1-Click mode (no Cloud Function needs them).
     match /companies/{adminUid}/secrets/{secretDoc} {
       allow read, write: if false;
     }
 
-    // Global phone-number-id -> company routing map — server only.
+    // Global phone-number-id -> company routing map — LEGACY server-only.
+    // Unused in 1-Click mode.
     match /wa_routing/{phoneNumberId} {
       allow read, write: if false;
     }
+
+    // WhatsApp opt-ins + delivery log live inside snapshots (see the
+    // snapshots rule above), so clients can read/write them without Blaze.
 
     // Employee auth snapshot — readable by any authenticated (incl. anonymous)
     // user so employees can verify credentials from any device before they

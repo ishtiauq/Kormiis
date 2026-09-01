@@ -1,14 +1,44 @@
 /**
- * Kormiis HR — Free WhatsApp Notification Service (Meta Cloud API, 24h window)
+ * Kormiis HR — Free WhatsApp Notification Service (Tier 1, 1-Click wa.me)
  *
- * Mode: "Free only".
- *   - The client queues messages by writing to the Firestore outbox:
- *       companies/{companyId}/wa_outbox/{msgId}
- *   - A Cloud Function sends them ONLY within the employee's free 24h window
- *     (after the employee has messaged the company's WhatsApp number).
- *     Out-of-window messages are parked and auto-send when the window reopens.
- *   - 1-Click wa.me links remain as an always-free manual fallback.
+ * No Blaze, no Cloud Functions, no Meta API tokens required.
+ *
+ * How it works:
+ *   - HR events call `queueWhatsAppMessages({ items })` exactly as before.
+ *   - Instead of writing to a Firestore outbox that a Cloud Function sends,
+ *     we persist a small pending queue (localStorage) and raise a window event
+ *     that the global <WhatsAppQueueModal /> listens for.
+ *   - The modal walks the HR user through each recipient one-by-one with a real
+ *     user gesture (window.open to wa.me), so browser popup blockers and
+ *     WhatsApp spam-rate-limiters are never triggered.
+ *   - Every delivery attempt is appended to `companies/{id}/snapshots/wa_log`
+ *     (Option A) so HR keeps a delivery log at zero cost.
+ *   - Opt-in gate: recipients who have not messaged the company WhatsApp number
+ *     yet are flagged and handed a one-tap wa.me "START" link instead of being
+ *     blasted — keeps WhatsApp ban risk effectively zero.
  */
+
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
+
+// Window event raised whenever a WhatsApp queue is ready to be sent.
+export const WA_QUEUE_EVENT = 'kormiis:wa-queue'
+
+// localStorage keys
+const WA_PENDING_KEY = 'kormiis_wa_pending'
+
+// Events that only HR/Admin may trigger from the client.
+const EVENT_REQUIRES_ADMIN = {
+  leave: true,
+  payroll: true,
+  announcement: true,
+  shift_swap: true,
+  overtime: true,
+  task: true,
+  attendance: true,
+  custom: true,
+}
 
 // ---------------------------------------------------------------------------
 // Phone helpers
@@ -54,8 +84,8 @@ export function openWhatsAppDirect(phone, message) {
 
 /**
  * Link a customer (employee) directly to the company's WhatsApp number with a
- * pre-filled "START" message — this is how employees opt in / open the free
- * 24h window. Provide the company's WhatsApp Business phone number.
+ * pre-filled "START" message — this is how employees opt in. Provide the
+ * company's WhatsApp Business phone number.
  */
 export function getWhatsAppOptInLink(businessPhone, companyName = '') {
   const cleanPhone = formatWhatsAppPhone(businessPhone)
@@ -228,20 +258,8 @@ Automated updates for Leaves, Payroll, and Announcements will now be dispatched 
 }
 
 // ---------------------------------------------------------------------------
-// Firestore outbox queue (Free 24h-window mode)
+// Local state helpers
 // ---------------------------------------------------------------------------
-
-// Events that only HR/Admin may trigger from the client.
-const EVENT_REQUIRES_ADMIN = {
-  leave: true,
-  payroll: true,
-  announcement: true,
-  shift_swap: true,
-  overtime: true,
-  task: true,
-  attendance: true,
-  custom: true,
-}
 
 function getLocalUser() {
   try {
@@ -258,9 +276,91 @@ function getCompanyUid(user) {
   return local?.companyUid || local?.uid || ''
 }
 
+// ---------------------------------------------------------------------------
+// Opt-in gate (snapshots/wa_optins) — keeps ban risk at zero
+// ---------------------------------------------------------------------------
+
+async function readWaOptins(companyUid) {
+  try {
+    const { fetchTableFromFirestore } = await import('./bridge.js')
+    const optins = await fetchTableFromFirestore(companyUid, 'wa_optins')
+    return optins && typeof optins === 'object' ? optins : {}
+  } catch (e) {
+    console.warn('[WhatsApp] Could not read opt-ins:', e)
+    return {}
+  }
+}
+
+function isOptedIn(optins, phone) {
+  const record = optins[phone]
+  return !!(record && (record.optedIn === true || record.optedIn === 'true'))
+}
+
+// ---------------------------------------------------------------------------
+// Delivery log (Option A — snapshots/wa_log, zero server cost)
+// ---------------------------------------------------------------------------
+
 /**
- * Queue one or more WhatsApp messages for delivery within each recipient's
- * free 24h window. Messages are parked server-side until the window opens.
+ * Append one delivery-log entry to companies/{companyId}/snapshots/wa_log.
+ * Uses the existing snapshots/{document=**} rule (admin/member write allowed).
+ */
+export async function logWhatsAppDelivery(companyUid, entry) {
+  if (!companyUid) return { success: false, error: 'No workspace linked.' }
+  try {
+    const { fetchTableFromFirestore, writeToTable } = await import('./bridge.js')
+    const current = (await fetchTableFromFirestore(companyUid, 'wa_log')) || []
+    const list = Array.isArray(current) ? current : []
+    const record = {
+      id: entry.id || `wa-${Date.now()}-${Math.floor(Math.random() * 1e6)}`,
+      phone: entry.phone || '',
+      employeeName: entry.employeeName || '',
+      event: entry.event || 'custom',
+      message: entry.message || '',
+      status: entry.status || 'opened',
+      sentAt: new Date().toISOString(),
+      createdBy: entry.createdBy || '',
+      createdByRole: entry.createdByRole || '',
+    }
+    await writeToTable(companyUid, 'wa_log', [record, ...list].slice(0, 200))
+    return { success: true, id: record.id }
+  } catch (e) {
+    console.warn('[WhatsApp Log Error]', e)
+    return { success: false, error: e.message }
+  }
+}
+
+/**
+ * Read the delivery log from the snapshots/wa_log table.
+ */
+export async function fetchWhatsAppLog(companyUid) {
+  if (!companyUid) return { success: false, error: 'No workspace linked.' }
+  try {
+    const { fetchTableFromFirestore } = await import('./bridge.js')
+    const list = (await fetchTableFromFirestore(companyUid, 'wa_log')) || []
+    return { success: true, data: { list: Array.isArray(list) ? list : [], stats: {} } }
+  } catch (e) {
+    return { success: false, error: e.message }
+  }
+}
+
+/**
+ * Read the opt-in registry (snapshots/wa_optins) — who has opened the free
+ * window by messaging the company number at least once.
+ */
+export async function fetchWhatsAppOptins(companyUid) {
+  if (!companyUid) return { success: false, error: 'No workspace linked.' }
+  const optins = await readWaOptins(companyUid)
+  return { success: true, data: { optins, count: Object.keys(optins).length } }
+}
+
+// ---------------------------------------------------------------------------
+// Queue + dispatch (Tier 1 — 1-Click wa.me wizard)
+// ---------------------------------------------------------------------------
+
+/**
+ * Queue one or more WhatsApp messages for the 1-Click delivery wizard.
+ * No Firestore outbox write, no Cloud Function. Raises `WA_QUEUE_EVENT` that
+ * the global <WhatsAppQueueModal /> handles.
  *
  * items: [{ phone, employeeName, event, message }]
  */
@@ -269,172 +369,104 @@ export async function queueWhatsAppMessages({ companyUid, user, items }) {
     return { success: false, error: 'No messages to queue.' }
   }
 
-  let db = null
-  let collection = null
-  let addDoc = null
-  let serverTimestamp = null
-  try {
-    const fb = await import('./firebase.js')
-    db = fb.db
-    collection = fb.collection
-    addDoc = fb.addDoc
-    serverTimestamp = fb.serverTimestamp
-  } catch (e) {
-    return { success: false, error: 'Firebase not available: ' + e.message }
-  }
-
   const local = user || getLocalUser()
   const cUid = companyUid || getCompanyUid(local)
-  if (!db || !cUid) {
+  if (!cUid) {
     return { success: false, error: 'Not connected to a workspace.' }
   }
 
   const isAdminUser = ['Admin', 'HR'].includes(local?.role) || (local?.uid && local?.uid === cUid)
   const role = isAdminUser ? 'Admin' : (local?.role || 'Teammate')
 
-  const results = []
+  // Gate against events only HR/Admin may trigger.
+  const unauthorized = items.filter(
+    (item) => EVENT_REQUIRES_ADMIN[item.event] !== false && !isAdminUser
+  )
+  if (unauthorized.length) {
+    return { success: false, error: 'Only HR/Admin can trigger WhatsApp notifications.' }
+  }
+
+  const optins = await readWaOptins(cUid)
+
+  const validItems = []
   for (const item of items) {
     const phone = formatWhatsAppPhone(item.phone)
-    if (!phone) {
-      results.push({ ...item, success: false, error: 'Invalid or missing phone number.' })
-      continue
-    }
-    try {
-      const docRef = await addDoc(collection(db, 'companies', cUid, 'wa_outbox'), {
-        phone,
-        employeeName: item.employeeName || '',
-        event: item.event || 'custom',
-        message: item.message,
-        requiresAdmin: EVENT_REQUIRES_ADMIN[item.event] !== false,
-        createdBy: local?.uid || local?.id || '',
-        createdByRole: role,
-        status: 'pending',
-        createdAt: serverTimestamp(),
-      })
-      results.push({ ...item, success: true, id: docRef.id, phone })
-    } catch (err) {
-      console.warn('[WhatsApp Outbox Error]', err)
-      results.push({ ...item, success: false, error: err.message, phone })
-    }
-  }
-
-  const okCount = results.filter(r => r.success).length
-  return {
-    success: okCount > 0,
-    queued: okCount,
-    failed: results.length - okCount,
-    results,
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Cloud Function callers (config / test / delivery log)
-// ---------------------------------------------------------------------------
-
-let _waFns = null
-async function getWaFns() {
-  if (_waFns) return _waFns
-  const { getFunctions, httpsCallable } = await import('firebase/functions')
-  const { app } = await import('./firebaseCore.js')
-  const functions = getFunctions(app, 'asia-south1')
-  _waFns = {
-    getWhatsAppSetupInfo: httpsCallable(functions, 'getWhatsAppSetupInfo'),
-    saveWhatsAppConfig: httpsCallable(functions, 'saveWhatsAppConfig'),
-    verifyWhatsAppConfig: httpsCallable(functions, 'verifyWhatsAppConfig'),
-    disconnectWhatsApp: httpsCallable(functions, 'disconnectWhatsApp'),
-    testWhatsApp: httpsCallable(functions, 'testWhatsApp'),
-    getWhatsAppLog: httpsCallable(functions, 'getWhatsAppLog'),
-  }
-  return _waFns
-}
-
-async function callWhatsAppFn(name, data) {
-  const fns = await getWaFns()
-  const res = await fns[name](data || {})
-  return res.data
-}
-
-export async function getWhatsAppSetupInfo() {
-  try {
-    return { success: true, data: await callWhatsAppFn('getWhatsAppSetupInfo') }
-  } catch (e) {
-    return { success: false, error: (e.message || '').replace(/^.*\.googleapis\.com\//, '') }
-  }
-}
-
-export async function saveWhatsAppConfig({ phoneNumberId, wabaId, accessToken, appSecret }) {
-  try {
-    const data = await callWhatsAppFn('saveWhatsAppConfig', {
-      phoneNumberId: String(phoneNumberId || '').trim(),
-      wabaId: String(wabaId || '').trim(),
-      accessToken: String(accessToken || '').trim(),
-      appSecret: String(appSecret || '').trim(),
+    if (!phone) continue
+    validItems.push({
+      phone,
+      employeeName: item.employeeName || '',
+      event: item.event || 'custom',
+      message: item.message,
+      link: getWhatsAppDirectLink(phone, item.message),
+      optedIn: isOptedIn(optins, phone),
+      createdBy: local?.uid || local?.id || '',
+      createdByRole: role,
     })
-    return { success: true, data }
-  } catch (e) {
-    return { success: false, error: (e.message || 'Connection failed.').replace(/^.*\.googleapis\.com\//, '') }
   }
-}
 
-export async function verifyWhatsAppConfig() {
-  try {
-    return { success: true, data: await callWhatsAppFn('verifyWhatsAppConfig') }
-  } catch (e) {
-    return { success: false, error: (e.message || '').replace(/^.*\.googleapis\.com\//, '') }
+  if (validItems.length === 0) {
+    return { success: false, error: 'No valid phone numbers to notify.' }
   }
-}
 
-export async function disconnectWhatsApp() {
-  try {
-    return { success: true, data: await callWhatsAppFn('disconnectWhatsApp') }
-  } catch (e) {
-    return { success: false, error: (e.message || '').replace(/^.*\.googleapis\.com\//, '') }
+  const queue = {
+    queueId: `waq-${Date.now()}`,
+    createdAt: new Date().toISOString(),
+    companyUid: cUid,
+    items: validItems,
+    total: validItems.length,
   }
-}
 
-export async function testWhatsApp({ phone, adminName }) {
+  // Persist so a page refresh can resume the wizard.
   try {
-    const data = await callWhatsAppFn('testWhatsApp', { phone, adminName })
-    return { success: !!data.ok, data }
-  } catch (e) {
-    return { success: false, error: (e.message || '').replace(/^.*\.googleapis\.com\//, '') }
+    localStorage.setItem(WA_PENDING_KEY, JSON.stringify(queue))
+  } catch {
+    // storage full — still dispatch in-memory
   }
-}
 
-export async function fetchWhatsAppLog() {
+  // Notify the global wizard modal.
   try {
-    const data = await callWhatsAppFn('getWhatsAppLog')
-    return { success: true, data }
-  } catch (e) {
-    return { success: false, error: (e.message || '').replace(/^.*\.googleapis\.com\//, '') }
+    window.dispatchEvent(new CustomEvent(WA_QUEUE_EVENT, { detail: queue }))
+  } catch {
+    // no-op when dispatched in non-DOM environments
+  }
+
+  return {
+    success: true,
+    queued: validItems.length,
+    failed: 0,
+    queueId: queue.queueId,
+    total: validItems.length,
+    notOptedIn: validItems.filter((i) => !i.optedIn).length,
+    results: validItems.map((i) => ({ ...i, success: true })),
   }
 }
 
 /**
- * Read the server-written WhatsApp status snapshot (connected state).
+ * Resume a previously persisted queue after a page refresh.
  */
-export async function fetchWhatsAppStatus(companyUid) {
+export function getPendingWhatsAppQueue() {
   try {
-    const { fetchTableFromFirestore } = await import('./bridge.js')
-    const status = await fetchTableFromFirestore(companyUid, 'wa_status')
-    return { success: true, status }
-  } catch (e) {
-    return { success: false, error: e.message }
+    const raw = localStorage.getItem(WA_PENDING_KEY)
+    if (!raw) return null
+    const queue = JSON.parse(raw)
+    return queue && Array.isArray(queue.items) ? queue : null
+  } catch {
+    return null
   }
 }
 
-/**
- * Subscribe to live updates of the WhatsApp status snapshot.
- * Returns an unsubscribe function.
- */
-export async function subscribeWhatsAppStatus(companyUid, onData) {
-  const { subscribeToTable } = await import('./bridge.js')
-  if (!companyUid) return () => {}
-  return subscribeToTable(companyUid, 'wa_status', onData)
+export function clearPendingWhatsAppQueue() {
+  try {
+    localStorage.removeItem(WA_PENDING_KEY)
+  } catch {
+    // ignore
+  }
 }
 
-// Backward-compatible legacy exports kept so the wa.me manual fallback paths
-// still work where referenced.
+// ---------------------------------------------------------------------------
+// Legacy stubs — kept so old references fail gracefully instead of crashing
+// ---------------------------------------------------------------------------
+
 export async function sendWhatsAppNotification() {
   return {
     success: false,
@@ -447,6 +479,6 @@ export async function sendTestWhatsAppPing() {
   return {
     success: false,
     mode: 'legacy',
-    error: 'Legacy gateway dispatch removed. Use testWhatsApp instead.',
+    error: 'Legacy gateway dispatch removed. Use the Settings Test button instead.',
   }
 }

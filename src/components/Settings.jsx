@@ -14,27 +14,20 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@
 import { requestPushPermission, getPushPermission, registerPushSubscription } from "../services/pushNotifications.js"
 import { sendTestEmail } from "../services/emailService.js"
 import {
-  getWhatsAppSetupInfo,
-  saveWhatsAppConfig,
-  verifyWhatsAppConfig,
-  disconnectWhatsApp,
-  testWhatsApp,
+  getWhatsAppOptInLink,
+  openWhatsAppDirect,
+  formatWhatsAppPhone,
   fetchWhatsAppLog,
-  fetchWhatsAppStatus,
-  getWhatsAppOptInLink
+  fetchWhatsAppOptins,
+  generateTestMessage
 } from "../services/whatsappService.js"
 import { getAiApiKey, setAiApiKey, getAiModel, setAiModel, testGeminiApiKey, GEMINI_MODELS } from "../services/aiAgent.js"
 import { AiQuantumGlyph } from './ai/AiExpandableFab.jsx'
 
 const WHATSAPP_STATUS_META = {
-  sent: { label: 'Sent', cls: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30' },
-  pending: { label: 'Pending', cls: 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30' },
-  queued_no_window: { label: 'Awaiting Window', cls: 'bg-sky-500/15 text-sky-600 dark:text-sky-400 border-sky-500/30' },
-  not_opted_in: { label: 'Not Opted-In', cls: 'bg-orange-500/15 text-orange-600 dark:text-orange-400 border-orange-500/30' },
-  disabled: { label: 'Disabled', cls: 'bg-muted text-muted-foreground border-border/40' },
-  not_configured: { label: 'Not Connected', cls: 'bg-muted text-muted-foreground border-border/40' },
-  not_allowed: { label: 'Not Allowed', cls: 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30' },
-  failed: { label: 'Failed', cls: 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30' },
+  opened: { label: 'Opened', cls: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30' },
+  optin_sent: { label: 'Opt-in Sent', cls: 'bg-sky-500/15 text-sky-600 dark:text-sky-400 border-sky-500/30' },
+  skipped: { label: 'Skipped', cls: 'bg-muted text-muted-foreground border-border/40' },
 }
 
 export default function Settings({ settings, setSettings, addLog, addToast, auditLogs, themeMode, toggleTheme, employees, setEmployees, currentUser }) {
@@ -148,6 +141,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
   const [showApiKey, setShowApiKey] = useState(false)
   const [isTestingEmail, setIsTestingEmail] = useState(false)
   const [whatsappEnabled, setWhatsappEnabled] = useState(settings.whatsapp?.enabled ?? false)
+  const [whatsappBusinessPhone, setWhatsappBusinessPhone] = useState(settings.whatsapp?.businessPhone || settings.company?.phone || '')
   const [whatsappAdminPhone, setWhatsappAdminPhone] = useState(settings.whatsapp?.adminPhone || settings.company?.phone || '')
   const [whatsappNotifyLeaves, setWhatsappNotifyLeaves] = useState(settings.whatsapp?.notifyLeaves ?? true)
   const [whatsappNotifyPayroll, setWhatsappNotifyPayroll] = useState(settings.whatsapp?.notifyPayroll ?? true)
@@ -157,16 +151,9 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
   const [whatsappNotifyTask, setWhatsappNotifyTask] = useState(settings.whatsapp?.notifyTask ?? true)
   const [whatsappNotifyAttendance, setWhatsappNotifyAttendance] = useState(settings.whatsapp?.notifyAttendance ?? true)
   const [isTestingWhatsApp, setIsTestingWhatsApp] = useState(false)
-  const [whatsappPhoneNumberId, setWhatsappPhoneNumberId] = useState('')
-  const [whatsappWabaId, setWhatsappWabaId] = useState('')
-  const [whatsappAccessToken, setWhatsappAccessToken] = useState('')
-  const [whatsappAppSecret, setWhatsappAppSecret] = useState('')
-  const [whatsappShowToken, setWhatsappShowToken] = useState(false)
-  const [whatsappConnecting, setWhatsappConnecting] = useState(false)
-  const [whatsappSetupInfo, setWhatsappSetupInfo] = useState(null)
-  const [whatsappStatus, setWhatsappStatus] = useState(null)
   const [whatsappLog, setWhatsappLog] = useState(null)
   const [whatsappLogLoading, setWhatsappLogLoading] = useState(false)
+  const [whatsappOptInCount, setWhatsappOptInCount] = useState(0)
   const [isSaving, setIsSaving] = useState(false)
   const [showResetModal, setShowResetModal] = useState(false)
   useModal(() => setShowResetModal(false))
@@ -200,6 +187,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
     }
     if (settings.whatsapp) {
       if (settings.whatsapp.enabled !== undefined) setWhatsappEnabled(settings.whatsapp.enabled)
+      if (settings.whatsapp.businessPhone !== undefined) setWhatsappBusinessPhone(settings.whatsapp.businessPhone)
       if (settings.whatsapp.adminPhone !== undefined) setWhatsappAdminPhone(settings.whatsapp.adminPhone)
       if (settings.whatsapp.notifyLeaves !== undefined) setWhatsappNotifyLeaves(settings.whatsapp.notifyLeaves)
       if (settings.whatsapp.notifyPayroll !== undefined) setWhatsappNotifyPayroll(settings.whatsapp.notifyPayroll)
@@ -295,28 +283,25 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
     }
   }
 
-  const loadWhatsAppSetupInfo = async () => {
-    const res = await getWhatsAppSetupInfo()
-    if (res.success) setWhatsappSetupInfo(res.data)
-  }
-
-  const loadWhatsAppStatus = async () => {
+  const loadWhatsAppLog = async () => {
     const uid = currentUser?.companyUid || currentUser?.uid
     if (!uid) return
-    const res = await fetchWhatsAppStatus(uid)
-    if (res.success) setWhatsappStatus(res.status)
-  }
-
-  const loadWhatsAppLog = async () => {
     setWhatsappLogLoading(true)
-    const res = await fetchWhatsAppLog()
+    const res = await fetchWhatsAppLog(uid)
     if (res.success) setWhatsappLog(res.data)
     setWhatsappLogLoading(false)
   }
 
+  const loadWhatsAppOptins = async () => {
+    const uid = currentUser?.companyUid || currentUser?.uid
+    if (!uid) return
+    const res = await fetchWhatsAppOptins(uid)
+    if (res.success) setWhatsappOptInCount(res.data.count || 0)
+  }
+
   useEffect(() => {
-    loadWhatsAppSetupInfo()
-    loadWhatsAppStatus()
+    loadWhatsAppLog()
+    loadWhatsAppOptins()
   }, [])
 
   const copyText = async (text) => {
@@ -328,82 +313,32 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
     }
   }
 
-  const handleConnectWhatsApp = async () => {
-    if (!whatsappPhoneNumberId?.trim() || !whatsappAccessToken?.trim()) {
-      if (addToast) addToast('Phone Number ID and Access Token are required.', 'warning')
-      return
-    }
-    setWhatsappConnecting(true)
-    try {
-      const res = await saveWhatsAppConfig({
-        phoneNumberId: whatsappPhoneNumberId,
-        wabaId: whatsappWabaId,
-        accessToken: whatsappAccessToken,
-        appSecret: whatsappAppSecret
-      })
-      if (res.success) {
-        if (addToast) addToast(`WhatsApp connected as ${res.data?.displayPhone}!`, 'success')
-        setWhatsappEnabled(true)
-        setWhatsappPhoneNumberId('')
-        setWhatsappWabaId('')
-        setWhatsappAccessToken('')
-        setWhatsappAppSecret('')
-        await loadWhatsAppStatus()
-        if (addLog) addLog('WhatsApp Connected', `Linked WhatsApp Business number ${res.data?.displayPhone}`, 'success')
-      } else {
-        if (addToast) addToast(`Connection failed: ${res.error}`, 'danger')
-      }
-    } finally {
-      setWhatsappConnecting(false)
-    }
-  }
-
-  const handleVerifyWhatsApp = async () => {
-    const res = await verifyWhatsAppConfig()
-    if (res.success) {
-      if (addToast) addToast(`WhatsApp verified as ${res.data?.displayPhone}!`, 'success')
-      await loadWhatsAppStatus()
-    } else {
-      if (addToast) addToast(`Verification failed: ${res.error}`, 'danger')
-    }
-  }
-
-  const handleDisconnectWhatsApp = async () => {
-    const res = await disconnectWhatsApp()
-    if (res.success) {
-      if (addToast) addToast('WhatsApp disconnected.', 'info')
-      setWhatsappEnabled(false)
-      setWhatsappStatus(null)
-      setWhatsappLog(null)
-      if (addLog) addLog('WhatsApp Disconnected', 'Removed WhatsApp Business credentials', 'info')
-    } else {
-      if (addToast) addToast(`Disconnect failed: ${res.error}`, 'danger')
-    }
-  }
-
   const handleSendTestWhatsApp = async () => {
-    const phone = whatsappAdminPhone?.trim() || companyPhone?.trim()
+    const phone = whatsappAdminPhone?.trim() || whatsappBusinessPhone?.trim() || companyPhone?.trim()
     if (!phone) {
       if (addToast) addToast('Please provide an Admin / Test WhatsApp phone number first.', 'warning')
       return
     }
     setIsTestingWhatsApp(true)
     try {
-      const res = await testWhatsApp({ phone, adminName: currentUser?.name || 'Admin' })
-      if (res.success) {
-        if (addToast) addToast(`Test WhatsApp message sent to ${phone}!`, 'success')
-      } else if (res.data?.windowClosed) {
-        if (addToast) addToast(res.data?.error || 'Free window not open for this number yet.', 'info')
-        const link = getWhatsAppOptInLink(whatsappStatus?.businessPhone, companyName)
-        if (link) window.open(link, '_blank', 'noopener,noreferrer')
+      const message = generateTestMessage({ companyName, adminName: currentUser?.name || 'Admin' })
+      const opened = openWhatsAppDirect(phone, message)
+      if (opened) {
+        if (addToast) addToast('WhatsApp opened — send the pre-filled test message to confirm delivery.', 'success')
       } else {
-        if (addToast) addToast(`WhatsApp Error: ${res.error || res.data?.error}`, 'danger')
+        if (addToast) addToast('Could not open WhatsApp. Check the phone number.', 'danger')
       }
     } catch (e) {
       if (addToast) addToast(`Dispatch failed: ${e.message}`, 'danger')
     } finally {
       setIsTestingWhatsApp(false)
     }
+  }
+
+  const handleCopyOptInLink = () => {
+    const link = getWhatsAppOptInLink(whatsappBusinessPhone, companyName)
+    if (link) copyText(link)
+    else if (addToast) addToast('Enter a Business WhatsApp Phone first.', 'warning')
   }
 
   const handleSave = () => {
@@ -425,6 +360,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
         notifications: { syncAlerts, emailDigests, pushEnabled },
         whatsapp: {
           enabled: whatsappEnabled,
+          businessPhone: formatWhatsAppPhone(whatsappBusinessPhone),
           adminPhone: whatsappAdminPhone?.trim() || '',
           notifyLeaves: whatsappNotifyLeaves,
           notifyPayroll: whatsappNotifyPayroll,
@@ -1050,7 +986,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                 </div>
               </div>
 
-              {/* 4. WhatsApp Integration Card (Meta Cloud API — Free 24h window) */}
+              {/* 4. WhatsApp Integration Card (Tier 1 — 1-Click Free, no Blaze) */}
               <div className="p-4 sm:p-5 rounded-2xl bg-black/[0.02] dark:bg-white/[0.02] border border-border/60 dark:border-white/10 flex flex-col gap-4 mt-1">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex flex-col gap-1 min-w-0">
@@ -1059,41 +995,25 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                         <Icon name="chat" size={20} className="text-emerald-500" />
                         <span className="font-bold text-sm text-foreground">WhatsApp Notifications (100% Free)</span>
                       </div>
-                      {whatsappStatus?.connected ? (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
-                          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                          Connected
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-muted text-muted-foreground border border-border/40">
-                          {whatsappEnabled ? 'Setup Required' : 'Disabled'}
-                        </span>
-                      )}
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                        1-Click Mode
+                      </span>
                     </div>
                     <span className="text-fluid-xs text-muted-foreground">
-                      Official Meta Cloud API — leave, payroll, announcements, shift swaps, overtime and task updates reach employees' WhatsApp. Free inside each 24h reply window, zero templates needed.
+                      No Meta API, no Cloud Functions, no Blaze plan needed. Leave, payroll, announcements, shift swaps, overtime and task updates open in WhatsApp with one tap per employee — perfectly safe from popup blockers and spam flags.
                     </span>
                   </div>
 
                   <div className="flex items-center gap-2 flex-wrap shrink-0">
-                    {whatsappStatus?.connected && (
-                      <>
-                        <Button type="button" variant="outline" size="sm" onClick={handleVerifyWhatsApp} className="h-9 px-3 rounded-xl text-xs font-bold shrink-0 gap-1.5">
-                          <Icon name="verified" size={14} /> Verify
-                        </Button>
-                        <Button type="button" variant="outline" size="sm" onClick={loadWhatsAppLog} className="h-9 px-3 rounded-xl text-xs font-bold shrink-0 gap-1.5">
-                          <Icon name="inbox" size={14} /> Delivery Log
-                        </Button>
-                        <Button type="button" variant="outline" size="sm" className="h-9 px-3 rounded-xl text-xs font-bold shrink-0 gap-1.5 text-destructive border-destructive/30 hover:text-destructive" onClick={handleDisconnectWhatsApp}>
-                          <Icon name="link_off" size={14} /> Disconnect
-                        </Button>
-                      </>
-                    )}
+                    <Button type="button" variant="outline" size="sm" onClick={loadWhatsAppLog} className="h-9 px-3 rounded-xl text-xs font-bold shrink-0 gap-1.5">
+                      <Icon name="inbox" size={14} /> Delivery Log
+                    </Button>
                     <Button
                       type="button"
                       variant="outline"
                       size="sm"
-                      disabled={isTestingWhatsApp || (!whatsappAdminPhone && !companyPhone) || !whatsappStatus?.connected}
+                      disabled={isTestingWhatsApp || (!whatsappAdminPhone && !whatsappBusinessPhone && !companyPhone)}
                       onClick={handleSendTestWhatsApp}
                       className="h-9 px-4 rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95 shrink-0 gap-1.5"
                     >
@@ -1102,121 +1022,17 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                       ) : (
                         <Icon name="send" size={14} />
                       )}
-                      {isTestingWhatsApp ? 'Sending...' : 'Test WhatsApp'}
+                      {isTestingWhatsApp ? 'Opening...' : 'Test WhatsApp'}
                     </Button>
                   </div>
                 </div>
-
-                {!whatsappStatus?.connected && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3 border-t border-border/40 dark:border-white/8">
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-bold text-foreground">Phone Number ID</label>
-                      <Input
-                        type="text"
-                        value={whatsappPhoneNumberId}
-                        onChange={e => setWhatsappPhoneNumberId(e.target.value)}
-                        placeholder="123456789012345"
-                        className="h-10 text-xs font-mono"
-                      />
-                      <span className="text-[11px] text-muted-foreground">From Meta WhatsApp → API Setup.</span>
-                    </div>
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-bold text-foreground">WABA ID (optional)</label>
-                      <Input
-                        type="text"
-                        value={whatsappWabaId}
-                        onChange={e => setWhatsappWabaId(e.target.value)}
-                        placeholder="Your WhatsApp Business Account ID"
-                        className="h-10 text-xs font-mono"
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-bold text-foreground">Permanent Access Token</label>
-                      <div className="relative">
-                        <Input
-                          type={whatsappShowToken ? "text" : "password"}
-                          value={whatsappAccessToken}
-                          onChange={e => setWhatsappAccessToken(e.target.value)}
-                          placeholder="EAAJ..."
-                          className="h-10 text-xs font-mono pr-10"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setWhatsappShowToken(prev => !prev)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
-                          tabIndex={-1}
-                        >
-                          <Icon name={whatsappShowToken ? "visibility_off" : "visibility"} size={16} />
-                        </button>
-                      </div>
-                    </div>
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-bold text-foreground">App Secret (optional — recommended)</label>
-                      <Input
-                        type="password"
-                        value={whatsappAppSecret}
-                        onChange={e => setWhatsappAppSecret(e.target.value)}
-                        placeholder="Meta app secret for webhook verification"
-                        className="h-10 text-xs font-mono"
-                      />
-                    </div>
-                    <div className="sm:col-span-2 flex flex-col gap-1.5">
-                      <Button
-                        type="button"
-                        disabled={whatsappConnecting}
-                        onClick={handleConnectWhatsApp}
-                        className="w-full sm:w-auto h-10 px-6 rounded-xl text-xs font-bold gap-1.5"
-                      >
-                        {whatsappConnecting ? (
-                          <Icon name="monitoring" className="animate-spin" size={14} />
-                        ) : (
-                          <Icon name="link" size={14} />
-                        )}
-                        {whatsappConnecting ? 'Verifying with Meta...' : 'Save & Connect'}
-                      </Button>
-                      <span className="text-[11px] text-muted-foreground">
-                        Credentials are stored server-side (never in the browser). We verify them instantly against the Meta Graph API.
-                      </span>
-                    </div>
-                  </div>
-                )}
-
-                {whatsappStatus?.connected && (
-                  <div className="p-3 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/25 flex flex-col gap-1">
-                    <div className="text-xs font-bold text-foreground flex items-center gap-2">
-                      <Icon name="verified" size={16} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
-                      Connected: {whatsappStatus?.displayPhone || whatsappStatus?.businessPhone || 'WhatsApp Business'}{whatsappStatus?.verifiedName ? ` — ${whatsappStatus.verifiedName}` : ''}
-                    </div>
-                    <span className="text-[11px] text-muted-foreground">
-                      Free-only mode active — messages are delivered inside each employee's 24h window at zero cost, and auto-sent when the window reopens.
-                    </span>
-                  </div>
-                )}
-
-                {whatsappStatus?.businessPhone && (
-                  <div className="p-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] border border-border/40 flex flex-col gap-2">
-                    <div className="text-xs font-bold text-foreground flex items-center gap-2">
-                      <Icon name="qr_code_2" size={15} className="text-emerald-600 dark:text-emerald-400" />
-                      Employee Opt-In Link (opens the free 24h window)
-                    </div>
-                    <span className="text-[11px] text-muted-foreground">
-                      Share this link with your team. Each employee sends any message to your WhatsApp Business number once — that opens their free window and lets parked messages flow automatically.
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <code className="flex-1 font-mono text-[10px] bg-muted/60 px-2 py-1.5 rounded-lg break-all">{getWhatsAppOptInLink(whatsappStatus.businessPhone, companyName) || '—'}</code>
-                      <Button type="button" size="sm" variant="outline" onClick={() => copyText(getWhatsAppOptInLink(whatsappStatus.businessPhone, companyName))}>
-                        Copy
-                      </Button>
-                    </div>
-                  </div>
-                )}
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-border/40 dark:border-white/8">
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center justify-between p-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] border border-border/40">
                       <div>
                         <div className="text-xs font-bold text-foreground">Enable WhatsApp System</div>
-                        <div className="text-[11px] text-muted-foreground">Turn automated WhatsApp notifications on/off</div>
+                        <div className="text-[11px] text-muted-foreground">Turn WhatsApp notification prompts on/off</div>
                       </div>
                       <button
                         type="button"
@@ -1237,7 +1053,23 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
 
                     <div className="flex flex-col gap-1.5">
                       <label className="text-xs font-bold text-foreground">
-                        Admin WhatsApp Phone (for testing)
+                        Business WhatsApp Phone <span className="text-muted-foreground font-semibold">(for opt-in links)</span>
+                      </label>
+                      <Input
+                        type="text"
+                        value={whatsappBusinessPhone}
+                        onChange={e => setWhatsappBusinessPhone(e.target.value)}
+                        placeholder="017XXXXXXXX or +88017XXXXXXXX"
+                        className="h-10 text-xs"
+                      />
+                      <span className="text-[11px] text-muted-foreground">
+                        The number employees message once to opt in. Opens the safe 1-tap START link below.
+                      </span>
+                    </div>
+
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-xs font-bold text-foreground">
+                        Admin WhatsApp Phone <span className="text-muted-foreground font-semibold">(for testing)</span>
                       </label>
                       <Input
                         type="text"
@@ -1247,7 +1079,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                         className="h-10 text-xs"
                       />
                       <span className="text-[11px] text-muted-foreground">
-                        Your WhatsApp number to receive test messages.
+                        Receives your test WhatsApp message.
                       </span>
                     </div>
                   </div>
@@ -1286,30 +1118,27 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                         </label>
                       </div>
                       <span className="text-[11px] text-muted-foreground">
-                        Free-only mode: if an employee's 24h window is closed, the message waits (queued) and auto-sends the moment they message you again.
+                        A delivery wizard opens automatically — one tap per employee. Not-yet-opted-in employees get a safe one-tap START link first.
                       </span>
                     </div>
-                  </div>
-                </div>
 
-                <div className="p-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] border border-border/40 flex flex-col gap-2">
-                  <div className="text-xs font-bold text-foreground flex items-center gap-2">
-                    <Icon name="api" size={15} className="text-primary" />
-                    One-Time Webhook Setup (Meta)
-                  </div>
-                  <ol className="text-[11px] text-muted-foreground list-decimal ml-4 flex flex-col gap-1">
-                    <li>In Meta → WhatsApp → API Setup, set the Callback URL and Verify token below, then press <strong>Verify and save</strong>.</li>
-                    <li>Under <strong>Webhook fields</strong>, subscribe to <code className="font-mono bg-muted/60 px-1 py-0.5 rounded text-[10px]">messages</code>.</li>
-                    <li>That's it — this webhook records employee opt-ins and auto-flushes queued messages.</li>
-                  </ol>
-                  <div className="flex flex-col gap-1.5 pt-1">
-                    <div className="flex items-center gap-2">
-                      <code className="flex-1 font-mono text-[10px] bg-muted/60 px-2 py-1.5 rounded-lg break-all">{whatsappSetupInfo?.webhookUrl || 'Loading webhook URL...'}</code>
-                      <Button type="button" size="sm" variant="outline" onClick={() => copyText(whatsappSetupInfo?.webhookUrl)}>Copy</Button>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <code className="flex-1 font-mono text-[10px] bg-muted/60 px-2 py-1.5 rounded-lg break-all">{whatsappSetupInfo?.verifyToken || '...'}</code>
-                      <Button type="button" size="sm" variant="outline" onClick={() => copyText(whatsappSetupInfo?.verifyToken)}>Copy</Button>
+                    <div className="flex flex-col gap-1.5 p-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] border border-border/40">
+                      <div className="flex items-center gap-2">
+                        <Icon name="qr_code_2" size={15} className="text-emerald-600 dark:text-emerald-400" />
+                        <span className="text-xs font-bold text-foreground">Employee Opt-In Link</span>
+                        {whatsappOptInCount > 0 && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+                            {whatsappOptInCount} opted in
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-[11px] text-muted-foreground">
+                        Share with your team. Each employee sends any message to your Business number once to opt in — messages to them stay ban-safe.
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <code className="flex-1 font-mono text-[10px] bg-muted/60 px-2 py-1.5 rounded-lg break-all">{getWhatsAppOptInLink(whatsappBusinessPhone, companyName) || 'Enter business phone first'}</code>
+                        <Button type="button" size="sm" variant="outline" onClick={handleCopyOptInLink}>Copy</Button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1338,7 +1167,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                                 <TableCell><span className="text-xs text-foreground">{m.employeeName || m.phone}</span></TableCell>
                                 <TableCell><span className="text-xs text-muted-foreground">{m.event}</span></TableCell>
                                 <TableCell className="text-right">
-                                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border ${WHATSAPP_STATUS_META[m.status]?.cls || WHATSAPP_STATUS_META.failed.cls}`}>
+                                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border ${WHATSAPP_STATUS_META[m.status]?.cls || WHATSAPP_STATUS_META.skipped.cls}`}>
                                     {WHATSAPP_STATUS_META[m.status]?.label || m.status}
                                   </span>
                                 </TableCell>
@@ -1347,13 +1176,13 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                           </TableBody>
                         </Table>
                       </div>
-                      {whatsappLog?.stats?.optInCount != null && (
-                        <span className="text-[11px] text-muted-foreground">Opted-in employees: {whatsappLog.stats.optInCount}</span>
+                      {whatsappOptInCount > 0 && (
+                        <span className="text-[11px] text-muted-foreground">Opted-in employees: {whatsappOptInCount}</span>
                       )}
                     </>
                   ) : (
                     <div className="text-[11px] text-muted-foreground">
-                      No messages yet. Approve a leave, run payroll or post an announcement to see delivery here.
+                      No delivery attempts yet. Approve a leave, run payroll or post an announcement to see activity here.
                     </div>
                   )}
                 </div>
