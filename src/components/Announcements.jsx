@@ -11,7 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import AdSlot from './AdSlot'
 import Calendar from './Calendar.jsx'
 import { formatDateTime } from '../services/date.js'
-import { generateAnnouncementMessage, sendWhatsAppNotification, openWhatsAppDirect } from '../services/whatsappService.js'
+import { generateAnnouncementMessage, queueWhatsAppMessages, openWhatsAppDirect } from '../services/whatsappService.js'
 
 const HoverTooltip = ({ content, children }) => {
   if (!content) return children
@@ -104,8 +104,8 @@ export default function Announcements({ employees, announcements, setAnnouncemen
       addLog('Posted Announcement', title)
       if (addNotification) addNotification(`New announcement posted: "${title}"`, 'announcements', { title: 'New Announcement', category: 'announcement' })
 
-      // Broadcast WhatsApp announcement if enabled
-      if (settings?.whatsapp?.enabled && settings?.whatsapp?.notifyAnnouncements && settings?.whatsapp?.gatewayUrl) {
+      // Queue WhatsApp broadcast if enabled (free 24h-window mode)
+      if (settings?.whatsapp?.enabled && settings?.whatsapp?.notifyAnnouncements) {
         const msg = generateAnnouncementMessage({
           companyName: settings?.company?.name || 'Kormiis HR',
           title,
@@ -113,15 +113,15 @@ export default function Announcements({ employees, announcements, setAnnouncemen
           content,
           publishedBy: currentUser?.name || 'Management'
         })
-        const phones = (employees || []).filter(e => e.phone).map(e => e.phone)
-        phones.forEach(p => {
-          sendWhatsAppNotification({
-            gatewayUrl: settings.whatsapp.gatewayUrl,
-            phone: p,
-            message: msg,
-            companyName: settings?.company?.name
-          }).catch(() => {})
-        })
+        const items = (employees || [])
+          .filter(e => e.phone)
+          .map(e => ({
+            phone: e.phone,
+            employeeName: e.name,
+            event: 'announcement',
+            message: msg
+          }))
+        if (items.length) queueWhatsAppMessages({ items }).catch(() => {})
       }
     }
 

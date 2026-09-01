@@ -1,13 +1,40 @@
 import { useOvertime } from '../../hooks/useOvertime.js'
 import { formatDateShort } from '../../services/date.js'
+import { generateOvertimeMessage, queueWhatsAppMessages } from '../../services/whatsappService.js'
 import Icon from "@/components/ui/Icon.jsx"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
 
-export default function OvertimeClaims({ employees, overtimeClaims, setOvertimeClaims, addToast }) {
+export default function OvertimeClaims({ employees, overtimeClaims, setOvertimeClaims, addToast, settings }) {
   const { pendingOvertime, historyOvertime, approveOvertime, rejectOvertime } = useOvertime(overtimeClaims, setOvertimeClaims, addToast)
+
+  const notifyOvertimeWhatsApp = (claim, status) => {
+    const emp = employees.find(e => e.id === claim.employeeId)
+    if (!settings?.whatsapp?.enabled || !settings?.whatsapp?.notifyOvertime || !emp?.phone) return
+    const message = generateOvertimeMessage({
+      employeeName: emp.name,
+      companyName: settings?.company?.name || 'Kormiis HR',
+      date: formatDateShort(claim.date),
+      hours: claim.hours,
+      status,
+      reason: claim.reason
+    })
+    queueWhatsAppMessages({
+      items: [{ phone: emp.phone, employeeName: emp.name, event: 'overtime', message }]
+    }).catch(() => {})
+  }
+
+  const handleApprove = (c) => {
+    approveOvertime(c.id)
+    notifyOvertimeWhatsApp(c, 'Approved')
+  }
+
+  const handleReject = (c) => {
+    rejectOvertime(c.id)
+    notifyOvertimeWhatsApp(c, 'Rejected')
+  }
 
   const STATUS = {
     Approved: { bg: '#28a745', color: '#fff' },
@@ -42,10 +69,10 @@ export default function OvertimeClaims({ employees, overtimeClaims, setOvertimeC
                     {c.reason && <div className="text-xs text-muted-foreground mt-0.5">{c.reason}</div>}
                   </div>
                   <div className="flex gap-2">
-                    <Button size="sm" onClick={() => approveOvertime(c.id)}>
+                    <Button size="sm" onClick={() => handleApprove(c)}>
                       <Icon name="check" size={13}/> Approve
                     </Button>
-                    <Button size="sm" variant="outline" className="text-destructive border-destructive/30 hover:text-destructive" onClick={() => rejectOvertime(c.id)}>
+                    <Button size="sm" variant="outline" className="text-destructive border-destructive/30 hover:text-destructive" onClick={() => handleReject(c)}>
                       <Icon name="close" size={13}/> Reject
                     </Button>
                   </div>

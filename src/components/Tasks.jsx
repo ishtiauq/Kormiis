@@ -7,9 +7,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog"
 import { Select, SelectItem } from "@/components/ui/select"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { generateTaskAssignedMessage, queueWhatsAppMessages } from '../services/whatsappService.js'
 import Notes from './Notes.jsx'
 
-export default function Tasks({ tasks = [], setTasks, employees = [], currentUser, addToast, addLog, addNotification, notes = [], setNotes, defaultTab = 'tasks' }) {
+export default function Tasks({ tasks = [], setTasks, employees = [], currentUser, addToast, addLog, addNotification, notes = [], setNotes, defaultTab = 'tasks', settings }) {
   const [mainSectionTab, setMainSectionTab] = useState(defaultTab)
   const [activeStatusTab, setActiveStatusTab] = useState('To Do')
   const [search, setSearch] = useState('')
@@ -85,6 +86,31 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
       return
     }
 
+    const notifyTaskWhatsApp = (assigneeIds) => {
+      if (!settings?.whatsapp?.enabled || !settings?.whatsapp?.notifyTask) return
+      const items = (assigneeIds || [])
+        .filter(id => id !== currentUser?.id)
+        .map(id => {
+          const emp = employees.find(e => e.id === id)
+          if (!emp?.phone) return null
+          return {
+            phone: emp.phone,
+            employeeName: emp.name,
+            event: 'task',
+            message: generateTaskAssignedMessage({
+              employeeName: emp.name,
+              companyName: settings?.company?.name || 'Kormiis HR',
+              taskTitle: taskForm.title,
+              dueDate: taskForm.dueDate,
+              priority: taskForm.priority,
+              assignedBy: currentUser?.name || 'HR'
+            })
+          }
+        })
+        .filter(Boolean)
+      if (items.length) queueWhatsAppMessages({ items }).catch(() => {})
+    }
+
     if (editingTask) {
       setTasks(prev => prev.map(t => t.id === editingTask.id ? { ...t, ...taskForm } : t))
       addToast('Task updated successfully', 'success')
@@ -97,6 +123,9 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
           }
         })
       }
+      // WhatsApp for newly-added assignees only
+      const newAssignees = (taskForm.assigneeIds || []).filter(id => !editingTask.assigneeIds?.includes(id))
+      notifyTaskWhatsApp(newAssignees)
     } else {
       const newTask = {
         ...taskForm,
@@ -113,6 +142,7 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
           }
         })
       }
+      notifyTaskWhatsApp(taskForm.assigneeIds)
     }
     closeModal()
   }

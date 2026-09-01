@@ -12,7 +12,7 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@
 import AdSlot from './AdSlot.jsx'
 import Expenses from './Expenses.jsx'
 import { formatDate } from '../services/date.js'
-import { generatePayrollSlipMessage, sendWhatsAppNotification, openWhatsAppDirect } from '../services/whatsappService.js'
+import { generatePayrollSlipMessage, queueWhatsAppMessages, openWhatsAppDirect } from '../services/whatsappService.js'
 
 export default function Payroll({ employees, payroll, setPayroll, addLog, settings, addAuditLog, expenses, setExpenses, addToast, currentUser, addNotification, defaultTab = 'payroll' }) {
   const [activeMainTab, setActiveMainTab] = useState(defaultTab)
@@ -303,18 +303,18 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
       currency: currency || 'BDT'
     })
 
-    const isGatewayActive = settings?.whatsapp?.enabled && settings?.whatsapp?.gatewayUrl
-    if (isGatewayActive) {
-      const res = await sendWhatsAppNotification({
-        gatewayUrl: settings.whatsapp.gatewayUrl,
+    // Free 24h-window queue (auto-sends when the employee's WhatsApp window opens)
+    const res = await queueWhatsAppMessages({
+      items: [{
         phone: emp.phone,
-        message,
-        companyName: settings?.company?.name
-      })
-      if (res.success) {
-        if (addToast) addToast(`Salary statement sent to ${emp.name}'s WhatsApp!`, 'success')
-        return
-      }
+        employeeName: emp.name,
+        event: 'payroll',
+        message
+      }]
+    })
+    if (res.success) {
+      if (addToast) addToast(`Salary statement queued to ${emp.name}'s WhatsApp!`, 'success')
+      return
     }
 
     // Direct 1-click fallback

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog"
-import { generateLeaveStatusMessage, sendWhatsAppNotification, openWhatsAppDirect } from '../../services/whatsappService.js'
+import { generateLeaveStatusMessage, queueWhatsAppMessages, openWhatsAppDirect } from '../../services/whatsappService.js'
 
 export default function LeaveRequests({ employees, attendance, setAttendance, addToast, addNotification, settings }) {
   const { pendingLeaves, approveLeave, rejectLeave, pendingCount } = useLeaves(attendance, setAttendance, addToast, addNotification)
@@ -24,7 +24,7 @@ export default function LeaveRequests({ employees, attendance, setAttendance, ad
         rejectLeave(pendingAction.id)
       }
 
-      // Auto-dispatch WhatsApp update if configured
+      // Auto-queue WhatsApp update if enabled (free 24h-window mode)
       if (settings?.whatsapp?.enabled && settings?.whatsapp?.notifyLeaves && emp?.phone && targetLeave) {
         const message = generateLeaveStatusMessage({
           employeeName: emp.name,
@@ -36,16 +36,16 @@ export default function LeaveRequests({ employees, attendance, setAttendance, ad
           reason: targetLeave.reason
         })
 
-        if (settings?.whatsapp?.gatewayUrl) {
-          sendWhatsAppNotification({
-            gatewayUrl: settings.whatsapp.gatewayUrl,
+        queueWhatsAppMessages({
+          items: [{
             phone: emp.phone,
-            message,
-            companyName: settings?.company?.name
-          }).then(res => {
-            if (res.success && addToast) addToast(`WhatsApp update dispatched to ${emp.name}!`, 'success')
-          }).catch(() => {})
-        }
+            employeeName: emp.name,
+            event: 'leave',
+            message
+          }]
+        }).then(res => {
+          if (res.success && addToast) addToast(`WhatsApp update queued for ${emp.name}!`, 'success')
+        }).catch(() => {})
       }
 
       setPendingAction(null)

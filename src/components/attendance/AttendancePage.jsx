@@ -95,13 +95,13 @@ export default function AttendancePage({
       {tab === 'roster' && (
         <div className="flex flex-col gap-5">
           <RosterPlanner employees={employees} roster={roster} setRoster={setRoster} shiftTemplates={shiftTemplates} setShiftTemplates={updateShiftTemplates} addToast={addToast} />
-          <ShiftSwaps employees={employees} shiftSwaps={shiftSwaps} setShiftSwaps={setShiftSwaps} roster={roster} setRoster={setRoster} addToast={addToast} />
+          <ShiftSwaps employees={employees} shiftSwaps={shiftSwaps} setShiftSwaps={setShiftSwaps} roster={roster} setRoster={setRoster} addToast={addToast} settings={settings} />
         </div>
       )}
       {tab === 'overtime' && (
         <div className="flex flex-col gap-5">
           <OvertimeRulesEditor overtimeRules={overtimeRules} setOvertimeRules={updateOvertimeRules} />
-          <OvertimeClaims employees={employees} overtimeClaims={overtimeClaims} setOvertimeClaims={setOvertimeClaims} addToast={addToast} />
+          <OvertimeClaims employees={employees} overtimeClaims={overtimeClaims} setOvertimeClaims={setOvertimeClaims} addToast={addToast} settings={settings} />
         </div>
       )}
       {tab === 'geofence' && (

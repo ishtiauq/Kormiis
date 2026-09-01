@@ -123,7 +123,7 @@ export default function AppContent({ currentView, setCurrentView, isAppLoading, 
       view = <Assets employees={data.employees} assets={data.assets} setAssets={data.setAssets} assetRequests={data.assetRequests} setAssetRequests={data.setAssetRequests} assetCategories={data.assetCategories} setAssetCategories={data.setAssetCategories} addLog={data.addLog} addToast={data.addToast} currentUser={user} addNotification={data.addNotification} settings={data.settings} />
       break
     case 'tasks':
-      view = <Tasks tasks={data.tasks} setTasks={data.handleSetTasks} employees={data.employees} currentUser={user} addToast={data.addToast} addLog={data.addLog} addNotification={data.addNotification} notes={data.notes} setNotes={data.handleSetNotes} defaultTab="tasks" />
+      view = <Tasks tasks={data.tasks} setTasks={data.handleSetTasks} employees={data.employees} currentUser={user} addToast={data.addToast} addLog={data.addLog} addNotification={data.addNotification} notes={data.notes} setNotes={data.handleSetNotes} defaultTab="tasks" settings={data.settings} />
       break
     case 'expenses':
       view = <Payroll employees={data.employees} payroll={data.payroll} setPayroll={data.handleSetPayroll} addLog={data.addLog} settings={data.settings} addAuditLog={data.addAuditLog} expenses={data.expenses} setExpenses={data.handleSetExpenses} addToast={data.addToast} currentUser={user} addNotification={data.addNotification} defaultTab="expenses" />

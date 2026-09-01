@@ -35,6 +35,24 @@ service cloud.firestore {
       allow write: if isAdmin(adminUid) || isMember(adminUid);
     }
 
+    // WhatsApp outbox — HR/admin and registered members can create message
+    // requests and read the delivery log. Only the Cloud Function (Admin SDK)
+    // updates status, so client updates are denied.
+    match /companies/{adminUid}/wa_outbox/{msgId} {
+      allow create, read: if isAdmin(adminUid) || isMember(adminUid);
+      allow update, delete: if false;
+    }
+
+    // WhatsApp credentials (Meta access token etc.) — server only.
+    match /companies/{adminUid}/secrets/{secretDoc} {
+      allow read, write: if false;
+    }
+
+    // Global phone-number-id -> company routing map — server only.
+    match /wa_routing/{phoneNumberId} {
+      allow read, write: if false;
+    }
+
     // Employee auth snapshot — readable by any authenticated (incl. anonymous)
     // user so employees can verify credentials from any device before they
     // become registered members. Only the admin can write it.

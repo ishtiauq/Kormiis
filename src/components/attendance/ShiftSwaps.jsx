@@ -1,11 +1,37 @@
 import { useShiftSwaps } from '../../hooks/useShiftSwaps.js'
 import { formatDateShort } from '../../services/date.js'
+import { generateShiftSwapMessage, queueWhatsAppMessages } from '../../services/whatsappService.js'
 import Icon from "@/components/ui/Icon.jsx"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 
-export default function ShiftSwaps({ employees, shiftSwaps, setShiftSwaps, roster, setRoster, addToast }) {
+export default function ShiftSwaps({ employees, shiftSwaps, setShiftSwaps, roster, setRoster, addToast, settings }) {
   const { pendingSwaps, approveSwap, rejectSwap } = useShiftSwaps(shiftSwaps, setShiftSwaps, roster, setRoster, addToast)
+
+  const notifySwapWhatsApp = (swap, status) => {
+    const r = employees.find(e => e.id === swap.requesterId)
+    if (!settings?.whatsapp?.enabled || !settings?.whatsapp?.notifyShiftSwap || !r?.phone) return
+    const message = generateShiftSwapMessage({
+      employeeName: r.name,
+      companyName: settings?.company?.name || 'Kormiis HR',
+      date: formatDateShort(swap.date),
+      status,
+      reason: swap.reason
+    })
+    queueWhatsAppMessages({
+      items: [{ phone: r.phone, employeeName: r.name, event: 'shift_swap', message }]
+    }).catch(() => {})
+  }
+
+  const handleApprove = (swap) => {
+    approveSwap(swap.id)
+    notifySwapWhatsApp(swap, 'Approved')
+  }
+
+  const handleReject = (swap) => {
+    rejectSwap(swap.id)
+    notifySwapWhatsApp(swap, 'Rejected')
+  }
 
   if (pendingSwaps.length === 0) return null
 
@@ -28,10 +54,10 @@ export default function ShiftSwaps({ employees, shiftSwaps, setShiftSwaps, roste
                 {swap.reason && <div className="text-xs text-muted-foreground mt-1">Reason: {swap.reason}</div>}
               </div>
               <div className="flex gap-2">
-                <Button size="sm" onClick={() => approveSwap(swap.id)}>
+                <Button size="sm" onClick={() => handleApprove(swap)}>
                   <Icon name="check" size={13}/> Approve
                 </Button>
-                <Button size="sm" variant="outline" className="text-destructive border-destructive/30 hover:text-destructive" onClick={() => rejectSwap(swap.id)}>
+                <Button size="sm" variant="outline" className="text-destructive border-destructive/30 hover:text-destructive" onClick={() => handleReject(swap)}>
                   <Icon name="close" size={13}/> Reject
                 </Button>
               </div>
