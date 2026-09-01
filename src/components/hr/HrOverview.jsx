@@ -38,7 +38,7 @@ export default function HrOverview({ adminUid, currentUser, setCurrentView, addT
   if (!isAdmin) return null
 
   return (
-    <Card className={`flex flex-col p-0 h-full widget-corner-gradient ${cardClass}`}>
+    <Card className={`flex flex-col p-0 h-full dashboard-widget ${cardClass}`}>
       <CardHeader className="flex-row items-center justify-between pb-3.5 space-y-0 gap-3">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="shrink-0 flex items-center justify-center [&_.msr]:!text-foreground">

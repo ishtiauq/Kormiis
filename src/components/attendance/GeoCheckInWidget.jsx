@@ -216,7 +216,7 @@ export default function GeoCheckInWidget({ currentUser, attendance, setAttendanc
         </DialogContent>
       </Dialog>
 
-      <Card className="col-span-full xl:col-span-12 border-primary/20 overflow-hidden shadow-sm mb-6 widget-corner-gradient">
+      <Card className="col-span-full xl:col-span-12 border-primary/20 overflow-hidden shadow-sm mb-6 dashboard-widget">
         <CardHeader className="pb-3.5 space-y-0 gap-3">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="shrink-0 flex items-center justify-center [&_.msr]:!text-foreground">

@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useDeferredValue, memo, lazy, Suspense } from 'react'
+import { useEffect, useState, useMemo, useDeferredValue, memo } from 'react'
 import Icon from "@/components/ui/Icon.jsx"
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
@@ -10,21 +10,15 @@ import DailyChecklistWidget from './DailyChecklistWidget.jsx'
 import HrOverview from './hr/HrOverview.jsx'
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, BarChart, Bar, XAxis, YAxis } from 'recharts'
 
-// Lazy load heavy widgets for progressive rendering
-const PerformanceTrackerWidget = lazy(() => import('./widgets/PerformanceTrackerWidget.jsx').then(m => ({ default: m.PerformanceTrackerWidget })))
-const TasksWidget = lazy(() => import('./widgets/TasksWidget.jsx').then(m => ({ default: m.TasksWidget })))
-const UpcomingWidget = lazy(() => import('./widgets/UpcomingWidget.jsx').then(m => ({ default: m.UpcomingWidget })))
-const EmployeeDirectoryWidget = lazy(() => import('./widgets/EmployeeDirectoryWidget.jsx').then(m => ({ default: m.EmployeeDirectoryWidget })))
-const DocumentsWidget = lazy(() => import('./widgets/DocumentsWidget.jsx').then(m => ({ default: m.DocumentsWidget })))
-const PayrollWidget = lazy(() => import('./widgets/PayrollWidget.jsx').then(m => ({ default: m.PayrollWidget })))
-const AssetsWidget = lazy(() => import('./widgets/AssetsWidget.jsx').then(m => ({ default: m.AssetsWidget })))
-
-// Skeleton fallback for lazy widgets
-function WidgetSkeleton({ className = '' }) {
-  return (
-    <div className={`w-full h-48 rounded-2xl bg-foreground/10 animate-pulse ${className}`} aria-hidden="true" />
-  )
-}
+// Eagerly imported widgets for instant, zero-delay rendering
+import { PerformanceTrackerWidget } from './widgets/PerformanceTrackerWidget.jsx'
+import { TasksWidget } from './widgets/TasksWidget.jsx'
+import { UpcomingWidget } from './widgets/UpcomingWidget.jsx'
+import { EmployeeDirectoryWidget } from './widgets/EmployeeDirectoryWidget.jsx'
+import { DocumentsWidget } from './widgets/DocumentsWidget.jsx'
+import { PayrollWidget } from './widgets/PayrollWidget.jsx'
+import { AssetsWidget } from './widgets/AssetsWidget.jsx'
+import { AnnouncementsWidget } from './widgets/AnnouncementsWidget.jsx'
 
 export const DashboardWidget = memo(({ 
   id, title, icon, action, 
@@ -34,7 +28,7 @@ export const DashboardWidget = memo(({
   children
 }) => {
   return (
-    <Card className={`flex flex-col p-0 h-full widget-corner-gradient ${cardClass}`}>
+    <Card className={`flex flex-col p-0 h-full dashboard-widget ${cardClass}`}>
       <CardHeader className="flex-row items-center justify-between pb-3.5 space-y-0 gap-3">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="shrink-0 flex items-center justify-center [&_.msr]:!text-foreground">
@@ -99,7 +93,7 @@ const VirtualizedList = memo(({ items, filter }) => {
 
 VirtualizedList.displayName = 'VirtualizedList'
 
-export default function Dashboard({ employees, onSync, attendance, setAttendance, currentUser, addToast, setCurrentView, announcements, events, payroll, isSidebarCollapsed, hasPermission, tasks = [], documents = [], assets = [], settings, notes = [], setNotes }) {
+export default function Dashboard({ employees, onSync, attendance, setAttendance, currentUser, addToast, setCurrentView, announcements, setAnnouncements, addLog, addNotification, events, payroll, isSidebarCollapsed, hasPermission, tasks = [], documents = [], assets = [], settings, notes = [], setNotes }) {
   const [expandedWidgets, setExpandedWidgets] = useState([])
   const [attFilter, setAttFilter] = useState(null)
   const [attTab, setAttTab] = useState('donut')
@@ -349,12 +343,6 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
   const totalTracked = todayStats.present + todayStats.absent + todayStats.onLeave
   const attendanceRate = totalTracked > 0 ? Math.round((todayStats.present / totalTracked) * 100) : 0
 
-  const recentAnnouncements = announcements
-    ? [...announcements]
-        .sort((a, b) => new Date(b.date) - new Date(a.date))
-        .slice(0, 3)
-    : []
-
   const upcomingEvents = events
     ? [...events]
         .filter(evt => new Date(evt.date) >= new Date())
@@ -408,57 +396,29 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 lg:gap-6 auto-rows-[minmax(148px,auto)] items-stretch pt-2">
 
         {canViewAnnouncements && (
-          <DashboardWidget
-          id="w4"
-          title="Announcements"
-          icon={<Icon name="rss_feed" className="text-amber-500 shrink-0" size={22}/>}
-          cardClass="col-span-12 lg:col-span-7 lg:row-span-2"
-          action={<button onClick={() => setCurrentView && setCurrentView('announcements')} className="apple-glass-btn text-xs font-semibold px-3.5 h-7 rounded-full cursor-pointer">View All</button>}
-          contentClass="flex flex-col p-0 pt-1 overflow-hidden"
-          {...wProps}
-        >
-          {recentAnnouncements.length === 0 ? (
-            <div className="flex-1 flex flex-col items-center justify-center text-center p-5">
-              <Icon name="rss_feed" size={34} className="text-amber-500/40 dark:text-amber-500/50 mb-2 shrink-0" />
-              <p className="m-0 text-fluid-xs font-medium text-muted-foreground max-w-[200px] leading-relaxed">No active announcements</p>
-            </div>
-          ) : (
-          <div className="flex-1 min-h-0 overflow-y-auto max-h-[360px] lg:max-h-[520px] flex flex-col gap-2.5 px-4 sm:px-5 pb-4 chat-scrollbar">
-            {recentAnnouncements.map((ann, idx) => (
-              <div
-                key={ann.id || idx}
-                className="flex items-center gap-3.5 p-3 px-4 rounded-2xl liquid-widget-item cursor-pointer select-none active:scale-[0.99]"
-                onClick={() => setCurrentView && setCurrentView('announcements')}
-              >
-                <Icon name="rss_feed" size={24} className="text-foreground shrink-0"/>
-                <div className="flex-1 min-w-0 pr-2">
-                  <p className="m-0 text-fluid-xs font-bold text-foreground break-words ">{ann.title}</p>
-                  <p className="m-0 mt-0.5 text-[11px] font-medium text-muted-foreground">
-                    {getEmployeeName(ann.authorId)} &middot; {new Date(ann.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                  </p>
-                </div>
-                {ann.priority === 'Important' && (
-                  <Badge variant="destructive" className="uppercase text-[10px] rounded-full px-2.5 py-0.5 shadow-xs">
-                    Important
-                  </Badge>
-                )}
-              </div>
-            ))}
-          </div>
-          )}
-        </DashboardWidget>
+          <AnnouncementsWidget
+            announcements={announcements}
+            setAnnouncements={setAnnouncements}
+            currentUser={currentUser}
+            employees={employees}
+            setCurrentView={setCurrentView}
+            addToast={addToast}
+            addLog={addLog}
+            addNotification={addNotification}
+            settings={settings}
+            hasPermission={hasPermission}
+            {...wProps}
+          />
         )}
 
-        {/* Employee Directory Widget - beside Announcements on desktop, 2-slot tall (Lazy loaded) */}
+        {/* Employee Directory Widget - beside Announcements on desktop, 2-slot tall */}
         {canViewEmployees && (
-          <Suspense fallback={<WidgetSkeleton />}>
-            <EmployeeDirectoryWidget
-              employees={employees}
-              setCurrentView={setCurrentView}
-              cardClass="col-span-12 lg:col-span-5 lg:row-span-3"
-              {...wProps}
-            />
-          </Suspense>
+          <EmployeeDirectoryWidget
+            employees={employees}
+            setCurrentView={setCurrentView}
+            cardClass="col-span-12 lg:col-span-5 lg:row-span-3"
+            {...wProps}
+          />
         )}
 
         {canViewAttendance && (
@@ -640,85 +600,73 @@ cardClass="col-span-12 lg:col-span-7"
 
 <HrOverview adminUid={currentUser?.uid} currentUser={currentUser} setCurrentView={setCurrentView} addToast={addToast} cardClass="col-span-12 lg:col-span-4" />
 
-        {/* Performance Tracker - Lazy loaded with Suspense */}
-        <Suspense fallback={<WidgetSkeleton />}>
-          <PerformanceTrackerWidget
-            efficiencyScore={efficiencyScore}
+        {/* Performance Tracker */}
+        <PerformanceTrackerWidget
+          efficiencyScore={efficiencyScore}
+          taskCompletionRate={taskCompletionRate}
+          attendanceRate={attendanceRate}
+          setCurrentView={setCurrentView}
+          cardClass="col-span-12 lg:col-span-4"
+          {...wProps}
+        />
+
+        {/* Tasks Widget */}
+        {canViewTasks && (
+          <TasksWidget
+            tasks={tasks}
+            pendingTasksCount={pendingTasksCount}
             taskCompletionRate={taskCompletionRate}
-            attendanceRate={attendanceRate}
+            setCurrentView={setCurrentView}
+            cardClass="col-span-12 sm:col-span-6 lg:col-span-4"
+            {...wProps}
+          />
+        )}
+
+        {/* Upcoming Widget (Milestones + Events merged) */}
+        {(canViewEmployees || canViewCalendar) && (
+          <UpcomingWidget
+            upcomingMilestones={upcomingMilestones}
+            upcomingEvents={upcomingEvents}
+            setCurrentView={setCurrentView}
+            cardClass="col-span-12 sm:col-span-6 lg:col-span-4"
+            {...wProps}
+          />
+        )}
+
+        {/* Documents Widget */}
+        {canViewDocuments && (
+          <DocumentsWidget
+            recentDocuments={recentDocuments}
+            setCurrentView={setCurrentView}
+            cardClass="col-span-12 sm:col-span-6 lg:col-span-4"
+            {...wProps}
+          />
+        )}
+
+        {/* Payroll Widget */}
+        {canViewPayroll && (
+          <PayrollWidget
+            currentPayrollMonth={currentPayrollMonth}
+            paidCount={paidCount}
+            pendingCount={pendingCount}
+            totalPayrollCost={totalPayrollCost}
+            settings={settings}
+            currentPayrollData={currentPayrollData}
             setCurrentView={setCurrentView}
             cardClass="col-span-12 lg:col-span-4"
             {...wProps}
           />
-        </Suspense>
-
-        {/* Tasks Widget - Lazy loaded with Suspense */}
-        {canViewTasks && (
-          <Suspense fallback={<WidgetSkeleton />}>
-            <TasksWidget
-              tasks={tasks}
-              pendingTasksCount={pendingTasksCount}
-              taskCompletionRate={taskCompletionRate}
-              setCurrentView={setCurrentView}
-              cardClass="col-span-12 sm:col-span-6 lg:col-span-4"
-              {...wProps}
-            />
-          </Suspense>
         )}
 
-        {/* Upcoming Widget (Milestones + Events merged) - Lazy loaded with Suspense */}
-        {(canViewEmployees || canViewCalendar) && (
-          <Suspense fallback={<WidgetSkeleton />}>
-            <UpcomingWidget
-              upcomingMilestones={upcomingMilestones}
-              upcomingEvents={upcomingEvents}
-              setCurrentView={setCurrentView}
-              cardClass="col-span-12 sm:col-span-6 lg:col-span-4"
-              {...wProps}
-            />
-          </Suspense>
-        )}
-
-        {/* Documents Widget - Lazy loaded with Suspense */}
-        {canViewDocuments && (
-          <Suspense fallback={<WidgetSkeleton />}>
-            <DocumentsWidget
-              recentDocuments={recentDocuments}
-              setCurrentView={setCurrentView}
-              cardClass="col-span-12 sm:col-span-6 lg:col-span-4"
-              {...wProps}
-            />
-          </Suspense>
-        )}
-
-        {/* Payroll Widget - Lazy loaded with Suspense */}
-        {canViewPayroll && (
-          <Suspense fallback={<WidgetSkeleton />}>
-            <PayrollWidget
-              currentPayrollMonth={currentPayrollMonth}
-              paidCount={paidCount}
-              pendingCount={pendingCount}
-              totalPayrollCost={totalPayrollCost}
-              settings={settings}
-              currentPayrollData={currentPayrollData}
-              setCurrentView={setCurrentView}
-              cardClass="col-span-12 lg:col-span-4"
-              {...wProps}
-            />
-          </Suspense>
-        )}
-
-        {/* Assets Widget - Lazy loaded with Suspense */}
+        {/* Assets Widget */}
         {canViewAssets && (
-          <Suspense fallback={<WidgetSkeleton />}>
-            <AssetsWidget
-              assets={assets}
-              availableAssetsCount={availableAssetsCount}
-              setCurrentView={setCurrentView}
-              cardClass="col-span-12 sm:col-span-6 lg:col-span-4"
-              {...wProps}
-            />
-          </Suspense>
+          <AssetsWidget
+            assets={assets}
+            availableAssetsCount={availableAssetsCount}
+            setCurrentView={setCurrentView}
+            cardClass="col-span-12 sm:col-span-6 lg:col-span-4"
+            {...wProps}
+          />
         )}
 
         <div className="h-8 col-span-full"></div>

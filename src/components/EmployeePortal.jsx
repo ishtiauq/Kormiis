@@ -710,12 +710,12 @@ function DashboardView({ currentUser, attendance, setAttendance, addToast, expen
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {recentAnnouncements.length === 0 ? (
-            <Card className="col-span-full">
+            <Card className="col-span-full dashboard-widget">
               <CardContent className="p-6 text-center text-muted-foreground">No new announcements</CardContent>
             </Card>
           ) : (
             recentAnnouncements.map(ann => (
-              <Card key={ann.id} className={`cursor-pointer hover:bg-muted/50 transition-colors ${ann.priority === 'Urgent' ? 'border-l-4 border-l-red-500' : ''}`} onClick={() => setActiveTab('announcements')}>
+              <Card key={ann.id} className={`cursor-pointer hover:bg-muted/50 transition-colors dashboard-widget ${ann.priority === 'Urgent' ? 'border-l-4 border-l-red-500' : ''}`} onClick={() => setActiveTab('announcements')}>
                 <CardContent className="p-4 flex flex-col h-full justify-between">
                   <div>
                     <div className="flex justify-between items-start mb-2 gap-2">
@@ -734,7 +734,7 @@ function DashboardView({ currentUser, attendance, setAttendance, addToast, expen
       <div className="grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3">
         <DailyChecklistWidget notes={notes} setNotes={setNotes} ownerId={currentUser?.id || currentUser?.uid || ''} />
         
-        <Card className="hover:border-primary/50 transition-colors shadow-sm cursor-pointer" onClick={() => setActiveTab('my-tasks')}>
+        <Card className="hover:border-primary/50 transition-colors shadow-sm cursor-pointer dashboard-widget" onClick={() => setActiveTab('my-tasks')}>
           <CardContent className="p-5 flex flex-col justify-center">
             <div className="flex items-center gap-2 mb-2 text-primary">
               <Icon name="check_box" size={18}/>
