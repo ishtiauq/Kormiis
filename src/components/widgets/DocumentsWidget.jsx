@@ -8,7 +8,7 @@ export const DocumentsWidget = memo(({ recentDocuments, setCurrentView, ...wProp
   <DashboardWidget
     id="documents-widget"
     title="Recent Documents"
-    icon={<Icon name="description" className="text-blue-500 shrink-0" size={16}/>}
+    icon={<Icon name="description" className="text-blue-500 shrink-0" size={22}/>}
     {...wProps}
     action={
       <button onClick={() => setCurrentView('documents')} className="apple-glass-btn text-xs font-semibold px-3.5 h-7 rounded-full text-blue-500 hover:text-blue-600 cursor-pointer">

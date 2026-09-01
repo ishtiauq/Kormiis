@@ -12,7 +12,7 @@ export const UpcomingWidget = memo(({ upcomingMilestones = [], upcomingEvents = 
     <DashboardWidget
       id="w8"
       title="Upcoming"
-      icon={<Icon name="event_upcoming" className="text-amber-500 shrink-0" size={16}/>}
+      icon={<Icon name="event_upcoming" className="text-amber-500 shrink-0" size={22}/>}
       action={
         <div className="flex items-center gap-1.5">
           {upcomingEvents.length > 0 && (

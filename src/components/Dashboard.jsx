@@ -34,13 +34,13 @@ export const DashboardWidget = memo(({
   children
 }) => {
   return (
-    <Card className={`flex flex-col p-0 h-full ${cardClass}`}>
-      <CardHeader className="flex-row items-center justify-between pb-2.5 space-y-0 gap-2.5">
+    <Card className={`flex flex-col p-0 h-full widget-corner-gradient ${cardClass}`}>
+      <CardHeader className="flex-row items-center justify-between pb-3.5 space-y-0 gap-3">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="shrink-0 flex items-center justify-center [&_.msr]:!text-foreground">
             {icon}
           </div>
-          <CardTitle className="text-fluid-headline font-extrabold tracking-[0.03em] uppercase text-foreground m-0 leading-none whitespace-nowrap flex-1 min-w-0">{title}</CardTitle>
+          <CardTitle className="text-fluid font-bold tracking-tight text-foreground m-0 leading-snug break-words">{title}</CardTitle>
         </div>
         {action}
       </CardHeader>
@@ -411,7 +411,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
           <DashboardWidget
           id="w4"
           title="Announcements"
-          icon={<Icon name="rss_feed" className="text-amber-500 shrink-0" size={16}/>}
+          icon={<Icon name="rss_feed" className="text-amber-500 shrink-0" size={22}/>}
           cardClass="col-span-12 lg:col-span-7 lg:row-span-2"
           action={<button onClick={() => setCurrentView && setCurrentView('announcements')} className="apple-glass-btn text-xs font-semibold px-3.5 h-7 rounded-full cursor-pointer">View All</button>}
           contentClass="flex flex-col p-0 pt-1 overflow-hidden"
@@ -465,7 +465,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
           <DashboardWidget
             id="w2"
             title="Attendance"
-            icon={<Icon name="group" className="text-foreground shrink-0" size={16}/>}
+            icon={<Icon name="group" className="text-foreground shrink-0" size={22}/>}
 cardClass="col-span-12 lg:col-span-7"
             action={
               <div className="flex items-center gap-1.5 sm:gap-2">

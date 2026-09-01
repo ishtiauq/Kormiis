@@ -6,7 +6,7 @@ export const PayrollWidget = memo(({ currentPayrollMonth, paidCount, pendingCoun
   <DashboardWidget
     id="w5"
     title="Payroll Summary"
-    icon={<Icon name="account_balance" className="text-emerald-500 shrink-0" size={16}/>}
+    icon={<Icon name="account_balance" className="text-emerald-500 shrink-0" size={22}/>}
     action={
       <button 
         onClick={() => setCurrentView && setCurrentView('payroll')} 

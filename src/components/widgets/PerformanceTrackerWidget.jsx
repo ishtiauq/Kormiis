@@ -6,7 +6,7 @@ export const PerformanceTrackerWidget = memo(({ efficiencyScore, taskCompletionR
   <DashboardWidget
     id="perf-widget"
     title="Performance Tracker"
-    icon={<Icon name="insights" className="text-purple-500 shrink-0" size={16}/>}
+    icon={<Icon name="insights" className="text-purple-500 shrink-0" size={22}/>}
     action={<button onClick={() => setCurrentView && setCurrentView('performance')} className="apple-glass-btn text-xs font-semibold px-3.5 h-7 rounded-full cursor-pointer">Details</button>}
     {...wProps}
   >

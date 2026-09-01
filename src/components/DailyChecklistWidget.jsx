@@ -24,13 +24,13 @@ export default function DailyChecklistWidget({ notes = [], setNotes, ownerId = '
   }
 
   return (
-    <Card className={`flex flex-col p-0 h-full ${cardClass}`}>
-      <CardHeader className="flex-row items-center justify-between pb-2.5 space-y-0">
+    <Card className={`flex flex-col p-0 h-full widget-corner-gradient ${cardClass}`}>
+      <CardHeader className="flex-row items-center justify-between pb-3.5 space-y-0 gap-3">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="flex items-center justify-center shrink-0">
-            <Icon name="task_alt" className="text-primary shrink-0" size={16}/>
+          <div className="shrink-0 flex items-center justify-center [&_.msr]:!text-foreground">
+            <Icon name="task_alt" className="text-primary shrink-0" size={22}/>
           </div>
-          <CardTitle className="text-fluid-headline font-extrabold tracking-[0.03em] uppercase text-foreground m-0 leading-none whitespace-nowrap flex-1 min-w-0">
+          <CardTitle className="text-fluid font-bold tracking-tight text-foreground m-0 leading-snug break-words">
             {checklistNote?.title || "Daily Checklist"}
           </CardTitle>
         </div>

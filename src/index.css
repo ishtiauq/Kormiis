@@ -359,6 +359,33 @@ html.dark .liquid-glass-drawer,
   box-shadow: none !important;
 }
 
+/* 45-degree progressive corner gradient covering 50% from top-left */
+.widget-corner-gradient {
+  position: relative;
+  isolation: isolate;
+}
+
+.widget-corner-gradient::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.72) 16%, rgba(255, 255, 255, 0.32) 34%, rgba(255, 255, 255, 0) 50%, transparent 100%);
+}
+
+.dark .widget-corner-gradient::before,
+html.dark .widget-corner-gradient::before,
+[data-theme="dark"] .widget-corner-gradient::before {
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.22) 18%, rgba(0, 0, 0, 0.06) 34%, transparent 50%);
+}
+
+.widget-corner-gradient > * {
+  position: relative;
+  z-index: 1;
+}
+
 /* True Apple Liquid Glass Top Bar & Floating Pills (Zero Shadow Standard) */
 .landing-glass-header,
 .landing-glass-bottom-bar {

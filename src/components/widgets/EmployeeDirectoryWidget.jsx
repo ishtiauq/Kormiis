@@ -26,7 +26,7 @@ export const EmployeeDirectoryWidget = memo(({ employees = [], setCurrentView, .
     <DashboardWidget
       id="directory"
       title="Employee Directory"
-      icon={<Icon name="group" className="text-foreground shrink-0" size={16}/>}
+      icon={<Icon name="group" className="text-foreground shrink-0" size={22}/>}
       action={
         <Badge variant="outline" className="px-2.5 py-0.5 rounded-full text-xs font-semibold border-black/10 dark:border-white/12 text-foreground bg-black/[0.04] dark:bg-white/[0.06] shrink-0">
           {employees.length} members

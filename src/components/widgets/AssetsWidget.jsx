@@ -11,7 +11,7 @@ export const AssetsWidget = memo(({ assets = [], setCurrentView, ...wProps }) =>
     <DashboardWidget
       id="assets-widget"
       title="Asset Inventory"
-      icon={<Icon name="devices_other" className="text-teal-500 shrink-0" size={16}/>}
+      icon={<Icon name="devices_other" className="text-teal-500 shrink-0" size={22}/>}
       {...wProps}
       action={
         <button onClick={() => setCurrentView('assets')} className="apple-glass-btn text-xs font-semibold px-3.5 h-7 rounded-full text-teal-500 hover:text-teal-600 cursor-pointer">
