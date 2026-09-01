@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { getRelativeTime } from '../../services/date.js'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import AiCoPilotModal from '../ai/AiCoPilotModal.jsx'
+import { AiQuantumGlyph } from '../ai/AiExpandableFab.jsx'
 import TooltipPopover from '../TooltipPopover.jsx'
 
 export default function Topbar({ 
@@ -439,6 +440,46 @@ export default function Topbar({
 
         {/* 3. Rightmost: Actions Group (Containerless Standalone Icons, Ultra-Compact gap-[1.6px]) */}
         <div className="flex items-center gap-[1.6px] shrink-0 h-[48px] sm:h-[54px]">
+          {/* Kormiis AI Trigger (Desktop/Tablet - plain icon, expands to orange pill + label when active like menu bar) */}
+          <div className="hidden lg:flex items-center justify-center">
+            <TooltipPopover label="Open Kormiis AI (Ctrl+Space)" side="bottom">
+              <motion.button
+                layout
+                data-ai-trigger="true"
+                onClick={() => { if (onOpenAi) onOpenAi() }}
+                aria-label="Open Kormiis AI"
+                aria-expanded={isAiOpen}
+                whileTap={{ scale: 0.94 }}
+                transition={{ layout: { type: 'spring', stiffness: 440, damping: 32, mass: 0.7 } }}
+                className={`relative flex items-center rounded-full select-none cursor-pointer border-0 !border-none outline-none transition-colors duration-150 ${
+                  isAiOpen
+                    ? 'px-3 sm:px-3.5 h-9 sm:h-9.5 gap-1.5 text-white font-bold z-10'
+                    : 'size-9 sm:size-10 justify-center text-foreground/75 hover:text-foreground p-0'
+                }`}
+                style={isAiOpen ? { background: 'linear-gradient(135deg, #FE3501 0%, #e62f00 100%)', color: '#ffffff', border: 'none', outline: 'none' } : { background: 'transparent', border: 'none', boxShadow: 'none', outline: 'none' }}
+              >
+                <span className={`relative z-10 shrink-0 flex items-center justify-center ${isAiOpen ? 'text-white scale-105' : ''}`}>
+                  <AiQuantumGlyph size={24} />
+                </span>
+
+                <AnimatePresence initial={false}>
+                  {isAiOpen && (
+                    <motion.span
+                      key="ai-active-label"
+                      initial={{ opacity: 0, width: 0, filter: 'blur(3px)', x: -3 }}
+                      animate={{ opacity: 1, width: 'auto', filter: 'blur(0px)', x: 0 }}
+                      exit={{ opacity: 0, width: 0, filter: 'blur(3px)', x: -3 }}
+                      transition={{ type: 'spring', stiffness: 440, damping: 30, mass: 0.65 }}
+                      className="relative z-10 text-xs font-bold tracking-tight whitespace-nowrap overflow-hidden inline-block leading-none !text-white"
+                    >
+                      Kormiis AI
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </motion.button>
+            </TooltipPopover>
+          </div>
+
           {showThemeToggle && (
             <TooltipPopover label={themeMode === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'} side="bottom">
               <button

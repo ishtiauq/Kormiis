@@ -37,7 +37,7 @@ export default function LoadingScreen({
         transition: { duration: 0.45, ease: [0.32, 0.72, 0, 1] } 
       }}
       transition={{ duration: 0.35 }}
-      className="fixed inset-0 z-[9999] flex flex-col items-center justify-center dark force-dark-mode bg-[#090a0f] text-white select-none overflow-hidden isolate"
+      className="fixed inset-0 z-[9999] flex flex-col items-center justify-center dark force-dark-mode bg-[#1c1c1e] text-white select-none overflow-hidden isolate"
     >
       {/* 2. Unboxed Clean Center Stage */}
       <div className="relative z-10 flex flex-col items-center gap-7 max-w-sm w-full px-6 text-center">

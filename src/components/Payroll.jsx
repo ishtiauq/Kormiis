@@ -778,7 +778,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
               <Icon name="keyboard_arrow_down" className={`h-4 w-4 shrink-0 opacity-50 transition-transform ${monthOpen ? 'rotate-180' : ''}`} size={16}/>
             </button>
           {monthOpen && (
-            <div className="absolute top-full left-0 right-0 mt-2 max-h-60 overflow-y-auto z-[100] rounded-md border bg-popover p-1 text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95">
+            <div className="absolute top-full left-0 right-0 mt-2 max-h-60 overflow-y-auto z-[100] rounded-md border glass-kormiis p-1 text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95">
               {monthNames.map((name, i) => (
                 <button key={name} onClick={() => { setSelectedMonth(`${currentYear}-${String(i + 1).padStart(2, '0')}`); setMonthOpen(false) }} 
                   className={`relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none hover:bg-accent hover:text-accent-foreground ${i + 1 === currentMonth ? 'bg-accent text-accent-foreground font-semibold' : ''}`}>
@@ -795,7 +795,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
             <Icon name="keyboard_arrow_down" className={`h-4 w-4 shrink-0 opacity-50 transition-transform ${yearOpen ? 'rotate-180' : ''}`} size={16}/>
           </button>
           {yearOpen && (
-            <div className="absolute top-full left-0 right-0 mt-2 max-h-60 overflow-y-auto z-[100] rounded-md border bg-popover p-1 text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95">
+            <div className="absolute top-full left-0 right-0 mt-2 max-h-60 overflow-y-auto z-[100] rounded-md border glass-kormiis p-1 text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95">
               {yearOptions.map(y => (
                 <button key={y} onClick={() => { setSelectedMonth(`${y}-${String(currentMonth).padStart(2, '0')}`); setYearOpen(false) }} 
                   className={`relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none hover:bg-accent hover:text-accent-foreground ${y === currentYear ? 'bg-accent text-accent-foreground font-semibold' : ''}`}>

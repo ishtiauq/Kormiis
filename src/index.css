@@ -51,7 +51,7 @@
 }
 
 :root {
-  --background: #f4f6fb;
+  --background: #f5f5f7;
   --foreground: #000000;
   --card: rgba(255, 255, 255, 0.72);
   --card-foreground: #000000;
@@ -108,7 +108,7 @@
 .dark,
 html.dark,
 [data-theme="dark"] {
-  --background: #090a0f;
+  --background: #1c1c1e;
   --foreground: #ffffff;
   --card: transparent;
   --card-foreground: #ffffff;
@@ -154,7 +154,7 @@ html.dark,
 }
 
 .force-dark-mode {
-  --background: #090a0f !important;
+  --background: #1c1c1e !important;
   --foreground: #ffffff !important;
   --card: transparent !important;
   --card-foreground: #ffffff !important;
@@ -175,7 +175,7 @@ html.dark,
 }
 
 .force-light-mode {
-  --background: #f4f6fb !important;
+  --background: #f5f5f7 !important;
   --foreground: hsl(0 0% 0%) !important;
   --card: rgba(255, 255, 255, 0.45) !important;
   --card-foreground: hsl(0 0% 0%) !important;
@@ -192,7 +192,7 @@ html.dark,
 }
 
 body {
-  background-color: #f4f6fb;
+  background-color: #f5f5f7;
   background-image: none;
   color: var(--foreground);
   font-family: var(--font-sans);
@@ -205,7 +205,7 @@ body {
 html.dark body,
 body[data-theme="dark"],
 [data-theme="dark"] body {
-  background-color: #090a0f !important;
+  background-color: #1c1c1e !important;
   background-image: none !important;
 }
 
@@ -221,7 +221,7 @@ html, body {
 html.dark,
 [data-theme="dark"] {
   color-scheme: dark;
-  background-color: #090a0f !important;
+  background-color: #1c1c1e !important;
 }
 
 #root,
@@ -252,7 +252,6 @@ html.dark,
 .glass-apple,
 .glass-card,
 .glass-kormiis-modal,
-.glass-popover,
 .glass-tooltip,
 .tooltip,
 .bg-card,
@@ -286,7 +285,6 @@ html.dark,
 .glass-apple,
 .glass-card,
 .glass-kormiis-modal,
-.glass-popover,
 .glass-tooltip,
 .bg-card {
   background: transparent !important;
@@ -304,7 +302,6 @@ html.dark,
   .glass-apple,
   .glass-card,
   .glass-kormiis-modal,
-  .glass-popover,
   .glass-tooltip,
   .bg-card,
   .liquid-glass-drawer,
@@ -327,7 +324,6 @@ html.dark,
   .glass-apple,
   .glass-card,
   .glass-kormiis-modal,
-  .glass-popover,
   .glass-tooltip,
   .bg-card,
   .liquid-glass-drawer,
@@ -1015,7 +1011,6 @@ textarea:hover::-webkit-scrollbar-thumb {
 .glass-apple,
 .glass-card,
 .glass-kormiis-modal,
-.glass-popover,
 .glass-tooltip,
 .bg-card,
 .liquid-glass-drawer,
@@ -1045,10 +1040,8 @@ textarea:hover::-webkit-scrollbar-thumb {
 
 /* Attendance list virtualization container */
 .virtualized-list,
-[class*="VirtualizedList"],
-.max-h-36.overflow-y-auto {
-  contain: layout style paint size;
-  content-visibility: auto;
+[class*="VirtualizedList"] {
+  contain: layout style paint;
 }
 
 /* Card content containment */
@@ -1093,12 +1086,8 @@ img {
 
 /* Virtualized list containers - skip rendering off-screen items */
 .virtualized-list,
-[class*="VirtualizedList"],
-.max-h-36.overflow-y-auto,
-.max-h-60.overflow-y-auto,
-.max-h-96.overflow-y-auto {
-  contain: layout style paint size;
-  content-visibility: auto;
+[class*="VirtualizedList"] {
+  contain: layout style paint;
 }
 
 /* Card grid - only render visible cards */

@@ -4,11 +4,15 @@ import Icon from "./Icon.jsx"
 import { cn } from "@/lib/utils"
 
 const Select = React.forwardRef(({ className, label, error, placeholder, children, value, onValueChange, onChange, ...props }, ref) => {
+  const selectedKey = value !== undefined ? (value === '' || value === null ? null : value) : undefined
+  const ariaLabel = !label ? (props['aria-label'] || placeholder || 'Select option') : undefined
+
   return (
     <AriaSelect 
       ref={ref}
-      selectedKey={value !== undefined ? value : null} 
+      selectedKey={selectedKey} 
       onSelectionChange={onValueChange || onChange} 
+      aria-label={ariaLabel}
       className={cn("flex flex-col gap-1.5", className)} 
       {...props}
     >
@@ -23,7 +27,7 @@ const Select = React.forwardRef(({ className, label, error, placeholder, childre
       </AriaButton>
       <AriaPopover 
         UNSTABLE_portalContainer={typeof window !== 'undefined' ? document.body : undefined}
-        className="z-[9999] w-[--trigger-width] rounded-2xl border border-border glass-popover p-1.5 text-popover-foreground shadow-none overflow-hidden"
+        className="z-[9999] w-[--trigger-width] rounded-2xl border border-border glass-kormiis p-1.5 text-popover-foreground shadow-none overflow-hidden"
       >
         <AriaListBox className="outline-none max-h-60 overflow-y-auto">
           {children}
@@ -34,20 +38,25 @@ const Select = React.forwardRef(({ className, label, error, placeholder, childre
 })
 Select.displayName = "Select"
 
-const SelectItem = React.forwardRef(({ className, children, value, id, textValue, ...props }, ref) => (
-  <AriaListBoxItem
-    ref={ref}
-    id={value || id}
-    textValue={textValue || (typeof children === 'string' ? children : undefined)}
-    className={cn(
-      "relative flex w-full cursor-pointer select-none items-center rounded-lg px-3 py-2 text-xs sm:text-sm text-foreground outline-none hover:bg-white/15 dark:hover:bg-white/10 data-[selected]:bg-primary data-[selected]:text-primary-foreground transition-colors",
-      className
-    )}
-    {...props}
-  >
-    {children}
-  </AriaListBoxItem>
-))
+const SelectItem = React.forwardRef(({ className, children, value, id, textValue, ...props }, ref) => {
+  const itemKey = id !== undefined ? id : (value !== undefined ? value : undefined)
+  const itemText = textValue || (typeof children === 'string' ? children : undefined)
+
+  return (
+    <AriaListBoxItem
+      ref={ref}
+      id={itemKey}
+      textValue={itemText}
+      className={cn(
+        "relative flex w-full cursor-pointer select-none items-center rounded-lg px-3 py-2 text-xs sm:text-sm text-foreground outline-none hover:bg-white/15 dark:hover:bg-white/10 data-[focused]:bg-white/10 data-[selected]:bg-primary data-[selected]:text-primary-foreground transition-colors",
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </AriaListBoxItem>
+  )
+})
 SelectItem.displayName = "SelectItem"
 
 export { Select, SelectItem }

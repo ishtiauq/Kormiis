@@ -148,7 +148,7 @@ export default function DailyLogs({ employees, attendance, setAttendance, addToa
                       </button>
                       {openStatusEmp === emp.id && (
                         <div onClick={e => e.stopPropagation()}
-                          className="absolute right-0 top-[calc(100%+8px)] z-50 min-w-[130px] p-2 rounded-2xl border border-border bg-popover shadow-xl animate-in fade-in zoom-in duration-200">
+                          className="absolute right-0 top-[calc(100%+8px)] z-50 min-w-[130px] p-2 rounded-2xl border border-border glass-kormiis shadow-xl animate-in fade-in zoom-in duration-200">
                           {Object.entries(PILL_STYLES).map(([k, v]) => (
                             <button key={k} onClick={() => { 
                               if (k !== log.status) {

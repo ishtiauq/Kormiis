@@ -425,7 +425,7 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
             width: '290px'
           }}
         >
-          <div className="glass-popover glass-kormiis rounded-3xl p-3.5 shadow-2xl border border-white/30 dark:border-white/15 backdrop-blur-3xl text-foreground flex flex-col gap-2.5">
+          <div className="glass-kormiis rounded-3xl p-3.5 shadow-2xl border border-white/30 dark:border-white/15 backdrop-blur-3xl text-foreground flex flex-col gap-2.5">
             {/* Header: Date + Today / Count */}
             <div className="flex items-center justify-between gap-2 border-b border-border/80 dark:border-white/12 pb-2">
               <div className="flex items-center gap-1.5 min-w-0">

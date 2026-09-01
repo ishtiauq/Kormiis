@@ -74,7 +74,7 @@ export default defineConfig({
         name: 'Kormiis',
         short_name: 'Kormiis',
         description: 'Kormiis',
-        theme_color: '#F8F9FA',
+        theme_color: '#f5f5f7',
         icons: [
           {
             src: 'logo.svg',

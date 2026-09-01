@@ -191,7 +191,7 @@ export default function GeoCheckInWidget({ currentUser, attendance, setAttendanc
   return (
     <>
       <Dialog open={!!successMsg} onOpenChange={(open) => { if (!open) setSuccessMsg(null) }}>
-        <DialogContent className="max-w-[400px] border-border/50 bg-popover shadow-lg flex flex-col items-center justify-center p-5 sm:p-8 gap-4 rounded-[1rem] outline-none">
+        <DialogContent className="max-w-[400px] border-border/50 glass-kormiis shadow-lg flex flex-col items-center justify-center p-5 sm:p-8 gap-4 rounded-[1rem] outline-none">
           <DialogTitle className="sr-only">Check In Successful</DialogTitle>
           <Icon name={successMsg?.type === 'Check-in' ? "celebration" : "check_circle"} className="text-primary animate-bounce mt-2 sm:mt-4" size={64}/>
           <h2 className="text-2xl sm:text-3xl font-black text-foreground text-center">

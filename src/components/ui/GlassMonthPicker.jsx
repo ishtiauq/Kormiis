@@ -156,7 +156,7 @@ export default function GlassMonthPicker({
       {/* Apple Liquid Glass Dropdown Popover */}
       {isOpen && (
         <div
-          className={`glass-kormiis glass-popover absolute top-full mt-2 z-50 w-[270px] sm:w-[285px] p-4 text-foreground shadow-none animate-in fade-in-0 zoom-in-95 duration-200 ${
+          className={`glass-kormiis absolute top-full mt-2 z-50 w-[270px] sm:w-[285px] p-4 text-foreground shadow-none animate-in fade-in-0 zoom-in-95 duration-200 ${
             align === 'left' ? 'left-0' : 'right-0'
           }`}
         >

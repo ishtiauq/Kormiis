@@ -156,7 +156,7 @@ export default function RosterPlanner({ employees, roster, setRoster, shiftTempl
                           </button>
                           {isOpen && menuStyle && createPortal(
                             <div onClick={e => e.stopPropagation()} role="menu"
-                              className="fixed z-[100] p-1.5 rounded-xl border border-border bg-popover text-popover-foreground shadow-xl"
+                              className="fixed z-[100] p-1.5 rounded-xl border border-border glass-kormiis text-popover-foreground shadow-xl"
                               style={menuStyle}>
                               <button key="Off" aria-label="Set as off" onClick={() => { assignWithRestCheck(emp.id, d, 'Off'); closeMenu() }}
                                 className="block w-full px-2.5 py-1.5 rounded-full text-xs font-semibold text-center transition-colors hover:bg-accent"

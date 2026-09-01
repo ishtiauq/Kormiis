@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import Icon from "@/components/ui/Icon.jsx"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -21,6 +22,54 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
   const [updateText, setUpdateText] = useState('')
   const [showAssigneesDropdown, setShowAssigneesDropdown] = useState(false)
   const [taskToDelete, setTaskToDelete] = useState(null)
+  const assigneesDropdownRef = useRef(null)
+  const [dropdownPos, setDropdownPos] = useState(null)
+
+  useEffect(() => {
+    if (!showAssigneesDropdown || !assigneesDropdownRef.current) return
+    const updatePos = () => {
+      const rect = assigneesDropdownRef.current.getBoundingClientRect()
+      const dropdownHeight = 220
+      const spaceBelow = window.innerHeight - rect.bottom
+      const openUpward = spaceBelow < dropdownHeight && rect.top > dropdownHeight
+      setDropdownPos({
+        top: openUpward ? rect.top - dropdownHeight - 4 : rect.bottom + 4,
+        left: rect.left,
+        width: rect.width,
+        openUpward,
+      })
+    }
+    updatePos()
+    window.addEventListener('scroll', updatePos, true)
+    window.addEventListener('resize', updatePos)
+    return () => {
+      window.removeEventListener('scroll', updatePos, true)
+      window.removeEventListener('resize', updatePos)
+    }
+  }, [showAssigneesDropdown])
+
+  useEffect(() => {
+    if (!showAssigneesDropdown) return
+    const handleClickOutside = (e) => {
+      if (assigneesDropdownRef.current && !assigneesDropdownRef.current.contains(e.target)) {
+        // also check if click is inside portal dropdown
+        const portalEl = document.getElementById('assignees-portal-dropdown')
+        if (portalEl && portalEl.contains(e.target)) return
+        setShowAssigneesDropdown(false)
+      }
+    }
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') setShowAssigneesDropdown(false)
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('touchstart', handleClickOutside)
+    document.addEventListener('keydown', handleEscape)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('touchstart', handleClickOutside)
+      document.removeEventListener('keydown', handleEscape)
+    }
+  }, [showAssigneesDropdown])
   
   // Form state
   const [taskForm, setTaskForm] = useState({
@@ -497,7 +546,7 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div className="space-y-2">
                     <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-foreground">Assignees</label>
-                    <div className="relative">
+                    <div ref={assigneesDropdownRef} className="relative">
                       <Button 
                         variant="outline" 
                         className="w-full justify-between font-normal bg-background shadow-sm h-9 px-3 py-2 text-sm"
@@ -508,8 +557,12 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
                           : <span className="text-muted-foreground">Select Assignees...</span>}
                         <Icon name="keyboard_arrow_down" className="h-4 w-4 opacity-50" size={16}/>
                       </Button>
-                      {showAssigneesDropdown && (
-                        <div className="absolute bottom-full mb-1 z-50 w-full bg-popover border border-border rounded-md shadow-md text-popover-foreground">
+                      {showAssigneesDropdown && dropdownPos && createPortal(
+                        <div
+                          id="assignees-portal-dropdown"
+                          className="fixed z-[9999] glass-kormiis border border-border rounded-md shadow-md text-popover-foreground"
+                          style={{ top: dropdownPos.top, left: dropdownPos.left, width: dropdownPos.width }}
+                        >
                           <div className="px-3 py-2 text-sm font-semibold bg-muted/40 border-b border-border">Select Employees</div>
                           <div className="max-h-[180px] overflow-y-auto p-1.5 flex flex-col gap-0.5">
                             {employees.map(emp => (
@@ -534,7 +587,8 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
                               </label>
                             ))}
                           </div>
-                        </div>
+                        </div>,
+                        document.body
                       )}
                     </div>
                   </div>
@@ -643,7 +697,7 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div className="space-y-2">
                   <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-foreground">Assignees</label>
-                  <div className="relative">
+                  <div ref={assigneesDropdownRef} className="relative">
                     <Button 
                       variant="outline" 
                       className="w-full justify-between font-normal bg-background shadow-sm h-9 px-3 py-2 text-sm"
@@ -655,8 +709,12 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
                         : <span className="text-muted-foreground">Select Assignees...</span>}
                       <Icon name="keyboard_arrow_down" className="h-4 w-4 opacity-50" size={16}/>
                     </Button>
-                    {showAssigneesDropdown && (
-                      <div className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-md shadow-md text-popover-foreground">
+                    {showAssigneesDropdown && dropdownPos && createPortal(
+                      <div
+                        id="assignees-portal-dropdown"
+                        className="fixed z-[9999] glass-kormiis border border-border rounded-md shadow-md text-popover-foreground"
+                        style={{ top: dropdownPos.top, left: dropdownPos.left, width: dropdownPos.width }}
+                      >
                         <div className="px-3 py-2 text-sm font-semibold bg-muted/40 border-b border-border">Select Employees</div>
                         <div className="max-h-[180px] overflow-y-auto p-1.5 flex flex-col gap-0.5">
                           {employees.map(emp => (
@@ -683,7 +741,8 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
                             </label>
                           ))}
                         </div>
-                      </div>
+                      </div>,
+                      document.body
                     )}
                   </div>
                 </div>
