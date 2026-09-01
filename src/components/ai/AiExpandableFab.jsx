@@ -89,8 +89,11 @@ export default function AiExpandableFab({
   addToast,
   initialAction
 }) {
+  const [isMobileHandset, setIsMobileHandset] = useState(() => {
+    return typeof window !== 'undefined' ? window.innerWidth < 640 : false
+  })
   const [isMobileOrTablet, setIsMobileOrTablet] = useState(() => {
-    return typeof window !== 'undefined' ? window.innerWidth < 1024 : false
+    return typeof window !== 'undefined' ? window.innerWidth <= 1368 : false
   })
   const containerRef = useRef(null)
 
@@ -99,7 +102,8 @@ export default function AiExpandableFab({
     const handleResize = () => {
       clearTimeout(resizeTimer)
       resizeTimer = setTimeout(() => {
-        setIsMobileOrTablet(window.innerWidth < 1024)
+        setIsMobileHandset(window.innerWidth < 640)
+        setIsMobileOrTablet(window.innerWidth <= 1368)
       }, 100)
     }
     window.addEventListener('resize', handleResize)
@@ -108,6 +112,9 @@ export default function AiExpandableFab({
       window.removeEventListener('resize', handleResize)
     }
   }, [])
+
+  // On mobile handsets (< 640px), AI is fully managed inside the mobile bottom bar accordion
+  if (isMobileHandset) return null
 
   // Keyboard shortcut Ctrl + Space / Alt + A
   useEffect(() => {

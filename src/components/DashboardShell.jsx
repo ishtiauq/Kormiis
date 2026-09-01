@@ -4,6 +4,8 @@ import { createPortal } from 'react-dom'
 import Sidebar from './layout/Sidebar.jsx'
 import Topbar from './layout/Topbar.jsx'
 import MobileTabButton from './layout/MobileTabButton.jsx'
+import NavigationDock from './layout/NavigationDock.jsx'
+import MobileResponsiveBottomBar from './layout/MobileResponsiveBottomBar.jsx'
 import Icon from "@/components/ui/Icon.jsx"
 import ToastContainer from './layout/ToastContainer.jsx'
 import CommandPalette from './layout/CommandPalette.jsx'
@@ -235,131 +237,51 @@ export default function DashboardShell({ user, themeMode, isDarkMode, toggleThem
         </div>
       </main>
 
-      {/* Bottom Tab Bar (Mobile) - Floating Pill */}
+      {/* Bottom Menu Bar Dock (Mobile 4-icon dock with expandable menu / Tablet full dock) */}
       {isMobile && (
-        <div className={`fixed bottom-0 left-0 right-0 z-40 flex justify-center pointer-events-none px-4 pb-3.5 sm:pb-4 transition-all duration-300 ${isScrollingDown && !showMobileMenu && !appData.showNotifications ? 'translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
-          <nav className="bottom-bar bottom-bar-pill pointer-events-auto w-auto max-w-[240px] flex items-center justify-center gap-1.5 px-2.5 h-13.5 transition-all duration-300 rounded-full glass-kormiis text-foreground border border-white/30 dark:border-white/14 shadow-2xl backdrop-blur-3xl" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
-            <MobileTabButton
-              active={currentView === 'dashboard' && !showMobileMenu && !appData.showNotifications && !showAiModal}
-              label="Dashboard"
-              onClick={() => { 
-                setCurrentView('dashboard')
-                setShowMobileMenu(false)
-                appData.setShowNotifications(false)
-                setShowAiModal(false)
-              }}
-            >
-              <Icon name="home" size={24}/>
-            </MobileTabButton>
-            <MobileTabButton
-              active={showAiModal}
-              label="AI Assistant"
-              onClick={() => {
-                setShowAiModal(prev => {
-                  const next = !prev
-                  setShowAiHistory(false)
-                  if (next) setAiModalAction(`open_chat_${Date.now()}`)
-                  return next
-                })
-                setShowMobileMenu(false)
-                appData.setShowNotifications(false)
-              }}
-            >
-              <AiQuantumGlyph size={24} className="transition-transform duration-300" />
-            </MobileTabButton>
-            <MobileTabButton
-              active={appData.showNotifications}
-              label="Notifications"
-              onClick={() => {
-                if (showAiModal) setShowAiModal(false)
-                setShowMobileMenu(false)
-                appData.setShowNotifications(prev => !prev)
-                if (appData.markNotificationsRead) appData.markNotificationsRead()
-              }}
-              badge={
-                unreadCount > 0 ? (
-                  <span className="absolute top-2.5 right-2.5 flex size-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
-                    <span className="relative inline-flex rounded-full size-2 bg-destructive"></span>
-                  </span>
-                ) : null
-              }
-            >
-              <Icon 
-                name={unreadCount > 0 ? "notifications_active" : "notifications"} 
-                size={24}
-                className={`transition-transform duration-300 ${appData.showNotifications ? 'text-primary scale-105' : ''}`}
-              />
-            </MobileTabButton>
-            <MobileTabButton
-              active={showMobileMenu}
-              label={showMobileMenu ? "Close Menu" : "Modules"}
-              onClick={() => {
-                setShowMobileMenu(!showMobileMenu)
-                appData.setShowNotifications(false)
-                setShowAiModal(false)
-              }}
-            >
-              <Icon 
-                name={showMobileMenu ? "close" : "grid_view"} 
-                size={24}
-                className={`transition-transform duration-300 ${showMobileMenu ? 'rotate-90 text-primary' : 'rotate-0'}`}
-              />
-            </MobileTabButton>
-          </nav>
-        </div>
-      )}
-
-      {/* Mobile & Tablet Menu Backdrop Click Catcher (Zero visual overlay) */}
-      {showMobileMenu && (
-        <div 
-          className="fixed inset-0 z-40 lg:hidden bg-transparent pointer-events-auto"
-          onClick={() => setShowMobileMenu(false)}
-          aria-hidden="true"
+        <MobileResponsiveBottomBar
+          visibleNavItems={visibleNavItems}
+          currentView={currentView}
+          setCurrentView={setCurrentView}
+          isDark={isDarkMode ?? (themeMode === 'dark')}
+          onOpenAi={() => {
+            setShowAiModal(prev => {
+              const next = !prev
+              setShowAiHistory(false)
+              if (next) setAiModalAction(`open_chat_${Date.now()}`)
+              return next
+            })
+          }}
+          isAiOpen={showAiModal}
+          notifications={appData.notifications || []}
+          markNotificationsRead={appData.markNotificationsRead}
+          clearNotifications={appData.clearNotifications || appData.handleClearNotifications}
+          unreadCount={appData.notifications ? appData.notifications.filter(n => !n.read).length : 0}
+          onProfileClick={() => {
+            if (showAiModal) setShowAiModal(false)
+            setCurrentView('profile')
+          }}
+          user={user}
+          employees={appData.employees}
+          setEmployees={appData.handleSetEmployees}
+          payroll={appData.payroll}
+          setPayroll={appData.handleSetPayroll}
+          attendance={appData.attendance}
+          setAttendance={appData.setAttendance || appData.handleSetAttendance}
+          expenses={appData.expenses}
+          setExpenses={appData.setExpenses || appData.handleSetExpenses}
+          announcements={appData.announcements}
+          setAnnouncements={appData.setAnnouncements}
+          tasks={appData.tasks}
+          setTasks={appData.setTasks || appData.handleSetTasks}
+          settings={appData.settings}
+          addToast={addToast}
+          isScrollingDown={isScrollingDown}
+          prefix="admin-bottom"
         />
       )}
-      
-      <div 
-        className={`fixed bottom-0 left-0 right-0 w-full z-50 flex flex-col glass-mobile-drawer shadow-2xl transition-transform duration-350 ease-[cubic-bezier(0.16,1,0.3,1)] lg:hidden overflow-hidden ${showMobileMenu ? 'translate-y-0' : 'translate-y-full pointer-events-none'}`}
-        aria-hidden={!showMobileMenu}
-      >
-        {/* Pull handle indicator */}
-        <div className="w-10 h-1 rounded-full bg-foreground/20 mx-auto mt-2 mb-0.5 shrink-0" />
 
-        <div className="px-5 py-2 border-b border-border/80 dark:border-white/10 shrink-0 flex items-center justify-between">
-          <h2 className="text-left text-fluid-sm font-bold text-foreground m-0 leading-none">Menu</h2>
-          <button 
-            className="rounded-full size-7 apple-glass-btn flex items-center justify-center text-muted-foreground hover:text-foreground cursor-pointer" 
-            onClick={() => setShowMobileMenu(false)}
-            aria-label="Close menu"
-          >
-            <Icon name="close" size={16}/>
-          </button>
-        </div>
-        <div className="px-3.5 pt-2.5 pb-7 sm:pb-8">
-          <div className="grid grid-cols-2 gap-1.5">
-            {visibleNavItems.filter(i => !['dashboard', 'profile'].includes(i.id)).map(item => {
-              const active = currentView === item.id
-              return (
-                <button
-                  key={item.id}
-                  className={`flex items-center gap-2 h-9 px-2.5 rounded-xl transition-all cursor-pointer select-none active:scale-[0.97] min-w-0 ${
-                    active 
-                      ? 'bg-primary/15 dark:bg-primary/25 text-primary font-bold border border-primary/35 shadow-xs' 
-                      : 'text-foreground font-medium hover:bg-white/20 dark:hover:bg-white/[0.08] border border-white/20 dark:border-white/8 bg-white/10 dark:bg-white/[0.03]'
-                  }`}
-                  onClick={() => { setCurrentView(item.id); setShowMobileMenu(false) }}
-                >
-                  <div className={`shrink-0 flex items-center justify-center ${active ? 'text-primary' : 'text-foreground/80'}`}>
-                    {item.icon}
-                  </div>
-                  <span className="text-[12px] font-semibold break-words leading-tight text-left">{item.label}</span>
-                </button>
-              )
-            })}
-          </div>
-        </div>
-      </div>
+
 
       {/* Floating AI Co-Pilot Widget (Collapsed FAB hidden on mobile via CSS) */}
       {createPortal(

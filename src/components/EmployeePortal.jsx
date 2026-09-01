@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import Icon from "@/components/ui/Icon.jsx"
+import NavigationDock from './layout/NavigationDock.jsx'
+import MobileResponsiveBottomBar from './layout/MobileResponsiveBottomBar.jsx'
 import AiCoPilotModal from './ai/AiCoPilotModal.jsx'
 import AiExpandableFab, { AiQuantumGlyph } from './ai/AiExpandableFab.jsx'
 import DailyChecklistWidget from './DailyChecklistWidget.jsx'
@@ -112,7 +114,7 @@ export default function EmployeePortal({
     if (setCurrentView) setCurrentView(tab)
     else setLocalActiveTab(tab)
   }
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024)
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' ? window.innerWidth <= 1368 : false)
   const [showAiModal, setShowAiModal] = useState(false)
   const [showAiHistory, setShowAiHistory] = useState(false)
   const [aiModalAction, setAiModalAction] = useState(null)
@@ -163,7 +165,7 @@ export default function EmployeePortal({
   }
 
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 1024)
+    const handleResize = () => setIsMobile(window.innerWidth <= 1368)
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
   }, [])
@@ -490,131 +492,46 @@ export default function EmployeePortal({
         </DialogContent>
       </Dialog>
 
-      {/* Bottom Tab Bar (Mobile) — Floating Pill */}
+      {/* Bottom Menu Bar Dock (Mobile 4-icon dock with expandable menu / Tablet full dock) */}
       {isMobile && (
-        <div className={`fixed bottom-0 left-0 right-0 z-40 flex justify-center pointer-events-none px-4 pb-3.5 sm:pb-4 transition-all duration-300 ${isScrollingDown && !showMobileMenu && !showNotifications ? 'translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
-          <nav className="bottom-bar bottom-bar-pill pointer-events-auto w-auto max-w-[240px] flex items-center justify-center gap-1.5 px-2.5 h-13.5 transition-all duration-300 rounded-full glass-kormiis text-foreground border border-white/30 dark:border-white/14 shadow-2xl backdrop-blur-3xl" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
-            <MobileTabButton
-              active={activeTab === 'dashboard' && !showMobileMenu && !showNotifications && !showAiModal}
-              label="Dashboard"
-              onClick={() => { 
-                setActiveTab('dashboard')
-                setShowMobileMenu(false)
-                setShowNotifications(false)
-                setShowAiModal(false)
-              }}
-            >
-              <Icon name="home" size={24}/>
-            </MobileTabButton>
-            <MobileTabButton
-              active={showAiModal}
-              label="AI Assistant"
-              onClick={() => {
-                setShowAiModal(prev => {
-                  const next = !prev
-                  setShowAiHistory(false)
-                  if (next) setAiModalAction(`open_chat_${Date.now()}`)
-                  return next
-                })
-                setShowMobileMenu(false)
-                setShowNotifications(false)
-              }}
-            >
-              <AiQuantumGlyph size={24} className="transition-transform duration-300" />
-            </MobileTabButton>
-            <MobileTabButton
-              active={showNotifications}
-              label="Notifications"
-              onClick={() => {
-                if (showAiModal) setShowAiModal(false)
-                setShowMobileMenu(false)
-                setShowNotifications(prev => !prev)
-                if (markNotificationsRead) markNotificationsRead()
-              }}
-              badge={
-                (notifications ? notifications.filter(n => !n.read).length : 0) > 0 ? (
-                  <span className="absolute top-2.5 right-2.5 flex size-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
-                    <span className="relative inline-flex rounded-full size-2 bg-destructive"></span>
-                  </span>
-                ) : null
-              }
-            >
-              <Icon 
-                name={(notifications ? notifications.filter(n => !n.read).length : 0) > 0 ? "notifications_active" : "notifications"} 
-                size={24}
-                className={`transition-transform duration-300 ${showNotifications ? 'text-primary scale-105' : ''}`}
-              />
-            </MobileTabButton>
-            <MobileTabButton
-              active={showMobileMenu}
-              label={showMobileMenu ? "Close Menu" : "Modules"}
-              onClick={() => {
-                setShowMobileMenu(!showMobileMenu)
-                setShowNotifications(false)
-                setShowAiModal(false)
-              }}
-            >
-              <Icon 
-                name={showMobileMenu ? "close" : "grid_view"} 
-                size={24}
-                className={`transition-transform duration-300 ${showMobileMenu ? 'rotate-90 text-primary' : 'rotate-0'}`}
-              />
-            </MobileTabButton>
-          </nav>
-        </div>
-      )}
-
-      {/* Mobile & Tablet Menu Backdrop Click Catcher (Zero visual overlay) */}
-      {showMobileMenu && (
-        <div 
-          className="fixed inset-0 z-40 lg:hidden bg-transparent pointer-events-auto"
-          onClick={() => setShowMobileMenu(false)}
-          aria-hidden="true"
+        <MobileResponsiveBottomBar
+          visibleNavItems={navItems}
+          currentView={activeTab}
+          setCurrentView={setActiveTab}
+          isDark={resolvedIsDark}
+          onOpenAi={() => {
+            setShowAiModal(prev => {
+              const next = !prev
+              setShowAiHistory(false)
+              if (next) setAiModalAction(`open_chat_${Date.now()}`)
+              return next
+            })
+          }}
+          isAiOpen={showAiModal}
+          notifications={notifications || []}
+          markNotificationsRead={markNotificationsRead}
+          clearNotifications={clearNotifications}
+          unreadCount={notifications ? notifications.filter(n => !n.read).length : 0}
+          onProfileClick={() => {
+            if (showAiModal) setShowAiModal(false)
+            setActiveTab('profile')
+          }}
+          user={currentUser}
+          employees={employees}
+          attendance={attendance}
+          setAttendance={setAttendance}
+          expenses={expenses}
+          setExpenses={setExpenses}
+          tasks={tasks}
+          setTasks={setTasks}
+          announcements={announcements}
+          addToast={addToast}
+          isScrollingDown={isScrollingDown}
+          prefix="employee-bottom"
         />
       )}
-      
-      <div 
-        className={`fixed bottom-0 left-0 right-0 w-full z-50 flex flex-col glass-mobile-drawer shadow-2xl transition-transform duration-350 ease-[cubic-bezier(0.16,1,0.3,1)] lg:hidden overflow-hidden ${showMobileMenu ? 'translate-y-0' : 'translate-y-full pointer-events-none'}`}
-        aria-hidden={!showMobileMenu}
-      >
-        {/* Pull handle indicator */}
-        <div className="w-10 h-1 rounded-full bg-foreground/20 mx-auto mt-2 mb-0.5 shrink-0" />
 
-        <div className="px-5 py-2 border-b border-border/80 dark:border-white/10 shrink-0 flex items-center justify-between">
-          <h2 className="text-left text-fluid-sm font-bold text-foreground m-0 leading-none">Menu</h2>
-          <button 
-            className="rounded-full size-7 apple-glass-btn flex items-center justify-center text-muted-foreground hover:text-foreground cursor-pointer" 
-            onClick={() => setShowMobileMenu(false)}
-            aria-label="Close menu"
-          >
-            <Icon name="close" size={16}/>
-          </button>
-        </div>
-        <div className="px-3.5 pt-2.5 pb-7 sm:pb-8">
-          <div className="grid grid-cols-2 gap-1.5">
-            {navItems.filter(i => !['dashboard', 'profile'].includes(i.id)).map(item => {
-              const active = activeTab === item.id
-              return (
-                <button
-                  key={item.id}
-                  className={`flex items-center gap-2 h-9 px-2.5 rounded-xl transition-all cursor-pointer select-none active:scale-[0.97] min-w-0 ${
-                    active 
-                      ? 'bg-primary/15 dark:bg-primary/25 text-primary font-bold border border-primary/35 shadow-xs' 
-                      : 'text-foreground font-medium hover:bg-white/20 dark:hover:bg-white/[0.08] border border-white/20 dark:border-white/8 bg-white/10 dark:bg-white/[0.03]'
-                  }`}
-                  onClick={() => { setActiveTab(item.id); setShowMobileMenu(false) }}
-                >
-                  <div className={`shrink-0 flex items-center justify-center ${active ? 'text-primary' : 'text-foreground/80'}`}>
-                    {item.icon}
-                  </div>
-                  <span className="text-[12px] font-semibold break-words leading-tight text-left">{item.label}</span>
-                </button>
-              )
-            })}
-          </div>
-        </div>
-      </div>
+
 
       {/* Floating AI Co-Pilot Widget (Collapsed FAB hidden on mobile via CSS) */}
       {createPortal(

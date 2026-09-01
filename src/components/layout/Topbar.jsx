@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import AiCoPilotModal from '../ai/AiCoPilotModal.jsx'
 import { AiQuantumGlyph } from '../ai/AiExpandableFab.jsx'
 import TooltipPopover from '../TooltipPopover.jsx'
+import NavigationDock from './NavigationDock.jsx'
 
 export default function Topbar({ 
   isDarkMode, 
@@ -55,7 +56,7 @@ export default function Topbar({
   visibleNavItems = [],
   currentView
 }) {
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024)
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' ? window.innerWidth <= 1368 : false)
   const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true)
   const buttonRef = useRef(null)
   const [notificationTab, setNotificationTab] = useState('all')
@@ -191,7 +192,7 @@ export default function Topbar({
     let resizeTimer
     const handleResize = () => {
       clearTimeout(resizeTimer)
-      resizeTimer = setTimeout(() => setIsMobile(window.innerWidth < 1024), 150)
+      resizeTimer = setTimeout(() => setIsMobile(window.innerWidth <= 1368), 150)
     }
     window.addEventListener('resize', handleResize)
     return () => { clearTimeout(resizeTimer); window.removeEventListener('resize', handleResize) }
@@ -302,111 +303,25 @@ export default function Topbar({
     )
   }
 
-  // Render navigation dock helper (Optimized micro-spacing to fit all icons at once with Apple fluid spring physics)
-  const renderNavigationDock = (isFullWidthRow = false, prefix = 'desktop') => {
-    if (!visibleNavItems || visibleNavItems.length === 0) return null
-    return (
-      <div className={`w-fit max-w-full h-10.5 sm:h-11 md:h-11.5 glass-kormiis rounded-full p-1 flex items-center justify-center border border-black/8 dark:border-white/8 menu-bar-dock shadow-none ${isFullWidthRow ? 'mx-auto' : ''}`}>
-        <nav 
-          aria-label="Main page navigation" 
-          className="flex items-center gap-0.5 sm:gap-1 md:gap-1.5 overflow-x-auto no-scrollbar scrollbar-none select-none scroll-smooth h-full max-w-full menu-bar-dock px-0.5"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
-        >
-          {visibleNavItems.filter(item => item.id !== 'profile').map(item => {
-            const isActive = currentView === item.id;
-            return (
-              <TooltipPopover key={item.id} label={item.label} isCollapsed={!isActive} isDarkMode={isDark} side="bottom">
-                <motion.button
-                  type="button"
-                  layout
-                  aria-label={item.label}
-                  onClick={() => {
-                    if (setCurrentView) setCurrentView(item.id);
-                  }}
-                  whileTap={{ scale: 0.94 }}
-                  whileHover={!isActive ? { scale: 1.05 } : undefined}
-                  transition={{
-                    layout: { type: "spring", stiffness: 440, damping: 32, mass: 0.7 },
-                    scale: { duration: 0.15 }
-                  }}
-                  className={`relative h-8 sm:h-8.5 rounded-full flex items-center justify-center shrink-0 cursor-pointer select-none border-0 !border-none outline-none focus-visible:ring-2 focus-visible:ring-primary/40 transition-colors duration-150 ${
-                    isActive
-                      ? 'nav-capsule-active px-3 sm:px-3.5 gap-1.5 font-bold z-10 !text-white'
-                      : 'w-8 sm:w-8.5 text-foreground/65 hover:text-foreground hover:bg-white/20 dark:hover:bg-white/8 bg-transparent p-0'
-                  }`}
-                  style={isActive ? { background: 'linear-gradient(135deg, #FE3501 0%, #e62f00 100%)', backgroundColor: '#FE3501', color: '#ffffff', border: 'none', outline: 'none' } : { background: 'transparent', border: 'none', boxShadow: 'none', outline: 'none' }}
-                >
-                  {/* Gliding morphing pill indicator (Brand Color) */}
-                  {isActive && (
-                    <motion.div
-                      layoutId={`${prefix}-active-nav-pill`}
-                      className="absolute inset-0 rounded-full nav-capsule-active z-0 pointer-events-none !border-none"
-                      style={{ border: 'none', outline: 'none' }}
-                      transition={{
-                        type: "spring",
-                        stiffness: 450,
-                        damping: 32,
-                        mass: 0.75
-                      }}
-                    />
-                  )}
-
-                  {/* Icon */}
-                  <span 
-                    className={`relative z-10 shrink-0 flex items-center justify-center transition-all duration-200 ${
-                      isActive ? '!text-white scale-105' : 'text-foreground/75'
-                    }`}
-                  >
-                    {item.icon}
-                  </span>
-
-                  {/* Smooth spring expanding label */}
-                  <AnimatePresence mode="popLayout" initial={false}>
-                    {isActive && (
-                      <motion.span
-                        key={`nav-label-${item.id}`}
-                        initial={{ opacity: 0, width: 0, filter: 'blur(3px)', x: -3 }}
-                        animate={{ opacity: 1, width: 'auto', filter: 'blur(0px)', x: 0 }}
-                        exit={{ opacity: 0, width: 0, filter: 'blur(3px)', x: -3 }}
-                        transition={{
-                          type: "spring",
-                          stiffness: 440,
-                          damping: 30,
-                          mass: 0.65
-                        }}
-                        className="relative z-10 text-[12px] sm:text-xs md:text-sm font-semibold tracking-tight whitespace-nowrap overflow-hidden inline-block leading-none !text-white"
-                      >
-                        {item.label}
-                      </motion.span>
-                    )}
-                  </AnimatePresence>
-                </motion.button>
-              </TooltipPopover>
-            );
-          })}
-        </nav>
-      </div>
-    )
-  }
-
   return (
     <div ref={topbarRef} className="relative w-full flex flex-col items-center pointer-events-auto">
       {/* Row 1: Unified Top Navigation Header (Logo Left, Inline Menu on XL+ screens, Actions Right) */}
       <header 
         aria-label="Top navigation bar" 
-        className="relative z-10 pointer-events-auto w-full h-20 sm:h-22 md:h-24 px-4 sm:px-6 md:px-8 flex items-center justify-between pt-3 sm:pt-4 md:pt-5 pb-2.5 sm:pb-3 md:pb-3.5 gap-2 sm:gap-4 text-foreground bg-transparent !bg-transparent border-none !border-none shadow-none backdrop-blur-[32px] backdrop-saturate-[190%]"
+        className="relative z-10 pointer-events-auto w-full h-14 sm:h-16 md:h-18 min-[1369px]:h-22 px-4 sm:px-6 md:px-8 flex items-center justify-between pt-2 sm:pt-3 md:pt-4 min-[1369px]:pt-5 pb-1 sm:pb-1.5 md:pb-2 min-[1369px]:pb-3.5 gap-2 sm:gap-4 text-foreground bg-transparent !bg-transparent border-none !border-none shadow-none backdrop-blur-[32px] backdrop-saturate-[190%]"
         style={{ background: 'transparent', backgroundColor: 'transparent', border: 'none', boxShadow: 'none', backdropFilter: 'saturate(190%) blur(32px)', WebkitBackdropFilter: 'saturate(190%) blur(32px)' }}
       >
         
-        {/* 1. Leftmost: Brand Logo (Containerless Pure Standalone) & Quick Integrity Alert */}
+        {/* 1. Leftmost: Desktop Brand Logo & Data Integrity Alert */}
         <div className="flex items-center gap-2 sm:gap-3 shrink-0 h-[48px] sm:h-[54px]">
+          {/* Desktop Leftmost Brand Logo (min-[1369px]+ screens) */}
           <a
             href="#"
             onClick={(e) => {
               e.preventDefault();
               if (setCurrentView) setCurrentView('dashboard');
             }}
-            className="flex items-center justify-center cursor-pointer outline-none no-underline border-none bg-transparent p-0 m-0 shadow-none select-none h-full transition-transform active:scale-95"
+            className="hidden min-[1369px]:flex items-center justify-center cursor-pointer outline-none no-underline border-none bg-transparent p-0 m-0 shadow-none select-none h-full transition-transform active:scale-95"
             style={{ background: 'transparent', border: 'none', boxShadow: 'none', padding: 0, margin: 0 }}
             title="Kormiis Dashboard"
           >
@@ -431,17 +346,44 @@ export default function Topbar({
           )}
         </div>
 
-        {/* 2. Center: Centered Menu Bar Dock (Desktop lg+ only; completely hidden on mobile & tablet) */}
+        {/* 2. Centered Brand Logo on Mobile, iPad Mini, iPad, Tablet & iPad Pro (< 1369px screens) */}
+        <div className="min-[1369px]:hidden absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center pointer-events-auto">
+          <a
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              if (setCurrentView) setCurrentView('dashboard');
+            }}
+            className="flex items-center justify-center cursor-pointer outline-none no-underline border-none bg-transparent p-0 m-0 shadow-none select-none transition-transform active:scale-95"
+            style={{ background: 'transparent', border: 'none', boxShadow: 'none', padding: 0, margin: 0 }}
+            title="Kormiis Dashboard"
+          >
+            <img
+              src={isDark ? kormiisWhiteLogo : kormiisLogo}
+              alt="Kormiis Logo"
+              className="h-7 sm:h-8 md:h-8.5 w-auto max-w-[125px] sm:max-w-[145px] md:max-w-[155px] object-contain shrink-0 select-none block"
+              style={{ background: 'transparent', border: 'none', boxShadow: 'none', filter: 'none' }}
+            />
+          </a>
+        </div>
+
+        {/* 3. Center: Centered Menu Bar Dock (Desktop widescreen min-[1369px]+ only; hidden on mobile, tablets & iPad Pro) */}
         {!isMobile && (
-          <div className="hidden lg:flex flex-1 items-center justify-center min-w-0 px-2 sm:px-3 md:px-4">
-            {renderNavigationDock(false, 'desktop')}
+          <div className="hidden min-[1369px]:flex flex-1 items-center justify-center min-w-0 px-2 sm:px-3 md:px-4">
+            <NavigationDock 
+              visibleNavItems={visibleNavItems} 
+              currentView={currentView} 
+              setCurrentView={setCurrentView} 
+              isDark={isDark} 
+              prefix="desktop-top" 
+            />
           </div>
         )}
 
-        {/* 3. Rightmost: Actions Group (Containerless Standalone Icons, Ultra-Compact gap-[1.6px]) */}
-        <div className="flex items-center gap-[1.6px] shrink-0 h-[48px] sm:h-[54px]">
-          {/* Kormiis AI Trigger (Desktop/Tablet - plain icon, expands to orange pill + label when active like menu bar) */}
-          <div className="hidden lg:flex items-center justify-center">
+        {/* 4. Rightmost: Actions Group (Containerless Standalone Icons, Ultra-Compact gap-[1.6px]) */}
+        <div className="flex items-center gap-[1.6px] shrink-0 h-[48px] sm:h-[54px] ml-auto min-[1369px]:ml-0">
+          {/* Kormiis AI Trigger (Desktop & iPad / Tablet - plain icon, expands to orange pill + label when active like menu bar) */}
+          <div className="hidden sm:flex items-center justify-center">
             <TooltipPopover label="Open Kormiis AI (Ctrl+Space)" side="bottom">
               <motion.button
                 layout
@@ -493,8 +435,8 @@ export default function Topbar({
             </TooltipPopover>
           )}
 
-          {/* Notifications Trigger (Containerless - Desktop only, shown in bottom bar on mobile/tablet) */}
-          <div className="relative hidden lg:flex items-center justify-center">
+          {/* Notifications Trigger (Desktop & iPad / Tablet - hidden only on mobile phone handsets) */}
+          <div className="relative hidden sm:flex items-center justify-center">
             <TooltipPopover label="Notifications" side="bottom">
               <button
                 ref={buttonRef}
@@ -519,24 +461,26 @@ export default function Topbar({
             </TooltipPopover>
           </div>
 
-          {/* User Profile Trigger Button (Containerless) */}
+          {/* User Profile Trigger Button (Containerless - Hidden on mobile screens since it's present in the mobile bottom bar) */}
           {user && (
-            <TooltipPopover label={user?.name ? `${user.name} (Profile)` : "My Profile"} side="bottom">
-              <button
-                onClick={onProfileClick || (() => setCurrentView && setCurrentView('profile'))}
-                aria-label="Open Profile"
-                className={`size-9 sm:size-10 bg-transparent border-none shadow-none outline-none shrink-0 flex items-center justify-center cursor-pointer active:scale-90 transition-all p-0 ${
-                  currentView === 'profile' ? 'text-primary ring-2 ring-primary/40 rounded-full' : 'text-foreground/75 hover:text-foreground'
-                }`}
-                style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}
-              >
-                {user?.avatar ? (
-                  <img src={user.avatar} alt={user.name || 'User'} className="w-7.5 h-7.5 sm:w-8.5 sm:h-8.5 object-cover rounded-full select-none" />
-                ) : (
-                  <Icon name="person" size={25} />
-                )}
-              </button>
-            </TooltipPopover>
+            <div className="hidden sm:flex items-center justify-center">
+              <TooltipPopover label={user?.name ? `${user.name} (Profile)` : "My Profile"} side="bottom">
+                <button
+                  onClick={onProfileClick || (() => setCurrentView && setCurrentView('profile'))}
+                  aria-label="Open Profile"
+                  className={`size-9 sm:size-10 bg-transparent border-none shadow-none outline-none shrink-0 flex items-center justify-center cursor-pointer active:scale-90 transition-all p-0 ${
+                    currentView === 'profile' ? 'text-primary ring-2 ring-primary/40 rounded-full' : 'text-foreground/75 hover:text-foreground'
+                  }`}
+                  style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}
+                >
+                  {user?.avatar ? (
+                    <img src={user.avatar} alt={user.name || 'User'} className="w-7.5 h-7.5 sm:w-8.5 sm:h-8.5 object-cover rounded-full select-none" />
+                  ) : (
+                    <Icon name="person" size={25} />
+                  )}
+                </button>
+              </TooltipPopover>
+            </div>
           )}
         </div>
       </header>
