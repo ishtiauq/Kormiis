@@ -1075,10 +1075,11 @@ textarea:hover::-webkit-scrollbar-thumb {
 }
 
 /* ==============================================================
-   RENDER PERFORMANCE: CSS CONTAINMENT & OPTIMIZATIONS
+   RENDER PERFORMANCE: INSTANT-RENDER & COMPOSITOR ACCELERATION
+   All elements pre-render fully with zero blank spaces or pop-ins.
    ============================================================== */
 
-/* Contain layout, style, paint for glass containers - prevents unnecessary reflows */
+/* Pre-render and paint all cards immediately without skipping off-screen elements */
 .glass-kormiis,
 .glass-apple,
 .glass-card,
@@ -1095,99 +1096,23 @@ textarea:hover::-webkit-scrollbar-thumb {
 .glass-mobile-drawer,
 .liquid-widget-item,
 .menu-bar-dock,
-[role="dialog"],
-[role="alertdialog"],
-[role="tooltip"],
-[data-notif-panel],
-[data-ai-trigger] {
-  contain: layout style paint;
-}
-
-/* Optimize Dashboard widgets - contain their rendering */
 .dashboard-widget,
-.DashboardWidget,
-[class*="DashboardWidget"] {
-  contain: layout style paint;
-}
-
-/* Attendance list virtualization container */
-.virtualized-list,
-[class*="VirtualizedList"] {
-  contain: layout style paint;
-}
-
-/* Card content containment */
 .card-content,
-.CardContent,
-[class*="CardContent"] {
-  contain: layout style paint;
-}
-
-/* Prevent layout thrashing on scroll */
-.dashboard-content,
-.dashboard-root,
-main[class*="dashboard-content"] {
-  contain: layout style;
-}
-
-/* Content visibility for off-screen widgets */
-.lazy-widget,
-[class*="lazy-"] {
-  content-visibility: auto;
-  contain-intrinsic-size: 0 500px;
-}
-
-/* Optimize images */
-img {
-  content-visibility: auto;
-}
-
-/* Reduce paint area for animated elements */
-.liquid-glass-btn,
-.apple-glass-btn,
-.liquid-icon-btn,
-.liquid-widget-item {
-  will-change: transform, opacity;
-}
-
-/* Remove will-change after animation completes */
-.liquid-glass-btn:not(:hover):not(:active),
-.apple-glass-btn:not(:hover):not(:active) {
-  will-change: auto;
-}
-
-/* Virtualized list containers - skip rendering off-screen items */
-.virtualized-list,
-[class*="VirtualizedList"] {
-  contain: layout style paint;
-}
-
-/* Card grid - only render visible cards */
-.card-grid,
-[class*="card-grid"] {
-  contain: layout style;
-}
-
-/* Table optimization - contain table rendering */
 table,
-[role="grid"] {
-  contain: layout style;
+img {
+  content-visibility: visible !important;
+}
+
+/* Optimize image decoding for instant synchronous-smooth display */
+img {
+  decoding: async;
 }
 
 /* Prevent layout shift on scroll */
 .dashboard-content,
 .dashboard-root,
 main[class*="dashboard-content"] {
-  contain: layout style;
   overflow-anchor: auto;
-}
-
-/* Skip off-screen glass containers */
-.glass-kormiis,
-.glass-card,
-.bg-card {
-  content-visibility: auto;
-  contain-intrinsic-size: 0 300px;
 }
 
 /* ==============================================================
