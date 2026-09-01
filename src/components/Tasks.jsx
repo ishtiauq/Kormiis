@@ -62,7 +62,7 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
       if (e.key === 'Escape') setShowAssigneesDropdown(false)
     }
     document.addEventListener('mousedown', handleClickOutside)
-    document.addEventListener('touchstart', handleClickOutside)
+    document.addEventListener('touchstart', handleClickOutside, { passive: true })
     document.addEventListener('keydown', handleEscape)
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)

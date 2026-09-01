@@ -209,12 +209,71 @@ body[data-theme="dark"],
   background-image: none !important;
 }
 
-html, body {
+html {
   min-height: 100%;
   width: 100%;
   margin: 0;
   padding: 0;
   overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+  scroll-behavior: smooth;
+  overscroll-behavior-y: none;
+}
+
+body {
+  min-height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  touch-action: pan-y pinch-zoom;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: none;
+}
+
+/* Eliminate 300ms tap delay on mobile / tablet interactive targets */
+button,
+a,
+input,
+select,
+textarea,
+[role="button"],
+.clickable {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Universal Momentum & Asynchronous Touch Scrolling for all containers */
+.overflow-y-auto,
+.overflow-x-auto,
+.overflow-auto,
+main,
+section,
+nav,
+aside,
+[data-notif-panel],
+.dashboard-content {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  touch-action: pan-y pinch-zoom;
+}
+
+.overflow-x-auto {
+  touch-action: pan-x pinch-zoom;
+  overscroll-behavior-x: contain;
+}
+
+/* GPU Hardware Layering on mobile & tablet viewports for 120Hz/60Hz silkiness */
+@media (max-width: 1368px) {
+  .dashboard-content,
+  main,
+  .overflow-y-auto {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
 }
 
 .dark,
