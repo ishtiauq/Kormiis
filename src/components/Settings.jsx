@@ -30,7 +30,7 @@ const WHATSAPP_STATUS_META = {
   skipped: { label: 'Skipped', cls: 'bg-muted text-muted-foreground border-border/40' },
 }
 
-export default function Settings({ settings, setSettings, addLog, addToast, auditLogs, themeMode, toggleTheme, employees, setEmployees, currentUser }) {
+export default function Settings({ settings, setSettings, addLog, addToast, auditLogs, themeMode, toggleTheme, employees, setEmployees, currentUser, onLoadDemoData, onClearDemoData }) {
   // Accordion open states
   const [openSections, setOpenSections] = useState(() => {
     const saved = localStorage.getItem('kormiis_settings_open_sections')
@@ -446,6 +446,44 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
 
   return (
     <div className="animate-fade-in flex flex-col gap-6 w-full pb-14 max-w-[1100px] mx-auto">
+
+      {/* Demo Data Quick Bar */}
+      {(onLoadDemoData || onClearDemoData) && (
+        <div className="glass-kormiis border border-primary/20 dark:border-white/10 rounded-3xl p-4 sm:p-5 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <div className="size-11 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+              <Icon name="dataset" size={24} />
+            </div>
+            <div>
+              <h4 className="font-bold text-sm text-foreground">Workspace Demo Dataset</h4>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Load or remove realistic sample data across all widgets (Employees, Attendance, Payroll, Expenses, Tasks, Assets, Events & Announcements).
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
+            {onLoadDemoData && (
+              <Button
+                onClick={onLoadDemoData}
+                className="liquid-glass-btn h-10 px-4 rounded-2xl font-bold text-xs shrink-0 whitespace-nowrap shadow-none"
+              >
+                <Icon name="sync" size={16} className="mr-1.5" />
+                Load Full Demo Data
+              </Button>
+            )}
+            {onClearDemoData && (
+              <Button
+                onClick={onClearDemoData}
+                variant="outline"
+                className="h-10 px-4 rounded-2xl font-bold text-xs text-destructive border-destructive/30 hover:bg-destructive/10 shrink-0 whitespace-nowrap shadow-none"
+              >
+                <Icon name="delete_sweep" size={16} className="mr-1.5" />
+                Remove Demo Data
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Accordion Stream */}
       <div className="flex flex-col gap-2.5 sm:gap-3">

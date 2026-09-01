@@ -457,15 +457,16 @@ html.dark .liquid-glass-drawer,
 
 button.glass-kormiis,
 a.glass-kormiis,
+button.glass-kormiis,
+a.glass-kormiis,
 [role="button"].glass-kormiis,
 .liquid-glass-btn,
 .apple-glass-btn {
-  background: transparent !important;
-  background-color: transparent !important;
-  border: 1px solid var(--glass-border) !important;
+  border: 1px solid var(--glass-border);
   box-shadow: none !important;
-  -webkit-backdrop-filter: saturate(190%) blur(32px) !important;
-  backdrop-filter: saturate(190%) blur(32px) !important;
+  -webkit-backdrop-filter: saturate(190%) blur(32px);
+  backdrop-filter: saturate(190%) blur(32px);
+  border-radius: 9999px;
   transition: 
     transform 450ms cubic-bezier(0.34, 1.56, 0.64, 1),
     filter 250ms cubic-bezier(0.2, 0.8, 0.2, 1),
@@ -658,10 +659,15 @@ a.bg-primary:active {
   background-color: var(--foreground) !important;
 }
 
-/* Dashboard Widgets & Widget Items (Zero Blur, Zero Saturation Overhead / Pure Transparent Standard for Instant Load) */
+/* Dashboard Widgets, Employee Cards & Employee Portal (Zero Blur, Zero Saturation Overhead / Pure Transparent Standard for Instant Load) */
 .dashboard-widget,
 .widget-card,
 [data-widget],
+.employee-card-transparent,
+.employee-portal-root .glass-kormiis,
+.employee-portal-root [data-slot="card"],
+.employee-portal-root .card,
+.employee-portal-root .dashboard-widget,
 .glass-kormiis.dashboard-widget,
 .glass-kormiis.widget-card {
   background: transparent !important;

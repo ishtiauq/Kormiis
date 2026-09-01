@@ -17,7 +17,8 @@ import { Select, SelectItem } from "@/components/ui/select"
 import { DatePicker } from "@/components/ui/date-picker"
 import defaultAvatar from '../Assets/default-avatar.svg'
 
-export default function Employees({ employees, setEmployees, addLog, addAuditLog, pendingProfileEdits, setPendingProfileEdits, addToast, selectedEmployeeId, setSelectedEmployeeId, isSidebarCollapsed, adminUid, currentUser, settings }) {
+export default function Employees({ employees, setEmployees, attendance, addLog, addAuditLog, pendingProfileEdits, setPendingProfileEdits, addToast, selectedEmployeeId, setSelectedEmployeeId, isSidebarCollapsed, adminUid, currentUser, settings }) {
+  // Main component state hooks
   const [searchTerm, setSearchTerm] = useState('')
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
   const [deptFilter, setDeptFilter] = useState('All')
@@ -25,7 +26,6 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
   const [editingEmployee, setEditingEmployee] = useState(null)
   const [viewingEmployee, setViewingEmployee] = useState(null)
   const [imageErrors, setImageErrors] = useState({})
-  const [expandedCardId, setExpandedCardId] = useState(null)
   const [selectedIds, setSelectedIds] = useState(new Set())
   const [confirmDelete, setConfirmDelete] = useState(null)
   const [expandedDepts, setExpandedDepts] = useState({})
@@ -33,10 +33,33 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
   const [deptManagerState, setDeptManagerState] = useState({ editing: null, deleteConfirm: null })
   const [removedDepts, setRemovedDepts] = useState([])
   const [avatarUploadCardId, setAvatarUploadCardId] = useState(null)
+
+  // Form states
+  const [newEmpId, setNewEmpId] = useState('')
+  const [newName, setNewName] = useState('')
+  const [newRole, setNewRole] = useState('Teammate')
+  const [newDesignation, setNewDesignation] = useState('')
+  const [newPermissions, setNewPermissions] = useState([])
+  const [newDept, setNewDept] = useState('Engineering')
+  const [newEmail, setNewEmail] = useState('')
+  const [newPhone, setNewPhone] = useState('')
+  const [newStatus, setNewStatus] = useState('Active')
+  const [newDob, setNewDob] = useState('')
+  const [newJoiningDate, setNewJoiningDate] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [newNidPassportId, setNewNidPassportId] = useState('')
+  const [newAvatar, setNewAvatar] = useState('')
+  const [isCustomDept, setIsCustomDept] = useState(false)
+  const [customDept, setCustomDept] = useState('')
+
+  // Refs
   const cardFileInputRef = useRef(null)
   const formFileInputRef = useRef(null)
+
+  // Modal / Escape listener
   useModal(() => setViewingEmployee(null))
 
+  // Effects
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearchTerm(searchTerm), 300)
     return () => clearTimeout(timer)
@@ -67,33 +90,62 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
     return () => window.removeEventListener('keydown', handleEsc)
   }, [showAddForm])
 
+  useEffect(() => {
+    if (!newEmail || !newEmail.includes('@')) return undefined
+    if (newAvatar) return undefined
+    const timer = setTimeout(() => {
+      fetchGmailAvatar(newEmail, (url) => setNewAvatar(url), { silent: true })
+    }, 700)
+    return () => clearTimeout(timer)
+  }, [newEmail])
+
   const getAvatarFallback = (name) => {
-    const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
+    const initials = (name || '').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'EM'
     const colors = ['#f87171', '#60a5fa', '#34d399', '#fbbf24', '#a78bfa']
-    const hash = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+    const hash = (name || '').split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
     const color = colors[hash % colors.length]
     return { initials, color }
   }
 
-  // Form states
-  const [newEmpId, setNewEmpId] = useState('')
-  const [newName, setNewName] = useState('')
-  const [newRole, setNewRole] = useState('Teammate')
-  const [newDesignation, setNewDesignation] = useState('')
-  const [newPermissions, setNewPermissions] = useState([])
-  const [newDept, setNewDept] = useState('Engineering')
-  const [newEmail, setNewEmail] = useState('')
-  const [newPhone, setNewPhone] = useState('')
-  const [newStatus, setNewStatus] = useState('Active')
-  const [newDob, setNewDob] = useState('')
-  const [newJoiningDate, setNewJoiningDate] = useState('')
-  const [newPassword, setNewPassword] = useState('')
-  const [newNidPassportId, setNewNidPassportId] = useState('')
-  const [newAvatar, setNewAvatar] = useState('')
+  // Live Attendance Status Computer (Functional based on Check In / Check Out and Leaves)
+  const getEmployeeLiveStatus = (emp) => {
+    const todayIso = new Date().toISOString().split('T')[0]
+    
+    // 1. Check approved leave covering today
+    const leavesList = attendance?.leaves || []
+    const onLeave = leavesList.some(leave => {
+      const isSameEmp = String(leave.employeeId) === String(emp.id) || (leave.employeeEmail && leave.employeeEmail.toLowerCase() === emp.email?.toLowerCase())
+      const isApproved = leave.status === 'Approved'
+      const isDateInRange = leave.startDate && leave.endDate && leave.startDate <= todayIso && leave.endDate >= todayIso
+      return isSameEmp && isApproved && isDateInRange
+    })
 
-  // Dynamic department states
-  const [isCustomDept, setIsCustomDept] = useState(false)
-  const [customDept, setCustomDept] = useState('')
+    if (onLeave || emp.status === 'On Leave') {
+      return { status: 'On Leave', label: 'On Leave', variant: 'amber', icon: 'event_busy', detail: 'On Approved Leave' }
+    }
+
+    // 2. Check today's punch/daily logs
+    const todayLogs = attendance?.dailyLogs?.[todayIso] || attendance?.dailyLogs?.['2026-07-17'] || {}
+    const log = todayLogs[emp.id]
+
+    if (log) {
+      if (log.status === 'On Leave') {
+        return { status: 'On Leave', label: 'On Leave', variant: 'amber', icon: 'event_busy', detail: 'On Leave' }
+      }
+      if (log.status === 'Present' || log.status === 'Late' || (log.checkIn && log.checkIn !== '--')) {
+        const detailStr = log.checkOut && log.checkOut !== '--'
+          ? `Checked In: ${log.checkIn} • Out: ${log.checkOut}`
+          : `Checked In: ${log.checkIn || 'On time'}`
+        return { status: 'Present', label: 'Present', variant: 'emerald', icon: 'check_circle', detail: detailStr }
+      }
+      if (log.status === 'Absent') {
+        return { status: 'Absent', label: 'Absent', variant: 'rose', icon: 'cancel', detail: 'Absent (Not Checked In)' }
+      }
+    }
+
+    // 3. Fallback if no check-in log exists for today
+    return { status: 'Absent', label: 'Absent', variant: 'rose', icon: 'cancel', detail: 'Absent (Not Checked In)' }
+  }
 
   // Compute dynamic departments list from default + current employees
   const defaultDepts = ['Engineering', 'Design', 'Human Resources']
@@ -170,15 +222,6 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
     testImg.src = avatarUrl
   }
 
-  useEffect(() => {
-    if (!newEmail || !newEmail.includes('@')) return undefined
-    if (newAvatar) return undefined
-    const timer = setTimeout(() => {
-      fetchGmailAvatar(newEmail, (url) => setNewAvatar(url), { silent: true })
-    }, 700)
-    return () => clearTimeout(timer)
-  }, [newEmail])
-
   const handleCopyInviteLink = () => {
     const companyId = adminUid || currentUser?.uid;
     if (!companyId) {
@@ -201,19 +244,53 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
 
   const handleSaveEmployee = async (e) => {
     e.preventDefault()
-    if (!newEmpId || !newName || !newRole || (!newEmail && !newPhone) || !newDesignation) {
-      if (!newEmail && !newPhone) {
-        addToast('Please provide at least a Work Email or Phone Number.', 'warning')
-      }
+    
+    // 1. Validation checks for all required fields
+    if (!newName || !newName.trim()) {
+      addToast('Cannot create employee record: Full Name is required.', 'danger')
+      return
+    }
+
+    if (!newEmpId || !newEmpId.trim()) {
+      addToast('Cannot create employee record: Employee ID is required.', 'danger')
+      return
+    }
+
+    if (!newRole || !newRole.trim()) {
+      addToast('Cannot create employee record: System Role is required.', 'danger')
+      return
+    }
+
+    if (!newDesignation || !newDesignation.trim()) {
+      addToast('Cannot create employee record: Designation / Job Title is required.', 'danger')
       return
     }
 
     const finalDept = isCustomDept ? customDept.trim() : newDept
-    if (!finalDept) return
+    if (!finalDept) {
+      addToast('Cannot create employee record: Department is required.', 'danger')
+      return
+    }
 
-    // Prevent duplicate ID for new employees
-    if (!editingEmployee && employees.some(emp => emp.id === newEmpId)) {
-      alert(`An employee with ID "${newEmpId}" already exists. Please choose a unique ID.`)
+    if (!newEmail.trim() && !newPhone.trim()) {
+      addToast('Cannot create employee record: Please provide at least a Work Email or Phone Number.', 'danger')
+      return
+    }
+
+    if (newEmail.trim() && !newEmail.includes('@')) {
+      addToast('Cannot create employee record: Please enter a valid email address.', 'danger')
+      return
+    }
+
+    // 2. Prevent duplicate ID for new employees
+    if (!editingEmployee && employees.some(emp => emp.id && emp.id.trim().toLowerCase() === newEmpId.trim().toLowerCase())) {
+      addToast(`Cannot create employee record: An employee with ID "${newEmpId}" already exists. Please choose a unique ID.`, 'danger')
+      return
+    }
+
+    // 3. Prevent duplicate Email for new employees
+    if (!editingEmployee && newEmail.trim() && employees.some(emp => emp.email && emp.email.trim().toLowerCase() === newEmail.trim().toLowerCase())) {
+      addToast(`Cannot create employee record: An employee with email "${newEmail}" already exists in directory.`, 'danger')
       return
     }
 
@@ -244,10 +321,6 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
       if (addAuditLog) addAuditLog('UPDATE', 'Employee', `Updated employee profile for ${newName} (${newEmpId})`)
     } else {
       const authIdentifier = newEmail.trim() || newPhone.trim()
-      if (!authIdentifier) {
-        addToast('An email or phone number is required so the teammate can sign in.', 'warning')
-        return
-      }
 
       // Invite the teammate by email/phone
       let uid = null
@@ -267,7 +340,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
         uid = result.uid
         wasAlreadyExisted = result.alreadyExisted
       } catch (err) {
-        addToast('Failed to create login account: ' + err.message, 'danger')
+        addToast(`Cannot create employee record: ${err.message || 'Failed to create login account'}`, 'danger')
         return
       }
 
@@ -909,19 +982,13 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
           </div>
         </div>
 
-        {/* Accordion header row */}
-        <div className="px-4 py-3 border-b border-border flex flex-wrap items-center justify-between gap-3">
-          <button
-            className="flex items-center gap-2 text-sm font-semibold text-foreground hover:text-primary transition-colors"
-            onClick={() => {
-              const allOpen = Object.keys(expandedDepts).length > 0 && activeDepts.every(d => !!expandedDepts[d])
-              setExpandedDepts(activeDepts.reduce((acc, d) => ({ ...acc, [d]: !allOpen }), {}))
-            }}
-          >
+        {/* Header toolbar row: Employee Count & Manage Department */}
+        <div className="px-4 sm:px-5 py-3 border-b border-black/[0.06] dark:border-white/[0.08] flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
             <Icon name="group" className="text-primary" size={18}/>
-            All Employees
-            <Badge variant="secondary" className="text-xs shrink-0">{filteredEmployees.length}</Badge>
-          </button>
+            <span>All Employees</span>
+            <Badge variant="secondary" className="text-xs shrink-0 font-bold">{filteredEmployees.length}</Badge>
+          </div>
           <Button variant="ghost" size="sm" onClick={() => setShowDeptManager(true)} className="rounded-full h-8 px-3 text-xs flex items-center gap-1.5 text-muted-foreground hover:text-foreground">
             <Icon name="tune" size={14}/> Manage Department
           </Button>
@@ -934,222 +1001,172 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
             <Button variant="outline" onClick={() => {setSearchTerm(''); setDeptFilter('All')}}>Clear Filters</Button>
           </div>
         ) : (
-          <div className="divide-y divide-border">
-            {departmentGroups.map(group => {
-              const isOpen = !!expandedDepts[group.key]
-              return (
-                <div key={group.key}>
-                  <button
-                    className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-muted/40 transition-colors"
-                    onClick={() => toggleDept(group.key)}
+          <div className="p-4 sm:p-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 items-start">
+              {filteredEmployees.map(emp => {
+                const liveStatus = getEmployeeLiveStatus(emp)
+                const displayRole = emp.designation && emp.designation.toLowerCase() !== 'teammate' 
+                  ? emp.designation 
+                  : (emp.role && emp.role.toLowerCase() !== 'teammate' ? emp.role : 'Teammate')
+
+                return (
+                  <div 
+                    key={emp.id} 
+                    className="employee-card-transparent relative group rounded-[28px] p-5 sm:p-5.5 bg-transparent text-foreground border border-black/[0.08] dark:border-white/[0.09] hover:border-primary/50 dark:hover:border-primary/40 shadow-none hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between overflow-hidden isolate [backdrop-filter:none] [-webkit-backdrop-filter:none]"
                   >
-                    <Icon name={isOpen ? 'expand_more' : 'chevron_right'} className="text-muted-foreground shrink-0 transition-transform" size={20}/>
-                    <Icon name="apartment" className="text-primary shrink-0" size={22}/>
-                    <span className="flex-1 font-semibold text-foreground break-words ">{group.key}</span>
-                    <Badge variant="secondary" className="text-xs shrink-0">{group.items.length}</Badge>
-                  </button>
-                  {isOpen && (
-                    <div className="px-4 pb-5 animate-fade-in">
-                      {group.items.length === 0 ? (
-                        <div className="text-center text-muted-foreground py-8 border border-border border-dashed rounded-lg">
-                          No employees in this department.
-                        </div>
-                      ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-start">
-                          {group.items.map(emp => {
-                            const isExpanded = expandedCardId === emp.id
-                            return (
-                              <div 
-                                key={emp.id} 
-                                className="relative group rounded-3xl p-5 sm:p-6 glass-kormiis text-foreground border border-white/30 dark:border-white/12 shadow-xl hover:border-primary/50 transition-all duration-300 flex flex-col justify-between overflow-hidden isolate"
-                              >
-                                {/* 1. Top Header: Checkbox & Quick Action Glass Icon Buttons */}
-                                <div className="flex items-center justify-between gap-2 mb-3.5 relative z-10">
-                                  {/* Apple Circular Checkbox */}
-                                  <div
-                                    onClick={(e) => toggleSelect(emp.id, e)}
-                                    className={`size-6 rounded-full border-2 transition-all flex items-center justify-center cursor-pointer ${
-                                      selectedIds.has(emp.id)
-                                        ? 'bg-primary border-primary text-primary-foreground shadow-xs scale-105'
-                                        : 'border-border/80 dark:border-white/20 bg-background/50 group-hover:border-primary/50 hover:bg-background/80'
-                                    }`}
-                                    title={selectedIds.has(emp.id) ? "Deselect" : "Select"}
-                                  >
-                                    {selectedIds.has(emp.id) && (
-                                      <Icon name="check" size={14} className="stroke-[3]" />
-                                    )}
-                                  </div>
-
-                                  {/* Quick Contact & Action Buttons */}
-                                  <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-                                    {emp.email && (
-                                      <a
-                                        href={`mailto:${emp.email}`}
-                                        title={`Email ${emp.name}`}
-                                        className="liquid-icon-btn size-7.5 rounded-full flex items-center justify-center bg-black/5 dark:bg-white/5 hover:bg-primary/20 hover:text-primary active:scale-90 border border-black/10 dark:border-white/10 transition-all text-muted-foreground hover:text-foreground shadow-xs cursor-pointer"
-                                      >
-                                        <Icon name="mail" size={13} />
-                                      </a>
-                                    )}
-                                    {emp.phone && (
-                                      <a
-                                        href={`tel:${emp.phone.replace(/[\s-]/g, '')}`}
-                                        title={`Call ${emp.name}`}
-                                        className="liquid-icon-btn size-7.5 rounded-full flex items-center justify-center bg-black/5 dark:bg-white/5 hover:bg-primary/20 hover:text-primary active:scale-90 border border-black/10 dark:border-white/10 transition-all text-muted-foreground hover:text-foreground shadow-xs cursor-pointer"
-                                      >
-                                        <Icon name="call" size={13} />
-                                      </a>
-                                    )}
-                                    <button
-                                      title={`Edit ${emp.name}`}
-                                      onClick={() => handleOpenEditForm(emp)}
-                                      className="liquid-icon-btn size-7.5 rounded-full flex items-center justify-center bg-black/5 dark:bg-white/5 hover:bg-primary/20 hover:text-primary active:scale-90 border border-black/10 dark:border-white/10 transition-all text-muted-foreground hover:text-foreground shadow-xs cursor-pointer"
-                                    >
-                                      <Icon name="edit" size={13} />
-                                    </button>
-                                    <button
-                                      title={`Delete ${emp.name}`}
-                                      onClick={() => {
-                                        setConfirmDelete(() => () => {
-                                          handleDeleteEmployee(emp.id, emp.name);
-                                          setConfirmDelete(null);
-                                        });
-                                      }}
-                                      className="liquid-icon-btn size-7.5 rounded-full flex items-center justify-center bg-black/5 dark:bg-white/5 hover:bg-destructive/20 hover:text-destructive active:scale-90 border border-black/10 dark:border-white/10 transition-all text-muted-foreground hover:text-destructive shadow-xs cursor-pointer"
-                                    >
-                                      <Icon name="delete" size={13} />
-                                    </button>
-                                  </div>
-                                </div>
-
-                                {/* 2. Hero Section: Profile Avatar on Left, Name & Designation on Right */}
-                                <div className="flex items-center gap-3.5 my-2 relative z-10">
-                                  {/* Left: Avatar with Glowing Status Dot & Upload Overlay */}
-                                  <div className="relative shrink-0 group/avatar">
-                                    <div 
-                                      onClick={(e) => {
-                                        e.stopPropagation()
-                                        setAvatarUploadCardId(emp.id)
-                                        cardFileInputRef.current?.click()
-                                      }}
-                                      title="Click to Upload Photo (Max: 500 KB, 1:1 Ratio)"
-                                      className="relative cursor-pointer"
-                                    >
-                                      <Avatar className={`size-15 rounded-full border-2 border-border/60 dark:border-white/15 shadow-md ring-2 ring-primary/20 dark:ring-white/10 ring-offset-2 ring-offset-card transition-all duration-300 group-hover/avatar:scale-105 ${emp.status !== 'Active' ? 'grayscale opacity-75' : ''}`}>
-                                        {!imageErrors[emp.id] && (
-                                          <AvatarImage 
-                                            src={emp.avatar || defaultAvatar} 
-                                            alt={emp.name} 
-                                            style={{ transform: `translate(${emp.photoX || 0}px, ${emp.photoY || 0}px) scale(${emp.photoZoom || 1})`, transformOrigin: 'center' }} 
-                                            onError={() => setImageErrors(prev => ({...prev, [emp.id]: true}))} 
-                                          />
-                                        )}
-                                        <AvatarFallback className="bg-gradient-to-br from-primary/20 via-primary/10 to-transparent text-primary text-base font-black">
-                                          {getAvatarFallback(emp.name).initials}
-                                        </AvatarFallback>
-                                      </Avatar>
-
-                                      {/* Hover Camera Upload Overlay */}
-                                      <div className="absolute inset-0 rounded-full bg-black/60 backdrop-blur-[2px] opacity-0 group-hover/avatar:opacity-100 flex flex-col items-center justify-center transition-all text-white">
-                                        <Icon name="photo_camera" size={15}/>
-                                        <span className="text-[8px] font-bold tracking-tight">Upload</span>
-                                      </div>
-                                    </div>
-
-                                    {/* Glowing Status Indicator */}
-                                    <span 
-                                      className={`absolute bottom-0 right-0 size-3.5 rounded-full border-2 border-card ${
-                                        emp.status === 'Active' 
-                                          ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.85)]' 
-                                          : emp.status === 'On Leave' 
-                                          ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.85)]' 
-                                          : 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.85)]'
-                                      }`} 
-                                    />
-                                  </div>
-
-                                  {/* Right: Name & Designation */}
-                                  <div className="flex flex-col min-w-0 flex-1 text-left justify-center">
-                                    <h4 className="font-bold text-fluid-lg text-foreground tracking-tight break-words group-hover:text-primary transition-colors leading-tight">
-                                      {emp.name}
-                                    </h4>
-                                    <p className="text-fluid-xs font-semibold text-muted-foreground break-words mt-1">
-                                      {emp.designation && emp.designation.toLowerCase() !== 'teammate' ? emp.designation : (emp.role && emp.role.toLowerCase() !== 'teammate' ? emp.role : '')}
-                                    </p>
-                                  </div>
-                                </div>
-
-                                {/* 3. Info Capsules: Department & Employee ID */}
-                                <div className="grid grid-cols-2 gap-2 mt-3.5 pt-3.5 border-t border-border/80 dark:border-white/12 relative z-10">
-                                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 min-w-0 shadow-xs">
-                                    <Icon name="apartment" size={13} className="text-primary shrink-0" />
-                                    <span className="text-[11px] font-medium text-foreground/90 break-words ">
-                                      {emp.department}
-                                    </span>
-                                  </div>
-                                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 min-w-0 font-mono shadow-xs">
-                                    <Icon name="badge" size={13} className="text-primary shrink-0" />
-                                    <span className="text-[11px] font-medium text-muted-foreground break-words ">
-                                      {emp.id}
-                                    </span>
-                                  </div>
-                                </div>
-
-                                {/* 4. Collapsible Drawer (Details: Email, Phone, DOB, Joining Date) */}
-                                <div className={`overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.175,0.885,0.32,1.15)] ${isExpanded ? 'max-h-[220px] opacity-100 mt-2.5' : 'max-h-0 opacity-0'}`}>
-                                  <div className="rounded-2xl border border-border/80 dark:border-white/12 bg-black/5 dark:bg-white/5 p-3 flex flex-col gap-1.5 text-fluid-xs text-muted-foreground">
-                                    {emp.email && (
-                                      <div className="flex items-center gap-2 break-words ">
-                                        <Icon name="mail" size={13} className="text-primary/80 shrink-0" />
-                                        <span className=" break-words ">{emp.email}</span>
-                                      </div>
-                                    )}
-                                    {emp.phone && (
-                                      <div className="flex items-center gap-2 break-words ">
-                                        <Icon name="call" size={13} className="text-primary/80 shrink-0" />
-                                        <span className=" break-words ">{emp.phone}</span>
-                                      </div>
-                                    )}
-                                    {emp.dob && (
-                                      <div className="flex items-center gap-2 break-words ">
-                                        <Icon name="cake" size={13} className="text-primary/80 shrink-0" />
-                                        <span className=" break-words ">DOB: {formatDate(emp.dob)}</span>
-                                      </div>
-                                    )}
-                                    {emp.joiningDate && (
-                                      <div className="flex items-center gap-2 break-words ">
-                                        <Icon name="calendar_month" size={13} className="text-primary/80 shrink-0" />
-                                        <span className=" break-words ">Joined: {formatDate(emp.joiningDate)}</span>
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-
-                                {/* 5. Card Footer: Ultra-Slim Grabber Bar Chevron Toggle Button */}
-                                <div className="mt-2 pt-1.5 border-t border-border/60 dark:border-white/10 flex items-center justify-center relative z-10">
-                                  <button
-                                    onClick={() => setExpandedCardId(prev => prev === emp.id ? null : emp.id)}
-                                    aria-label={isExpanded ? 'Collapse details' : 'Expand details'}
-                                    title={isExpanded ? 'Collapse details' : 'Expand details'}
-                                    className="liquid-icon-btn group/btn w-full h-3.5 rounded-full flex items-center justify-center bg-black/[0.04] dark:bg-white/[0.04] hover:bg-black/10 dark:hover:bg-white/10 active:scale-[0.99] border border-black/5 dark:border-white/8 text-muted-foreground hover:text-foreground transition-all cursor-pointer"
-                                  >
-                                    <Icon 
-                                      name="keyboard_arrow_down" 
-                                      size={12} 
-                                      className={`transition-transform duration-300 ${isExpanded ? 'rotate-180 text-primary' : 'group-hover/btn:translate-y-0.5'}`} 
-                                    />
-                                  </button>
-                                </div>
-                              </div>
-                            )
-                          })}
-                        </div>
-                      )}
+                    {/* 1. Top Header: Functional Live Attendance Status Badge on Top Right */}
+                    <div className="flex items-center justify-end mb-2 relative z-10">
+                      {/* Functional Attendance Status Badge (Present / Absent / On Leave) */}
+                      <div 
+                        title={liveStatus.detail}
+                        className={`inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-normal tracking-tight border transition-all select-none ${
+                          liveStatus.status === 'Present'
+                            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/25 shadow-none'
+                            : liveStatus.status === 'On Leave'
+                              ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/25 shadow-none'
+                              : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/25 shadow-none'
+                        }`}
+                      >
+                        <span>{liveStatus.label}</span>
+                      </div>
                     </div>
-                  )}
-                </div>
-              )
-            })}
+
+                    {/* 2. Hero Section: Profile Avatar on Left, First Name -> Role -> Department on Right */}
+                    <div className="flex items-start gap-3.5 my-1.5 relative z-10">
+                      {/* Left: Avatar with Squircle Frame & Upload Overlay */}
+                      <div className="relative shrink-0 group/avatar mt-0.5">
+                        <div 
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setAvatarUploadCardId(emp.id)
+                            cardFileInputRef.current?.click()
+                          }}
+                          title="Click to Upload Photo (Max: 500 KB, 1:1 Ratio)"
+                          className="relative cursor-pointer"
+                        >
+                          <Avatar className={`size-15 rounded-2xl border border-black/10 dark:border-white/15 ring-1 ring-black/5 dark:ring-white/10 transition-all duration-300 group-hover/avatar:scale-105 ${emp.status !== 'Active' ? 'grayscale opacity-75' : ''}`}>
+                            {!imageErrors[emp.id] && (
+                              <AvatarImage 
+                                src={emp.avatar || defaultAvatar} 
+                                alt={emp.name} 
+                                style={{ transform: `translate(${emp.photoX || 0}px, ${emp.photoY || 0}px) scale(${emp.photoZoom || 1})`, transformOrigin: 'center' }} 
+                                onError={() => setImageErrors(prev => ({...prev, [emp.id]: true}))} 
+                              />
+                            )}
+                            <AvatarFallback className="bg-primary/10 text-primary text-base font-semibold rounded-2xl">
+                              {getAvatarFallback(emp.name).initials}
+                            </AvatarFallback>
+                          </Avatar>
+
+                          {/* Hover Camera Upload Overlay */}
+                          <div className="absolute inset-0 rounded-2xl bg-black/60 opacity-0 group-hover/avatar:opacity-100 flex flex-col items-center justify-center transition-all text-white">
+                            <Icon name="photo_camera" size={15}/>
+                            <span className="text-[8px] font-normal tracking-tight">Upload</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Right: First Name -> Role -> Department */}
+                      <div className="flex flex-col min-w-0 flex-1 text-left justify-center space-y-1">
+                        {/* 1. Name (Only Heavy / Bold Font in the Card) */}
+                        <h4 
+                          onClick={() => setViewingEmployee(emp)}
+                          title={`Click to view complete profile of ${emp.name}`}
+                          className="font-bold text-fluid-lg text-foreground tracking-tight break-words group-hover:text-primary transition-colors leading-tight cursor-pointer"
+                        >
+                          {emp.name}
+                        </h4>
+
+                        {/* 2. Role / Title */}
+                        <div className="flex items-center gap-1.5 text-xs font-normal text-muted-foreground break-words">
+                          <Icon name="work" size={13} className="text-primary/70 shrink-0" />
+                          <span className="truncate">{displayRole}</span>
+                        </div>
+
+                        {/* 3. Department & Employee ID */}
+                        <div className="flex items-center gap-2 flex-wrap pt-0.5 text-xs font-normal">
+                          <span className="inline-flex items-center gap-1 font-normal text-muted-foreground truncate">
+                            <Icon name="apartment" size={13} className="text-primary/70 shrink-0" />
+                            {emp.department || 'General'}
+                          </span>
+                          <span className="text-muted-foreground/40 font-mono text-xs">•</span>
+                          <span className="inline-flex items-center gap-1 font-mono font-normal text-muted-foreground">
+                            <Icon name="badge" size={13} className="text-primary/70 shrink-0" />
+                            {emp.id}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 3. Quick Action Split / Segmented Buttons with Text (Matching Full Profile dimensions) */}
+                    <div className="mt-2.5 pt-2 border-t border-black/[0.06] dark:border-white/[0.08] relative z-10" onClick={(e) => e.stopPropagation()}>
+                      <div className="w-full h-9 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.08] shadow-none overflow-hidden flex items-center">
+                        {emp.email && (
+                          <>
+                            <a
+                              href={`mailto:${emp.email}`}
+                              title={`Email ${emp.name}`}
+                              className="flex-1 h-full text-muted-foreground hover:text-primary hover:bg-black/5 dark:hover:bg-white/10 active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-1.5 text-xs font-normal select-none"
+                            >
+                              <Icon name="mail" size={13} className="shrink-0" />
+                              <span className="truncate">Email</span>
+                            </a>
+                            <div className="w-[1px] h-4 bg-black/10 dark:bg-white/15 shrink-0" />
+                          </>
+                        )}
+                        {emp.phone && (
+                          <>
+                            <a
+                              href={`tel:${emp.phone.replace(/[\s-]/g, '')}`}
+                              title={`Call ${emp.name}`}
+                              className="flex-1 h-full text-muted-foreground hover:text-primary hover:bg-black/5 dark:hover:bg-white/10 active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-1.5 text-xs font-normal select-none"
+                            >
+                              <Icon name="call" size={13} className="shrink-0" />
+                              <span className="truncate">Call</span>
+                            </a>
+                            <div className="w-[1px] h-4 bg-black/10 dark:bg-white/15 shrink-0" />
+                          </>
+                        )}
+                        <button
+                          title={`Edit ${emp.name}`}
+                          onClick={() => handleOpenEditForm(emp)}
+                          className="flex-1 h-full text-muted-foreground hover:text-primary hover:bg-black/5 dark:hover:bg-white/10 active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-1.5 text-xs font-normal select-none"
+                        >
+                          <Icon name="edit" size={13} className="shrink-0" />
+                          <span className="truncate">Edit</span>
+                        </button>
+                        <div className="w-[1px] h-4 bg-black/10 dark:bg-white/15 shrink-0" />
+                        <button
+                          title={`Delete ${emp.name}`}
+                          onClick={() => {
+                            setConfirmDelete(() => () => {
+                              handleDeleteEmployee(emp.id, emp.name);
+                              setConfirmDelete(null);
+                            });
+                          }}
+                          className="flex-1 h-full text-muted-foreground hover:text-destructive hover:bg-rose-500/10 active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-1.5 text-xs font-normal select-none"
+                        >
+                          <Icon name="delete" size={13} className="shrink-0" />
+                          <span className="truncate">Delete</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* 4. Card Footer: Direct Unified "Full Profile" Button (Exact Same Height & Width) */}
+                    <div className="mt-2 flex items-center relative z-10">
+                      <button
+                        onClick={() => setViewingEmployee(emp)}
+                        title={`View full profile of ${emp.name}`}
+                        className="w-full h-9 rounded-2xl flex items-center justify-center gap-1.5 bg-black/[0.02] dark:bg-white/[0.03] hover:bg-primary/10 hover:text-primary dark:hover:bg-primary/15 dark:hover:text-primary active:scale-[0.98] border border-black/[0.06] dark:border-white/[0.08] hover:border-primary/30 text-xs font-normal text-foreground/80 transition-all cursor-pointer select-none"
+                      >
+                        <Icon name="visibility" size={14} className="text-primary" />
+                        <span>Full Profile</span>
+                      </button>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
           </div>
         )}
       </div>

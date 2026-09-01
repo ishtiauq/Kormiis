@@ -9,9 +9,7 @@ export function useToast() {
       if (prev.some(t => t.message === message && t.type === type)) return prev
       return [...prev.slice(-5), { id, message, type, action }]
     })
-    setTimeout(() => {
-      setToasts(prev => prev.filter(t => t.id !== id))
-    }, 4000)
+    // Persistent toast standard: Toasts stay active until the user explicitly dismisses them via the cross button
   }, [])
 
   const removeToast = useCallback((id) => {

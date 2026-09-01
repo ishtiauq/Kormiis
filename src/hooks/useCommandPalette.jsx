@@ -3,7 +3,7 @@ import { clearLocalCache } from '../services/db.js'
 import Icon from "@/components/ui/Icon.jsx"
 import { useConfirm } from './useConfirm'
 
-export function useCommandPalette({ employees, themeMode, toggleTheme, setCurrentView, addToast, setSelectedEmployeeId }) {
+export function useCommandPalette({ employees, themeMode, toggleTheme, setCurrentView, addToast, setSelectedEmployeeId, onLoadDemoData, onClearDemoData }) {
   const [showCommandPalette, setShowCommandPalette] = useState(false)
   const [commandSearch, setCommandSearch] = useState('')
   const [paletteIndex, setPaletteIndex] = useState(0)
@@ -57,6 +57,8 @@ export function useCommandPalette({ employees, themeMode, toggleTheme, setCurren
           if (!ok) return
           clearLocalCache().then(() => window.location.reload())
         }
+        if (act.id === 'action-loaddemo') actionFn = () => { if (onLoadDemoData) onLoadDemoData() }
+        if (act.id === 'action-cleardemo') actionFn = () => { if (onClearDemoData) onClearDemoData() }
       } else if (act.type === 'employee') {
         actionFn = () => {
           setSelectedEmployeeId(act.employeeId)
@@ -84,6 +86,8 @@ export function useCommandPalette({ employees, themeMode, toggleTheme, setCurren
 
     const quickActions = [
       { id: 'action-darkmode', category: 'Actions', label: 'Toggle Theme', action: toggleTheme, keywords: 'dark light mode theme appearance toggle system' },
+      { id: 'action-loaddemo', category: 'Actions', label: 'Load Full Demo Data (All Modules & Widgets)', action: () => { if (onLoadDemoData) onLoadDemoData() }, keywords: 'demo mock sample seed test data widgets populate' },
+      { id: 'action-cleardemo', category: 'Actions', label: 'Remove All Demo Data (Clear Workspace)', action: () => { if (onClearDemoData) onClearDemoData() }, keywords: 'remove clear clean delete demo data reset empty' },
       { id: 'action-clearcache', category: 'Actions', label: 'Clear Local Cache & Resync', action: async () => {
         const ok = await confirm('Unsynced offline changes will be lost, and the app will reload.', 'Clear Cache?', { destructive: true, confirmText: 'Clear' })
         if (!ok) return

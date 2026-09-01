@@ -4,6 +4,21 @@ import { encryptJson, decryptJson } from '../services/crypto.js'
 import { EMPLOYEES_STORAGE_KEY, timestampArrayChanges, getDeviceInfo } from '../utils/helpers.js'
 import { writeToTable, fetchTableFromFirestore } from '../services/bridge.js'
 import { initPushSync, broadcast, updateBadge, notifyOnHidden, showSystemNotification, registerPushSubscription } from '../services/pushNotifications.js'
+import {
+  DEMO_EMPLOYEES,
+  DEMO_ATTENDANCE,
+  DEMO_PAYROLL,
+  DEMO_EXPENSES,
+  DEMO_TASKS,
+  DEMO_ANNOUNCEMENTS,
+  DEMO_ASSETS,
+  DEMO_EVENTS,
+  DEMO_DOCUMENTS,
+  DEMO_NOTES,
+  DEMO_NOTIFICATIONS,
+  seedDemoData,
+  clearDemoData
+} from '../utils/demoData.js'
 
 export default function useAppData({ user, addToast }) {
   const adminUid = user?.isEmployee ? user.adminUid : (user?.companyUid || user?.uid);
@@ -31,7 +46,7 @@ export default function useAppData({ user, addToast }) {
 
   const [employees, setEmployeesRaw] = useState(() => {
     const plain = localStorage.getItem(EMPLOYEES_STORAGE_KEY + '_plain')
-    if (plain) { try { const p = JSON.parse(plain); if (Array.isArray(p) && p.length > 0) return p } catch (e) {} }
+    if (plain) { try { const p = JSON.parse(plain); if (Array.isArray(p)) return p } catch (e) {} }
     return []
   })
   const [payroll, setPayrollRaw] = useState(() => loadSaved('kormiis_payroll') || {})
@@ -42,17 +57,13 @@ export default function useAppData({ user, addToast }) {
   const [roster, setRoster] = useState(() => loadSaved('kormiis_roster') || [])
   const [shiftSwaps, setShiftSwaps] = useState(() => loadSaved('kormiis_shift_swaps') || [])
   const [overtimeClaims, setOvertimeClaims] = useState(() => loadSaved('kormiis_overtime_claims') || [])
-  const [announcements, setAnnouncements] = useState(() => {
-    const saved = loadSaved('kormiis_announcements')
-    if (saved) return saved
-    return []
-  })
+  const [announcements, setAnnouncements] = useState(() => loadSaved('kormiis_announcements') || [])
   const [tasks, setTasks] = useState(() => loadSaved('kormiis_tasks') || [])
   const [notes, setNotesRaw] = useState(() => loadSaved('kormiis_notes') || [])
   const [assets, setAssets] = useState(() => loadSaved('kormiis_assets') || [])
   const [assetRequests, setAssetRequests] = useState(() => loadSaved('kormiis_asset_requests') || [])
   const [assetCategories, setAssetCategories] = useState(() => loadSaved('kormiis_asset_categories') || ['Laptop', 'Phone', 'Monitor', 'Peripherals', 'Access Card'])
-  const [settings, setSettingsRaw] = useState(() => loadSaved('kormiis_settings') || { currency: '৳', officeLocation: { lat: 23.8103, lng: 90.4125, radius: 100 }, salaryStructure: [{ id: 'basic', name: 'Basic Salary', percentage: 50, type: 'earning' }, { id: 'hra', name: 'House Rent Allowance (HRA)', percentage: 25, type: 'earning' }, { id: 'medical', name: 'Medical Allowance', percentage: 10, type: 'earning' }, { id: 'conveyance', name: 'Conveyance Allowance', percentage: 10, type: 'earning' }, { id: 'pf', name: 'Provident Fund (PF)', percentage: 5, type: 'deduction' }], company: { name: 'Kormiis Ltd.', email: 'hr@kormiis.io', website: 'kormiis.vercel.app', logo: '', logoX: 0, logoY: 0, logoZoom: 1 }, shiftTemplates: [{ id: 'st-1', name: 'Morning Shift', start: '09:00', end: '18:00', break: 60 }, { id: 'st-2', name: 'Night Shift', start: '22:00', end: '07:00', break: 60 }], overtimeRules: { multiplierWeekday: 1.5, multiplierWeekend: 2.0 }, notifications: { syncAlerts: true, emailDigests: false } })
+  const [settings, setSettingsRaw] = useState(() => loadSaved('kormiis_settings') || { currency: '৳', officeLocation: { lat: 23.8103, lng: 90.4125, radius: 100 }, salaryStructure: [{ id: 'basic', name: 'Basic Salary', percentage: 50, type: 'earning' }, { id: 'hra', name: 'House Rent Allowance (HRA)', percentage: 25, type: 'earning' }, { id: 'medical', name: 'Medical Allowance', percentage: 10, type: 'earning' }, { id: 'conveyance', name: 'Conveyance Allowance', percentage: 10, type: 'earning' }, { id: 'pf', name: 'Provident Fund (PF)', percentage: 5, type: 'deduction' }], company: { name: 'Kormiis Technologies Ltd.', email: 'hr@kormiis.io', website: 'kormiis.vercel.app', logo: '', logoX: 0, logoY: 0, logoZoom: 1 }, shiftTemplates: [{ id: 'st-1', name: 'Morning Shift', start: '09:00', end: '18:00', break: 60 }, { id: 'st-2', name: 'Night Shift', start: '22:00', end: '07:00', break: 60 }], overtimeRules: { multiplierWeekday: 1.5, multiplierWeekend: 2.0 }, notifications: { syncAlerts: true, emailDigests: false } })
   const [syncLogs, setSyncLogs] = useState(() => loadSaved('kormiis_sync_logs') || [])
 
   /* ─── Notifications ─── */
@@ -62,10 +73,10 @@ export default function useAppData({ user, addToast }) {
       try {
         const parsed = JSON.parse(saved)
         const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000)
-        return Array.isArray(parsed) ? parsed.filter(n => (n.timestamp || Date.now()) > sevenDaysAgo) : []
-      } catch (e) {
-        return []
-      }
+        if (Array.isArray(parsed)) {
+          return parsed.filter(n => (n.timestamp || Date.now()) > sevenDaysAgo)
+        }
+      } catch (e) {}
     }
     return []
   })
@@ -983,6 +994,38 @@ export default function useAppData({ user, addToast }) {
     }, 0);
   }
 
+  const handleLoadDemoData = useCallback(() => {
+    seedDemoData(true)
+    handleSetEmployees(DEMO_EMPLOYEES)
+    handleSetAttendance(DEMO_ATTENDANCE)
+    handleSetPayroll(DEMO_PAYROLL)
+    handleSetExpenses(DEMO_EXPENSES)
+    handleSetTasks(DEMO_TASKS)
+    handleSetAnnouncements(DEMO_ANNOUNCEMENTS)
+    handleSetAssets(DEMO_ASSETS)
+    handleSetEvents(DEMO_EVENTS)
+    handleSetDocuments(DEMO_DOCUMENTS)
+    handleSetNotes(DEMO_NOTES)
+    setAllNotifications(DEMO_NOTIFICATIONS)
+    if (addToast) addToast('Loaded complete demo dataset across all widgets', 'success')
+  }, [handleSetEmployees, handleSetAttendance, handleSetPayroll, handleSetExpenses, handleSetTasks, handleSetAnnouncements, handleSetAssets, handleSetEvents, handleSetDocuments, handleSetNotes, addToast])
+
+  const handleClearDemoData = useCallback(() => {
+    clearDemoData()
+    handleSetEmployees([])
+    handleSetAttendance({ leaves: [], dailyLogs: {}, balances: {} })
+    handleSetPayroll({})
+    handleSetExpenses([])
+    handleSetTasks([])
+    handleSetAnnouncements([])
+    handleSetAssets([])
+    handleSetEvents([])
+    handleSetDocuments([])
+    handleSetNotes([])
+    setAllNotifications([])
+    if (addToast) addToast('Removed all demo data from workspace', 'info')
+  }, [handleSetEmployees, handleSetAttendance, handleSetPayroll, handleSetExpenses, handleSetTasks, handleSetAnnouncements, handleSetAssets, handleSetEvents, handleSetDocuments, handleSetNotes, addToast])
+
   return {
     /* DB */
     adminUid,
@@ -1018,7 +1061,8 @@ export default function useAppData({ user, addToast }) {
     handleSetAttendance, handleSetExpenses, handleSetEvents, handleSetDocuments,
     handleSetRoster, handleSetShiftSwaps, handleSetOvertimeClaims,
     handleSetAssets, handleSetAssetRequests, handleSetAssetCategories,
-    handleAutoRepairDatabase, handleSync,
+    handleAutoRepairDatabase, handleSync, handleLoadDemoData, loadDemoData: handleLoadDemoData,
+    handleClearDemoData, clearDemoData: handleClearDemoData,
     addLog, addAuditLog, hasPermission,
     addNotification, markNotificationsRead, clearNotifications,
   }

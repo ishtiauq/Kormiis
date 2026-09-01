@@ -350,20 +350,22 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
         .slice(0, 3)
     : []
 
-  const currentPayrollMonth = payroll && Object.keys(payroll).length > 0
+  const currentPayrollMonth = payroll && typeof payroll === 'object' && Object.keys(payroll).length > 0
     ? Object.keys(payroll).sort().reverse()[0]
     : null
-  const currentPayrollData = currentPayrollMonth ? payroll[currentPayrollMonth] || [] : []
-  const paidCount = currentPayrollData.filter(p => p.status === 'Paid').length
-  const pendingCount = currentPayrollData.filter(p => p.status === 'Pending').length
-  const totalPayrollCost = currentPayrollData.reduce((acc, curr) => acc + (Number(curr.netSalary) || 0), 0)
+  const currentPayrollData = (currentPayrollMonth && Array.isArray(payroll[currentPayrollMonth])) ? payroll[currentPayrollMonth] : []
+  const paidCount = currentPayrollData.filter(p => p && p.status === 'Paid').length
+  const pendingCount = currentPayrollData.filter(p => p && p.status === 'Pending').length
+  const totalPayrollCost = currentPayrollData.reduce((acc, curr) => acc + (Number(curr?.netSalary) || 0), 0)
 
-  const efficiencyScore = totalTracked > 0 ? Math.min(100, Math.round((todayStats.present / totalTracked) * 100 + 5)) : 94
-  const completedTasksCount = tasks.filter(t => t.status === 'Done').length
-  const taskCompletionRate = tasks.length > 0 ? Math.round((completedTasksCount / tasks.length) * 100) : 85
-  const pendingTasksCount = tasks.filter(t => t.status !== 'Done').length
-  const recentDocuments = documents.slice(0, 3)
-  const availableAssetsCount = assets.filter(a => a.status === 'Available').length
+  const efficiencyScore = totalTracked > 0 ? Math.min(100, Math.round((todayStats.present / totalTracked) * 100 + 5)) : 100
+  const taskList = Array.isArray(tasks) ? tasks : []
+  const completedTasksCount = taskList.filter(t => t && t.status === 'Done').length
+  const taskCompletionRate = taskList.length > 0 ? Math.round((completedTasksCount / taskList.length) * 100) : 0
+  const pendingTasksCount = taskList.filter(t => t && t.status !== 'Done').length
+  const recentDocuments = Array.isArray(documents) ? documents.slice(0, 3) : []
+  const assetList = Array.isArray(assets) ? assets : []
+  const availableAssetsCount = assetList.filter(a => a && a.status === 'Available').length
 
   const getEmployeeName = (id) => {
     const emp = employees.find(e => e.id === id)

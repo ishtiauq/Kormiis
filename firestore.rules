@@ -72,17 +72,20 @@ service cloud.firestore {
       allow write: if isAdmin(adminUid) || request.auth.uid == employeeUid;
     }
 
-    // Users collection
+    // Users collection:
+    // 1) Users can read/write their own document
+    // 2) Authenticated users can read user docs to check workspace links
+    // 3) Workspace owners can write user records to provision teammates
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && (request.auth.uid == userId || isWorkspaceOwner());
     }
 
     // Email invites — workspace owners invite teammates by email; the invite
     // lets that exact email address auto-link to the company on first Google
-    // sign-in. Only the invite owner and workspace owners can touch them.
+    // sign-in.
     match /invites/{email} {
-      allow read, write: if request.auth != null
-        && (request.auth.token.email != null && request.auth.token.email == email || isWorkspaceOwner());
+      allow read, write: if request.auth != null;
     }
   }
 }

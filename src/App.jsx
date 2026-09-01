@@ -7,6 +7,8 @@ import { useTheme } from './hooks/useTheme.js'
 import { useToast } from './hooks/useToast.js'
 import { useAuth } from './hooks/useAuth.js'
 
+import ToastContainer from './components/layout/ToastContainer.jsx'
+
 const Login = lazy(() => import('./components/Login.jsx'))
 const DashboardShell = lazy(() => import('./components/DashboardShell.jsx'))
 
@@ -81,8 +83,9 @@ export default function App() {
     return (
       <>
         <GlobalTooltip />
+        <ToastContainer toasts={toasts} removeToast={removeToast} />
         <Suspense fallback={<LoadingScreen isDarkMode={isDarkMode} message="Loading Kormiis..." />}>
-          <Login onLogin={handleLogin} themeMode={themeMode} toggleTheme={toggleTheme} setThemeMode={setThemeMode} />
+          <Login onLogin={handleLogin} themeMode={themeMode} toggleTheme={toggleTheme} setThemeMode={setThemeMode} addToast={addToast} />
         </Suspense>
       </>
     )

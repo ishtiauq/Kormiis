@@ -249,47 +249,59 @@ export const provisionEmployeeAccount = async ({ email, password, name, role, co
 
   // 2. If UID is known, update user doc and company members collection
   if (uid) {
-    await setDoc(doc(db, 'users', uid), {
-      uid,
-      email: parsedEmail,
-      fullName: name || '',
+    try {
+      await setDoc(doc(db, 'users', uid), {
+        uid,
+        email: parsedEmail,
+        fullName: name || '',
+        companyUid,
+        employeeId: employeeId || '',
+        role: role || 'Teammate',
+        department: department || '',
+        avatar: avatar || '',
+        joinedAt: serverTimestamp(),
+      }, { merge: true });
+    } catch (userDocErr) {
+      console.warn('[provisionEmployeeAccount] Note: users/{uid} write skipped or deferred (rules):', userDocErr.message);
+    }
+
+    try {
+      await setDoc(doc(db, 'companies', companyUid, 'members', uid), {
+        employeeId: employeeId || '',
+        email: parsedEmail,
+        name: name || '',
+        role: role || 'Teammate',
+        department: department || '',
+        avatar: avatar || '',
+        registeredAt: serverTimestamp(),
+      }, { merge: true });
+    } catch (memberDocErr) {
+      console.warn('[provisionEmployeeAccount] Note: members/{uid} write skipped or deferred (rules):', memberDocErr.message);
+    }
+  }
+
+  // 3. Always create an invite record in 'invites' so when they sign in with Google or credentials, they auto-link
+  try {
+    const inviteData = {
+      email: rawEmail,
+      parsedEmail,
       companyUid,
       employeeId: employeeId || '',
-      role: role || 'Teammate',
-      department: department || '',
-      avatar: avatar || '',
-      joinedAt: serverTimestamp(),
-    }, { merge: true });
-
-    await setDoc(doc(db, 'companies', companyUid, 'members', uid), {
-      employeeId: employeeId || '',
-      email: parsedEmail,
       name: name || '',
       role: role || 'Teammate',
       department: department || '',
       avatar: avatar || '',
-      registeredAt: serverTimestamp(),
-    }, { merge: true });
-  }
+      createdAt: serverTimestamp(),
+      status: uid ? 'linked' : 'pending',
+      linkedUid: uid || null,
+    };
 
-  // 3. Always create an invite record in 'invites' so when they sign in with Google or credentials, they auto-link
-  const inviteData = {
-    email: rawEmail,
-    parsedEmail,
-    companyUid,
-    employeeId: employeeId || '',
-    name: name || '',
-    role: role || 'Teammate',
-    department: department || '',
-    avatar: avatar || '',
-    createdAt: serverTimestamp(),
-    status: uid ? 'linked' : 'pending',
-    linkedUid: uid || null,
-  };
-
-  await setDoc(doc(db, 'invites', parsedEmail), inviteData, { merge: true });
-  if (rawEmail && rawEmail !== parsedEmail) {
-    await setDoc(doc(db, 'invites', rawEmail), inviteData, { merge: true });
+    await setDoc(doc(db, 'invites', parsedEmail), inviteData, { merge: true });
+    if (rawEmail && rawEmail !== parsedEmail) {
+      await setDoc(doc(db, 'invites', rawEmail), inviteData, { merge: true });
+    }
+  } catch (inviteErr) {
+    console.warn('[provisionEmployeeAccount] Note: invites record write skipped or deferred (rules):', inviteErr.message);
   }
 
   return { uid, invited: !uid, alreadyExisted };

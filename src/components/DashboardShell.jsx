@@ -66,31 +66,31 @@ export default function DashboardShell({ user, themeMode, isDarkMode, toggleThem
     setShowMobileMenu(prev => !prev)
   }
 
+  const { showCommandPalette, setShowCommandPalette, commandSearch, setCommandSearch, paletteIndex, setPaletteIndex, filteredItems, selectPaletteItem, getCategoryIcon, ConfirmDialog } = useCommandPalette({
+    employees: appData.employees, themeMode, toggleTheme, setCurrentView, addToast, setSelectedEmployeeId, onLoadDemoData: appData.handleLoadDemoData, onClearDemoData: appData.handleClearDemoData
+  })
+
   useEffect(() => {
     const handleKeyDown = (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
         e.preventDefault()
-        appData.setShowCommandPalette(prev => !prev)
-        appData.setCommandSearch('')
-        appData.setPaletteIndex(0)
+        setShowCommandPalette(prev => !prev)
+        setCommandSearch('')
+        setPaletteIndex(0)
         return
       }
       if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName) || e.target.isContentEditable) {
-        if (e.key === 'Escape') { e.preventDefault(); appData.setShowCommandPalette(false); appData.setCommandSearch(''); appData.setPaletteIndex(0); e.target.blur() }
+        if (e.key === 'Escape') { e.preventDefault(); setShowCommandPalette(false); setCommandSearch(''); setPaletteIndex(0); e.target.blur() }
         return
       }
-      if (e.key === '/') { e.preventDefault(); appData.setShowCommandPalette(true); appData.setCommandSearch(''); appData.setPaletteIndex(0) }
+      if (e.key === '/') { e.preventDefault(); setShowCommandPalette(true); setCommandSearch(''); setPaletteIndex(0) }
       else if (e.key.toLowerCase() === 'e') { e.preventDefault(); setCurrentView('employees') }
       else if (e.key.toLowerCase() === 's') { e.preventDefault(); addToast('Save shortcut triggered', 'info') }
-      else if (e.key === 'Escape') { appData.setShowCommandPalette(false); setMobileMenuOpen(false) }
+      else if (e.key === 'Escape') { setShowCommandPalette(false); setMobileMenuOpen(false) }
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [])
-
-  const { showCommandPalette, setShowCommandPalette, commandSearch, setCommandSearch, paletteIndex, setPaletteIndex, filteredItems, selectPaletteItem, getCategoryIcon, ConfirmDialog } = useCommandPalette({
-    employees: appData.employees, themeMode, toggleTheme, setCurrentView, addToast, setSelectedEmployeeId
-  })
+  }, [addToast, setCurrentView, setCommandSearch, setPaletteIndex, setShowCommandPalette])
 
   if (user.isEmployee || user.role === 'Teammate') {
     return (

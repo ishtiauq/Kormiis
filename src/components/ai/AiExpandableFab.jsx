@@ -113,9 +113,6 @@ export default function AiExpandableFab({
     }
   }, [])
 
-  // On mobile handsets (< 640px), AI is fully managed inside the mobile bottom bar accordion
-  if (isMobileHandset) return null
-
   // Keyboard shortcut Ctrl + Space / Alt + A
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -151,6 +148,9 @@ export default function AiExpandableFab({
       document.removeEventListener('touchstart', handleClickOutside)
     }
   }, [isOpen, onClose])
+
+  // On mobile handsets (< 640px), AI is fully managed inside the mobile bottom bar accordion
+  if (isMobileHandset) return null
 
   return (
     <>

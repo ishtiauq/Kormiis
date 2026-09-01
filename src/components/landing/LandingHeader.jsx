@@ -17,12 +17,12 @@ export default function LandingHeader({ onOpenAuth, deferredPrompt, onInstallCli
         </a>
 
         {/* Right Actions */}
-        <div className="flex items-center gap-1.5 sm:gap-2.5">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           {/* PWA Install Button */}
           {deferredPrompt && (
             <button
               onClick={onInstallClick}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold apple-glass-btn text-white/90 hover:text-white transition-all cursor-pointer"
+              className="apple-glass-btn flex items-center justify-center gap-1.5 h-9 sm:h-10 px-3.5 sm:px-4 rounded-full text-xs sm:text-sm font-semibold text-white/90 hover:text-white bg-white/10 hover:bg-white/15 border border-white/15 transition-all cursor-pointer shadow-none active:scale-95 shrink-0 whitespace-nowrap"
               title="Install App as PWA"
             >
               <Icon name="download" size={15} />
@@ -30,12 +30,20 @@ export default function LandingHeader({ onOpenAuth, deferredPrompt, onInstallCli
             </button>
           )}
 
+          {/* Sign In Button */}
+          <button
+            onClick={() => onOpenAuth('in')}
+            className="apple-glass-btn flex items-center justify-center h-9 sm:h-10 px-4 sm:px-5 rounded-full text-xs sm:text-sm font-bold text-white/90 hover:text-white bg-white/10 hover:bg-white/15 border border-white/15 transition-all cursor-pointer shadow-none active:scale-95 shrink-0 whitespace-nowrap"
+          >
+            Sign in
+          </button>
+
           {/* Primary CTA */}
           <button
             onClick={() => onOpenAuth('up')}
-            className="bg-primary text-primary-foreground px-4 sm:px-5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold shadow-md hover:opacity-95 active:scale-95 transition-all flex items-center gap-1 sm:gap-1.5 cursor-pointer"
+            className="liquid-glass-btn bg-primary text-primary-foreground flex items-center justify-center gap-1.5 h-9 sm:h-10 px-4 sm:px-5 rounded-full text-xs sm:text-sm font-bold shadow-none hover:opacity-95 active:scale-95 transition-all cursor-pointer shrink-0 whitespace-nowrap"
           >
-            <span>Get Started</span>
+            <span>Start for free</span>
             <Icon name="arrow_forward" size={15} />
           </button>
         </div>

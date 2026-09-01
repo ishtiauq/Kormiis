@@ -654,11 +654,11 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
           </a>
 
           {/* Right Action Group */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             {/* Install App Button */}
             <button
               onClick={handleInstallClick}
-              className="apple-glass-btn flex items-center gap-1.5 px-3.5 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-white/90 hover:text-white transition-all cursor-pointer shadow-sm active:scale-95"
+              className="apple-glass-btn flex items-center justify-center gap-1.5 h-9 sm:h-10 px-3.5 sm:px-4 rounded-full text-xs sm:text-sm font-semibold text-white/90 hover:text-white bg-white/10 hover:bg-white/15 border border-white/15 transition-all cursor-pointer shadow-none active:scale-95 shrink-0 whitespace-nowrap"
               title="Install App as PWA"
             >
               <Icon name="download" size={15} />
@@ -669,7 +669,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
             {/* Sign in Button */}
             <button
               onClick={() => openAuthModal('in')}
-              className="apple-glass-btn flex items-center px-3.5 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-bold text-white/90 hover:text-white transition-all cursor-pointer active:scale-95"
+              className="apple-glass-btn flex items-center justify-center h-9 sm:h-10 px-4 sm:px-5 rounded-full text-xs sm:text-sm font-bold text-white/90 hover:text-white bg-white/10 hover:bg-white/15 border border-white/15 transition-all cursor-pointer shadow-none active:scale-95 shrink-0 whitespace-nowrap"
             >
               Sign in
             </button>
@@ -677,7 +677,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
             {/* Start for Free CTA */}
             <button
               onClick={() => openAuthModal('up')}
-              className="liquid-glass-btn bg-primary text-primary-foreground px-4 sm:px-5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold shadow-sm hover:opacity-95 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
+              className="liquid-glass-btn bg-primary text-primary-foreground flex items-center justify-center gap-1.5 h-9 sm:h-10 px-4 sm:px-5 rounded-full text-xs sm:text-sm font-bold shadow-none hover:opacity-95 active:scale-95 transition-all cursor-pointer shrink-0 whitespace-nowrap"
             >
               <span>Start for free</span>
               <Icon name="arrow_forward" size={15} />
@@ -694,11 +694,11 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
         style={{ left: '50%', x: '-50%' }}
         className="sm:hidden fixed bottom-4 z-40 pointer-events-auto w-max max-w-[calc(100vw-1.5rem)] glass-kormiis h-12 px-2.5 flex items-center gap-1.5 rounded-full text-white transition-all duration-300"
       >
-        <nav className="flex items-center gap-1.5 w-full">
+        <nav className="flex items-center justify-center gap-1.5 w-full">
           {/* Install App Button */}
           <button
             onClick={handleInstallClick}
-            className="apple-glass-btn flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white/90 hover:text-white transition-all cursor-pointer shadow-sm active:scale-95"
+            className="apple-glass-btn flex items-center justify-center gap-1.5 h-8 px-3 rounded-full text-xs font-semibold text-white/90 hover:text-white bg-white/10 hover:bg-white/15 border border-white/15 transition-all cursor-pointer shadow-none active:scale-95 shrink-0 whitespace-nowrap"
             title="Install App as PWA"
           >
             <Icon name="download" size={14} />
@@ -708,7 +708,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
           {/* Sign In Button */}
           <button
             onClick={() => openAuthModal('in')}
-            className="apple-glass-btn flex items-center px-3.5 py-1.5 text-xs font-bold text-white/90 hover:text-white transition-all cursor-pointer active:scale-95"
+            className="apple-glass-btn flex items-center justify-center h-8 px-3.5 rounded-full text-xs font-bold text-white/90 hover:text-white bg-white/10 hover:bg-white/15 border border-white/15 transition-all cursor-pointer shadow-none active:scale-95 shrink-0 whitespace-nowrap"
           >
             Sign in
           </button>
@@ -716,7 +716,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
           {/* Start for Free CTA */}
           <button
             onClick={() => openAuthModal('up')}
-            className="liquid-glass-btn bg-primary text-primary-foreground px-4 py-1.5 rounded-full text-xs font-bold shadow-sm hover:opacity-95 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
+            className="liquid-glass-btn bg-primary text-primary-foreground flex items-center justify-center gap-1.5 h-8 px-4 rounded-full text-xs font-bold shadow-none hover:opacity-95 active:scale-95 transition-all cursor-pointer shrink-0 whitespace-nowrap"
           >
             <span>Start for free</span>
             <Icon name="arrow_forward" size={14} />
