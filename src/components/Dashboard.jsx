@@ -13,11 +13,10 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, B
 // Lazy load heavy widgets for progressive rendering
 const PerformanceTrackerWidget = lazy(() => import('./widgets/PerformanceTrackerWidget.jsx').then(m => ({ default: m.PerformanceTrackerWidget })))
 const TasksWidget = lazy(() => import('./widgets/TasksWidget.jsx').then(m => ({ default: m.TasksWidget })))
-const MilestonesWidget = lazy(() => import('./widgets/MilestonesWidget.jsx').then(m => ({ default: m.MilestonesWidget })))
-const EventsWidget = lazy(() => import('./widgets/EventsWidget.jsx').then(m => ({ default: m.EventsWidget })))
+const UpcomingWidget = lazy(() => import('./widgets/UpcomingWidget.jsx').then(m => ({ default: m.UpcomingWidget })))
+const EmployeeDirectoryWidget = lazy(() => import('./widgets/EmployeeDirectoryWidget.jsx').then(m => ({ default: m.EmployeeDirectoryWidget })))
 const DocumentsWidget = lazy(() => import('./widgets/DocumentsWidget.jsx').then(m => ({ default: m.DocumentsWidget })))
 const PayrollWidget = lazy(() => import('./widgets/PayrollWidget.jsx').then(m => ({ default: m.PayrollWidget })))
-const EmployeeDirectoryWidget = lazy(() => import('./widgets/EmployeeDirectoryWidget.jsx').then(m => ({ default: m.EmployeeDirectoryWidget })))
 const AssetsWidget = lazy(() => import('./widgets/AssetsWidget.jsx').then(m => ({ default: m.AssetsWidget })))
 
 // Skeleton fallback for lazy widgets
@@ -36,16 +35,16 @@ export const DashboardWidget = memo(({
 }) => {
   return (
     <Card className={`flex flex-col p-0 h-full ${cardClass}`}>
-      <CardHeader className="flex-row items-center justify-between pb-3.5 space-y-0 gap-3">
+      <CardHeader className="flex-row items-center justify-between pb-2.5 space-y-0 gap-2.5">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="shrink-0 flex items-center justify-center [&_.msr]:!text-foreground">
             {icon}
           </div>
-          <CardTitle className="text-fluid-lg font-bold tracking-tight text-foreground m-0 leading-snug break-words ">{title}</CardTitle>
+          <CardTitle className="text-fluid-headline font-extrabold tracking-[0.03em] uppercase text-foreground m-0 leading-none whitespace-nowrap flex-1 min-w-0">{title}</CardTitle>
         </div>
         {action}
       </CardHeader>
-      <CardContent className={`flex-1 ${contentClass} p-4 sm:p-5`}>
+      <CardContent className={`flex-1 ${contentClass} p-3.5 sm:p-4`}>
         {children}
       </CardContent>
     </Card>
@@ -349,7 +348,6 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
   const upcomingMilestones = calculateUpcomingMilestones(employees)
   const totalTracked = todayStats.present + todayStats.absent + todayStats.onLeave
   const attendanceRate = totalTracked > 0 ? Math.round((todayStats.present / totalTracked) * 100) : 0
-  const inactiveCount = employees.filter(emp => emp.status === 'Terminated' || emp.status === 'Inactive').length
 
   const recentAnnouncements = announcements
     ? [...announcements]
@@ -392,6 +390,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
     })
   }
 
+
   return (
     <div className="space-y-6">
       {currentUser && (
@@ -406,22 +405,26 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
         />
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3 gap-5 lg:gap-6 items-stretch pt-2">
-        
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 lg:gap-6 auto-rows-[minmax(148px,auto)] items-stretch pt-2">
+
         {canViewAnnouncements && (
           <DashboardWidget
           id="w4"
           title="Announcements"
-          icon={<Icon name="rss_feed" className="text-amber-500 shrink-0" size={28}/>}
-          cardClass="col-span-full"
+          icon={<Icon name="rss_feed" className="text-amber-500 shrink-0" size={16}/>}
+          cardClass="col-span-12 lg:col-span-7 lg:row-span-2"
           action={<button onClick={() => setCurrentView && setCurrentView('announcements')} className="apple-glass-btn text-xs font-semibold px-3.5 h-7 rounded-full cursor-pointer">View All</button>}
-          contentClass="flex flex-col justify-start gap-2.5 pt-4"
+          contentClass="flex flex-col p-0 pt-1 overflow-hidden"
           {...wProps}
         >
           {recentAnnouncements.length === 0 ? (
-            <p className="text-center my-auto text-fluid-xs text-muted-foreground py-4">No active announcements</p>
+            <div className="flex-1 flex flex-col items-center justify-center text-center p-5">
+              <Icon name="rss_feed" size={34} className="text-amber-500/40 dark:text-amber-500/50 mb-2 shrink-0" />
+              <p className="m-0 text-fluid-xs font-medium text-muted-foreground max-w-[200px] leading-relaxed">No active announcements</p>
+            </div>
           ) : (
-            recentAnnouncements.map((ann, idx) => (
+          <div className="flex-1 min-h-0 overflow-y-auto max-h-[360px] lg:max-h-[520px] flex flex-col gap-2.5 px-4 sm:px-5 pb-4 chat-scrollbar">
+            {recentAnnouncements.map((ann, idx) => (
               <div
                 key={ann.id || idx}
                 className="flex items-center gap-3.5 p-3 px-4 rounded-2xl liquid-widget-item cursor-pointer select-none active:scale-[0.99]"
@@ -440,28 +443,42 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
                   </Badge>
                 )}
               </div>
-            ))
+            ))}
+          </div>
           )}
         </DashboardWidget>
+        )}
+
+        {/* Employee Directory Widget - beside Announcements on desktop, 2-slot tall (Lazy loaded) */}
+        {canViewEmployees && (
+          <Suspense fallback={<WidgetSkeleton />}>
+            <EmployeeDirectoryWidget
+              employees={employees}
+              setCurrentView={setCurrentView}
+              cardClass="col-span-12 lg:col-span-5 lg:row-span-3"
+              {...wProps}
+            />
+          </Suspense>
         )}
 
         {canViewAttendance && (
           <DashboardWidget
             id="w2"
             title="Attendance"
-            icon={<Icon name="group" className="text-foreground shrink-0" size={28}/>}
+            icon={<Icon name="group" className="text-foreground shrink-0" size={16}/>}
+cardClass="col-span-12 lg:col-span-7"
             action={
               <div className="flex items-center gap-1.5 sm:gap-2">
                 {attFilter && (
-                  <button 
+                  <button
                     onClick={() => setAttFilter(null)}
                     className="text-[11px] font-semibold text-muted-foreground hover:text-foreground px-2 py-0.5 rounded-lg transition-colors cursor-pointer"
                   >
                     Reset
                   </button>
                 )}
-                <button 
-                  onClick={() => setCurrentView && setCurrentView('attendance')} 
+                <button
+                  onClick={() => setCurrentView && setCurrentView('attendance')}
                   className="apple-glass-btn text-xs font-semibold px-3.5 h-7 rounded-full cursor-pointer shrink-0"
                 >
                   Roll Call
@@ -508,14 +525,14 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
                         <span className="text-xs font-mono font-black leading-none mt-1">
                           {dayNum}
                         </span>
-                        <span 
+                        <span
                           className={`size-1.5 rounded-full mt-1.5 day-dot ${
-                            isSelected 
-                              ? '' 
-                              : item.present > 0 
-                                ? 'bg-foreground' 
+                            isSelected
+                              ? ''
+                              : item.present > 0
+                                ? 'bg-foreground'
                                 : 'bg-foreground/20'
-                          }`} 
+                          }`}
                         />
                       </button>
                     )
@@ -598,14 +615,14 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
               <div className="mt-3 p-3 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-border/60 dark:border-white/8 flex flex-col gap-2 animate-in fade-in-50 duration-200">
                 <div className="flex items-center justify-between px-1">
                   <span className="text-xs font-bold text-foreground capitalize flex items-center gap-1.5">
-                    <Icon 
-                      name={attFilter === 'present' ? 'check_circle' : attFilter === 'absent' ? 'cancel' : 'event_busy'} 
-                      size={14} 
-                      className="text-foreground shrink-0" 
+                    <Icon
+                      name={attFilter === 'present' ? 'check_circle' : attFilter === 'absent' ? 'cancel' : 'event_busy'}
+                      size={14}
+                      className="text-foreground shrink-0"
                     />
                     {attFilter === 'present' ? 'Present' : attFilter === 'absent' ? 'Absent' : 'On Leave'} ({selectedDayLists[attFilter]?.length || 0}) • <span className="font-mono text-muted-foreground text-[11px]">{selectedDayData.isToday ? 'Today' : selectedDayData.day}</span>
                   </span>
-                  <button 
+                  <button
                     onClick={() => setAttFilter(null)}
                     className="text-[11px] font-semibold text-foreground hover:underline cursor-pointer"
                   >
@@ -619,52 +636,45 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
           </DashboardWidget>
         )}
 
-        <DailyChecklistWidget notes={notes} setNotes={setNotes} ownerId={currentUser?.id || currentUser?.uid || ''} setCurrentView={setCurrentView} cardClass="" />
+        <DailyChecklistWidget notes={notes} setNotes={setNotes} ownerId={currentUser?.id || currentUser?.uid || ''} setCurrentView={setCurrentView} cardClass="col-span-12 sm:col-span-6 lg:col-span-4" />
 
-<HrOverview adminUid={currentUser?.uid} currentUser={currentUser} setCurrentView={setCurrentView} addToast={addToast} />
+<HrOverview adminUid={currentUser?.uid} currentUser={currentUser} setCurrentView={setCurrentView} addToast={addToast} cardClass="col-span-12 lg:col-span-4" />
 
         {/* Performance Tracker - Lazy loaded with Suspense */}
         <Suspense fallback={<WidgetSkeleton />}>
-          <PerformanceTrackerWidget 
-            efficiencyScore={efficiencyScore} 
-            taskCompletionRate={taskCompletionRate} 
-            attendanceRate={attendanceRate} 
-            setCurrentView={setCurrentView} 
-            {...wProps} 
+          <PerformanceTrackerWidget
+            efficiencyScore={efficiencyScore}
+            taskCompletionRate={taskCompletionRate}
+            attendanceRate={attendanceRate}
+            setCurrentView={setCurrentView}
+            cardClass="col-span-12 lg:col-span-4"
+            {...wProps}
           />
         </Suspense>
 
         {/* Tasks Widget - Lazy loaded with Suspense */}
         {canViewTasks && (
           <Suspense fallback={<WidgetSkeleton />}>
-            <TasksWidget 
-              tasks={tasks} 
-              pendingTasksCount={pendingTasksCount} 
-              taskCompletionRate={taskCompletionRate} 
-              setCurrentView={setCurrentView} 
-              {...wProps} 
+            <TasksWidget
+              tasks={tasks}
+              pendingTasksCount={pendingTasksCount}
+              taskCompletionRate={taskCompletionRate}
+              setCurrentView={setCurrentView}
+              cardClass="col-span-12 sm:col-span-6 lg:col-span-4"
+              {...wProps}
             />
           </Suspense>
         )}
 
-        {/* Milestones Widget - Lazy loaded with Suspense */}
-        {canViewEmployees && (
+        {/* Upcoming Widget (Milestones + Events merged) - Lazy loaded with Suspense */}
+        {(canViewEmployees || canViewCalendar) && (
           <Suspense fallback={<WidgetSkeleton />}>
-            <MilestonesWidget 
-              upcomingMilestones={upcomingMilestones} 
-              setCurrentView={setCurrentView} 
-              {...wProps} 
-            />
-          </Suspense>
-        )}
-
-        {/* Events Widget - Lazy loaded with Suspense */}
-        {canViewCalendar && (
-          <Suspense fallback={<WidgetSkeleton />}>
-            <EventsWidget 
-              upcomingEvents={upcomingEvents} 
-              setCurrentView={setCurrentView} 
-              {...wProps} 
+            <UpcomingWidget
+              upcomingMilestones={upcomingMilestones}
+              upcomingEvents={upcomingEvents}
+              setCurrentView={setCurrentView}
+              cardClass="col-span-12 sm:col-span-6 lg:col-span-4"
+              {...wProps}
             />
           </Suspense>
         )}
@@ -672,10 +682,11 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
         {/* Documents Widget - Lazy loaded with Suspense */}
         {canViewDocuments && (
           <Suspense fallback={<WidgetSkeleton />}>
-            <DocumentsWidget 
-              recentDocuments={recentDocuments} 
-              setCurrentView={setCurrentView} 
-              {...wProps} 
+            <DocumentsWidget
+              recentDocuments={recentDocuments}
+              setCurrentView={setCurrentView}
+              cardClass="col-span-12 sm:col-span-6 lg:col-span-4"
+              {...wProps}
             />
           </Suspense>
         )}
@@ -683,27 +694,16 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
         {/* Payroll Widget - Lazy loaded with Suspense */}
         {canViewPayroll && (
           <Suspense fallback={<WidgetSkeleton />}>
-            <PayrollWidget 
+            <PayrollWidget
               currentPayrollMonth={currentPayrollMonth}
               paidCount={paidCount}
               pendingCount={pendingCount}
               totalPayrollCost={totalPayrollCost}
               settings={settings}
               currentPayrollData={currentPayrollData}
-              setCurrentView={setCurrentView} 
-              {...wProps} 
-            />
-          </Suspense>
-        )}
-
-        {/* Employee Directory Widget - Lazy loaded with Suspense */}
-        {canViewEmployees && (
-          <Suspense fallback={<WidgetSkeleton />}>
-            <EmployeeDirectoryWidget 
-              activeCount={activeCount} 
-              inactiveCount={inactiveCount} 
-              setCurrentView={setCurrentView} 
-              {...wProps} 
+              setCurrentView={setCurrentView}
+              cardClass="col-span-12 lg:col-span-4"
+              {...wProps}
             />
           </Suspense>
         )}
@@ -711,11 +711,12 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
         {/* Assets Widget - Lazy loaded with Suspense */}
         {canViewAssets && (
           <Suspense fallback={<WidgetSkeleton />}>
-            <AssetsWidget 
-              assets={assets} 
-              availableAssetsCount={availableAssetsCount} 
-              setCurrentView={setCurrentView} 
-              {...wProps} 
+            <AssetsWidget
+              assets={assets}
+              availableAssetsCount={availableAssetsCount}
+              setCurrentView={setCurrentView}
+              cardClass="col-span-12 sm:col-span-6 lg:col-span-4"
+              {...wProps}
             />
           </Suspense>
         )}

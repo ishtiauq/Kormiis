@@ -7,7 +7,7 @@ export const TasksWidget = memo(({ tasks, pendingTasksCount, taskCompletionRate,
   <DashboardWidget
     id="tasks-widget"
     title="Tasks Overview"
-    icon={<Icon name="check_box" className="text-foreground shrink-0" size={28}/>}
+    icon={<Icon name="check_box" className="text-foreground shrink-0" size={16}/>}
     {...wProps}
     action={
       <button onClick={() => setCurrentView('tasks')} className="apple-glass-btn text-xs font-semibold px-3.5 h-7 rounded-full text-foreground hover:text-foreground cursor-pointer">

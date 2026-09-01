@@ -1,33 +1,107 @@
-import { memo } from 'react'
+import { memo, useMemo, useState } from 'react'
 import Icon from "@/components/ui/Icon.jsx"
 import { Badge } from "@/components/ui/badge"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Input } from "@/components/ui/input"
 import { DashboardWidget } from '../Dashboard.jsx'
 
-export const EmployeeDirectoryWidget = memo(({ activeCount, inactiveCount, setCurrentView, ...wProps }) => (
-  <DashboardWidget
-    id="w1"
-    title="Employee Directory"
-    icon={<Icon name="group" className="text-blue-500 shrink-0" size={28}/>}
-    action={<button onClick={() => setCurrentView && setCurrentView('employees')} className="apple-glass-btn text-xs font-semibold px-3.5 h-7 rounded-full cursor-pointer">View All</button>}
-    contentClass="flex items-center justify-around py-4"
-    {...wProps}
-  >
-    <div className="flex flex-col items-center gap-1.5">
-      <span className="text-fluid-xl font-black tabular-nums text-foreground">{activeCount}</span>
-      <Badge variant="success" className="gap-1 xl:gap-1.5 py-1 px-2.5 xl:px-3 text-[10px] xl:text-xs rounded-full">
-        <span className="sync-dot sync-blink w-1.5 h-1.5 rounded-full bg-status-success"></span>
-        Active
-      </Badge>
-    </div>
-    <div className="w-[1px] h-12 bg-border/80 dark:bg-white/10"></div>
-    <div className="flex flex-col items-center gap-1.5">
-      <span className="text-fluid-xl font-black tabular-nums text-foreground">{inactiveCount}</span>
-      <Badge variant="destructive" className="gap-1 xl:gap-1.5 py-1 px-2.5 xl:px-3 text-[10px] xl:text-xs rounded-full">
-        <span className="sync-dot w-1.5 h-1.5 rounded-full bg-status-error"></span>
-        Inactive
-      </Badge>
-    </div>
-  </DashboardWidget>
-))
+export const EmployeeDirectoryWidget = memo(({ employees = [], setCurrentView, ...wProps }) => {
+  const [search, setSearch] = useState('')
+
+  const filtered = useMemo(() => {
+    const query = search.trim().toLowerCase()
+    return [...employees]
+      .filter(e => e.status !== 'Terminated')
+      .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
+      .filter(e => {
+        if (!query) return true
+        const name = (e.name || '').toLowerCase()
+        const email = (e.email || '').toLowerCase()
+        const phone = (e.phone || e.mobileNumber || '').toLowerCase()
+        return name.includes(query) || email.includes(query) || phone.includes(query)
+      })
+  }, [employees, search])
+
+  return (
+    <DashboardWidget
+      id="directory"
+      title="Employee Directory"
+      icon={<Icon name="group" className="text-foreground shrink-0" size={16}/>}
+      action={
+        <Badge variant="outline" className="px-2.5 py-0.5 rounded-full text-xs font-semibold border-black/10 dark:border-white/12 text-foreground bg-black/[0.04] dark:bg-white/[0.06] shrink-0">
+          {employees.length} members
+        </Badge>
+      }
+      contentClass="flex flex-col p-0 pt-1 overflow-hidden"
+      {...wProps}
+    >
+      {/* Search */}
+      <div className="relative flex items-center px-4 sm:px-5 pt-2 pb-2.5 w-full">
+        <Icon name="search" size={18} className="absolute left-6 sm:left-7 text-muted-foreground z-10 pointer-events-none" />
+        <Input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search employees..."
+          aria-label="Search employees"
+          className="!pl-10.5 h-11 rounded-2xl w-full bg-muted/40"
+        />
+      </div>
+
+      {/* Scrollable list â€” never expands, scrolls within 2-slot height */}
+      <div className="flex-1 min-h-0 overflow-y-auto max-h-[360px] lg:max-h-[640px] divide-y divide-border/40 dark:divide-white/6 chat-scrollbar px-4 sm:px-5 pb-4">
+        {filtered.length === 0 ? (
+          <div className="flex flex-col items-center justify-center text-center py-10 gap-2">
+            <Icon name="group_off" size={34} className="text-muted-foreground/40" />
+            <p className="m-0 text-fluid-xs font-medium text-muted-foreground max-w-[220px] leading-relaxed">
+              {employees.length === 0 ? 'No employees enlisted yet.' : 'No employees match your search.'}
+            </p>
+            {employees.length === 0 && setCurrentView && (
+              <button
+                onClick={() => setCurrentView('employees')}
+                className="apple-glass-btn text-xs font-semibold px-3.5 h-7 rounded-full cursor-pointer mt-1"
+              >
+                View Directory
+              </button>
+            )}
+          </div>
+        ) : (
+          filtered.map((emp) => (
+            <div key={emp.id} className="flex items-start gap-3 py-3 first:pt-2 last:pb-1">
+              <Avatar className="size-9 shrink-0 rounded-xl ring-1 ring-border/60 dark:ring-white/10">
+                {emp.avatar ? <AvatarImage src={emp.avatar} alt={emp.name} className="object-cover" /> : null}
+                <AvatarFallback className="bg-primary/10 text-primary rounded-xl text-[11px] font-bold">
+                  {(emp.name || '?').slice(0, 2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+
+              <div className="flex-1 min-w-0 flex flex-col gap-1">
+                <span className="text-xs font-bold text-foreground break-words">{emp.name}</span>
+                <div className="flex flex-wrap items-center gap-x-3.5 gap-y-0.5 text-[11px] text-muted-foreground min-w-0">
+                  <span className="flex items-center gap-1.5 min-w-0">
+                    <Icon name="call" size={12} className="shrink-0 opacity-80" />
+                    {emp.phone || emp.mobileNumber ? (
+                      <span className="break-all">{emp.phone || emp.mobileNumber}</span>
+                    ) : (
+                      <span className="italic text-muted-foreground/70">No phone added yet</span>
+                    )}
+                  </span>
+                  <span className="flex items-center gap-1.5 min-w-0">
+                    <Icon name="mail" size={12} className="shrink-0 opacity-80" />
+                    {emp.email ? (
+                      <span className="break-all">{emp.email}</span>
+                    ) : (
+                      <span className="italic text-muted-foreground/70">No email added yet</span>
+                    )}
+                  </span>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </DashboardWidget>
+  )
+})
 
 EmployeeDirectoryWidget.displayName = 'EmployeeDirectoryWidget'

@@ -1445,6 +1445,9 @@ button[role="tab"][aria-selected="true"] .msr {
   .text-fluid-display-xl {
     font-size: clamp(2.5rem, 1.5rem + 3.5vw, 4.5rem) !important;
   }
+  .text-fluid-headline {
+    font-size: clamp(0.72rem, 0.68rem + 0.22vw, 0.82rem) !important;
+  }
 }
 
 /* ==============================================================

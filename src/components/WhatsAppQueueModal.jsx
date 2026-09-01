@@ -200,7 +200,7 @@ export default function WhatsAppQueueModal({ settings }) {
                     <Icon name="person" size={18} />
                   </div>
                   <div className="min-w-0">
-                    <div className="text-sm font-bold text-foreground truncate">{current?.employeeName || 'Team Member'}</div>
+                    <div className="text-sm font-bold text-foreground break-words">{current?.employeeName || 'Team Member'}</div>
                     <div className="text-[11px] text-muted-foreground tabular-nums">+{current?.phone || ''}</div>
                   </div>
                 </div>

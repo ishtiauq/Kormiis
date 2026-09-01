@@ -16,7 +16,7 @@ const stat = (icon, label, value, toneColor, iconBg, view, setCurrentView) => (
   </button>
 )
 
-export default function HrOverview({ adminUid, currentUser, setCurrentView, addToast }) {
+export default function HrOverview({ adminUid, currentUser, setCurrentView, addToast, cardClass = '' }) {
   const [counts, setCounts] = useState({ highRisk: '-', gigs: '-' })
 
   const load = useCallback(async () => {
@@ -38,13 +38,13 @@ export default function HrOverview({ adminUid, currentUser, setCurrentView, addT
   if (!isAdmin) return null
 
   return (
-    <Card className="flex flex-col p-0 h-full">
-      <CardHeader className="flex-row items-center justify-between pb-3.5 space-y-0">
-        <div className="flex items-center gap-3">
+    <Card className={`flex flex-col p-0 h-full ${cardClass}`}>
+      <CardHeader className="flex-row items-center justify-between pb-2.5 space-y-0">
+        <div className="flex items-center gap-2.5 min-w-0">
           <div className="flex items-center justify-center shrink-0">
-            <Icon name="monitoring" className="text-primary shrink-0" size={28}/>
+            <Icon name="monitoring" className="text-primary shrink-0" size={16}/>
           </div>
-          <CardTitle className="text-fluid-lg font-bold text-foreground m-0">People Insights</CardTitle>
+          <CardTitle className="text-fluid-headline font-extrabold tracking-[0.03em] uppercase text-foreground m-0 leading-none whitespace-nowrap flex-1 min-w-0">People Insights</CardTitle>
         </div>
         <button 
           onClick={() => setCurrentView && setCurrentView('wellbeing')} 
@@ -54,17 +54,10 @@ export default function HrOverview({ adminUid, currentUser, setCurrentView, addT
         </button>
       </CardHeader>
 
-      <CardContent className="flex-1 p-4 sm:p-5 flex flex-col justify-between pt-1">
+      <CardContent className="flex-1 p-4 sm:p-5 flex flex-col pt-1">
         <div className="grid grid-cols-2 gap-2.5 sm:gap-3 py-1">
           {stat('favorite', 'Well-being risks', counts.highRisk, 'text-rose-500', 'bg-rose-500/15', 'wellbeing', setCurrentView)}
           {stat('workspaces', 'Open gigs', counts.gigs, 'text-emerald-500', 'bg-emerald-500/15', 'gigs', setCurrentView)}
-        </div>
-
-        <div className="mt-3.5 pt-3 border-t border-border/80 dark:border-white/10 flex justify-between items-center text-xs font-semibold text-muted-foreground">
-          <span>Pulse Condition</span>
-          <span className="font-extrabold text-sm text-foreground flex items-center gap-2">
-            <span className="pulse-dot pulse-dot-green m-0"></span> Optimal
-          </span>
         </div>
       </CardContent>
     </Card>
