@@ -32,11 +32,40 @@ export const parseMin = (t) => {
 
 export const fmtH = (m) => m === null ? '0.0' : (m / 60).toFixed(1)
 
+export const ATTENDANCE_STATUSES = [
+  'In Office',
+  'Remote',
+  'On-Field',
+  'On Leave',
+  'Off Duty',
+  'No-Show'
+]
+
+export const normalizeAttendanceStatus = (status) => {
+  if (!status) return 'Off Duty'
+  const s = String(status).trim()
+  if (s === 'Present' || s === 'At Office' || s === 'Late') return 'In Office'
+  if (s === 'WFH' || s === 'Work From Home' || s === 'Home') return 'Remote'
+  if (s === 'Field' || s === 'Outdoor' || s === 'On Field' || s === 'Client Visit') return 'On-Field'
+  if (s === 'Leave' || s === 'On Leave' || s === 'Annual Leave' || s === 'Sick Leave' || s === 'Casual Leave') return 'On Leave'
+  if (s === 'Absent' || s === 'Day Off' || s === 'Off') return 'Off Duty'
+  if (s === 'No-Show' || s === 'No Show' || s === 'Unannounced') return 'No-Show'
+  if (ATTENDANCE_STATUSES.includes(s)) return s
+  return s
+}
+
 export const PILL_STYLES = {
-  Present: { bg: '#28a745', color: '#fff' },
-  Absent: { bg: '#dc3545', color: '#fff' },
-  'On Leave': { bg: '#ffc107', color: '#121212' },
-  WFH: { bg: '#007aff', color: '#fff' },
+  'In Office': { bg: '#10b981', color: '#fff', label: 'In Office', icon: 'check_circle' },
+  'Remote': { bg: '#0284c7', color: '#fff', label: 'Remote', icon: 'home_work' },
+  'On-Field': { bg: '#8b5cf6', color: '#fff', label: 'On-Field', icon: 'commute' },
+  'On Leave': { bg: '#f59e0b', color: '#121212', label: 'On Leave', icon: 'event_busy' },
+  'Off Duty': { bg: '#64748b', color: '#fff', label: 'Off Duty', icon: 'schedule' },
+  'No-Show': { bg: '#ef4444', color: '#fff', label: 'No-Show', icon: 'cancel' },
+  // Backward compatibility mappings:
+  Present: { bg: '#10b981', color: '#fff', label: 'In Office', icon: 'check_circle' },
+  Absent: { bg: '#64748b', color: '#fff', label: 'Off Duty', icon: 'schedule' },
+  WFH: { bg: '#0284c7', color: '#fff', label: 'Remote', icon: 'home_work' },
+  Late: { bg: '#10b981', color: '#fff', label: 'In Office', icon: 'check_circle' },
 }
 
 export const tabChip = (isActive) => ({

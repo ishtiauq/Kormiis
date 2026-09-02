@@ -1081,6 +1081,91 @@ textarea:hover::-webkit-scrollbar-thumb {
 }
 
 /* ==============================================================
+   UNIVERSAL MOBILE, TABLET & TOUCH DEVICE ZERO-SCROLLBAR STANDARD
+   On all mobile handsets, tablets, iPads, and touch-screen devices,
+   native momentum touch scrolling is used and scrollbars are 100%
+   invisible and eliminated globally.
+   ============================================================== */
+@media (hover: none) and (pointer: coarse), (max-width: 1024px) {
+  html,
+  body,
+  *,
+  *::before,
+  *::after,
+  .overflow-y-auto,
+  .overflow-x-auto,
+  .chat-scrollbar,
+  main,
+  textarea,
+  div,
+  section,
+  nav,
+  aside,
+  ul,
+  ol {
+    -ms-overflow-style: none !important;
+    scrollbar-width: none !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  ::-webkit-scrollbar,
+  *::-webkit-scrollbar,
+  .chat-scrollbar::-webkit-scrollbar,
+  .chat-scrollbar *::-webkit-scrollbar,
+  *:hover::-webkit-scrollbar,
+  *:hover .chat-scrollbar::-webkit-scrollbar,
+  .overflow-y-auto:hover::-webkit-scrollbar,
+  .overflow-x-auto:hover::-webkit-scrollbar,
+  main:hover::-webkit-scrollbar,
+  textarea:hover::-webkit-scrollbar,
+  .dark *:hover::-webkit-scrollbar,
+  [data-theme="dark"] *:hover::-webkit-scrollbar {
+    display: none !important;
+    width: 0px !important;
+    height: 0px !important;
+    max-width: 0px !important;
+    max-height: 0px !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  ::-webkit-scrollbar-thumb,
+  *::-webkit-scrollbar-thumb,
+  .chat-scrollbar::-webkit-scrollbar-thumb,
+  .chat-scrollbar *::-webkit-scrollbar-thumb,
+  *:hover::-webkit-scrollbar-thumb,
+  *:hover .chat-scrollbar::-webkit-scrollbar-thumb,
+  .overflow-y-auto:hover::-webkit-scrollbar-thumb,
+  .overflow-x-auto:hover::-webkit-scrollbar-thumb,
+  main:hover::-webkit-scrollbar-thumb,
+  textarea:hover::-webkit-scrollbar-thumb,
+  .dark *:hover::-webkit-scrollbar-thumb,
+  [data-theme="dark"] *:hover::-webkit-scrollbar-thumb,
+  ::-webkit-scrollbar-thumb:hover,
+  *::-webkit-scrollbar-thumb:hover {
+    display: none !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    border: none !important;
+    pointer-events: none !important;
+  }
+
+  ::-webkit-scrollbar-track,
+  *::-webkit-scrollbar-track,
+  ::-webkit-scrollbar-corner,
+  *::-webkit-scrollbar-corner {
+    display: none !important;
+    background: transparent !important;
+    background-color: transparent !important;
+  }
+}
+
+/* ==============================================================
    RENDER PERFORMANCE: INSTANT-RENDER & COMPOSITOR ACCELERATION
    All elements pre-render fully with zero blank spaces or pop-ins.
    ============================================================== */

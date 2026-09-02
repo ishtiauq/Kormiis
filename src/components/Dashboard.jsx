@@ -13,7 +13,6 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, B
 // Eagerly imported widgets for instant, zero-delay rendering
 import { PerformanceTrackerWidget } from './widgets/PerformanceTrackerWidget.jsx'
 import { TasksWidget } from './widgets/TasksWidget.jsx'
-import { UpcomingWidget } from './widgets/UpcomingWidget.jsx'
 import { EmployeeDirectoryWidget } from './widgets/EmployeeDirectoryWidget.jsx'
 import { DocumentsWidget } from './widgets/DocumentsWidget.jsx'
 import { PayrollWidget } from './widgets/PayrollWidget.jsx'
@@ -67,7 +66,7 @@ const EmployeeRow = memo(({ emp }) => (
       </span>
     ) : (
       <Badge variant="outline" className="text-[10px] px-2 py-0.5 rounded-md font-semibold shrink-0">
-        {emp.status || 'Absent'}
+        {emp.status || 'Off Duty'}
       </Badge>
     )}
   </div>
@@ -149,8 +148,9 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
         activeEmps.forEach(emp => {
           const log = logs[emp.id]
           if (log) {
-            if (log.status === 'Present' || log.status === 'Late') presentCount++
-            else if (log.status === 'On Leave') onLeaveCount++
+            const s = String(log.status || '').trim()
+            if (s === 'In Office' || s === 'Present' || s === 'Late' || s === 'Remote' || s === 'WFH' || s === 'On-Field') presentCount++
+            else if (s === 'On Leave') onLeaveCount++
             else absentCount++
           } else {
             if (emp.status === 'On Leave') onLeaveCount++
@@ -212,6 +212,8 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
     activeEmps.forEach(emp => {
       const log = logs[emp.id]
       const designation = emp.designation && emp.designation.toLowerCase() !== 'teammate' ? emp.designation : (emp.role && emp.role.toLowerCase() !== 'teammate' ? emp.role : '')
+      const s = String(log?.status || '').trim()
+      const fallbackStatus = emp.status === 'On Leave' ? 'On Leave' : 'Off Duty'
       const entry = {
         id: emp.id,
         name: emp.name,
@@ -219,11 +221,11 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
         role: designation,
         designation,
         time: log?.checkIn || null,
-        status: log?.status || (emp.status === 'On Leave' ? 'On Leave' : 'Absent')
+        status: s || fallbackStatus
       }
       if (log) {
-        if (log.status === 'Present' || log.status === 'Late') pList.push(entry)
-        else if (log.status === 'On Leave') lList.push(entry)
+        if (s === 'In Office' || s === 'Present' || s === 'Late' || s === 'Remote' || s === 'WFH' || s === 'On-Field') pList.push(entry)
+        else if (s === 'On Leave') lList.push(entry)
         else aList.push(entry)
       } else {
         if (emp.status === 'On Leave') lList.push(entry)
@@ -245,6 +247,8 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
     activeEmps.forEach(emp => {
       const log = todayLogs[emp.id]
       const designation = emp.designation && emp.designation.toLowerCase() !== 'teammate' ? emp.designation : (emp.role && emp.role.toLowerCase() !== 'teammate' ? emp.role : '')
+      const s = String(log?.status || '').trim()
+      const fallbackStatus = emp.status === 'On Leave' ? 'On Leave' : 'Off Duty'
       const entry = { 
         id: emp.id, 
         name: emp.name, 
@@ -252,15 +256,15 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
         role: designation, 
         designation, 
         time: log?.checkIn || null,
-        status: log?.status || (emp.status === 'On Leave' ? 'On Leave' : 'Absent')
+        status: s || fallbackStatus
       }
       if (log) {
-        if (log.status === 'Present' || log.status === 'Late') {
+        if (s === 'In Office' || s === 'Present' || s === 'Late' || s === 'Remote' || s === 'WFH' || s === 'On-Field') {
           presentList.push(entry)
-        } else if (log.status === 'Absent') {
-          absentList.push(entry)
-        } else if (log.status === 'On Leave') {
+        } else if (s === 'On Leave') {
           onLeaveList.push(entry)
+        } else {
+          absentList.push(entry)
         }
       } else {
         if (emp.status === 'On Leave') {
@@ -409,12 +413,15 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
             setAnnouncements={setAnnouncements}
             currentUser={currentUser}
             employees={employees}
+            upcomingMilestones={upcomingMilestones}
+            upcomingEvents={upcomingEvents}
             setCurrentView={setCurrentView}
             addToast={addToast}
             addLog={addLog}
             addNotification={addNotification}
             settings={settings}
             hasPermission={hasPermission}
+            cardClass="col-span-12 lg:col-span-7 lg:row-span-3"
             {...wProps}
           />
         )}
@@ -526,13 +533,13 @@ cardClass="col-span-12 lg:col-span-7"
                       {selectedDayData.present}
                     </span>
                   </div>
-                  <span className="text-[11px] font-bold text-foreground">Present</span>
+                  <span className="text-[11px] font-bold text-foreground">In Office</span>
                   <span className="text-[10px] text-muted-foreground font-semibold">
                     {selectedDayData.total > 0 ? `${Math.round((selectedDayData.present / selectedDayData.total) * 100)}%` : '0%'}
                   </span>
                 </button>
 
-                {/* Absent Card */}
+                {/* Off Duty Card */}
                 <button
                   type="button"
                   onClick={() => setAttFilter(attFilter === 'absent' ? null : 'absent')}
@@ -543,12 +550,12 @@ cardClass="col-span-12 lg:col-span-7"
                   }`}
                 >
                   <div className="flex items-center gap-1.5 mb-1">
-                    <Icon name="cancel" size={16} className="text-foreground/50 shrink-0" />
+                    <Icon name="schedule" size={16} className="text-foreground/75 shrink-0" />
                     <span className="text-fluid-lg sm:text-fluid-xl font-black text-foreground tabular-nums">
                       {selectedDayData.absent}
                     </span>
                   </div>
-                  <span className="text-[11px] font-bold text-foreground">Absent</span>
+                  <span className="text-[11px] font-bold text-foreground">Off Duty</span>
                   <span className="text-[10px] text-muted-foreground font-semibold">
                     {selectedDayData.total > 0 ? `${Math.round((selectedDayData.absent / selectedDayData.total) * 100)}%` : '0%'}
                   </span>
@@ -584,11 +591,11 @@ cardClass="col-span-12 lg:col-span-7"
                 <div className="flex items-center justify-between px-1">
                   <span className="text-xs font-bold text-foreground capitalize flex items-center gap-1.5">
                     <Icon
-                      name={attFilter === 'present' ? 'check_circle' : attFilter === 'absent' ? 'cancel' : 'event_busy'}
+                      name={attFilter === 'present' ? 'check_circle' : attFilter === 'absent' ? 'schedule' : 'event_busy'}
                       size={14}
                       className="text-foreground shrink-0"
                     />
-                    {attFilter === 'present' ? 'Present' : attFilter === 'absent' ? 'Absent' : 'On Leave'} ({selectedDayLists[attFilter]?.length || 0}) • <span className="font-mono text-muted-foreground text-[11px]">{selectedDayData.isToday ? 'Today' : selectedDayData.day}</span>
+                    {attFilter === 'present' ? 'In Office' : attFilter === 'absent' ? 'Off Duty' : 'On Leave'} ({selectedDayLists[attFilter]?.length || 0}) • <span className="font-mono text-muted-foreground text-[11px]">{selectedDayData.isToday ? 'Today' : selectedDayData.day}</span>
                   </span>
                   <button
                     onClick={() => setAttFilter(null)}
@@ -624,17 +631,6 @@ cardClass="col-span-12 lg:col-span-7"
             tasks={tasks}
             pendingTasksCount={pendingTasksCount}
             taskCompletionRate={taskCompletionRate}
-            setCurrentView={setCurrentView}
-            cardClass="col-span-12 sm:col-span-6 lg:col-span-4"
-            {...wProps}
-          />
-        )}
-
-        {/* Upcoming Widget (Milestones + Events merged) */}
-        {(canViewEmployees || canViewCalendar) && (
-          <UpcomingWidget
-            upcomingMilestones={upcomingMilestones}
-            upcomingEvents={upcomingEvents}
             setCurrentView={setCurrentView}
             cardClass="col-span-12 sm:col-span-6 lg:col-span-4"
             {...wProps}

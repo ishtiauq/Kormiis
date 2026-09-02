@@ -175,12 +175,12 @@ export default function EmployeePortal({
     const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     
     const todayLogs = attendance?.dailyLogs?.[today] || {}
-    const myLog = todayLogs[currentUser.id] || { status: 'Absent', checkIn: '--', checkOut: '--', hours: '0.0' }
+    const myLog = todayLogs[currentUser.id] || { status: 'Off Duty', checkIn: '--', checkOut: '--', hours: '0.0' }
     
     let updatedLog = { ...myLog }
     let action = 'in'
     if (myLog.checkIn === '--') {
-      updatedLog.status = 'Present'
+      updatedLog.status = 'In Office'
       updatedLog.checkIn = nowTime
     } else if (myLog.checkOut === '--') {
       action = 'out'
@@ -622,7 +622,7 @@ function DashboardView({ currentUser, attendance, setAttendance, addToast, expen
       {/* ANNOUNCEMENTS - MOVED TO TOP */}
       <div className="flex flex-col gap-4">
         <div className="flex justify-between items-center px-1">
-          <h3 className="text-fluid-xl font-semibold text-foreground m-0">Announcements</h3>
+          <h3 className="text-fluid-xl font-semibold text-foreground m-0">Catch Up</h3>
           <button className="bg-transparent border-0 font-semibold cursor-pointer text-sm text-primary hover:text-primary/80 transition-colors" onClick={() => setActiveTab('announcements')}>View All</button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -963,7 +963,7 @@ function AttendanceView({
                           <TableCell>{log.checkOut}</TableCell>
                           <TableCell>{log.hours}</TableCell>
                           <TableCell>
-                            <Badge variant={log.status === 'Present' ? 'default' : 'secondary'}>{log.status}</Badge>
+                            <Badge variant={log.status === 'In Office' || log.status === 'Present' ? 'default' : 'secondary'}>{log.status === 'Present' ? 'In Office' : (log.status === 'Absent' ? 'Off Duty' : log.status)}</Badge>
                           </TableCell>
                         </TableRow>
                       ))

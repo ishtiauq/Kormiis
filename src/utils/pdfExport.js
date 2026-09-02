@@ -104,22 +104,27 @@ export async function exportDailyAttendancePDF(employees = [], logs = {}, select
   doc.text(`Report Date: ${dateString}`, 14, headerY + 10)
 
   // Calculate Daily Stats
-  let presentCount = 0
-  let lateCount = 0
-  let absentCount = 0
+  let inOfficeCount = 0
+  let remoteCount = 0
+  let onFieldCount = 0
   let leaveCount = 0
+  let offDutyCount = 0
 
   const tableColumn = ["Employee Name", "Role / Designation", "Check In", "Check Out", "Total Hours", "Status"]
   const tableRows = []
 
   employees.forEach(emp => {
-    const log = logs[emp.id] || { status: 'Absent', checkIn: '--', checkOut: '--', hours: '0.0' }
-    const status = log.status || 'Absent'
+    const log = logs[emp.id] || { status: 'Off Duty', checkIn: '--', checkOut: '--', hours: '0.0' }
+    let rawStatus = log.status || 'Off Duty'
+    if (rawStatus === 'Present' || rawStatus === 'Late') rawStatus = 'In Office'
+    if (rawStatus === 'WFH') rawStatus = 'Remote'
+    if (rawStatus === 'Absent') rawStatus = 'Off Duty'
 
-    if (status === 'Present') presentCount++
-    else if (status === 'Late') { presentCount++; lateCount++; }
-    else if (status === 'On Leave' || status === 'Half Day') leaveCount++
-    else absentCount++
+    if (rawStatus === 'In Office') inOfficeCount++
+    else if (rawStatus === 'Remote') remoteCount++
+    else if (rawStatus === 'On-Field') onFieldCount++
+    else if (rawStatus === 'On Leave' || rawStatus === 'Half Day') leaveCount++
+    else offDutyCount++
 
     const rowData = [
       emp.name || emp.employeeName || 'Unnamed',
@@ -127,7 +132,7 @@ export async function exportDailyAttendancePDF(employees = [], logs = {}, select
       log.checkIn || '--',
       log.checkOut || '--',
       `${log.hours || '0.0'}h`,
-      status
+      rawStatus
     ]
     tableRows.push(rowData)
   })
@@ -136,7 +141,7 @@ export async function exportDailyAttendancePDF(employees = [], logs = {}, select
   doc.setFontSize(8.5)
   doc.setFont('helvetica', 'bold')
   doc.setTextColor(71, 85, 105)
-  doc.text(`Total: ${employees.length}  |  Present: ${presentCount}  |  Late: ${lateCount}  |  Leave: ${leaveCount}  |  Absent: ${absentCount}`, 14, headerY + 16)
+  doc.text(`Total: ${employees.length}  |  In Office: ${inOfficeCount}  |  Remote: ${remoteCount}  |  On-Field: ${onFieldCount}  |  Leave: ${leaveCount}  |  Off Duty: ${offDutyCount}`, 14, headerY + 16)
 
   autoTable(doc, {
     startY: headerY + 20,
@@ -196,19 +201,19 @@ export async function exportMonthlyAttendancePDF(employees = [], attendance = {}
   doc.setTextColor(100, 116, 139)
   doc.text(`Billing / Payroll Period: ${monthName}`, 14, headerY + 10)
 
-  const tableColumn = ["Employee Name", "Role / Designation", "Present", "Late", "Absent", "Leave", "Total Hours"]
+  const tableColumn = ["Employee Name", "Role / Designation", "In Office", "Remote", "On-Field", "Leave", "Off Duty", "Total Hours"]
   const tableRows = []
 
   const calDaysInMonth = new Date(calYear, calMonth + 1, 0).getDate()
 
   let totalCompanyHours = 0
-  let totalPresentDays = 0
 
   employees.forEach(emp => {
-    let present = 0
-    let late = 0
-    let absent = 0
+    let inOffice = 0
+    let remote = 0
+    let onField = 0
     let leave = 0
+    let offDuty = 0
     let totalHours = 0
 
     for (let day = 1; day <= calDaysInMonth; day++) {
@@ -217,18 +222,19 @@ export async function exportMonthlyAttendancePDF(employees = [], attendance = {}
       const log = dailyLogs[emp.id]
       
       if (log) {
-        if (log.status === 'Present') { present++; totalPresentDays++; }
-        else if (log.status === 'Late') { present++; late++; totalPresentDays++; }
-        else if (log.status === 'Half Day') { present += 0.5; leave += 0.5; totalPresentDays += 0.5; }
-        else if (log.status === 'Absent') absent++
-        else if (log.status === 'On Leave') leave++
+        const s = String(log.status || '').trim()
+        if (s === 'In Office' || s === 'Present' || s === 'Late') inOffice++
+        else if (s === 'Remote' || s === 'WFH') remote++
+        else if (s === 'On-Field' || s === 'Field' || s === 'Outdoor') onField++
+        else if (s === 'On Leave') leave++
+        else offDuty++
         
         totalHours += parseFloat(log.hours || 0)
       } else {
         const dateObj = new Date(calYear, calMonth, day)
         const dayOfWeek = dateObj.getDay()
         if (dayOfWeek !== 0 && dayOfWeek !== 6) {
-          absent++
+          offDuty++
         }
       }
     }
@@ -238,10 +244,11 @@ export async function exportMonthlyAttendancePDF(employees = [], attendance = {}
     const rowData = [
       emp.name || emp.employeeName || 'Unnamed',
       emp.role || emp.designation || 'Employee',
-      present.toString(),
-      late.toString(),
-      absent.toString(),
+      inOffice.toString(),
+      remote.toString(),
+      onField.toString(),
       leave.toString(),
+      offDuty.toString(),
       `${totalHours.toFixed(1)}h`
     ]
     tableRows.push(rowData)

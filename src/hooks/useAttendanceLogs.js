@@ -19,14 +19,16 @@ export function useAttendanceLogs(attendance, setAttendance, addToast) {
   const logs = attendance?.dailyLogs?.[selectedDate] || {}
 
   const setLog = (empId, upd) => {
-    const cur = logs[empId] || { status: 'Absent', checkIn: '--', checkOut: '--', hours: '0.0' }
+    const cur = logs[empId] || { status: 'Off Duty', checkIn: '--', checkOut: '--', hours: '0.0' }
     const next = { ...cur, ...upd }
     if (next.checkIn !== '--' && next.checkOut !== '--') {
       const a = parseMin(next.checkIn), b = parseMin(next.checkOut)
       if (a !== null && b !== null) {
         let d = b - a; if (d < 0) d += 1440
         next.hours = fmtH(d)
-        if (cur.status === 'Absent' || cur.status === '--') next.status = 'Present'
+        if (cur.status === 'Off Duty' || cur.status === 'No-Show' || cur.status === 'Absent' || cur.status === '--') {
+          next.status = 'In Office'
+        }
       }
     }
     setAttendance(prev => ({ ...prev, dailyLogs: { ...prev.dailyLogs, [selectedDate]: { ...logs, [empId]: next } } }))
@@ -39,12 +41,12 @@ export function useAttendanceLogs(attendance, setAttendance, addToast) {
       const updated = { ...prev, dailyLogs: { ...prev.dailyLogs, [selectedDate]: { ...logs } } }
       employees.forEach(emp => {
         if (!updated.dailyLogs[selectedDate][emp.id]) {
-          updated.dailyLogs[selectedDate][emp.id] = { status: 'Present', checkIn: time, checkOut: '--', hours: '0.0' }
+          updated.dailyLogs[selectedDate][emp.id] = { status: 'In Office', checkIn: time, checkOut: '--', hours: '0.0' }
         }
       })
       return updated
     })
-    addToast(`Marked all employees as Present (${time})`, 'success')
+    addToast(`Marked all employees as In Office (${time})`, 'success')
   }
 
   const calDaysInMonth = new Date(calYear, calMonth + 1, 0).getDate()

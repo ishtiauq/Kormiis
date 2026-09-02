@@ -149,24 +149,24 @@ const getFutureDateStr = (daysAhead) => {
 export const DEMO_ATTENDANCE = {
   dailyLogs: {
     [getTodayStr()]: {
-      'emp-101': { status: 'Present', checkIn: '08:55', checkOut: '17:45', hours: 8.8, geoVerified: true },
-      'emp-102': { status: 'Present', checkIn: '09:05', checkOut: '18:10', hours: 8.5, geoVerified: true },
-      'emp-103': { status: 'Present', checkIn: '08:50', checkOut: '17:30', hours: 8.6, geoVerified: true },
-      'emp-104': { status: 'Present', checkIn: '09:15', checkOut: '18:30', hours: 8.2, geoVerified: true, isLate: true },
+      'emp-101': { status: 'In Office', checkIn: '08:55', checkOut: '17:45', hours: 8.8, geoVerified: true },
+      'emp-102': { status: 'In Office', checkIn: '09:05', checkOut: '18:10', hours: 8.5, geoVerified: true },
+      'emp-103': { status: 'Remote', checkIn: '08:50', checkOut: '17:30', hours: 8.6, geoVerified: false },
+      'emp-104': { status: 'In Office', checkIn: '09:15', checkOut: '18:30', hours: 8.2, geoVerified: true, isLate: true },
       'emp-105': { status: 'On Leave', type: 'Annual Leave' },
-      'emp-106': { status: 'Present', checkIn: '09:00', checkOut: '18:00', hours: 8.0, geoVerified: true },
-      'emp-107': { status: 'Present', checkIn: '08:58', checkOut: '17:50', hours: 8.8, geoVerified: true },
-      'emp-108': { status: 'Present', checkIn: '09:10', checkOut: '18:15', hours: 8.0, geoVerified: true }
+      'emp-106': { status: 'On-Field', checkIn: '09:00', checkOut: '18:00', hours: 8.0, geoVerified: true },
+      'emp-107': { status: 'In Office', checkIn: '08:58', checkOut: '17:50', hours: 8.8, geoVerified: true },
+      'emp-108': { status: 'In Office', checkIn: '09:10', checkOut: '18:15', hours: 8.0, geoVerified: true }
     },
     [getPastDateStr(1)]: {
-      'emp-101': { status: 'Present', checkIn: '09:00', checkOut: '18:00', hours: 8.0 },
-      'emp-102': { status: 'Present', checkIn: '09:12', checkOut: '18:20', hours: 8.0 },
-      'emp-103': { status: 'Present', checkIn: '08:50', checkOut: '17:40', hours: 8.5 },
-      'emp-104': { status: 'Present', checkIn: '09:00', checkOut: '18:00', hours: 8.0 },
+      'emp-101': { status: 'In Office', checkIn: '09:00', checkOut: '18:00', hours: 8.0 },
+      'emp-102': { status: 'In Office', checkIn: '09:12', checkOut: '18:20', hours: 8.0 },
+      'emp-103': { status: 'Remote', checkIn: '08:50', checkOut: '17:40', hours: 8.5 },
+      'emp-104': { status: 'In Office', checkIn: '09:00', checkOut: '18:00', hours: 8.0 },
       'emp-105': { status: 'On Leave', type: 'Annual Leave' },
-      'emp-106': { status: 'Present', checkIn: '08:55', checkOut: '18:05', hours: 8.1 },
-      'emp-107': { status: 'Present', checkIn: '09:02', checkOut: '18:00', hours: 8.0 },
-      'emp-108': { status: 'Present', checkIn: '09:00', checkOut: '18:00', hours: 8.0 }
+      'emp-106': { status: 'On-Field', checkIn: '08:55', checkOut: '18:05', hours: 8.1 },
+      'emp-107': { status: 'In Office', checkIn: '09:02', checkOut: '18:00', hours: 8.0 },
+      'emp-108': { status: 'In Office', checkIn: '09:00', checkOut: '18:00', hours: 8.0 }
     }
   },
   leaves: [
@@ -386,6 +386,7 @@ export const DEMO_TASKS = [
 export const DEMO_ANNOUNCEMENTS = [
   {
     id: 'ann-501',
+    postType: 'notice',
     title: '🎉 Q3 Product All-Hands & Townhall Meeting',
     content: 'Join us this Thursday at 4:00 PM for our quarterly townhall! We will review our product roadmap, celebrate key milestones, and announce our Employee of the Quarter awards.',
     date: getTodayStr(),
@@ -402,7 +403,44 @@ export const DEMO_ANNOUNCEMENTS = [
     poll: null
   },
   {
+    id: 'ann-504',
+    postType: 'feed',
+    title: '🌴 Quarterly Team Retreat Location Vote',
+    content: 'Hey everyone! HR is finalizing the venue for our upcoming 2-day team retreat next month. Please cast your vote below so we can lock in bookings!',
+    date: getTodayStr(),
+    author: 'Sarah Rahman',
+    authorId: 'emp-101',
+    pinned: true,
+    category: 'Poll',
+    priority: 'Important',
+    audience: 'all',
+    attachments: [],
+    reactions: { '👍': ['emp-101', 'emp-103'], '❤️': ['emp-102', 'emp-104', 'emp-106'], '👎': [] },
+    comments: [
+      {
+        id: 'cmt-1',
+        authorId: 'emp-104',
+        authorName: 'Arif Chowdhury',
+        text: 'Sreemangal would be amazing for a quiet nature getaway!',
+        date: getTodayStr(),
+        reactions: { '👍': ['emp-101'] },
+        replies: []
+      }
+    ],
+    readBy: ['emp-101', 'emp-102', 'emp-103', 'emp-104'],
+    poll: {
+      question: 'Where should we go for our quarterly team retreat?',
+      options: [
+        { text: "Cox's Bazar Beach Resort", votes: ['emp-102', 'emp-106'] },
+        { text: 'Sreemangal Tea Garden Eco Resort', votes: ['emp-101', 'emp-104', 'emp-107'] },
+        { text: 'Gazipur Luxury Wilderness Resort', votes: ['emp-103'] },
+        { text: 'Dhaka Rooftop Gala & Bowling Night', votes: ['emp-108'] }
+      ]
+    }
+  },
+  {
     id: 'ann-502',
+    postType: 'notice',
     title: '🏥 Comprehensive Health & Dental Insurance 2026',
     content: 'We have upgraded all teammate health coverage to include enhanced OPD, dental, and dependent healthcare benefits. Please review the updated handbook.',
     date: getPastDateStr(3),
@@ -419,7 +457,87 @@ export const DEMO_ANNOUNCEMENTS = [
     poll: null
   },
   {
+    id: 'ann-505',
+    postType: 'feed',
+    title: '⚡ Frontend Dev Tooling: Vite 6 + Rolldown Upgrade',
+    content: 'Just tested the new build pipeline—our HMR is down to sub-10ms and production bundles are 20% smaller! Check out the dev channel for benchmarks.',
+    date: getPastDateStr(4),
+    author: 'Arif Chowdhury',
+    authorId: 'emp-104',
+    pinned: false,
+    category: 'Team Update',
+    priority: 'Normal',
+    audience: 'Engineering',
+    attachments: [],
+    reactions: { '👍': ['emp-101', 'emp-108'], '❤️': ['emp-103'], '👎': [] },
+    comments: [],
+    readBy: ['emp-101', 'emp-104', 'emp-108'],
+    poll: null
+  },
+  {
+    id: 'ann-506',
+    postType: 'feed',
+    title: '🎨 Apple Ultra-Liquid Glass UI Kit V2 in Figma',
+    content: 'The refreshed design system tokens, continuous squircles, and tactile tactile micro-interactions are now live in our shared Figma workspace. Grab the components for your sprint tasks!',
+    date: getPastDateStr(5),
+    author: 'Tanvir Hossain',
+    authorId: 'emp-102',
+    pinned: false,
+    category: 'Design',
+    priority: 'Normal',
+    audience: 'all',
+    attachments: [],
+    reactions: { '👍': ['emp-101', 'emp-103'], '❤️': ['emp-104'], '👎': [] },
+    comments: [],
+    readBy: ['emp-101', 'emp-102', 'emp-103'],
+    poll: null
+  },
+  {
+    id: 'ann-507',
+    postType: 'feed',
+    title: '🍕 Monthly Team Lunch Day Preference',
+    content: 'Which day works best for our monthly catered team lunch next week?',
+    date: getPastDateStr(6),
+    author: 'Mahmud Hasan',
+    authorId: 'emp-106',
+    pinned: false,
+    category: 'Poll',
+    priority: 'Normal',
+    audience: 'all',
+    attachments: [],
+    reactions: { '👍': ['emp-101'], '❤️': ['emp-102'], '👎': [] },
+    comments: [],
+    readBy: ['emp-101', 'emp-106'],
+    poll: {
+      question: 'Which day works best for our monthly catered team lunch?',
+      options: [
+        { text: 'Wednesday (Mid-week Recharge)', votes: ['emp-101', 'emp-102', 'emp-104'] },
+        { text: 'Thursday (Pre-weekend Vibes)', votes: ['emp-103', 'emp-106'] },
+        { text: 'Sunday (Fresh Start Kickoff)', votes: ['emp-108'] }
+      ]
+    }
+  },
+  {
+    id: 'ann-508',
+    postType: 'feed',
+    title: '👏 Warm Welcome to our New Teammates!',
+    content: 'Huge shoutout to our newly joined engineers this week. Make sure to say hi on Slack and help them get set up with dev environments!',
+    date: getPastDateStr(8),
+    author: 'Nusrat Jahan',
+    authorId: 'emp-103',
+    pinned: false,
+    category: 'Team Update',
+    priority: 'Normal',
+    audience: 'all',
+    attachments: [],
+    reactions: { '👍': ['emp-101', 'emp-102', 'emp-104'], '❤️': ['emp-106'], '👎': [] },
+    comments: [],
+    readBy: ['emp-101', 'emp-102', 'emp-103', 'emp-104'],
+    poll: null
+  },
+  {
     id: 'ann-503',
+    postType: 'notice',
     title: '🚀 Flexible Hybrid Work Policy Update',
     content: 'Starting next month, teammates can choose flexible work-from-anywhere days on Wednesdays and Thursdays with asynchronous daily pulse standups.',
     date: getPastDateStr(7),
@@ -433,6 +551,42 @@ export const DEMO_ANNOUNCEMENTS = [
     reactions: { '👍': ['emp-102', 'emp-103'], '❤️': ['emp-101'], '👎': [] },
     comments: [],
     readBy: ['emp-101', 'emp-102', 'emp-103'],
+    poll: null
+  },
+  {
+    id: 'ann-509',
+    postType: 'notice',
+    title: '📋 Annual Tax & Salary Certificates (FY 2025-2026)',
+    content: 'The finance desk has published digital salary tax certificates in the Documents portal. You can download your certified copy for annual tax filing directly.',
+    date: getPastDateStr(9),
+    author: 'Finance & Compliance',
+    authorId: 'emp-101',
+    pinned: false,
+    category: 'Finance',
+    priority: 'Important',
+    audience: 'all',
+    attachments: [],
+    reactions: { '👍': ['emp-102', 'emp-104'], '❤️': [], '👎': [] },
+    comments: [],
+    readBy: ['emp-101', 'emp-102', 'emp-104'],
+    poll: null
+  },
+  {
+    id: 'ann-510',
+    postType: 'notice',
+    title: '🔒 Workspace Wi-Fi & Zero-Trust VPN Maintenance',
+    content: 'Scheduled infrastructure maintenance will take place this Saturday from 2:00 AM to 4:00 AM. High-speed Gigabit mesh routers and SSO certificates will be upgraded.',
+    date: getPastDateStr(12),
+    author: 'IT Infrastructure',
+    authorId: 'emp-104',
+    pinned: false,
+    category: 'IT Support',
+    priority: 'Normal',
+    audience: 'all',
+    attachments: [],
+    reactions: { '👍': ['emp-101', 'emp-108'], '❤️': [], '👎': [] },
+    comments: [],
+    readBy: ['emp-101', 'emp-104'],
     poll: null
   }
 ]

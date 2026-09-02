@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useAttendanceLogs } from '../../hooks/useAttendanceLogs.js'
-import { PILL_STYLES } from '../../services/attendance.js'
+import { PILL_STYLES, ATTENDANCE_STATUSES, normalizeAttendanceStatus } from '../../services/attendance.js'
 import Icon from "@/components/ui/Icon.jsx"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -93,8 +93,9 @@ export default function DailyLogs({ employees, attendance, setAttendance, addToa
 
         <div className="flex flex-col">
           {employees.map((emp, idx) => {
-            const log = logs[emp.id] || { status: 'Absent', checkIn: '--', checkOut: '--', hours: '0.0' }
-            const ps = PILL_STYLES[log.status] || PILL_STYLES.Absent
+            const log = logs[emp.id] || { status: 'Off Duty', checkIn: '--', checkOut: '--', hours: '0.0' }
+            const normStatus = normalizeAttendanceStatus(log.status)
+            const ps = PILL_STYLES[normStatus] || PILL_STYLES['Off Duty']
             return (
               <div key={emp.id} className={`p-4 sm:p-5 flex flex-col xl:flex-row xl:items-center justify-between gap-4 transition-colors hover:bg-muted/20 ${idx !== employees.length - 1 ? 'border-b border-border/50' : ''}`}>
                 <div className="flex items-center gap-4">
@@ -143,27 +144,31 @@ export default function DailyLogs({ employees, attendance, setAttendance, addToa
                       <button role="status" onClick={(e) => { e.stopPropagation(); setOpenStatusEmp(v => v === emp.id ? null : emp.id) }}
                         className="inline-flex w-full items-center justify-center sm:justify-between h-10 rounded-xl px-2 sm:px-4 text-[11px] sm:text-xs font-bold shadow-sm hover:scale-[1.02] transition-transform cursor-pointer"
                         style={{ background: ps.bg, color: ps.color, border: 'none' }}>
-                        <span className=" break-words ">{log.status}</span>
+                        <span className=" break-words ">{normStatus}</span>
                         <svg width="10" height="6" viewBox="0 0 10 6" fill="none" className="opacity-70 ml-1 sm:ml-2 shrink-0"><path d="M1 1l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                       </button>
                       {openStatusEmp === emp.id && (
                         <div onClick={e => e.stopPropagation()}
-                          className="absolute right-0 top-[calc(100%+8px)] z-50 min-w-[130px] p-2 rounded-2xl border border-border glass-kormiis shadow-xl animate-in fade-in zoom-in duration-200">
-                          {Object.entries(PILL_STYLES).map(([k, v]) => (
-                            <button key={k} onClick={() => { 
-                              if (k !== log.status) {
-                                setPendingStatusChange({ empId: emp.id, status: k, oldStatus: log.status, empName: emp.name })
-                              }
-                              setOpenStatusEmp(null) 
-                            }}
-                              className="block w-full px-4 py-2.5 rounded-xl text-xs font-bold text-left transition-all hover:bg-muted mb-1 last:mb-0"
-                              style={{
-                                background: k === log.status ? v.bg : 'transparent',
-                                color: k === log.status ? v.color : 'var(--foreground)',
-                              }}>
-                              {k}
-                            </button>
-                          ))}
+                          className="absolute right-0 top-[calc(100%+8px)] z-50 min-w-[140px] p-2 rounded-2xl border border-border glass-kormiis shadow-xl animate-in fade-in zoom-in duration-200">
+                          {ATTENDANCE_STATUSES.map((statusKey) => {
+                            const statusPill = PILL_STYLES[statusKey]
+                            const isSelected = normStatus === statusKey
+                            return (
+                              <button key={statusKey} onClick={() => { 
+                                if (statusKey !== normStatus) {
+                                  setPendingStatusChange({ empId: emp.id, status: statusKey, oldStatus: normStatus, empName: emp.name })
+                                }
+                                setOpenStatusEmp(null) 
+                              }}
+                                className="block w-full px-3.5 py-2 rounded-xl text-xs font-bold text-left transition-all hover:bg-muted mb-1 last:mb-0"
+                                style={{
+                                  background: isSelected ? statusPill.bg : 'transparent',
+                                  color: isSelected ? statusPill.color : 'var(--foreground)',
+                                }}>
+                                {statusKey}
+                              </button>
+                            )
+                          })}
                         </div>
                       )}
                     </div>

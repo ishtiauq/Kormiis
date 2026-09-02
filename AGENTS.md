@@ -142,5 +142,8 @@ Scrollbars across the entire application **MUST STRICTLY** follow this minimal s
 - **Mouse Leave**: Instantly disappears (`transition: none !important` with 0ms delay).
 - **No Stepper Arrows**: Up/down and left/right arrows are completely eliminated (`::-webkit-scrollbar-button { display: none !important; width: 0; height: 0; }`).
 - **No Glass Layers or Inner Strokes**: No white border, no translucent layer stacking, no backdrop filters on scrollbars to avoid rendering glitches/glare.
-- **DO NOT** add custom inline or per-component scrollbars that leave a visible bar in the default idle state. Always inherit or use the centralized standard.
+- **Mobile, Tablet & Touch Devices Standard (100% Zero Scrollbars)**:
+  - On **all mobile handsets, tablets, iPads (including iPad Pro), and touchscreen devices** (`@media (hover: none) and (pointer: coarse), (max-width: 1024px)`), scrollbars are **100% invisible and eliminated globally** (`scrollbar-width: none !important; ::-webkit-scrollbar { display: none !important; width: 0; }`).
+  - Touch devices use native fluid momentum touch gestures without any visible scrollbar tracks or thumbs cluttering the viewport.
+- **DO NOT** add custom inline or per-component scrollbars that leave a visible bar in the default idle state or on touch devices. Always inherit or use the centralized standard in `src/index.css`.
 

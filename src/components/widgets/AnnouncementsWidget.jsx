@@ -1,10 +1,12 @@
-import { memo, useState, useCallback } from 'react'
+import { memo, useState, useCallback, useMemo } from 'react'
 import Icon from "@/components/ui/Icon.jsx"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Select, SelectItem } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { formatDate } from '../../services/date.js'
 import { DashboardWidget } from '../Dashboard.jsx'
 import { generateAnnouncementMessage, queueWhatsAppMessages } from '../../services/whatsappService.js'
 
@@ -13,97 +15,208 @@ export const AnnouncementsWidget = memo(({
   setAnnouncements,
   currentUser,
   employees = [],
+  upcomingMilestones = [],
+  upcomingEvents = [],
   setCurrentView,
   addToast,
   addLog,
   addNotification,
   settings,
+  cardClass = "col-span-12 lg:col-span-7 lg:row-span-3",
   ...wProps
 }) => {
-  const [isCreateOpen, setIsCreateOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState('feed') // 'feed' | 'notice' | 'upcoming'
+  const [isNoticeModalOpen, setIsNoticeModalOpen] = useState(false)
+  const [isFeedModalOpen, setIsFeedModalOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Form State
-  const [title, setTitle] = useState('')
-  const [content, setContent] = useState('')
-  const [category, setCategory] = useState('General')
-  const [priority, setPriority] = useState('Normal')
-  const [audience, setAudience] = useState('all')
+  const upcomingCount = (upcomingMilestones?.length || 0) + (upcomingEvents?.length || 0)
 
-  const resetForm = () => {
-    setTitle('')
-    setContent('')
-    setCategory('General')
-    setPriority('Normal')
-    setAudience('all')
-    setIsSubmitting(false)
+  // Notice Form State
+  const [noticeTitle, setNoticeTitle] = useState('')
+  const [noticeContent, setNoticeContent] = useState('')
+  const [noticeCategory, setNoticeCategory] = useState('General')
+  const [noticePriority, setNoticePriority] = useState('Normal')
+  const [noticeAudience, setNoticeAudience] = useState('all')
+
+  // Feed & Poll Form State
+  const [feedTitle, setFeedTitle] = useState('')
+  const [feedContent, setFeedContent] = useState('')
+  const [hasPoll, setHasPoll] = useState(false)
+  const [pollQuestion, setPollQuestion] = useState('')
+  const [pollOptions, setPollOptions] = useState(['', ''])
+
+  const currentUserId = currentUser?.id || currentUser?.uid || 'guest'
+
+  const isFeedPost = useCallback((post) => {
+    if (!post) return false
+    return post.postType === 'feed' || Boolean(post.poll) || post.category === 'Feed' || post.category === 'Discussion' || post.category === 'Poll'
+  }, [])
+
+  const feedPosts = useMemo(() => {
+    return (Array.isArray(announcements) ? [...announcements] : [])
+      .filter(isFeedPost)
+      .sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0))
+  }, [announcements, isFeedPost])
+
+  const noticePosts = useMemo(() => {
+    return (Array.isArray(announcements) ? [...announcements] : [])
+      .filter(a => !isFeedPost(a))
+      .sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0))
+  }, [announcements, isFeedPost])
+
+  const getAuthor = useCallback((id, post) => {
+    // 1. Check if ID matches an employee in the employees list
+    const emp = (employees || []).find(e => String(e.id) === String(id) || String(e.uid) === String(id))
+    if (emp) {
+      return {
+        name: emp.name,
+        avatar: emp.avatar || null,
+        initials: (emp.name || 'U').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'U',
+        role: emp.role || emp.designation || 'Member'
+      }
+    }
+
+    // 2. Check if current user created it
+    if (currentUser && (String(currentUser.id) === String(id) || String(currentUser.uid) === String(id) || id === 'guest' || id === 'admin')) {
+      const currentName = currentUser.name || currentUser.displayName || 'Sarah Rahman'
+      return {
+        name: currentName,
+        avatar: currentUser.avatar || currentUser.photoURL || employees?.[0]?.avatar || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=256&q=80',
+        initials: currentName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'SR',
+        role: currentUser.role || 'Member'
+      }
+    }
+
+    // 3. Check if post has author name saved
+    if (post && post.author && post.author !== 'Teammate' && post.author !== 'Unknown User') {
+      const matchedEmp = (employees || []).find(e => e.name?.toLowerCase() === post.author.toLowerCase())
+      return {
+        name: post.author,
+        avatar: post.authorAvatar || matchedEmp?.avatar || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=256&q=80',
+        initials: post.author.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'U',
+        role: post.authorRole || matchedEmp?.role || 'Member'
+      }
+    }
+
+    // 4. Default to first employee in company list (e.g. Sarah Rahman)
+    const fallbackEmp = (employees && employees.length > 0) ? employees[0] : null
+    if (fallbackEmp) {
+      return {
+        name: fallbackEmp.name,
+        avatar: fallbackEmp.avatar || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=256&q=80',
+        initials: (fallbackEmp.name || 'SR').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'SR',
+        role: fallbackEmp.role || 'Member'
+      }
+    }
+
+    return {
+      name: 'Sarah Rahman',
+      avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=256&q=80',
+      initials: 'SR',
+      role: 'Lead Software Engineer'
+    }
+  }, [employees, currentUser])
+
+  // --- Handlers ---
+  const handleAddPollOption = () => {
+    if (pollOptions.length < 6) {
+      setPollOptions(prev => [...prev, ''])
+    }
   }
 
-  const handleOpenDialog = () => {
-    resetForm()
-    setIsCreateOpen(true)
+  const handleRemovePollOption = (idx) => {
+    if (pollOptions.length > 2) {
+      setPollOptions(prev => prev.filter((_, i) => i !== idx))
+    }
   }
 
-  const handleCloseDialog = () => {
-    setIsCreateOpen(false)
-    resetForm()
+  const handlePollOptionTextChange = (idx, text) => {
+    setPollOptions(prev => {
+      const next = [...prev]
+      next[idx] = text
+      return next
+    })
   }
 
-  const handleCreateAnnouncement = (e) => {
+  const handleVote = (postId, optionIndex) => {
+    if (!setAnnouncements) return
+
+    setAnnouncements(prev => (Array.isArray(prev) ? prev : []).map(p => {
+      if (p.id === postId && p.poll && Array.isArray(p.poll.options)) {
+        const updatedOptions = p.poll.options.map((opt, idx) => {
+          const votes = Array.isArray(opt.votes) ? opt.votes : []
+          const hasVotedThis = votes.includes(currentUserId)
+          
+          if (idx === optionIndex) {
+            // Toggle vote
+            return {
+              ...opt,
+              votes: hasVotedThis ? votes.filter(id => id !== currentUserId) : [...votes, currentUserId]
+            }
+          } else {
+            // Remove previous vote from other options (single-choice)
+            return {
+              ...opt,
+              votes: votes.filter(id => id !== currentUserId)
+            }
+          }
+        })
+
+        return {
+          ...p,
+          poll: {
+            ...p.poll,
+            options: updatedOptions
+          }
+        }
+      }
+      return p
+    }))
+
+    addToast?.('Vote recorded', 'success')
+  }
+
+  const handleCreateNotice = (e) => {
     e.preventDefault()
-    if (!title.trim() || !content.trim()) {
-      if (addToast) addToast('Please provide both title and content', 'warning')
+    if (!noticeTitle.trim() || !noticeContent.trim()) {
+      addToast?.('Please provide title and content', 'warning')
       return
     }
 
     setIsSubmitting(true)
-
-    const trimmedTitle = title.trim()
-    const trimmedContent = content.trim()
-    const authorId = currentUser?.id || currentUser?.uid || 'admin'
+    const trimmedTitle = noticeTitle.trim()
+    const trimmedContent = noticeContent.trim()
+    const authorId = currentUserId
     const authorName = currentUser?.name || 'Management'
 
-    const newPost = {
-      id: `ann-${Date.now()}`,
+    const newNotice = {
+      id: `ann-notice-${Date.now()}`,
+      postType: 'notice',
       title: trimmedTitle,
       content: trimmedContent,
       authorId,
       date: new Date().toISOString(),
-      category: category || 'General',
-      priority: priority || 'Normal',
-      audience: audience || 'all',
+      category: noticeCategory || 'General',
+      priority: noticePriority || 'Normal',
+      audience: noticeAudience || 'all',
       attachments: [],
       reactions: { '👍': [], '❤️': [], '👎': [] },
       comments: [],
       readBy: [authorId],
+      poll: null
     }
 
-    if (setAnnouncements) {
-      setAnnouncements(prev => [newPost, ...(Array.isArray(prev) ? prev : [])])
-    }
+    setAnnouncements?.(prev => [newNotice, ...(Array.isArray(prev) ? prev : [])])
+    addToast?.('Official notice published', 'success')
+    addLog?.('Posted Company Notice', trimmedTitle)
+    addNotification?.(`New Notice: "${trimmedTitle}"`, 'announcements', { title: 'New Notice', category: 'notice' })
 
-    if (addToast) {
-      addToast('Announcement posted successfully', 'success')
-    }
-
-    if (addLog) {
-      addLog('Posted Announcement', trimmedTitle)
-    }
-
-    if (addNotification) {
-      addNotification(
-        `New announcement posted: "${trimmedTitle}"`,
-        'announcements',
-        { title: 'New Announcement', category: 'announcement' }
-      )
-    }
-
-    // Queue WhatsApp broadcast if enabled
     if (settings?.whatsapp?.enabled && settings?.whatsapp?.notifyAnnouncements) {
       const msg = generateAnnouncementMessage({
         companyName: settings?.company?.name || 'Kormiis HR',
         title: trimmedTitle,
-        category: category || 'General',
+        category: noticeCategory || 'General',
         content: trimmedContent,
         publishedBy: authorName
       })
@@ -120,126 +233,574 @@ export const AnnouncementsWidget = memo(({
       }
     }
 
-    handleCloseDialog()
+    setIsNoticeModalOpen(false)
+    setNoticeTitle('')
+    setNoticeContent('')
+    setNoticeCategory('General')
+    setNoticePriority('Normal')
+    setNoticeAudience('all')
+    setIsSubmitting(false)
   }
 
-  const recentAnnouncements = (Array.isArray(announcements) ? [...announcements] : [])
-    .sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0))
-    .slice(0, 3)
+  const handleCreateFeed = (e) => {
+    e.preventDefault()
+    const trimmedContent = feedContent.trim()
 
-  const getAuthorName = useCallback((id) => {
-    const emp = employees.find(e => e.id === id || e.uid === id)
-    return emp ? emp.name : 'Management'
-  }, [employees])
+    if (!trimmedContent) {
+      addToast?.('Please write what you would like to share or ask', 'warning')
+      return
+    }
+
+    const validOptions = pollOptions.map(o => o.trim()).filter(Boolean)
+    const isPoll = validOptions.length >= 2
+
+    setIsSubmitting(true)
+    const authorName = currentUser?.name || currentUser?.displayName || employees?.[0]?.name || 'Sarah Rahman'
+    const authorAvatar = currentUser?.avatar || currentUser?.photoURL || employees?.[0]?.avatar || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=256&q=80'
+    const authorId = currentUser?.id || currentUser?.uid || employees?.[0]?.id || 'emp-101'
+
+    const derivedTitle = trimmedContent.length > 70 ? trimmedContent.slice(0, 67) + '...' : trimmedContent
+
+    const newFeedPost = {
+      id: `ann-feed-${Date.now()}`,
+      postType: 'feed',
+      title: derivedTitle,
+      content: trimmedContent,
+      author: authorName,
+      authorAvatar: authorAvatar,
+      authorId,
+      date: new Date().toISOString(),
+      category: isPoll ? 'Poll' : 'Team Update',
+      priority: 'Normal',
+      audience: 'all',
+      attachments: [],
+      reactions: { '👍': [], '❤️': [], '👎': [] },
+      comments: [],
+      readBy: [authorId],
+      poll: isPoll ? {
+        question: trimmedContent,
+        options: validOptions.map(text => ({ text, votes: [] }))
+      } : null
+    }
+
+    setAnnouncements?.(prev => [newFeedPost, ...(Array.isArray(prev) ? prev : [])])
+    addToast?.(isPoll ? 'Poll posted to Feed!' : 'Post shared with team!', 'success')
+    addLog?.(isPoll ? 'Posted Team Poll' : 'Posted Team Update', derivedTitle)
+
+    setIsFeedModalOpen(false)
+    setFeedTitle('')
+    setFeedContent('')
+    setHasPoll(false)
+    setPollQuestion('')
+    setPollOptions(['', ''])
+    setIsSubmitting(false)
+  }
 
   return (
     <>
       <DashboardWidget
         id="w4"
-        title="Announcements"
+        title="Catch Up"
         icon={<Icon name="rss_feed" className="text-amber-500 shrink-0" size={22}/>}
-        cardClass="col-span-12 lg:col-span-7 lg:row-span-2"
+        cardClass={cardClass}
         action={
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <button
-              onClick={handleOpenDialog}
-              className="apple-glass-btn text-xs font-semibold px-3 h-7 rounded-full text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 flex items-center gap-1 cursor-pointer transition-colors"
-              title="Post Announcement"
-            >
-              <Icon name="add" size={15}/>
-              <span>Post</span>
-            </button>
-            <button
-              onClick={() => setCurrentView && setCurrentView('announcements')}
-              className="apple-glass-btn text-xs font-semibold px-3.5 h-7 rounded-full cursor-pointer text-foreground"
-            >
-              View All
-            </button>
-          </div>
+          <button
+            onClick={() => setCurrentView && setCurrentView('announcements')}
+            className="apple-glass-btn text-xs font-semibold px-3.5 h-7 rounded-full cursor-pointer text-muted-foreground hover:text-foreground inline-flex items-center"
+          >
+            View All
+          </button>
         }
-        contentClass="flex flex-col p-0 pt-1 overflow-hidden"
+        contentClass="flex flex-col p-0 overflow-hidden"
         {...wProps}
       >
-        {recentAnnouncements.length === 0 ? (
-          <div className="flex-1 flex flex-col items-center justify-center text-center p-6 gap-3">
-            <Icon name="rss_feed" size={38} className="text-amber-500/40 dark:text-amber-500/50 shrink-0" />
-            <div className="flex flex-col gap-1">
-              <p className="m-0 text-fluid-sm font-semibold text-foreground">No Active Announcements</p>
-              <p className="m-0 text-fluid-xs font-medium text-muted-foreground max-w-[240px] leading-relaxed">
-                Share important updates, events or notices with your team.
-              </p>
-            </div>
+        {/* Full-width Subheader: Feed, Notice & Upcoming Tab Switcher */}
+        <div className="px-4 sm:px-5 pt-0 pb-2.5 -mt-1.5 sm:-mt-2">
+          <div className="w-full p-1 rounded-2xl bg-muted/60 dark:bg-white/[0.06] border border-border/80 dark:border-white/10 flex items-center gap-1">
             <button
-              onClick={handleOpenDialog}
-              className="apple-glass-btn text-xs font-semibold px-4 h-8 rounded-full text-primary hover:text-primary/90 flex items-center gap-1.5 cursor-pointer mt-1"
+              type="button"
+              onClick={() => setActiveTab('feed')}
+              className={`flex-1 h-9 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer select-none flex items-center justify-center gap-1.5 sm:gap-2 ${
+                activeTab === 'feed'
+                  ? 'bg-background text-foreground shadow-sm font-bold border border-black/10 dark:border-white/15'
+                  : 'text-foreground/70 hover:text-foreground hover:bg-background/40'
+              }`}
             >
-              <Icon name="add_circle" size={16}/>
-              <span>Post First Announcement</span>
+              <Icon name="forum" size={15} className="text-foreground/70" />
+              <span>Feed</span>
+              <span className={`text-[11px] sm:text-xs tabular-nums px-1.5 sm:px-2 py-0.5 rounded-full font-bold ${
+                activeTab === 'feed'
+                  ? 'bg-foreground/15 text-foreground'
+                  : 'bg-foreground/5 text-muted-foreground'
+              }`}>
+                {feedPosts.length}
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('notice')}
+              className={`flex-1 h-9 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer select-none flex items-center justify-center gap-1.5 sm:gap-2 ${
+                activeTab === 'notice'
+                  ? 'bg-background text-foreground shadow-sm font-bold border border-black/10 dark:border-white/15'
+                  : 'text-foreground/70 hover:text-foreground hover:bg-background/40'
+              }`}
+            >
+              <Icon name="campaign" size={16} className="text-foreground/70" />
+              <span>Notice</span>
+              <span className={`text-[11px] sm:text-xs tabular-nums px-1.5 sm:px-2 py-0.5 rounded-full font-bold ${
+                activeTab === 'notice'
+                  ? 'bg-foreground/15 text-foreground'
+                  : 'bg-foreground/5 text-muted-foreground'
+              }`}>
+                {noticePosts.length}
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('upcoming')}
+              className={`flex-1 h-9 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer select-none flex items-center justify-center gap-1.5 sm:gap-2 ${
+                activeTab === 'upcoming'
+                  ? 'bg-background text-foreground shadow-sm font-bold border border-black/10 dark:border-white/15'
+                  : 'text-foreground/70 hover:text-foreground hover:bg-background/40'
+              }`}
+            >
+              <Icon name="calendar_month" size={15} className="text-foreground/70" />
+              <span>Events</span>
+              <span className={`text-[11px] sm:text-xs tabular-nums px-1.5 sm:px-2 py-0.5 rounded-full font-bold ${
+                activeTab === 'upcoming'
+                  ? 'bg-foreground/15 text-foreground'
+                  : 'bg-foreground/5 text-muted-foreground'
+              }`}>
+                {upcomingCount}
+              </span>
             </button>
           </div>
-        ) : (
-          <div className="flex-1 min-h-0 overflow-y-auto max-h-[360px] lg:max-h-[520px] flex flex-col gap-2.5 px-4 sm:px-5 pb-4 chat-scrollbar">
-            {recentAnnouncements.map((ann, idx) => (
-              <div
-                key={ann.id || idx}
-                className="flex items-center gap-3.5 p-3 px-4 rounded-2xl liquid-widget-item cursor-pointer select-none active:scale-[0.99] border-black/[0.06] dark:border-white/[0.08]"
-                onClick={() => setCurrentView && setCurrentView('announcements')}
+        </div>
+
+        {/* --- FEED TAB CONTENT --- */}
+        {activeTab === 'feed' && (
+          feedPosts.length === 0 ? (
+            <div className="flex-1 flex flex-col items-center justify-center text-center p-6 gap-3">
+              <Icon name="forum" size={38} className="text-primary/40 dark:text-primary/50 shrink-0" />
+              <div className="flex flex-col gap-1">
+                <p className="m-0 text-fluid-sm font-semibold text-foreground">No Feed Updates Yet</p>
+                <p className="m-0 text-fluid-xs font-medium text-muted-foreground max-w-[260px] leading-relaxed">
+                  Share a thought with your teammates or create an interactive poll!
+                </p>
+              </div>
+              <button
+                onClick={() => setIsFeedModalOpen(true)}
+                className="apple-glass-btn text-xs font-semibold px-4 h-8 rounded-full text-primary hover:text-primary/90 flex items-center gap-1.5 cursor-pointer mt-1"
               >
-                <div className="size-9 rounded-xl flex items-center justify-center bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0">
-                  <Icon name="campaign" size={20}/>
-                </div>
-                <div className="flex-1 min-w-0 pr-2">
-                  <div className="flex items-center gap-2">
-                    <p className="m-0 text-fluid-xs font-bold text-foreground break-words truncate">{ann.title}</p>
-                    {ann.category && ann.category !== 'General' && (
-                      <span className="text-[10px] font-medium text-muted-foreground/80 px-2 py-0.5 rounded-md bg-foreground/5 hidden sm:inline-block shrink-0">
-                        {ann.category}
-                      </span>
+                <Icon name="add_circle" size={16}/>
+                <span>Create First Poll or Post</span>
+              </button>
+            </div>
+          ) : (
+            <div className="flex-1 min-h-0 overflow-y-auto max-h-[360px] lg:max-h-[640px] flex flex-col gap-2.5 px-4 sm:px-5 pb-2.5 chat-scrollbar">
+              {feedPosts.map((post) => {
+                const author = getAuthor(post.authorId, post)
+                const hasActivePoll = post.poll && Array.isArray(post.poll.options) && post.poll.options.length > 0
+                const totalPollVotes = hasActivePoll
+                  ? post.poll.options.reduce((sum, opt) => sum + (Array.isArray(opt.votes) ? opt.votes.length : 0), 0)
+                  : 0
+
+                return (
+                  <div
+                    key={post.id}
+                    className="p-3.5 sm:p-4 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.08] hover:border-black/15 dark:hover:border-white/15 transition-all flex flex-col gap-2.5"
+                  >
+                    {/* Header Row: Author info, date (No right-side tag) */}
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <Avatar className="size-7 rounded-xl border border-black/10 dark:border-white/15 shrink-0">
+                          {author.avatar ? <AvatarImage src={author.avatar} alt={author.name} /> : null}
+                          <AvatarFallback className="bg-foreground/10 text-foreground text-[10px] font-bold">
+                            {author.initials}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex items-center gap-1.5 min-w-0 flex-wrap">
+                          <span className="text-xs font-bold text-foreground truncate">{author.name}</span>
+                          <span className="text-muted-foreground/40 text-xs">•</span>
+                          <span className="text-[11px] font-normal text-muted-foreground">
+                            {new Date(post.date || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Regular Post Content (Only shown when NOT a poll to avoid duplicate question) */}
+                    {!hasActivePoll && (
+                      <div className="flex flex-col gap-1">
+                        {post.title && post.title !== post.content && (
+                          <h5 className="font-bold text-xs sm:text-fluid-sm text-foreground tracking-tight m-0">{post.title}</h5>
+                        )}
+                        <p className="text-xs text-foreground/90 font-normal leading-relaxed m-0 break-words">
+                          {post.content}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Interactive Poll Display (Monochrome Icon & Header) */}
+                    {hasActivePoll && (
+                      <div className="p-3 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] flex flex-col gap-2.5">
+                        <div className="flex items-center justify-between text-xs font-semibold text-foreground">
+                          <span className="flex items-center gap-1.5 truncate">
+                            <Icon name="poll" size={15} className="text-foreground shrink-0" />
+                            <span className="truncate font-semibold">{post.poll.question || post.content || post.title}</span>
+                          </span>
+                          <span className="text-[10px] text-muted-foreground font-mono shrink-0 ml-2">
+                            {totalPollVotes} {totalPollVotes === 1 ? 'vote' : 'votes'}
+                          </span>
+                        </div>
+
+                        <div className="flex flex-col gap-1.5">
+                          {post.poll.options.map((opt, optIdx) => {
+                            const votes = Array.isArray(opt.votes) ? opt.votes : []
+                            const voteCount = votes.length
+                            const pct = totalPollVotes > 0 ? Math.round((voteCount / totalPollVotes) * 100) : 0
+                            const hasVotedThis = votes.includes(currentUserId)
+
+                            return (
+                              <button
+                                key={optIdx}
+                                type="button"
+                                onClick={() => handleVote(post.id, optIdx)}
+                                className={`relative w-full h-8 rounded-lg overflow-hidden border transition-all flex items-center justify-between px-3 cursor-pointer text-left select-none ${
+                                  hasVotedThis
+                                    ? 'border-foreground/30 bg-foreground/10 shadow-xs'
+                                    : 'border-black/10 dark:border-white/10 hover:border-black/20 dark:hover:border-white/20 bg-background/60 dark:bg-black/20'
+                                }`}
+                              >
+                                {/* Progress Bar fill */}
+                                <div
+                                  className={`absolute top-0 left-0 h-full transition-all duration-500 ease-out ${
+                                    hasVotedThis ? 'bg-foreground/20' : 'bg-foreground/10'
+                                  }`}
+                                  style={{ width: `${pct}%` }}
+                                />
+
+                                <span className="relative z-10 text-xs font-medium text-foreground truncate flex items-center gap-1.5">
+                                  {hasVotedThis && (
+                                    <Icon name="check_circle" size={13} className="text-foreground shrink-0" />
+                                  )}
+                                  <span className="truncate">{opt.text}</span>
+                                </span>
+
+                                <span className="relative z-10 text-[11px] font-bold text-muted-foreground tabular-nums shrink-0 ml-2">
+                                  {pct}% <span className="text-[9px] font-normal opacity-70">({voteCount})</span>
+                                </span>
+                              </button>
+                            )
+                          })}
+                        </div>
+                      </div>
                     )}
                   </div>
-                  <p className="m-0 mt-0.5 text-[11px] font-medium text-muted-foreground">
-                    {getAuthorName(ann.authorId)} &middot; {new Date(ann.date || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                  </p>
-                </div>
-                {ann.priority === 'Urgent' ? (
-                  <Badge variant="destructive" className="uppercase text-[10px] font-bold rounded-full px-2.5 py-0.5 shadow-xs shrink-0">
-                    Urgent
-                  </Badge>
-                ) : ann.priority === 'Important' ? (
-                  <Badge variant="outline" className="uppercase text-[10px] font-bold rounded-full px-2.5 py-0.5 border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10 shrink-0">
-                    Important
-                  </Badge>
-                ) : null}
-              </div>
-            ))}
-          </div>
+                )
+              })}
+            </div>
+          )
         )}
+
+        {/* --- NOTICE TAB CONTENT --- */}
+        {activeTab === 'notice' && (
+          noticePosts.length === 0 ? (
+            <div className="flex-1 flex flex-col items-center justify-center text-center p-6 gap-3">
+              <Icon name="campaign" size={38} className="text-amber-500/40 dark:text-amber-500/50 shrink-0" />
+              <div className="flex flex-col gap-1">
+                <p className="m-0 text-fluid-sm font-semibold text-foreground">No Official Notices</p>
+                <p className="m-0 text-fluid-xs font-medium text-muted-foreground max-w-[240px] leading-relaxed">
+                  Management announcements and official policies will appear here.
+                </p>
+              </div>
+              <button
+                onClick={() => setIsNoticeModalOpen(true)}
+                className="apple-glass-btn text-xs font-semibold px-4 h-8 rounded-full text-amber-600 dark:text-amber-400 hover:text-amber-700 flex items-center gap-1.5 cursor-pointer mt-1"
+              >
+                <Icon name="add_circle" size={16}/>
+                <span>Post Company Notice</span>
+              </button>
+            </div>
+          ) : (
+            <div className="flex-1 min-h-0 overflow-y-auto max-h-[360px] lg:max-h-[640px] flex flex-col gap-2.5 px-4 sm:px-5 pb-2.5 chat-scrollbar">
+              {noticePosts.map((ann, idx) => {
+                const author = getAuthor(ann.authorId, ann)
+                return (
+                  <div
+                    key={ann.id || idx}
+                    className="flex items-center gap-3.5 p-3 px-4 rounded-2xl liquid-widget-item cursor-pointer select-none active:scale-[0.99] border-black/[0.06] dark:border-white/[0.08]"
+                    onClick={() => setCurrentView && setCurrentView('announcements')}
+                  >
+                    <div className="size-9 rounded-xl flex items-center justify-center bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0">
+                      <Icon name="campaign" size={20}/>
+                    </div>
+                    <div className="flex-1 min-w-0 pr-2">
+                      <div className="flex items-center gap-2">
+                        <p className="m-0 text-fluid-xs font-bold text-foreground break-words truncate">{ann.title}</p>
+                        {ann.category && ann.category !== 'General' && (
+                          <span className="text-[10px] font-medium text-muted-foreground/80 px-2 py-0.5 rounded-md bg-foreground/5 hidden sm:inline-block shrink-0">
+                            {ann.category}
+                          </span>
+                        )}
+                      </div>
+                      <p className="m-0 mt-0.5 text-[11px] font-medium text-muted-foreground truncate">
+                        {author.name} &middot; {new Date(ann.date || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                      </p>
+                    </div>
+                    {ann.priority === 'Urgent' ? (
+                      <Badge variant="destructive" className="uppercase text-[10px] font-bold rounded-full px-2.5 py-0.5 shadow-xs shrink-0">
+                        Urgent
+                      </Badge>
+                    ) : ann.priority === 'Important' ? (
+                      <Badge variant="outline" className="uppercase text-[10px] font-bold rounded-full px-2.5 py-0.5 border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10 shrink-0">
+                        Important
+                      </Badge>
+                    ) : null}
+                  </div>
+                )
+              })}
+            </div>
+          )
+        )}
+
+        {/* --- UPCOMING TAB CONTENT --- */}
+        {activeTab === 'upcoming' && (
+          upcomingCount === 0 ? (
+            <div className="flex-1 flex flex-col items-center justify-center text-center p-6 gap-3">
+              <Icon name="event_available" size={38} className="text-muted-foreground/40 shrink-0" />
+              <div className="flex flex-col gap-1">
+                <p className="m-0 text-fluid-sm font-semibold text-foreground">No Upcoming Events</p>
+                <p className="m-0 text-fluid-xs font-medium text-muted-foreground max-w-[260px] leading-relaxed">
+                  No birthdays, work anniversaries, or calendar events in the next 30 days.
+                </p>
+              </div>
+              {setCurrentView && (
+                <button
+                  onClick={() => setCurrentView('calendar')}
+                  className="apple-glass-btn text-xs font-semibold px-4 h-8 rounded-full text-foreground hover:text-foreground/90 flex items-center gap-1.5 cursor-pointer mt-1"
+                >
+                  <Icon name="calendar_month" size={16}/>
+                  <span>Open Calendar</span>
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="flex-1 min-h-0 overflow-y-auto max-h-[360px] lg:max-h-[640px] flex flex-col gap-2.5 px-4 sm:px-5 pb-2.5 chat-scrollbar">
+              {/* Milestones (Birthdays & Work Anniversaries) */}
+              {upcomingMilestones.map((milestone, i) => (
+                <div key={`ms-${i}`} className="flex items-center gap-3 p-2.5 px-3.5 rounded-2xl liquid-widget-item border-black/[0.06] dark:border-white/[0.08]">
+                  <Avatar className="size-8 shrink-0 rounded-xl border border-black/10 dark:border-white/15">
+                    {milestone.avatar ? <AvatarImage src={milestone.avatar} alt={milestone.empName} className="object-cover" /> : null}
+                    <AvatarFallback className="bg-foreground/10 text-foreground rounded-xl font-bold text-xs">
+                      {milestone.empName?.slice(0, 2).toUpperCase() || 'U'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 flex flex-col gap-0.5 min-w-0">
+                    <p className="m-0 text-fluid-xs font-bold text-foreground break-words">{milestone.empName}</p>
+                    <p className="m-0 text-[11px] font-medium text-muted-foreground break-words">{milestone.label}</p>
+                  </div>
+                  <Badge variant="outline" className="uppercase text-[10px] rounded-full px-2.5 py-0.5 font-bold border-foreground/20 text-foreground bg-foreground/5 shrink-0">
+                    {milestone.daysRemaining === 0 ? 'Today' : `${milestone.daysRemaining}d`}
+                  </Badge>
+                </div>
+              ))}
+
+              {/* Upcoming Events */}
+              {upcomingEvents.map((evt, idx) => (
+                <div
+                  key={`ev-${evt.id || idx}`}
+                  className="flex items-center gap-3.5 p-2.5 px-3.5 rounded-2xl liquid-widget-item border-black/[0.06] dark:border-white/[0.08] cursor-pointer select-none active:scale-[0.99]"
+                  onClick={() => setCurrentView && setCurrentView('calendar')}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setCurrentView && setCurrentView('calendar') } }}
+                >
+                  <div className="size-8.5 rounded-xl flex items-center justify-center bg-foreground/5 text-foreground shrink-0">
+                    <Icon name="calendar_month" size={18}/>
+                  </div>
+                  <div className="flex-1 min-w-0 pr-2">
+                    <p className="m-0 text-fluid-xs font-bold text-foreground break-words truncate">{evt.title}</p>
+                    <p className="m-0 mt-0.5 text-[11px] font-medium text-muted-foreground break-words">
+                      {formatDate(evt.date)}{evt.time ? ` at ${evt.time}` : ''}
+                    </p>
+                  </div>
+                  <Badge variant="outline" className="capitalize text-[10px] px-2 py-0.5 rounded-full border-foreground/15 text-muted-foreground shrink-0">
+                    {evt.type}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          )
+        )}
+
+        {/* Widget Footer: Post / Serve Notice / Calendar Action Button (No separator line, colorless/blurless clean button) */}
+        <div className="px-4 sm:px-5 pb-3 pt-0 flex items-center">
+          {activeTab === 'feed' ? (
+            <button
+              type="button"
+              onClick={() => setIsFeedModalOpen(true)}
+              className="w-full h-8.5 rounded-xl font-semibold text-xs transition-all cursor-pointer select-none flex items-center justify-center gap-2 bg-transparent text-foreground/80 hover:text-foreground border border-black/10 dark:border-white/15 hover:border-black/25 dark:hover:border-white/30 active:scale-[0.99]"
+            >
+              <Icon name="add" size={15} className="text-foreground" />
+              <span>Share Update or Create Poll</span>
+            </button>
+          ) : activeTab === 'notice' ? (
+            <button
+              type="button"
+              onClick={() => setIsNoticeModalOpen(true)}
+              className="w-full h-8.5 rounded-xl font-semibold text-xs transition-all cursor-pointer select-none flex items-center justify-center gap-2 bg-transparent text-foreground/80 hover:text-foreground border border-black/10 dark:border-white/15 hover:border-black/25 dark:hover:border-white/30 active:scale-[0.99]"
+            >
+              <Icon name="campaign" size={15} className="text-foreground" />
+              <span>Post Company Notice</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setCurrentView && setCurrentView('calendar')}
+              className="w-full h-8.5 rounded-xl font-semibold text-xs transition-all cursor-pointer select-none flex items-center justify-center gap-2 bg-transparent text-foreground/80 hover:text-foreground border border-black/10 dark:border-white/15 hover:border-black/25 dark:hover:border-white/30 active:scale-[0.99]"
+            >
+              <Icon name="calendar_month" size={15} className="text-foreground" />
+              <span>View Full Calendar & Events</span>
+            </button>
+          )}
+        </div>
       </DashboardWidget>
 
-      {/* Direct Announcement Compose Dialog (MonoGlass Standard) */}
-      <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+      {/* --- CREATE FEED POST & POLL DIALOG --- */}
+      <Dialog open={isFeedModalOpen} onOpenChange={setIsFeedModalOpen}>
+        <DialogContent
+          className="max-w-[460px] glass-kormiis border border-white/20 dark:border-white/10 rounded-3xl overflow-hidden shadow-none"
+          dialogClassName="p-5 sm:p-6 outline-none flex flex-col"
+        >
+          {/* Header: Left title, Right raw cross icon (No separator line) */}
+          <div className="flex items-center justify-between pb-1 shrink-0">
+            <h3 className="text-base sm:text-lg font-bold text-foreground m-0">Create Post or Poll</h3>
+            <button
+              type="button"
+              onClick={() => setIsFeedModalOpen(false)}
+              className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer p-0 bg-transparent border-0 flex items-center justify-center outline-none focus:outline-none"
+              aria-label="Close"
+            >
+              <Icon name="close" size={20} />
+            </button>
+          </div>
+
+          <form onSubmit={handleCreateFeed} className="flex flex-col flex-1 mt-2 gap-3">
+            {/* Middle Space: Seamless transparent canvas without box background color */}
+            <div className="flex-1 min-h-[90px] flex flex-col py-1">
+              <textarea
+                required
+                rows={3}
+                value={feedContent}
+                onChange={(e) => setFeedContent(e.target.value)}
+                placeholder="Share your thoughts, ideas, updates or ask a question..."
+                className="w-full h-full flex-1 bg-transparent border-0 p-0 text-sm sm:text-base text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:ring-0 resize-none leading-relaxed"
+                autoFocus
+              />
+            </div>
+
+            {/* Auto-Attached Poll Options */}
+            <div className="p-3.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.08] dark:border-white/[0.08] flex flex-col gap-2.5">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                  <Icon name="poll" size={16} className="text-foreground" />
+                  Poll Options <span className="text-[11px] font-normal text-muted-foreground">(Optional)</span>
+                </span>
+                {pollOptions.some(o => o.trim()) && (
+                  <button
+                    type="button"
+                    onClick={() => setPollOptions(['', ''])}
+                    className="text-[11px] font-medium text-muted-foreground hover:text-rose-500 cursor-pointer bg-transparent border-0"
+                  >
+                    Clear Options
+                  </button>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-2">
+                {pollOptions.map((opt, idx) => (
+                  <div key={idx} className="flex items-center gap-2">
+                    <span className="text-xs font-semibold text-muted-foreground w-4 text-center">{idx + 1}.</span>
+                    <Input
+                      type="text"
+                      value={opt}
+                      onChange={(e) => handlePollOptionTextChange(idx, e.target.value)}
+                      placeholder={`Option ${idx + 1}`}
+                      className="h-8.5 rounded-xl bg-background text-xs flex-1"
+                    />
+                    {pollOptions.length > 2 && (
+                      <button
+                        type="button"
+                        onClick={() => handleRemovePollOption(idx)}
+                        className="size-7 rounded-lg hover:bg-rose-500/10 hover:text-rose-500 flex items-center justify-center text-muted-foreground transition-colors cursor-pointer bg-transparent border-0"
+                      >
+                        <Icon name="close" size={14} />
+                      </button>
+                    )}
+                  </div>
+                ))}
+
+                {pollOptions.length < 6 && (
+                  <button
+                    type="button"
+                    onClick={handleAddPollOption}
+                    className="self-start text-xs font-semibold text-primary hover:text-primary/80 flex items-center gap-1 py-0.5 cursor-pointer bg-transparent border-0"
+                  >
+                    <Icon name="add" size={14} /> Add Option
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Footer: Post Button on right (No separator line) */}
+            <div className="flex items-center justify-end pt-1 mt-auto shrink-0">
+              <Button
+                type="submit"
+                className="rounded-full h-9.5 px-7 font-semibold bg-primary text-primary-foreground hover:bg-primary/90 shadow-xs cursor-pointer"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <div className="flex items-center gap-2">
+                    <span className="liquid-spinner" />
+                    <span>Posting...</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1.5">
+                    <Icon name="send" size={15}/>
+                    <span>Post</span>
+                  </div>
+                )}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* --- CREATE NOTICE DIALOG (Official Company Notice) --- */}
+      <Dialog open={isNoticeModalOpen} onOpenChange={setIsNoticeModalOpen}>
         <DialogContent className="max-w-lg glass-kormiis border border-white/20 dark:border-white/10 rounded-3xl overflow-hidden p-0 shadow-none">
           <DialogHeader className="px-6 pt-6 pb-4 border-b border-border/60 dark:border-white/10">
             <div className="flex items-center gap-2.5">
               <div className="size-9 rounded-xl flex items-center justify-center bg-amber-500/15 text-amber-500">
                 <Icon name="campaign" size={20}/>
               </div>
-              <DialogTitle className="text-fluid-lg font-bold text-foreground">Post New Announcement</DialogTitle>
+              <DialogTitle className="text-fluid-lg font-bold text-foreground">Post Company Notice</DialogTitle>
             </div>
           </DialogHeader>
 
-          <form onSubmit={handleCreateAnnouncement} className="flex flex-col gap-4 p-6 pt-5">
+          <form onSubmit={handleCreateNotice} className="flex flex-col gap-4 p-6 pt-5">
             {/* Title */}
             <div className="flex flex-col gap-1.5">
               <label className="text-fluid-xs font-semibold text-foreground">
-                Title <span className="text-red-500">*</span>
+                Notice Title <span className="text-red-500">*</span>
               </label>
               <Input
                 type="text"
                 required
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="e.g. Q3 Town Hall & Team Updates"
+                value={noticeTitle}
+                onChange={(e) => setNoticeTitle(e.target.value)}
+                placeholder="e.g. Q3 Town Hall & Policy Updates"
                 className="h-11 rounded-2xl bg-muted/40"
               />
             </div>
@@ -248,17 +809,18 @@ export const AnnouncementsWidget = memo(({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <div className="flex flex-col gap-1.5">
                 <label className="text-fluid-xs font-semibold text-foreground">Category</label>
-                <Select value={category} onChange={setCategory}>
+                <Select value={noticeCategory} onChange={setNoticeCategory}>
                   <SelectItem id="General">General</SelectItem>
                   <SelectItem id="Policy Update">Policy Update</SelectItem>
-                  <SelectItem id="Event">Event</SelectItem>
+                  <SelectItem id="Company">Company</SelectItem>
+                  <SelectItem id="Benefits">Benefits</SelectItem>
                   <SelectItem id="Emergency">Emergency</SelectItem>
                 </Select>
               </div>
 
               <div className="flex flex-col gap-1.5">
                 <label className="text-fluid-xs font-semibold text-foreground">Priority</label>
-                <Select value={priority} onChange={setPriority}>
+                <Select value={noticePriority} onChange={setNoticePriority}>
                   <SelectItem id="Normal">Normal</SelectItem>
                   <SelectItem id="Important">Important</SelectItem>
                   <SelectItem id="Urgent">Urgent</SelectItem>
@@ -269,25 +831,26 @@ export const AnnouncementsWidget = memo(({
             {/* Target Audience */}
             <div className="flex flex-col gap-1.5">
               <label className="text-fluid-xs font-semibold text-foreground">Target Audience</label>
-              <Select value={audience} onChange={setAudience}>
+              <Select value={noticeAudience} onChange={setNoticeAudience}>
                 <SelectItem id="all">All Employees</SelectItem>
                 <SelectItem id="Engineering">Engineering Dept</SelectItem>
                 <SelectItem id="Design">Design Dept</SelectItem>
                 <SelectItem id="HR">HR Dept</SelectItem>
+                <SelectItem id="Marketing">Marketing Dept</SelectItem>
               </Select>
             </div>
 
-            {/* Message Content */}
+            {/* Content */}
             <div className="flex flex-col gap-1.5">
               <label className="text-fluid-xs font-semibold text-foreground">
-                Message Content <span className="text-red-500">*</span>
+                Official Notice Content <span className="text-red-500">*</span>
               </label>
               <textarea
                 required
                 rows={4}
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder="Write your announcement message here..."
+                value={noticeContent}
+                onChange={(e) => setNoticeContent(e.target.value)}
+                placeholder="Write official company notice details..."
                 className="w-full rounded-2xl border border-input bg-muted/40 px-3.5 py-2.5 text-fluid text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none min-h-[100px]"
               />
             </div>
@@ -296,7 +859,7 @@ export const AnnouncementsWidget = memo(({
               <Button
                 type="button"
                 variant="outline"
-                onClick={handleCloseDialog}
+                onClick={() => setIsNoticeModalOpen(false)}
                 className="rounded-full h-11 px-5 font-semibold"
                 disabled={isSubmitting}
               >
@@ -304,7 +867,7 @@ export const AnnouncementsWidget = memo(({
               </Button>
               <Button
                 type="submit"
-                className="rounded-full h-11 px-6 font-semibold bg-primary text-primary-foreground hover:bg-primary/90"
+                className="rounded-full h-11 px-6 font-semibold bg-amber-600 text-white hover:bg-amber-700 dark:bg-amber-500 dark:text-black"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? (
@@ -314,8 +877,8 @@ export const AnnouncementsWidget = memo(({
                   </div>
                 ) : (
                   <div className="flex items-center gap-1.5">
-                    <Icon name="send" size={16}/>
-                    <span>Publish Announcement</span>
+                    <Icon name="campaign" size={16}/>
+                    <span>Publish Notice</span>
                   </div>
                 )}
               </Button>

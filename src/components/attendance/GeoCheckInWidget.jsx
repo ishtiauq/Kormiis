@@ -49,7 +49,7 @@ export default function GeoCheckInWidget({ currentUser, attendance, setAttendanc
   }, [])
 
   const logs = attendance?.dailyLogs?.[today] || {}
-  const empLog = logs[empId] || { status: 'Absent', checkIn: '--', checkOut: '--', hours: '0.0' }
+  const empLog = logs[empId] || { status: 'Off Duty', checkIn: '--', checkOut: '--', hours: '0.0' }
 
   const timeStr = currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })
   
@@ -133,7 +133,7 @@ export default function GeoCheckInWidget({ currentUser, attendance, setAttendanc
           [today]: {
             ...(prev.dailyLogs?.[today] || {}),
             [empId]: {
-              status: 'Present',
+              status: 'In Office',
               checkIn: now,
               checkOut: '--',
               hours: '0.0'

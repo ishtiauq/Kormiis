@@ -22,8 +22,8 @@ const HoverTooltip = ({ content, children }) => {
   )
 }
 
-export default function Announcements({ employees, announcements, setAnnouncements, addLog, addToast, currentUser, addNotification, settings, headline = 'Announcements', events = [], setEvents, defaultTab = 'announcements' }) {
-  const [activeHubTab, setActiveHubTab] = useState(defaultTab)
+export default function Announcements({ employees, announcements, setAnnouncements, addLog, addToast, currentUser, addNotification, settings, headline = 'Announcements', events = [], setEvents, defaultTab = 'feed' }) {
+  const [activeHubTab, setActiveHubTab] = useState(defaultTab === 'calendar' ? 'calendar' : (defaultTab === 'notice' || defaultTab === 'announcements' ? 'notice' : 'feed'))
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingPostId, setEditingPostId] = useState(null)
 
@@ -38,7 +38,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
   const [pollQuestion, setPollQuestion] = useState('')
   const [pollOptions, setPollOptions] = useState(['', ''])
 
-  const [categories, setCategories] = useState(['General', 'Policy Update', 'Event', 'Emergency'])
+  const [categories, setCategories] = useState(['General', 'Policy Update', 'Company', 'Benefits', 'Event', 'Emergency', 'Discussion', 'Poll'])
   const [showCategoryModal, setShowCategoryModal] = useState(false)
   const [editingCategory, setEditingCategory] = useState(null)
   const [catFormName, setCatFormName] = useState('')
@@ -60,9 +60,43 @@ export default function Announcements({ employees, announcements, setAnnouncemen
     setPollOptions(newOptions)
   }
 
+  const handleVote = (postId, optionIndex) => {
+    const userId = currentUser?.id || currentUser?.uid || 'guest'
+    setAnnouncements(prev => (Array.isArray(prev) ? prev : []).map(p => {
+      if (p.id === postId && p.poll && Array.isArray(p.poll.options)) {
+        const updatedOptions = p.poll.options.map((opt, idx) => {
+          const votes = Array.isArray(opt.votes) ? opt.votes : []
+          const hasVotedThis = votes.includes(userId)
+          if (idx === optionIndex) {
+            return {
+              ...opt,
+              votes: hasVotedThis ? votes.filter(id => id !== userId) : [...votes, userId]
+            }
+          } else {
+            return {
+              ...opt,
+              votes: votes.filter(id => id !== userId)
+            }
+          }
+        })
+        return {
+          ...p,
+          poll: {
+            ...p.poll,
+            options: updatedOptions
+          }
+        }
+      }
+      return p
+    }))
+    addToast('Vote recorded', 'success')
+  }
+
   const handleSubmit = (e) => {
     e.preventDefault()
     if (!title || !content) return addToast('Title and content are required', 'warning')
+
+    const isFeedItem = activeHubTab === 'feed' || hasPoll
 
     if (editingPostId) {
       setAnnouncements(prev => prev.map(p => {
@@ -70,6 +104,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
           return {
             ...p,
             title, content, category, priority, audience,
+            postType: isFeedItem ? 'feed' : 'notice',
             poll: hasPoll && pollQuestion ? {
               question: pollQuestion,
               options: pollOptions.filter(o => o.trim() !== '').map(opt => ({ text: opt, votes: [] }))
@@ -78,16 +113,17 @@ export default function Announcements({ employees, announcements, setAnnouncemen
         }
         return p
       }))
-      addToast('Announcement updated', 'success')
+      addToast(isFeedItem ? 'Post updated' : 'Notice updated', 'success')
       setEditingPostId(null)
     } else {
       const newPost = {
         id: `ann-${Date.now()}`,
+        postType: isFeedItem ? 'feed' : 'notice',
         title,
         content,
         authorId: currentUser?.id || 'admin',
         date: new Date().toISOString(),
-        category,
+        category: hasPoll ? 'Poll' : category,
         priority,
         audience,
         attachments: [],
@@ -100,12 +136,12 @@ export default function Announcements({ employees, announcements, setAnnouncemen
         } : null
       }
       setAnnouncements(prev => [newPost, ...prev])
-      addToast('Announcement posted', 'success')
-      addLog('Posted Announcement', title)
-      if (addNotification) addNotification(`New announcement posted: "${title}"`, 'announcements', { title: 'New Announcement', category: 'announcement' })
+      addToast(isFeedItem ? 'Post shared to Feed' : 'Notice posted', 'success')
+      addLog(isFeedItem ? 'Posted Team Update' : 'Posted Announcement', title)
+      if (addNotification) addNotification(`New ${isFeedItem ? 'feed post' : 'announcement'}: "${title}"`, 'announcements', { title: isFeedItem ? 'New Team Post' : 'New Announcement', category: isFeedItem ? 'feed' : 'announcement' })
 
       // Queue WhatsApp broadcast if enabled (free 24h-window mode)
-      if (settings?.whatsapp?.enabled && settings?.whatsapp?.notifyAnnouncements) {
+      if (!isFeedItem && settings?.whatsapp?.enabled && settings?.whatsapp?.notifyAnnouncements) {
         const msg = generateAnnouncementMessage({
           companyName: settings?.company?.name || 'Kormiis HR',
           title,
@@ -470,9 +506,17 @@ export default function Announcements({ employees, announcements, setAnnouncemen
     return 'outline'
   }
 
-  const uniqueCategories = ['All', ...new Set([...categories, ...(announcements || []).map(a => a.category).filter(Boolean)])]
+  const isFeedPost = (post) => !post ? false : (post.postType === 'feed' || Boolean(post.poll) || post.category === 'Feed' || post.category === 'Discussion' || post.category === 'Poll')
 
-  const filteredAnnouncements = announcements.filter(a => filterCategory === 'All' || a.category === filterCategory)
+  const tabFilteredAnnouncements = (announcements || []).filter(post => {
+    if (activeHubTab === 'feed') return isFeedPost(post)
+    if (activeHubTab === 'notice' || activeHubTab === 'announcements') return !isFeedPost(post)
+    return true
+  })
+
+  const uniqueCategories = ['All', ...new Set([...categories, ...tabFilteredAnnouncements.map(a => a.category).filter(Boolean)])]
+
+  const filteredAnnouncements = tabFilteredAnnouncements.filter(a => filterCategory === 'All' || a.category === filterCategory)
 
   // Track unique views
   useEffect(() => {
@@ -496,7 +540,8 @@ export default function Announcements({ employees, announcements, setAnnouncemen
   }, [filterCategory, currentUser, announcements, setAnnouncements])
 
   const companyHubTabs = [
-    { id: 'announcements', label: 'Announcements', icon: <Icon name="rss_feed" size={15}/> },
+    { id: 'feed', label: 'Feed & Polls', icon: <Icon name="forum" size={15}/> },
+    { id: 'notice', label: 'Company Notice', icon: <Icon name="campaign" size={15}/> },
     { id: 'calendar', label: 'Events Calendar', icon: <Icon name="calendar_month" size={15}/> },
   ]
 
@@ -547,12 +592,12 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                 setHasPoll(false)
               }}>
                 <Icon name="add" className="mr-1 sm:mr-2" size={16}/>
-                <span className="hidden sm:inline">New Post</span>
+                <span className="hidden sm:inline">{activeHubTab === 'feed' ? 'Post / Poll' : 'New Notice'}</span>
               </Button>
             </DialogTrigger>
           <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>{editingPostId ? 'Edit Announcement' : 'Create Announcement'}</DialogTitle>
+              <DialogTitle>{editingPostId ? 'Edit Post' : (activeHubTab === 'feed' ? 'Create Feed Post or Poll' : 'Post Company Notice')}</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="flex flex-col gap-5 sm:gap-6 mt-4">
               <div className="flex flex-col gap-2">
@@ -658,7 +703,13 @@ export default function Announcements({ employees, announcements, setAnnouncemen
           </Card>
         ) : (
           filteredAnnouncements.map(post => {
-            const author = post.authorId === 'system' ? { name: 'System Auto-Post', avatar: '' } : employees.find(e => e.id === post.authorId) || { name: post.author || 'Unknown User' }
+            const emp = employees.find(e => String(e.id) === String(post.authorId) || String(e.uid) === String(post.authorId))
+            const author = post.authorId === 'system'
+              ? { name: 'System Auto-Post', avatar: '' }
+              : emp || {
+                  name: post.author || currentUser?.name || employees?.[0]?.name || 'Sarah Rahman',
+                  avatar: post.authorAvatar || currentUser?.avatar || employees?.[0]?.avatar || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=256&q=80'
+                }
             const dateStr = formatDateTime(post.date)
             const isUrgent = post.priority === 'Urgent'
 
@@ -700,31 +751,61 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                 </CardHeader>
                 
                 <CardContent className="pb-5">
-                  <h3 className="text-lg font-semibold tracking-tight text-foreground mb-2">{post.title}</h3>
-                  <div className="whitespace-pre-wrap leading-relaxed text-fluid-sm text-foreground/90">
-                    {post.content}
-                  </div>
+                  {!post.poll && (
+                    <>
+                      {post.title && post.title !== post.content && (
+                        <h3 className="text-lg font-semibold tracking-tight text-foreground mb-2">{post.title}</h3>
+                      )}
+                      <div className="whitespace-pre-wrap leading-relaxed text-fluid-sm text-foreground/90">
+                        {post.content}
+                      </div>
+                    </>
+                  )}
 
                   {post.poll && post.poll.options && (
-                    <div className="mt-6 p-4 rounded-xl border border-border/50 bg-muted/20">
-                      <h4 className="font-medium text-sm mb-4 flex items-center gap-2 text-foreground">
-                         <span className="text-lg">📊</span> {post.poll.question}
-                      </h4>
-                      <div className="flex flex-col gap-3">
+                    <div className="p-4 rounded-2xl border border-border/50 bg-muted/20">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-semibold text-sm sm:text-base flex items-center gap-2 text-foreground m-0">
+                          <Icon name="poll" size={17} className="text-foreground shrink-0" />
+                          <span>{post.poll.question || post.content || post.title}</span>
+                        </h4>
+                        <span className="text-xs text-muted-foreground font-mono shrink-0 ml-2">
+                          {post.poll.options.reduce((sum, o) => sum + (Array.isArray(o.votes) ? o.votes.length : (o.votes || 0)), 0)} votes
+                        </span>
+                      </div>
+                      <div className="flex flex-col gap-2.5">
                         {post.poll.options.map((opt, i) => {
-                          const votes = Array.isArray(opt.votes) ? opt.votes.length : (opt.votes || 0)
+                          const votes = Array.isArray(opt.votes) ? opt.votes : []
                           const totalVotes = post.poll.options.reduce((sum, o) => sum + (Array.isArray(o.votes) ? o.votes.length : (o.votes || 0)), 0)
-                          const pct = totalVotes === 0 ? 0 : Math.round((votes / totalVotes) * 100)
+                          const pct = totalVotes === 0 ? 0 : Math.round((votes.length / totalVotes) * 100)
+                          const currentUserId = currentUser?.id || currentUser?.uid || 'guest'
+                          const hasVotedThis = votes.includes(currentUserId)
+
                           return (
-                            <div key={i} className="flex items-center gap-3">
-                              <div className="flex-1 relative overflow-hidden h-9 rounded-md bg-muted/50 border border-transparent hover:border-border transition-colors">
-                                <div className="absolute top-0 left-0 h-full opacity-10 bg-primary transition-all duration-500 ease-in-out" style={{ width: `${pct}%` }} />
-                                <div className="absolute top-0 left-0 h-full w-full flex items-center px-3 text-sm font-medium text-foreground">
-                                  {opt.text}
-                                </div>
-                              </div>
-                              <div className="w-10 text-sm text-right text-muted-foreground font-medium">{votes}</div>
-                            </div>
+                            <button
+                              key={i}
+                              type="button"
+                              onClick={() => handleVote(post.id, i)}
+                              className={`relative w-full h-10 rounded-xl overflow-hidden border transition-all flex items-center justify-between px-3.5 cursor-pointer text-left select-none ${
+                                hasVotedThis
+                                  ? 'border-foreground/40 bg-foreground/10 shadow-xs'
+                                  : 'border-border/60 hover:border-foreground/30 bg-card/60'
+                              }`}
+                            >
+                              <div
+                                className={`absolute top-0 left-0 h-full transition-all duration-500 ease-out ${
+                                  hasVotedThis ? 'bg-foreground/20' : 'bg-muted/60'
+                                }`}
+                                style={{ width: `${pct}%` }}
+                              />
+                              <span className="relative z-10 text-sm font-medium text-foreground flex items-center gap-2 truncate">
+                                {hasVotedThis && <Icon name="check_circle" size={14} className="text-foreground shrink-0" />}
+                                <span className="truncate">{opt.text}</span>
+                              </span>
+                              <span className="relative z-10 text-xs font-bold text-muted-foreground tabular-nums ml-2 shrink-0">
+                                {pct}% ({votes.length})
+                              </span>
+                            </button>
                           )
                         })}
                       </div>

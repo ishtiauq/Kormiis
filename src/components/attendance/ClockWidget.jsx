@@ -16,7 +16,7 @@ export default function ClockWidget({ employees = [], attendance = {}, setAttend
   }, [])
 
   const logs = attendance?.dailyLogs?.[today] || {}
-  const empLog = clockEmpId ? (logs[clockEmpId] || { status: 'Absent', checkIn: '--', checkOut: '--', hours: '0.0' }) : null
+  const empLog = clockEmpId ? (logs[clockEmpId] || { status: 'Off Duty', checkIn: '--', checkOut: '--', hours: '0.0' }) : null
 
   const timeStr = currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })
   const dateStr = currentTime.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
@@ -31,7 +31,7 @@ export default function ClockWidget({ employees = [], attendance = {}, setAttend
         [today]: {
           ...(prev?.dailyLogs?.[today] || {}),
           [clockEmpId]: {
-            status: 'Present',
+            status: 'In Office',
             checkIn: now,
             checkOut: empLog?.checkOut || '--',
             hours: empLog?.hours || '0.0'
@@ -39,7 +39,7 @@ export default function ClockWidget({ employees = [], attendance = {}, setAttend
         }
       }
     }))
-    addToast?.('Check-in recorded for today', 'success')
+    addToast?.('Check-in recorded for today (In Office)', 'success')
   }
 
   const handleCheckOut = () => {

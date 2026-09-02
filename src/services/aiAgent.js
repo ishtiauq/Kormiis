@@ -397,13 +397,13 @@ export function parseLocalHrAction(prompt, context = {}) {
   }
 
   // 6. Attendance Summary
-  if (lower.includes('attendance') || lower.includes('present') || lower.includes('who is in') || lower.includes('absent')) {
+  if (lower.includes('attendance') || lower.includes('in office') || lower.includes('present') || lower.includes('who is in') || lower.includes('off duty') || lower.includes('remote') || lower.includes('on field') || lower.includes('absent')) {
     return {
       text: `📋 **Today's Attendance Overview (${new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })})**\n\n` +
             `- **Total Staff:** ${employees.length}\n` +
-            `- **Logged In Today:** ${(employees.length > 0 ? Math.max(1, Math.round(employees.length * 0.85)) : 0)} employees\n` +
+            `- **In Office:** ${(employees.length > 0 ? Math.max(1, Math.round(employees.length * 0.85)) : 0)} employees\n` +
             `- **On Approved Leave:** 1 employee\n` +
-            `- **Unaccounted:** ${(employees.length > 0 ? Math.max(0, Math.round(employees.length * 0.15) - 1) : 0)} employees\n\n` +
+            `- **Off Duty / Remote:** ${(employees.length > 0 ? Math.max(0, Math.round(employees.length * 0.15) - 1) : 0)} employees\n\n` +
             `Click below to view the live attendance roster.`,
       functionCalls: [{
         name: 'navigate_view',
@@ -435,7 +435,7 @@ export function parseLocalHrAction(prompt, context = {}) {
             `• **Calculate Payroll:** *"Summarize our monthly payroll breakdown"*\n` +
             `• **Post Announcement:** *"Draft announcement: Annual company retreat next Friday"*\n` +
             `• **Log Expense:** *"Log expense 450 for team snacks"*\n` +
-            `• **Attendance & Leaves:** *"Who is present today?"*\n\n` +
+            `• **Attendance & Leaves:** *"Who is in office today?"*\n\n` +
             `Simply type a command or select a suggested prompt below!`,
       functionCalls: []
     }

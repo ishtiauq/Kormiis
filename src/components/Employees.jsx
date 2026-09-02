@@ -107,7 +107,7 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
     return { initials, color }
   }
 
-  // Live Attendance Status Computer (Functional based on Check In / Check Out and Leaves)
+  // Live Attendance Status Computer (Functional based on Check In / Check Out, Remote, On-Field, Leaves)
   const getEmployeeLiveStatus = (emp) => {
     const todayIso = new Date().toISOString().split('T')[0]
     
@@ -129,22 +129,32 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
     const log = todayLogs[emp.id]
 
     if (log) {
-      if (log.status === 'On Leave') {
+      const s = String(log.status || '').trim()
+      if (s === 'On Leave') {
         return { status: 'On Leave', label: 'On Leave', variant: 'amber', icon: 'event_busy', detail: 'On Leave' }
       }
-      if (log.status === 'Present' || log.status === 'Late' || (log.checkIn && log.checkIn !== '--')) {
-        const detailStr = log.checkOut && log.checkOut !== '--'
-          ? `Checked In: ${log.checkIn} • Out: ${log.checkOut}`
-          : `Checked In: ${log.checkIn || 'On time'}`
-        return { status: 'Present', label: 'At Office', variant: 'emerald', icon: 'check_circle', detail: detailStr }
+      if (s === 'Remote' || s === 'WFH') {
+        return { status: 'Remote', label: 'Remote', variant: 'sky', icon: 'home_work', detail: `Remote Work • In: ${log.checkIn || '--'}` }
       }
-      if (log.status === 'Absent') {
-        return { status: 'Absent', label: 'Absent', variant: 'rose', icon: 'cancel', detail: 'Absent (Not Checked In)' }
+      if (s === 'On-Field' || s === 'Field' || s === 'Outdoor') {
+        return { status: 'On-Field', label: 'On-Field', variant: 'purple', icon: 'commute', detail: `On-Field Work • In: ${log.checkIn || '--'}` }
+      }
+      if (s === 'No-Show') {
+        return { status: 'No-Show', label: 'No-Show', variant: 'rose', icon: 'cancel', detail: 'Absent (No Notice Given)' }
+      }
+      if (s === 'Off Duty' || s === 'Absent') {
+        return { status: 'Off Duty', label: 'Off Duty', variant: 'slate', icon: 'schedule', detail: 'Off Duty / Day Off' }
+      }
+      if (s === 'In Office' || s === 'Present' || s === 'Late' || (log.checkIn && log.checkIn !== '--')) {
+        const detailStr = log.checkOut && log.checkOut !== '--'
+          ? `In Office • In: ${log.checkIn} • Out: ${log.checkOut}`
+          : `In Office • Checked In: ${log.checkIn || 'On time'}`
+        return { status: 'In Office', label: 'In Office', variant: 'emerald', icon: 'check_circle', detail: detailStr }
       }
     }
 
     // 3. Fallback if no check-in log exists for today
-    return { status: 'Absent', label: 'Absent', variant: 'rose', icon: 'cancel', detail: 'Absent (Not Checked In)' }
+    return { status: 'Off Duty', label: 'Off Duty', variant: 'slate', icon: 'schedule', detail: 'Off Duty / Not Checked In' }
   }
 
   // Compute dynamic departments list from default + current employees
@@ -1001,8 +1011,8 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
             <Button variant="outline" onClick={() => {setSearchTerm(''); setDeptFilter('All')}}>Clear Filters</Button>
           </div>
         ) : (
-          <div className="p-4 sm:p-5">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 items-start">
+          <div className="p-3.5 sm:p-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-3.5 items-start">
               {filteredEmployees.map(emp => {
                 const liveStatus = getEmployeeLiveStatus(emp)
                 const displayRole = emp.designation && emp.designation.toLowerCase() !== 'teammate' 
@@ -1012,10 +1022,10 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
                 return (
                   <div 
                     key={emp.id} 
-                    className="employee-card-transparent relative group rounded-[28px] p-5 sm:p-5.5 bg-transparent text-foreground border border-black/[0.08] dark:border-white/[0.09] hover:border-primary/50 dark:hover:border-primary/40 shadow-none hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between overflow-hidden isolate [backdrop-filter:none] [-webkit-backdrop-filter:none]"
+                    className="employee-card-transparent relative group rounded-[22px] sm:rounded-[24px] p-3.5 sm:p-4 bg-transparent text-foreground border border-black/[0.08] dark:border-white/[0.09] hover:border-primary/50 dark:hover:border-primary/40 shadow-none hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between overflow-hidden isolate [backdrop-filter:none] [-webkit-backdrop-filter:none]"
                   >
                     {/* Hero Section: Profile Avatar on Left, First Name -> Role -> Department & Live Status on Right */}
-                    <div className="flex items-start gap-3.5 my-1.5 relative z-10">
+                    <div className="flex items-start gap-3 my-0.5 relative z-10">
                       {/* Left: Avatar with Squircle Frame & Upload Overlay */}
                       <div className="relative shrink-0 group/avatar mt-0.5">
                         <div 
@@ -1027,7 +1037,7 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
                           title="Click to Upload Photo (Max: 500 KB, 1:1 Ratio)"
                           className="relative cursor-pointer"
                         >
-                          <Avatar className={`size-15 rounded-2xl border border-black/10 dark:border-white/15 ring-1 ring-black/5 dark:ring-white/10 transition-all duration-300 group-hover/avatar:scale-105 ${emp.status !== 'Active' ? 'grayscale opacity-75' : ''}`}>
+                          <Avatar className={`size-12 sm:size-13 rounded-2xl border border-black/10 dark:border-white/15 ring-1 ring-black/5 dark:ring-white/10 transition-all duration-300 group-hover/avatar:scale-105 ${emp.status !== 'Active' ? 'grayscale opacity-75' : ''}`}>
                             {!imageErrors[emp.id] && (
                               <AvatarImage 
                                 src={emp.avatar || defaultAvatar} 
@@ -1036,57 +1046,51 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
                                 onError={() => setImageErrors(prev => ({...prev, [emp.id]: true}))} 
                               />
                             )}
-                            <AvatarFallback className="bg-primary/10 text-primary text-base font-semibold rounded-2xl">
+                            <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold rounded-2xl">
                               {getAvatarFallback(emp.name).initials}
                             </AvatarFallback>
                           </Avatar>
 
                           {/* Hover Camera Upload Overlay */}
                           <div className="absolute inset-0 rounded-2xl bg-black/60 opacity-0 group-hover/avatar:opacity-100 flex flex-col items-center justify-center transition-all text-white">
-                            <Icon name="photo_camera" size={15}/>
-                            <span className="text-[8px] font-normal tracking-tight">Upload</span>
+                            <Icon name="photo_camera" size={13}/>
+                            <span className="text-[7.5px] font-normal tracking-tight">Upload</span>
                           </div>
                         </div>
                       </div>
 
                       {/* Right: First Name -> Role -> Department & Live Status */}
-                      <div className="flex flex-col min-w-0 flex-1 text-left justify-center space-y-1">
-                        {/* 1. Name (Only Heavy / Bold Font in the Card) */}
+                      <div className="flex flex-col min-w-0 flex-1 text-left justify-center space-y-0.5">
+                        {/* 1. Name (Only Heavy / Bold Font in the Card, slightly reduced) */}
                         <h4 
                           onClick={() => setViewingEmployee(emp)}
                           title={`Click to view complete profile of ${emp.name}`}
-                          className="font-bold text-fluid-lg text-foreground tracking-tight break-words group-hover:text-primary transition-colors leading-tight cursor-pointer"
+                          className="font-bold text-[14.5px] sm:text-[15px] text-foreground tracking-tight break-words group-hover:text-primary transition-colors leading-snug cursor-pointer"
                         >
                           {emp.name}
                         </h4>
 
                         {/* 2. Role / Title */}
                         <div className="flex items-center gap-1.5 text-xs font-normal text-muted-foreground break-words">
-                          <Icon name="work" size={13} className="text-primary/70 shrink-0" />
+                          <Icon name="work" size={12} className="text-primary/70 shrink-0" />
                           <span className="truncate">{displayRole}</span>
                         </div>
 
-                        {/* 3. Department • Employee ID • Attendance Live Status (At Office, On Leave, Absent) */}
-                        <div className="flex items-center gap-2 flex-wrap pt-0.5 text-xs font-normal">
+                        {/* 3. Department • Employee ID • Attendance Live Status (In Office, Remote, On-Field, On Leave, Off Duty, No-Show) */}
+                        <div className="flex items-center gap-1.5 flex-wrap pt-0.5 text-xs font-normal">
                           <span className="inline-flex items-center gap-1 font-normal text-muted-foreground truncate">
-                            <Icon name="apartment" size={13} className="text-primary/70 shrink-0" />
+                            <Icon name="apartment" size={12} className="text-primary/70 shrink-0" />
                             {emp.department || 'General'}
                           </span>
                           <span className="text-muted-foreground/40 font-mono text-xs">•</span>
                           <span className="inline-flex items-center gap-1 font-mono font-normal text-muted-foreground">
-                            <Icon name="credit_card" size={13} className="text-primary/70 shrink-0" />
+                            <Icon name="credit_card" size={12} className="text-primary/70 shrink-0" />
                             {emp.id}
                           </span>
                           <span className="text-muted-foreground/40 font-mono text-xs">•</span>
                           <span 
                             title={liveStatus.detail}
-                            className={`inline-flex items-center font-medium select-none ${
-                              liveStatus.status === 'Present'
-                                ? 'text-emerald-600 dark:text-emerald-400'
-                                : liveStatus.status === 'On Leave'
-                                  ? 'text-amber-600 dark:text-amber-400'
-                                  : 'text-rose-600 dark:text-rose-400'
-                            }`}
+                            className="inline-flex items-center font-normal text-muted-foreground select-none"
                           >
                             {liveStatus.label}
                           </span>
@@ -1095,8 +1099,8 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
                     </div>
 
                     {/* 3. Quick Action Split / Segmented Buttons with Text (Matching Full Profile dimensions) */}
-                    <div className="mt-2.5 pt-2 border-t border-black/[0.06] dark:border-white/[0.08] relative z-10" onClick={(e) => e.stopPropagation()}>
-                      <div className="w-full h-9 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.08] shadow-none overflow-hidden flex items-center">
+                    <div className="mt-2 pt-1.5 border-t border-black/[0.06] dark:border-white/[0.08] relative z-10" onClick={(e) => e.stopPropagation()}>
+                      <div className="w-full h-8 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.08] shadow-none overflow-hidden flex items-center">
                         {emp.email && (
                           <>
                             <a
@@ -1104,10 +1108,10 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
                               title={`Email ${emp.name}`}
                               className="flex-1 h-full text-muted-foreground hover:text-primary hover:bg-black/5 dark:hover:bg-white/10 active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-1.5 text-xs font-normal select-none"
                             >
-                              <Icon name="mail" size={13} className="shrink-0" />
+                              <Icon name="mail" size={12} className="shrink-0" />
                               <span className="truncate">Email</span>
                             </a>
-                            <div className="w-[1px] h-4 bg-black/10 dark:bg-white/15 shrink-0" />
+                            <div className="w-[1px] h-3.5 bg-black/10 dark:bg-white/15 shrink-0" />
                           </>
                         )}
                         {emp.phone && (
@@ -1117,10 +1121,10 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
                               title={`Call ${emp.name}`}
                               className="flex-1 h-full text-muted-foreground hover:text-primary hover:bg-black/5 dark:hover:bg-white/10 active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-1.5 text-xs font-normal select-none"
                             >
-                              <Icon name="call" size={13} className="shrink-0" />
+                              <Icon name="call" size={12} className="shrink-0" />
                               <span className="truncate">Call</span>
                             </a>
-                            <div className="w-[1px] h-4 bg-black/10 dark:bg-white/15 shrink-0" />
+                            <div className="w-[1px] h-3.5 bg-black/10 dark:bg-white/15 shrink-0" />
                           </>
                         )}
                         <button
@@ -1128,10 +1132,10 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
                           onClick={() => handleOpenEditForm(emp)}
                           className="flex-1 h-full text-muted-foreground hover:text-primary hover:bg-black/5 dark:hover:bg-white/10 active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-1.5 text-xs font-normal select-none"
                         >
-                          <Icon name="edit" size={13} className="shrink-0" />
+                          <Icon name="edit" size={12} className="shrink-0" />
                           <span className="truncate">Edit</span>
                         </button>
-                        <div className="w-[1px] h-4 bg-black/10 dark:bg-white/15 shrink-0" />
+                        <div className="w-[1px] h-3.5 bg-black/10 dark:bg-white/15 shrink-0" />
                         <button
                           title={`Delete ${emp.name}`}
                           onClick={() => {
@@ -1142,21 +1146,21 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
                           }}
                           className="flex-1 h-full text-muted-foreground hover:text-destructive hover:bg-rose-500/10 active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-1.5 text-xs font-normal select-none"
                         >
-                          <Icon name="delete" size={13} className="shrink-0" />
+                          <Icon name="delete" size={12} className="shrink-0" />
                           <span className="truncate">Delete</span>
                         </button>
                       </div>
                     </div>
 
                     {/* 4. Card Footer: Direct Unified "Full Profile" Button (Exact Same Height & Width) */}
-                    <div className="mt-2 flex items-center relative z-10">
+                    <div className="mt-1.5 flex items-center relative z-10">
                       <button
                         onClick={() => setViewingEmployee(emp)}
                         title={`View full profile of ${emp.name}`}
-                        className="w-full h-9 rounded-2xl flex items-center justify-center gap-1.5 bg-black/[0.02] dark:bg-white/[0.03] hover:bg-primary/10 hover:text-primary dark:hover:bg-primary/15 dark:hover:text-primary active:scale-[0.98] border border-black/[0.06] dark:border-white/[0.08] hover:border-primary/30 text-xs font-normal text-foreground/80 transition-all cursor-pointer select-none"
+                        className="w-full h-8 rounded-xl flex items-center justify-center gap-1.5 bg-black/[0.02] dark:bg-white/[0.03] text-muted-foreground hover:text-primary hover:bg-black/5 dark:hover:bg-white/10 active:scale-95 border border-black/[0.06] dark:border-white/[0.08] text-xs font-normal transition-all cursor-pointer select-none"
                       >
-                        <Icon name="visibility" size={14} className="text-primary" />
-                        <span>Full Profile</span>
+                        <Icon name="visibility" size={12} className="shrink-0" />
+                        <span className="truncate">Full Profile</span>
                       </button>
                     </div>
                   </div>
