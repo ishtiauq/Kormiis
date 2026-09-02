@@ -497,7 +497,7 @@ export const AnnouncementsWidget = memo(({
               </button>
             </div>
           ) : (
-            <div className="flex-1 min-h-0 overflow-y-auto max-h-[360px] lg:max-h-[640px] flex flex-col gap-2.5 px-2.5 sm:px-3 pb-2.5 chat-scrollbar">
+            <div className="flex-1 min-h-0 overflow-y-auto max-h-[360px] lg:max-h-[480px] flex flex-col gap-2.5 px-2.5 sm:px-3 pb-2.5 chat-scrollbar">
               {feedPosts.map((post) => {
                 const author = getAuthor(post.authorId, post)
                 const hasActivePoll = post.poll && Array.isArray(post.poll.options) && post.poll.options.length > 0
@@ -623,7 +623,7 @@ export const AnnouncementsWidget = memo(({
               </button>
             </div>
           ) : (
-            <div className="flex-1 min-h-0 overflow-y-auto max-h-[360px] lg:max-h-[640px] flex flex-col gap-2.5 px-2.5 sm:px-3 pb-2.5 chat-scrollbar">
+            <div className="flex-1 min-h-0 overflow-y-auto max-h-[360px] lg:max-h-[480px] flex flex-col gap-2.5 px-2.5 sm:px-3 pb-2.5 chat-scrollbar">
               {noticePosts.map((ann, idx) => {
                 const author = getAuthor(ann.authorId, ann)
                 return (
@@ -686,7 +686,7 @@ export const AnnouncementsWidget = memo(({
               )}
             </div>
           ) : (
-            <div className="flex-1 min-h-0 overflow-y-auto max-h-[360px] lg:max-h-[640px] flex flex-col gap-2.5 px-2.5 sm:px-3 pb-2.5 chat-scrollbar">
+            <div className="flex-1 min-h-0 overflow-y-auto max-h-[360px] lg:max-h-[480px] flex flex-col gap-2.5 px-2.5 sm:px-3 pb-2.5 chat-scrollbar">
               {/* Milestones (Birthdays & Work Anniversaries) */}
               {upcomingMilestones.map((milestone, i) => (
                 <div key={`ms-${i}`} className="flex items-center gap-3 p-2.5 px-3.5 rounded-2xl liquid-widget-item border-black/[0.06] dark:border-white/[0.08]">

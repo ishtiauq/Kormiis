@@ -407,6 +407,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 lg:gap-6 auto-rows-[minmax(148px,auto)] items-stretch pt-2">
 
+        {/* Column 1: Catch Up (Announcements, Notice & Events) */}
         {canViewAnnouncements && (
           <AnnouncementsWidget
             announcements={announcements}
@@ -423,209 +424,212 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
             addNotification={addNotification}
             settings={settings}
             hasPermission={hasPermission}
-            cardClass="col-span-12 lg:col-span-7 lg:row-span-3"
+            cardClass="col-span-12 lg:col-span-4 h-full"
             {...wProps}
           />
         )}
 
-        {/* Employee Directory Widget - beside Announcements on desktop, 2-slot tall */}
+        {/* Column 2: Middle Stacked Column — Attendance (top) & Performance Tracker (bottom) */}
+        <div className="col-span-12 lg:col-span-4 flex flex-col gap-4 sm:gap-5 lg:gap-6 justify-between">
+          {canViewAttendance && (
+            <DashboardWidget
+              id="w2"
+              title="Attendance"
+              icon={<Icon name="group" className="text-foreground shrink-0" size={22}/>}
+              cardClass="flex-1"
+              action={
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  {attFilter && (
+                    <button
+                      onClick={() => setAttFilter(null)}
+                      className="text-[11px] font-semibold text-muted-foreground hover:text-foreground px-2 py-0.5 rounded-lg transition-colors cursor-pointer"
+                    >
+                      Reset
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setCurrentView && setCurrentView('attendance')}
+                    className="apple-glass-btn text-xs font-semibold px-3.5 h-7 rounded-full cursor-pointer shrink-0"
+                  >
+                    Roll Call
+                  </button>
+                </div>
+              }
+              contentClass="flex flex-col justify-between pt-1"
+              {...wProps}
+            >
+              {/* ================= 7-DAY DAY-WISE SELECTOR & BREAKDOWN ================= */}
+              <div className="flex flex-col gap-3 py-1">
+                {/* 1. Top: Full-Width 7-Day Day Selector Strip */}
+                <div className="flex flex-col gap-1.5 w-full">
+                  <div className="flex items-center justify-between px-0.5">
+                    <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                      LAST 7 DAYS
+                    </span>
+                    <span className="text-[11px] font-bold text-foreground font-mono">
+                      {selectedDayData.isToday ? 'Today' : selectedDayData.date}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-7 gap-1 sm:gap-1.5 p-1 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/8 dark:border-white/10">
+                    {weeklyTrendData.map((item, idx) => {
+                      const isSelected = selectedDayIndex === idx
+                      const dayNum = item.date ? item.date.split('-')[2] : ''
+                      return (
+                        <button
+                          key={item.date || idx}
+                          type="button"
+                          onClick={() => {
+                            setSelectedDayIndex(idx)
+                            setAttFilter(null)
+                          }}
+                          className={`flex flex-col items-center justify-center py-2 px-0.5 rounded-xl transition-all duration-200 cursor-pointer select-none ${
+                            isSelected
+                              ? 'selected-day-capsule font-extrabold scale-[1.04]'
+                              : 'text-muted-foreground hover:text-foreground hover:bg-black/[0.05] dark:hover:bg-white/[0.08]'
+                          }`}
+                        >
+                          <span className="text-[10px] uppercase font-bold leading-tight">
+                            {item.day}
+                          </span>
+                          <span className="text-xs font-mono font-black leading-none mt-1">
+                            {dayNum}
+                          </span>
+                          <span
+                            className={`size-1.5 rounded-full mt-1.5 day-dot ${
+                              isSelected
+                                ? ''
+                                : item.present > 0
+                                  ? 'bg-foreground'
+                                  : 'bg-foreground/20'
+                            }`}
+                          />
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                {/* 2. Bottom: Selected Day Interactive Status Cards (Horizontal 3-Column Grid) */}
+                <div className="grid grid-cols-3 gap-2 sm:gap-2.5">
+                  {/* Present Card */}
+                  <button
+                    type="button"
+                    onClick={() => setAttFilter(attFilter === 'present' ? null : 'present')}
+                    className={`flex flex-col items-center justify-center p-2.5 sm:p-3 rounded-2xl transition-all cursor-pointer select-none text-center relative overflow-hidden ${
+                      attFilter === 'present'
+                        ? 'bg-black/15 dark:bg-white/20 border-2 border-black/30 dark:border-white/40 shadow-xs scale-[1.02]'
+                        : 'bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/10 hover:bg-black/[0.06] dark:hover:bg-white/[0.08]'
+                    }`}
+                  >
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <Icon name="check_circle" size={16} className="text-foreground shrink-0" />
+                      <span className="text-fluid-lg sm:text-fluid-xl font-black text-foreground tabular-nums">
+                        {selectedDayData.present}
+                      </span>
+                    </div>
+                    <span className="text-[11px] font-bold text-foreground">In Office</span>
+                    <span className="text-[10px] text-muted-foreground font-semibold">
+                      {selectedDayData.total > 0 ? `${Math.round((selectedDayData.present / selectedDayData.total) * 100)}%` : '0%'}
+                    </span>
+                  </button>
+
+                  {/* Off Duty Card */}
+                  <button
+                    type="button"
+                    onClick={() => setAttFilter(attFilter === 'absent' ? null : 'absent')}
+                    className={`flex flex-col items-center justify-center p-2.5 sm:p-3 rounded-2xl transition-all cursor-pointer select-none text-center relative overflow-hidden ${
+                      attFilter === 'absent'
+                        ? 'bg-black/15 dark:bg-white/20 border-2 border-black/30 dark:border-white/40 shadow-xs scale-[1.02]'
+                        : 'bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/10 hover:bg-black/[0.06] dark:hover:bg-white/[0.08]'
+                    }`}
+                  >
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <Icon name="schedule" size={16} className="text-foreground/75 shrink-0" />
+                      <span className="text-fluid-lg sm:text-fluid-xl font-black text-foreground tabular-nums">
+                        {selectedDayData.absent}
+                      </span>
+                    </div>
+                    <span className="text-[11px] font-bold text-foreground">Off Duty</span>
+                    <span className="text-[10px] text-muted-foreground font-semibold">
+                      {selectedDayData.total > 0 ? `${Math.round((selectedDayData.absent / selectedDayData.total) * 100)}%` : '0%'}
+                    </span>
+                  </button>
+
+                  {/* On Leave Card */}
+                  <button
+                    type="button"
+                    onClick={() => setAttFilter(attFilter === 'onLeave' ? null : 'onLeave')}
+                    className={`flex flex-col items-center justify-center p-2.5 sm:p-3 rounded-2xl transition-all cursor-pointer select-none text-center relative overflow-hidden ${
+                      attFilter === 'onLeave'
+                        ? 'bg-black/15 dark:bg-white/20 border-2 border-black/30 dark:border-white/40 shadow-xs scale-[1.02]'
+                        : 'bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/10 hover:bg-black/[0.06] dark:hover:bg-white/[0.08]'
+                    }`}
+                  >
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <Icon name="event_busy" size={16} className="text-foreground/75 shrink-0" />
+                      <span className="text-fluid-lg sm:text-fluid-xl font-black text-foreground tabular-nums">
+                        {selectedDayData.onLeave}
+                      </span>
+                    </div>
+                    <span className="text-[11px] font-bold text-foreground">On Leave</span>
+                    <span className="text-[10px] text-muted-foreground font-semibold">
+                      {selectedDayData.total > 0 ? `${Math.round((selectedDayData.onLeave / selectedDayData.total) * 100)}%` : '0%'}
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Interactive Personnel List (Drill-Down on Filter) */}
+              {attFilter && (
+                <div className="mt-3 p-3 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-border/60 dark:border-white/8 flex flex-col gap-2 animate-in fade-in-50 duration-200">
+                  <div className="flex items-center justify-between px-1">
+                    <span className="text-xs font-bold text-foreground capitalize flex items-center gap-1.5">
+                      <Icon
+                        name={attFilter === 'present' ? 'check_circle' : attFilter === 'absent' ? 'schedule' : 'event_busy'}
+                        size={14}
+                        className="text-foreground shrink-0"
+                      />
+                      {attFilter === 'present' ? 'In Office' : attFilter === 'absent' ? 'Off Duty' : 'On Leave'} ({selectedDayLists[attFilter]?.length || 0}) • <span className="font-mono text-muted-foreground text-[11px]">{selectedDayData.isToday ? 'Today' : selectedDayData.day}</span>
+                    </span>
+                    <button
+                      onClick={() => setAttFilter(null)}
+                      className="text-[11px] font-semibold text-foreground hover:underline cursor-pointer"
+                    >
+                      Hide
+                    </button>
+                  </div>
+
+                  <VirtualizedList items={selectedDayLists[deferredAttFilter]} filter={deferredAttFilter} />
+                </div>
+              )}
+            </DashboardWidget>
+          )}
+
+          {/* Performance Tracker (stacked beneath Attendance) */}
+          <PerformanceTrackerWidget
+            efficiencyScore={efficiencyScore}
+            taskCompletionRate={taskCompletionRate}
+            attendanceRate={attendanceRate}
+            setCurrentView={setCurrentView}
+            cardClass="flex-1"
+            {...wProps}
+          />
+        </div>
+
+        {/* Column 3: Team Directory Widget */}
         {canViewEmployees && (
           <EmployeeDirectoryWidget
             employees={employees}
             setCurrentView={setCurrentView}
-            cardClass="col-span-12 lg:col-span-5 lg:row-span-3"
+            cardClass="col-span-12 lg:col-span-4 h-full"
             {...wProps}
           />
         )}
 
-        {canViewAttendance && (
-          <DashboardWidget
-            id="w2"
-            title="Attendance"
-            icon={<Icon name="group" className="text-foreground shrink-0" size={22}/>}
-cardClass="col-span-12 lg:col-span-7"
-            action={
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                {attFilter && (
-                  <button
-                    onClick={() => setAttFilter(null)}
-                    className="text-[11px] font-semibold text-muted-foreground hover:text-foreground px-2 py-0.5 rounded-lg transition-colors cursor-pointer"
-                  >
-                    Reset
-                  </button>
-                )}
-                <button
-                  onClick={() => setCurrentView && setCurrentView('attendance')}
-                  className="apple-glass-btn text-xs font-semibold px-3.5 h-7 rounded-full cursor-pointer shrink-0"
-                >
-                  Roll Call
-                </button>
-              </div>
-            }
-            contentClass="flex flex-col justify-between pt-1"
-            {...wProps}
-          >
-            {/* ================= 7-DAY DAY-WISE SELECTOR & BREAKDOWN ================= */}
-            <div className="flex flex-col gap-3 py-1">
-              {/* 1. Top: Full-Width 7-Day Day Selector Strip */}
-              <div className="flex flex-col gap-1.5 w-full">
-                <div className="flex items-center justify-between px-0.5">
-                  <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-                    LAST 7 DAYS
-                  </span>
-                  <span className="text-[11px] font-bold text-foreground font-mono">
-                    {selectedDayData.isToday ? 'Today' : selectedDayData.date}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-7 gap-1 sm:gap-1.5 p-1 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/8 dark:border-white/10">
-                  {weeklyTrendData.map((item, idx) => {
-                    const isSelected = selectedDayIndex === idx
-                    const dayNum = item.date ? item.date.split('-')[2] : ''
-                    return (
-                      <button
-                        key={item.date || idx}
-                        type="button"
-                        onClick={() => {
-                          setSelectedDayIndex(idx)
-                          setAttFilter(null)
-                        }}
-                        className={`flex flex-col items-center justify-center py-2 px-0.5 rounded-xl transition-all duration-200 cursor-pointer select-none ${
-                          isSelected
-                            ? 'selected-day-capsule font-extrabold scale-[1.04]'
-                            : 'text-muted-foreground hover:text-foreground hover:bg-black/[0.05] dark:hover:bg-white/[0.08]'
-                        }`}
-                      >
-                        <span className="text-[10px] uppercase font-bold leading-tight">
-                          {item.day}
-                        </span>
-                        <span className="text-xs font-mono font-black leading-none mt-1">
-                          {dayNum}
-                        </span>
-                        <span
-                          className={`size-1.5 rounded-full mt-1.5 day-dot ${
-                            isSelected
-                              ? ''
-                              : item.present > 0
-                                ? 'bg-foreground'
-                                : 'bg-foreground/20'
-                          }`}
-                        />
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
-
-              {/* 2. Bottom: Selected Day Interactive Status Cards (Horizontal 3-Column Grid) */}
-              <div className="grid grid-cols-3 gap-2 sm:gap-2.5">
-                {/* Present Card */}
-                <button
-                  type="button"
-                  onClick={() => setAttFilter(attFilter === 'present' ? null : 'present')}
-                  className={`flex flex-col items-center justify-center p-2.5 sm:p-3 rounded-2xl transition-all cursor-pointer select-none text-center relative overflow-hidden ${
-                    attFilter === 'present'
-                      ? 'bg-black/15 dark:bg-white/20 border-2 border-black/30 dark:border-white/40 shadow-xs scale-[1.02]'
-                      : 'bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/10 hover:bg-black/[0.06] dark:hover:bg-white/[0.08]'
-                  }`}
-                >
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <Icon name="check_circle" size={16} className="text-foreground shrink-0" />
-                    <span className="text-fluid-lg sm:text-fluid-xl font-black text-foreground tabular-nums">
-                      {selectedDayData.present}
-                    </span>
-                  </div>
-                  <span className="text-[11px] font-bold text-foreground">In Office</span>
-                  <span className="text-[10px] text-muted-foreground font-semibold">
-                    {selectedDayData.total > 0 ? `${Math.round((selectedDayData.present / selectedDayData.total) * 100)}%` : '0%'}
-                  </span>
-                </button>
-
-                {/* Off Duty Card */}
-                <button
-                  type="button"
-                  onClick={() => setAttFilter(attFilter === 'absent' ? null : 'absent')}
-                  className={`flex flex-col items-center justify-center p-2.5 sm:p-3 rounded-2xl transition-all cursor-pointer select-none text-center relative overflow-hidden ${
-                    attFilter === 'absent'
-                      ? 'bg-black/15 dark:bg-white/20 border-2 border-black/30 dark:border-white/40 shadow-xs scale-[1.02]'
-                      : 'bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/10 hover:bg-black/[0.06] dark:hover:bg-white/[0.08]'
-                  }`}
-                >
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <Icon name="schedule" size={16} className="text-foreground/75 shrink-0" />
-                    <span className="text-fluid-lg sm:text-fluid-xl font-black text-foreground tabular-nums">
-                      {selectedDayData.absent}
-                    </span>
-                  </div>
-                  <span className="text-[11px] font-bold text-foreground">Off Duty</span>
-                  <span className="text-[10px] text-muted-foreground font-semibold">
-                    {selectedDayData.total > 0 ? `${Math.round((selectedDayData.absent / selectedDayData.total) * 100)}%` : '0%'}
-                  </span>
-                </button>
-
-                {/* On Leave Card */}
-                <button
-                  type="button"
-                  onClick={() => setAttFilter(attFilter === 'onLeave' ? null : 'onLeave')}
-                  className={`flex flex-col items-center justify-center p-2.5 sm:p-3 rounded-2xl transition-all cursor-pointer select-none text-center relative overflow-hidden ${
-                    attFilter === 'onLeave'
-                      ? 'bg-black/15 dark:bg-white/20 border-2 border-black/30 dark:border-white/40 shadow-xs scale-[1.02]'
-                      : 'bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/10 hover:bg-black/[0.06] dark:hover:bg-white/[0.08]'
-                  }`}
-                >
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <Icon name="event_busy" size={16} className="text-foreground/75 shrink-0" />
-                    <span className="text-fluid-lg sm:text-fluid-xl font-black text-foreground tabular-nums">
-                      {selectedDayData.onLeave}
-                    </span>
-                  </div>
-                  <span className="text-[11px] font-bold text-foreground">On Leave</span>
-                  <span className="text-[10px] text-muted-foreground font-semibold">
-                    {selectedDayData.total > 0 ? `${Math.round((selectedDayData.onLeave / selectedDayData.total) * 100)}%` : '0%'}
-                  </span>
-                </button>
-              </div>
-            </div>
-
-            {/* Interactive Personnel List (Drill-Down on Filter) */}
-            {attFilter && (
-              <div className="mt-3 p-3 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-border/60 dark:border-white/8 flex flex-col gap-2 animate-in fade-in-50 duration-200">
-                <div className="flex items-center justify-between px-1">
-                  <span className="text-xs font-bold text-foreground capitalize flex items-center gap-1.5">
-                    <Icon
-                      name={attFilter === 'present' ? 'check_circle' : attFilter === 'absent' ? 'schedule' : 'event_busy'}
-                      size={14}
-                      className="text-foreground shrink-0"
-                    />
-                    {attFilter === 'present' ? 'In Office' : attFilter === 'absent' ? 'Off Duty' : 'On Leave'} ({selectedDayLists[attFilter]?.length || 0}) • <span className="font-mono text-muted-foreground text-[11px]">{selectedDayData.isToday ? 'Today' : selectedDayData.day}</span>
-                  </span>
-                  <button
-                    onClick={() => setAttFilter(null)}
-                    className="text-[11px] font-semibold text-foreground hover:underline cursor-pointer"
-                  >
-                    Hide
-                  </button>
-                </div>
-
-                <VirtualizedList items={selectedDayLists[deferredAttFilter]} filter={deferredAttFilter} />
-              </div>
-            )}
-          </DashboardWidget>
-        )}
-
         <DailyChecklistWidget notes={notes} setNotes={setNotes} ownerId={currentUser?.id || currentUser?.uid || ''} setCurrentView={setCurrentView} cardClass="col-span-12 sm:col-span-6 lg:col-span-4" />
 
-<HrOverview adminUid={currentUser?.uid} currentUser={currentUser} setCurrentView={setCurrentView} addToast={addToast} cardClass="col-span-12 lg:col-span-4" />
-
-        {/* Performance Tracker */}
-        <PerformanceTrackerWidget
-          efficiencyScore={efficiencyScore}
-          taskCompletionRate={taskCompletionRate}
-          attendanceRate={attendanceRate}
-          setCurrentView={setCurrentView}
-          cardClass="col-span-12 lg:col-span-4"
-          {...wProps}
-        />
+        <HrOverview adminUid={currentUser?.uid} currentUser={currentUser} setCurrentView={setCurrentView} addToast={addToast} cardClass="col-span-12 lg:col-span-4" />
 
         {/* Tasks Widget */}
         {canViewTasks && (
