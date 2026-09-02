@@ -25,7 +25,7 @@ export const EmployeeDirectoryWidget = memo(({ employees = [], setCurrentView, .
   return (
     <DashboardWidget
       id="directory"
-      title="Employee Directory"
+      title="Team Directory"
       icon={<Icon name="group" className="text-foreground shrink-0" size={22}/>}
       action={
         <Badge variant="outline" className="px-2.5 py-0.5 rounded-full text-xs font-semibold border-black/10 dark:border-white/12 text-foreground bg-black/[0.04] dark:bg-white/[0.06] shrink-0">
@@ -36,32 +36,32 @@ export const EmployeeDirectoryWidget = memo(({ employees = [], setCurrentView, .
       {...wProps}
     >
       {/* Search */}
-      <div className="relative flex items-center px-4 sm:px-5 pt-2 pb-2.5 w-full">
-        <Icon name="search" size={18} className="absolute left-6 sm:left-7 text-muted-foreground z-10 pointer-events-none" />
+      <div className="relative flex items-center px-2.5 sm:px-3 pt-2 pb-2.5 w-full">
+        <Icon name="search" size={18} className="absolute left-4.5 sm:left-5 text-muted-foreground z-10 pointer-events-none" />
         <Input
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search employees..."
-          aria-label="Search employees"
+          placeholder="Search team members..."
+          aria-label="Search team members"
           className="!pl-10.5 h-11 rounded-2xl w-full bg-muted/40"
         />
       </div>
 
-      {/* Scrollable list â€” never expands, scrolls within 2-slot height */}
-      <div className="flex-1 min-h-0 overflow-y-auto max-h-[360px] lg:max-h-[640px] divide-y divide-border/40 dark:divide-white/6 chat-scrollbar px-4 sm:px-5 pb-4">
+      {/* Scrollable list — never expands, scrolls within 2-slot height */}
+      <div className="flex-1 min-h-0 overflow-y-auto max-h-[360px] lg:max-h-[640px] divide-y divide-border/40 dark:divide-white/6 chat-scrollbar px-2.5 sm:px-3 pb-3.5">
         {filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center text-center py-10 gap-2">
             <Icon name="group_off" size={34} className="text-muted-foreground/40" />
             <p className="m-0 text-fluid-xs font-medium text-muted-foreground max-w-[220px] leading-relaxed">
-              {employees.length === 0 ? 'No employees enlisted yet.' : 'No employees match your search.'}
+              {employees.length === 0 ? 'No team members enlisted yet.' : 'No team members match your search.'}
             </p>
             {employees.length === 0 && setCurrentView && (
               <button
                 onClick={() => setCurrentView('employees')}
                 className="apple-glass-btn text-xs font-semibold px-3.5 h-7 rounded-full cursor-pointer mt-1"
               >
-                View Directory
+                View Team Directory
               </button>
             )}
           </div>

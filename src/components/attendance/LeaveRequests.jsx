@@ -55,7 +55,7 @@ export default function LeaveRequests({ employees, attendance, setAttendance, ad
   const handleDirectWhatsAppClick = (l) => {
     const emp = employees.find(e => e.id === l.employeeId)
     if (!emp?.phone) {
-      if (addToast) addToast(`No phone number recorded for ${emp?.name || 'this employee'}.`, 'warning')
+      if (addToast) addToast(`No phone number recorded for ${emp?.name || 'this team member'}.`, 'warning')
       return
     }
     const message = generateLeaveStatusMessage({
@@ -86,7 +86,7 @@ export default function LeaveRequests({ employees, attendance, setAttendance, ad
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[160px]">Employee</TableHead>
+                  <TableHead className="w-[160px]">Team Member</TableHead>
                   <TableHead className="w-[120px]">Type</TableHead>
                   <TableHead className="w-[180px]">Dates</TableHead>
                   <TableHead className="text-center w-[60px]">Days</TableHead>

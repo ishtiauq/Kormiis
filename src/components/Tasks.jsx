@@ -563,7 +563,7 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
                           className="fixed z-[9999] glass-kormiis border border-border rounded-md shadow-md text-popover-foreground"
                           style={{ top: dropdownPos.top, left: dropdownPos.left, width: dropdownPos.width }}
                         >
-                          <div className="px-3 py-2 text-sm font-semibold bg-muted/40 border-b border-border">Select Employees</div>
+                          <div className="px-3 py-2 text-sm font-semibold bg-muted/40 border-b border-border">Select Team Members</div>
                           <div className="max-h-[180px] overflow-y-auto p-1.5 flex flex-col gap-0.5">
                             {employees.map(emp => (
                               <label key={emp.id} className="flex items-center gap-2.5 text-sm p-2 hover:bg-accent rounded-sm cursor-pointer transition-colors group">
@@ -715,7 +715,7 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
                         className="fixed z-[9999] glass-kormiis border border-border rounded-md shadow-md text-popover-foreground"
                         style={{ top: dropdownPos.top, left: dropdownPos.left, width: dropdownPos.width }}
                       >
-                        <div className="px-3 py-2 text-sm font-semibold bg-muted/40 border-b border-border">Select Employees</div>
+                        <div className="px-3 py-2 text-sm font-semibold bg-muted/40 border-b border-border">Select Team Members</div>
                         <div className="max-h-[180px] overflow-y-auto p-1.5 flex flex-col gap-0.5">
                           {employees.map(emp => (
                             <label key={emp.id} className="flex items-center gap-2.5 text-sm p-2 hover:bg-accent rounded-sm cursor-pointer transition-colors group">

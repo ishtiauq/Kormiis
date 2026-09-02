@@ -633,7 +633,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                 <div className="flex flex-col gap-2">
                   <label className="text-sm font-medium text-foreground">Target Audience</label>
                   <Select value={audience} onChange={setAudience}>
-                    <SelectItem id="all">All Employees</SelectItem>
+                    <SelectItem id="all">All Team Members</SelectItem>
                     <SelectItem id="Engineering">Engineering Dept</SelectItem>
                     <SelectItem id="Design">Design Dept</SelectItem>
                     <SelectItem id="HR">HR Dept</SelectItem>
@@ -731,7 +731,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                         {post.priority !== 'Normal' && <Badge variant={getPriorityBadgeVariant(post.priority)} className="h-5 px-1.5 text-[10px] uppercase tracking-wider">{post.priority}</Badge>}
                       </div>
                       <span className="text-xs text-muted-foreground">
-                        {dateStr} &bull; {post.audience === 'all' ? 'All Employees' : post.audience}
+                        {dateStr} &bull; {post.audience === 'all' ? 'All Team Members' : post.audience}
                       </span>
                     </div>
                   </div>

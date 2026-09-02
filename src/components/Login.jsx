@@ -55,7 +55,7 @@ const HERO_FEATURE_ROWS = [
     },
     { 
       id: 'employees', 
-      label: 'Employees & Squads', 
+      label: 'Team & Squads', 
       tag: 'Team Directory', 
       icon: 'group', 
       iconGrad: 'from-blue-400 via-indigo-500 to-blue-700',

@@ -25,7 +25,7 @@ export const allNavItems = [
   { id: 'tasks', label: 'Tasks', icon: createElement(Icon, { name: 'check_box', size: 18 }) },
   { id: 'announcements', label: 'Announcements', icon: createElement(Icon, { name: 'rss_feed', size: 18 }) },
   { id: 'documents', label: 'Documents', icon: createElement(Icon, { name: 'folder_open', size: 18 }) },
-  { id: 'employees', label: 'Employees', icon: createElement(Icon, { name: 'group', size: 18 }) },
+  { id: 'employees', label: 'Team', icon: createElement(Icon, { name: 'group', size: 18 }) },
   { id: 'payroll', label: 'Payroll', icon: createElement(Icon, { name: 'account_balance', size: 18 }) },
   { id: 'attendance', label: 'Attendance', icon: createElement(Icon, { name: 'schedule', size: 18 }) },
   { id: 'assets', label: 'Assets', icon: createElement(Icon, { name: 'devices_other', size: 18 }) },

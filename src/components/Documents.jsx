@@ -193,27 +193,27 @@ export default function Documents({
 
       if (letterType === 'experience') {
         bodyParagraphs = [
-          `This is to certify that ${emp.name} (Employee ID: ${emp.id}) has been actively employed with ${companyName} as a ${empRole} in the ${empDept} department since ${joinDate}.`,
+          `This is to certify that ${emp.name} (Team Member ID: ${emp.id}) has been actively working with ${companyName} as a ${empRole} in the ${empDept} department since ${joinDate}.`,
           `During their tenure with us, we have found ${emp.name} to be hardworking, dedicated, and professional in performing their duties and responsibilities.`,
           letterNotes ? `Additional Remarks: ${letterNotes}` : 'We appreciate their valuable contributions to our organization and wish them all the best in their future endeavors.'
         ]
       } else if (letterType === 'salary') {
         bodyParagraphs = [
-          `This is to certify that ${emp.name} (Employee ID: ${emp.id}) is a full-time regular employee of ${companyName}, currently holding the position of ${empRole} in the ${empDept} department since ${joinDate}.`,
+          `This is to certify that ${emp.name} (Team Member ID: ${emp.id}) is a full-time regular team member of ${companyName}, currently holding the position of ${empRole} in the ${empDept} department since ${joinDate}.`,
           `As per our company records, their current gross monthly compensation is ${salaryAmount}, disbursed on a monthly basis via direct company payroll.`,
-          letterNotes ? `Purpose/Notes: ${letterNotes}` : 'This certificate is issued upon the employee\'s request for official verification purposes without any financial liability on part of the company.'
+          letterNotes ? `Purpose/Notes: ${letterNotes}` : 'This certificate is issued upon the team member\'s request for official verification purposes without any financial liability on part of the company.'
         ]
       } else if (letterType === 'noc') {
         bodyParagraphs = [
-          `This is to confirm that ${emp.name} (Employee ID: ${emp.id}) is employed with ${companyName} as ${empRole} in the ${empDept} department since ${joinDate}.`,
+          `This is to confirm that ${emp.name} (Team Member ID: ${emp.id}) is working with ${companyName} as ${empRole} in the ${empDept} department since ${joinDate}.`,
           `${companyName} has no objection regarding ${emp.name}'s official applications or travel requirements as requested.`,
-          letterNotes ? `Specified Purpose: ${letterNotes}` : 'The employee is expected to resume their normal employment duties upon conclusion of the specified period.'
+          letterNotes ? `Specified Purpose: ${letterNotes}` : 'The team member is expected to resume their normal duties upon conclusion of the specified period.'
         ]
       } else {
         bodyParagraphs = [
-          `This letter serves to verify that ${emp.name} (Employee ID: ${emp.id}) is currently employed with ${companyName} in good standing as a ${empRole} in the ${empDept} department since ${joinDate}.`,
-          `Their employment status is active and verified as per current HR records.`,
-          letterNotes ? `Notes: ${letterNotes}` : 'Should you require any further information or employment confirmation, please feel free to reach out to our HR department.'
+          `This letter serves to verify that ${emp.name} (Team Member ID: ${emp.id}) is currently with ${companyName} in good standing as a ${empRole} in the ${empDept} department since ${joinDate}.`,
+          `Their team status is active and verified as per current HR records.`,
+          letterNotes ? `Notes: ${letterNotes}` : 'Should you require any further information or confirmation, please feel free to reach out to our HR department.'
         ]
       }
 
@@ -1192,11 +1192,11 @@ export default function Documents({
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-bold text-foreground uppercase tracking-wider">Select Employee</label>
+              <label className="text-xs font-bold text-foreground uppercase tracking-wider">Select Team Member</label>
               <Select value={letterEmpId} onChange={setLetterEmpId}>
                 {employees.map(emp => (
                   <SelectItem key={emp.id} value={emp.id}>
-                    {emp.name} — {emp.designation || emp.role || 'Employee'} ({emp.department || 'General'})
+                    {emp.name} — {emp.designation || emp.role || 'Teammate'} ({emp.department || 'General'})
                   </SelectItem>
                 ))}
               </Select>

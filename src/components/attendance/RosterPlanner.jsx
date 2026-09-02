@@ -108,7 +108,7 @@ export default function RosterPlanner({ employees, roster, setRoster, shiftTempl
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[160px] sticky left-0 bg-background">Employee</TableHead>
+                  <TableHead className="w-[160px] sticky left-0 bg-background">Team Member</TableHead>
                   {weekDates.map((d, i) => (
                     <TableHead key={d} className="text-center min-w-[120px]">
                       {labels[i]}<br /><span className="font-normal text-muted-foreground">{formatDateShort(d)}</span>

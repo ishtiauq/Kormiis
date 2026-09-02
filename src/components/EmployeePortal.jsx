@@ -379,7 +379,7 @@ export default function EmployeePortal({
   const resolvedIsDark = isDarkMode ?? (themeMode === 'dark')
 
   return (
-    <div className="dashboard-root app-shell employee-portal-root relative" style={{ display: 'flex', height: '100vh', width: '100vw', maxWidth: '100vw', overflow: 'hidden', boxSizing: 'border-box' }}>
+    <div className="dashboard-root app-shell employee-portal-root relative" style={{ display: 'flex', width: '100vw', maxWidth: '100vw', overflow: 'hidden', boxSizing: 'border-box' }}>
       <main 
         className={`content dashboard-content ${isMobile ? 'pb-24' : 'pb-12'} px-0 flex-1 overflow-y-auto overflow-x-hidden flex flex-col items-center w-full max-w-[100vw] transition-all duration-300`} 
         style={{ scrollbarGutter: 'stable' }}
@@ -1203,8 +1203,8 @@ function PayslipsView({ currentUser, payroll, employees, expenses, setExpenses, 
       doc.setFontSize(10)
       doc.setFont('helvetica', 'normal')
       doc.setTextColor(40, 40, 40)
-      doc.text(`Employee Name: ${currentUser.name}`, 14, startY)
-      doc.text(`Role: ${currentUser.role || 'Employee'}`, 14, startY + 6)
+      doc.text(`Team Member Name: ${currentUser.name}`, 14, startY)
+      doc.text(`Role: ${currentUser.role || 'Teammate'}`, 14, startY + 6)
       doc.text(`Pay Period / Date: ${slip.date}`, 14, startY + 12)
 
       autoTable(doc, {
@@ -1555,7 +1555,7 @@ function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetR
             date: new Date().toISOString().split('T')[0],
             issue: issueText,
             cost: 0,
-            vendor: 'Reported by Employee',
+            vendor: 'Reported by Team Member',
             status: 'In Progress'
           }]
         }

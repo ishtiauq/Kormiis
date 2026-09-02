@@ -72,7 +72,7 @@ export default function LeavePoliciesEditor({ settings, setSettings, addToast, a
           <div>
             <CardTitle className="text-fluid-lg font-bold">Leave Types & Annual Quotas</CardTitle>
             <CardDescription className="text-fluid-xs text-muted-foreground">
-              Configure standard paid and unpaid annual leave allocations per employee.
+              Configure standard paid and unpaid annual leave allocations per team member.
             </CardDescription>
           </div>
         </div>

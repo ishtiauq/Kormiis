@@ -217,7 +217,7 @@ export default function GeoCheckInWidget({ currentUser, attendance, setAttendanc
       </Dialog>
 
       <Card className="col-span-full xl:col-span-12 border-primary/20 overflow-hidden shadow-sm mb-6 dashboard-widget">
-        <CardHeader className="pb-3.5 space-y-0 gap-3">
+        <CardHeader className="px-3.5 sm:px-4 pt-3.5 pb-2.5 space-y-0 gap-3">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="shrink-0 flex items-center justify-center [&_.msr]:!text-foreground">
               <Icon name="event_available" className="text-primary shrink-0" size={22}/>
@@ -226,7 +226,7 @@ export default function GeoCheckInWidget({ currentUser, attendance, setAttendanc
           </div>
         </CardHeader>
       
-      <CardContent className="p-4 sm:p-5 flex flex-col gap-5">
+      <CardContent className="p-2.5 sm:p-3 flex flex-col gap-4">
         <div className="flex flex-col items-center gap-1 text-center">
           <div className="text-fluid-display font-black tabular-nums tracking-tight font-sans text-foreground" aria-live="polite">{timeStr}</div>
           <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}</div>

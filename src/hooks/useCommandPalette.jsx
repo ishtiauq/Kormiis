@@ -12,7 +12,7 @@ export function useCommandPalette({ employees, themeMode, toggleTheme, setCurren
   const [recentActions, setRecentActions] = useState(() => {
     const saved = localStorage.getItem('kormiis_recent_actions')
     return saved ? JSON.parse(saved) : [
-      { id: 'page-employees', type: 'page', label: 'Go to Employees', view: 'employees' },
+      { id: 'page-employees', type: 'page', label: 'Go to Team', view: 'employees' },
       { id: 'page-attendance', type: 'page', label: 'Go to Attendance', view: 'attendance' },
       { id: 'page-leaves', type: 'page', label: 'Go to Leaves', view: 'leaves' }
     ]
@@ -34,7 +34,7 @@ export function useCommandPalette({ employees, themeMode, toggleTheme, setCurren
     const query = commandSearch.toLowerCase().trim()
     const pages = [
       { id: 'page-dashboard', category: 'Pages', label: 'Go to Dashboard', action: () => setCurrentView('dashboard'), keywords: 'dashboard home main' },
-      { id: 'page-employees', category: 'Pages', label: 'Go to Employees', action: () => setCurrentView('employees'), keywords: 'employees staff members directory profile' },
+      { id: 'page-employees', category: 'Pages', label: 'Go to Team', action: () => setCurrentView('employees'), keywords: 'team employees staff members directory profile' },
       { id: 'page-payroll', category: 'Pages', label: 'Go to Payroll', action: () => setCurrentView('payroll'), keywords: 'payroll salary pay compensation' },
       { id: 'page-attendance', category: 'Pages', label: 'Go to Attendance', action: () => setCurrentView('attendance'), keywords: 'attendance daily logs roster schedule overtime clock in out' },
       { id: 'page-leaves', category: 'Pages', label: 'Go to Leaves', action: () => setCurrentView('leaves'), keywords: 'leaves time off vacation leave requests balance' },
@@ -74,7 +74,7 @@ export function useCommandPalette({ employees, themeMode, toggleTheme, setCurren
 
     const emps = (employees || []).map(emp => ({
       id: `emp-${emp.id}`,
-      category: 'Employees',
+      category: 'Team Members',
       label: `${emp.name} (${emp.role} - ${emp.department})`,
       employeeId: emp.id,
       action: () => {

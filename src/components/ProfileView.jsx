@@ -253,7 +253,7 @@ export default function ProfileView({
         })
 
         addLog?.('Workspace Deletion Scheduled', `Administrator scheduled workspace deletion for ${targetDateFormatted} (1-week notice).`, 'warning')
-        addToast?.(`Workspace scheduled for deletion on ${targetDateFormatted}. All employees have been notified.`, 'warning')
+        addToast?.(`Workspace scheduled for deletion on ${targetDateFormatted}. All team members have been notified.`, 'warning')
 
         setDeleteModalOpen(false)
       } else {
@@ -965,7 +965,7 @@ export default function ProfileView({
                       <h4 className="text-fluid-sm font-bold text-foreground m-0">Workspace Deletion Pending</h4>
                     </div>
                     <p className="text-fluid-xs text-muted-foreground m-0 max-w-[540px]">
-                      This workspace is scheduled for permanent deletion on <strong className="text-foreground">{scheduledDate ? new Date(scheduledDate).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }) : 'in 7 days'}</strong> (1-week notice period). All employees have been notified.
+                      This workspace is scheduled for permanent deletion on <strong className="text-foreground">{scheduledDate ? new Date(scheduledDate).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }) : 'in 7 days'}</strong> (1-week notice period). All team members have been notified.
                     </p>
                   </div>
                   {isCurrentAdmin && (
@@ -998,10 +998,10 @@ export default function ProfileView({
                     </h4>
                     <p className="text-fluid-xs text-muted-foreground m-0 max-w-[520px]">
                       {isSoleAdmin 
-                        ? 'You are the only Administrator. Deleting your account will schedule the entire workspace for permanent deletion in 7 days, and all employees will be notified with 1-week notice.' 
+                        ? 'You are the only Administrator. Deleting your account will schedule the entire workspace for permanent deletion in 7 days, and all team members will be notified with 1-week notice.' 
                         : isCurrentAdmin 
                           ? 'There are other administrators managing this workspace. Your admin account will be deleted immediately without deleting the workspace or notifying teammates.'
-                          : 'Permanently delete your employee account and revoke access to this workspace.'}
+                          : 'Permanently delete your teammate account and revoke access to this workspace.'}
                     </p>
                   </div>
                   <Button 
@@ -1057,7 +1057,7 @@ export default function ProfileView({
               <span>
                 {isSoleAdmin ? (
                   <>
-                    You are currently the <strong>only Administrator</strong>. Confirming this will schedule the <strong>entire workspace and all accounts for permanent deletion in 7 days</strong>. An announcement and notification will be sent to all employees so they can export their records.
+                    You are currently the <strong>only Administrator</strong>. Confirming this will schedule the <strong>entire workspace and all accounts for permanent deletion in 7 days</strong>. An announcement and notification will be sent to all team members so they can export their records.
                   </>
                 ) : isCurrentAdmin ? (
                   <>
@@ -1065,7 +1065,7 @@ export default function ProfileView({
                   </>
                 ) : (
                   <>
-                    Your employee account, profile details, and access to this workspace will be <strong>deleted immediately</strong>.
+                    Your teammate account, profile details, and access to this workspace will be <strong>deleted immediately</strong>.
                   </>
                 )}
               </span>

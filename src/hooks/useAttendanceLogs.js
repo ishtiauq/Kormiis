@@ -46,7 +46,7 @@ export function useAttendanceLogs(attendance, setAttendance, addToast) {
       })
       return updated
     })
-    addToast(`Marked all employees as In Office (${time})`, 'success')
+    addToast(`Marked all team members as In Office (${time})`, 'success')
   }
 
   const calDaysInMonth = new Date(calYear, calMonth + 1, 0).getDate()

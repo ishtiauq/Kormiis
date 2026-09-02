@@ -386,7 +386,7 @@ export const AnnouncementsWidget = memo(({
         {...wProps}
       >
         {/* Full-width Subheader: Feed, Notice & Upcoming Tab Switcher */}
-        <div className="px-4 sm:px-5 pt-0 pb-2.5 -mt-1.5 sm:-mt-2">
+        <div className="px-2.5 sm:px-3 pt-0 pb-2.5 -mt-1.5 sm:-mt-2">
           <div className="w-full p-1 rounded-2xl bg-muted/60 dark:bg-white/[0.06] border border-border/80 dark:border-white/10 flex items-center gap-1">
             <button
               type="button"
@@ -461,14 +461,14 @@ export const AnnouncementsWidget = memo(({
               </div>
               <button
                 onClick={() => setIsFeedModalOpen(true)}
-                className="apple-glass-btn text-xs font-semibold px-4 h-8 rounded-full text-primary hover:text-primary/90 flex items-center gap-1.5 cursor-pointer mt-1"
+                className="apple-glass-btn text-xs font-semibold px-2.5 sm:px-3 h-8 rounded-full text-primary hover:text-primary/90 flex items-center gap-1.5 cursor-pointer mt-1"
               >
                 <Icon name="add_circle" size={16}/>
                 <span>Create First Poll or Post</span>
               </button>
             </div>
           ) : (
-            <div className="flex-1 min-h-0 overflow-y-auto max-h-[360px] lg:max-h-[640px] flex flex-col gap-2.5 px-4 sm:px-5 pb-2.5 chat-scrollbar">
+            <div className="flex-1 min-h-0 overflow-y-auto max-h-[360px] lg:max-h-[640px] flex flex-col gap-2.5 px-2.5 sm:px-3 pb-2.5 chat-scrollbar">
               {feedPosts.map((post) => {
                 const author = getAuthor(post.authorId, post)
                 const hasActivePoll = post.poll && Array.isArray(post.poll.options) && post.poll.options.length > 0
@@ -587,14 +587,14 @@ export const AnnouncementsWidget = memo(({
               </div>
               <button
                 onClick={() => setIsNoticeModalOpen(true)}
-                className="apple-glass-btn text-xs font-semibold px-4 h-8 rounded-full text-amber-600 dark:text-amber-400 hover:text-amber-700 flex items-center gap-1.5 cursor-pointer mt-1"
+                className="apple-glass-btn text-xs font-semibold px-2.5 sm:px-3 h-8 rounded-full text-amber-600 dark:text-amber-400 hover:text-amber-700 flex items-center gap-1.5 cursor-pointer mt-1"
               >
                 <Icon name="add_circle" size={16}/>
                 <span>Post Company Notice</span>
               </button>
             </div>
           ) : (
-            <div className="flex-1 min-h-0 overflow-y-auto max-h-[360px] lg:max-h-[640px] flex flex-col gap-2.5 px-4 sm:px-5 pb-2.5 chat-scrollbar">
+            <div className="flex-1 min-h-0 overflow-y-auto max-h-[360px] lg:max-h-[640px] flex flex-col gap-2.5 px-2.5 sm:px-3 pb-2.5 chat-scrollbar">
               {noticePosts.map((ann, idx) => {
                 const author = getAuthor(ann.authorId, ann)
                 return (
@@ -649,7 +649,7 @@ export const AnnouncementsWidget = memo(({
               {setCurrentView && (
                 <button
                   onClick={() => setIsEventModalOpen(true)}
-                  className="apple-glass-btn text-xs font-semibold px-4 h-8 rounded-full text-foreground hover:text-foreground/90 flex items-center gap-1.5 cursor-pointer mt-1"
+                  className="apple-glass-btn text-xs font-semibold px-2.5 sm:px-3 h-8 rounded-full text-foreground hover:text-foreground/90 flex items-center gap-1.5 cursor-pointer mt-1"
                 >
                   <Icon name="add" size={16}/>
                   <span>Add Event</span>
@@ -657,7 +657,7 @@ export const AnnouncementsWidget = memo(({
               )}
             </div>
           ) : (
-            <div className="flex-1 min-h-0 overflow-y-auto max-h-[360px] lg:max-h-[640px] flex flex-col gap-2.5 px-4 sm:px-5 pb-2.5 chat-scrollbar">
+            <div className="flex-1 min-h-0 overflow-y-auto max-h-[360px] lg:max-h-[640px] flex flex-col gap-2.5 px-2.5 sm:px-3 pb-2.5 chat-scrollbar">
               {/* Milestones (Birthdays & Work Anniversaries) */}
               {upcomingMilestones.map((milestone, i) => (
                 <div key={`ms-${i}`} className="flex items-center gap-3 p-2.5 px-3.5 rounded-2xl liquid-widget-item border-black/[0.06] dark:border-white/[0.08]">
@@ -706,7 +706,7 @@ export const AnnouncementsWidget = memo(({
         )}
 
         {/* Widget Footer: Post / Serve Notice / Add Event Action Button (No separator line, colorless/blurless clean button) */}
-        <div className="px-4 sm:px-5 pb-3 pt-0 flex items-center">
+        <div className="px-2.5 sm:px-3 pb-3 pt-0 flex items-center">
           {activeTab === 'feed' ? (
             <button
               type="button"
@@ -903,7 +903,7 @@ export const AnnouncementsWidget = memo(({
             <div className="flex flex-col gap-1.5">
               <label className="text-fluid-xs font-semibold text-foreground">Target Audience</label>
               <Select value={noticeAudience} onChange={setNoticeAudience}>
-                <SelectItem id="all">All Employees</SelectItem>
+                <SelectItem id="all">All Team Members</SelectItem>
                 <SelectItem id="Engineering">Engineering Dept</SelectItem>
                 <SelectItem id="Design">Design Dept</SelectItem>
                 <SelectItem id="HR">HR Dept</SelectItem>

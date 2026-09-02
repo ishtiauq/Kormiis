@@ -264,16 +264,23 @@ aside,
   overscroll-behavior-x: contain;
 }
 
-/* GPU Hardware Layering on mobile & tablet viewports for 120Hz/60Hz silkiness */
+/* GPU Hardware Layering on mobile & tablet viewports for 120Hz/60Hz silkiness
+   NOTE: applied ONLY to inner content, NEVER to the scroll container itself —
+   a `transform` on the scrollable element breaks touch scrolling on mobile. */
 @media (max-width: 1368px) {
-  .dashboard-content,
-  main,
-  .overflow-y-auto {
+  .dashboard-root > main > div {
     transform: translateZ(0);
     -webkit-transform: translateZ(0);
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
   }
+}
+
+/* Dynamic viewport height — fixes "first touch scroll stuck" on mobile URL-bar resize */
+.dashboard-root,
+.employee-portal-root {
+  height: 100vh;
+  height: 100dvh;
 }
 
 .dark,

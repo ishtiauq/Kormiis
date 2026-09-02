@@ -257,22 +257,22 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
     
     // 1. Validation checks for all required fields
     if (!newName || !newName.trim()) {
-      addToast('Cannot create employee record: Full Name is required.', 'danger')
+      addToast('Cannot create team member record: Full Name is required.', 'danger')
       return
     }
 
     if (!newEmpId || !newEmpId.trim()) {
-      addToast('Cannot create employee record: Employee ID is required.', 'danger')
+      addToast('Cannot create team member record: Team Member ID is required.', 'danger')
       return
     }
 
     if (!newRole || !newRole.trim()) {
-      addToast('Cannot create employee record: System Role is required.', 'danger')
+      addToast('Cannot create team member record: System Role is required.', 'danger')
       return
     }
 
     if (!newDesignation || !newDesignation.trim()) {
-      addToast('Cannot create employee record: Designation / Job Title is required.', 'danger')
+      addToast('Cannot create team member record: Designation / Job Title is required.', 'danger')
       return
     }
 
@@ -758,7 +758,7 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
             <DialogTitle>Confirm Delete</DialogTitle>
           </DialogHeader>
           <div className="py-4">
-            <p className="text-muted-foreground">Are you sure you want to delete the selected employee(s)? This action cannot be undone.</p>
+            <p className="text-muted-foreground">Are you sure you want to delete the selected team member(s)? This action cannot be undone.</p>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setConfirmDelete(null)}>Cancel</Button>
@@ -783,7 +783,7 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
                 <div key={editReq.id} className="flex justify-between items-center p-3 rounded-lg bg-background border border-border shadow-sm flex-wrap gap-3">
                   <div className="flex flex-col gap-1.5 min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <strong className="text-sm">{emp ? emp.name : 'Unknown Employee'}</strong>
+                      <strong className="text-sm">{emp ? emp.name : 'Unknown Teammate'}</strong>
                       <span className="text-xs text-muted-foreground">ID: {editReq.employeeId}</span>
                     </div>
                     <div className="flex gap-1.5 flex-wrap text-xs">
@@ -951,8 +951,8 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
                       const filteredImport = imported.filter(e => !existingIds.has(e.id))
                       return [...prev, ...filteredImport]
                     })
-                    addToast(`Successfully imported ${imported.length} employee(s) from spreadsheet.`, 'success')
-                    addLog('Imported employees', `Imported ${imported.length} employee records from spreadsheet`)
+                    addToast(`Successfully imported ${imported.length} team member(s) from spreadsheet.`, 'success')
+                    addLog('Imported team members', `Imported ${imported.length} team member records from spreadsheet`)
                   }
                 } catch (err) {
                   console.error(err)
@@ -987,16 +987,16 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
               <Icon name="table_view" className="mr-2 h-4 w-4 text-emerald-500" size={16}/> Demo Excel
             </Button>
             <Button onClick={handleOpenAddForm} className="shadow-sm flex-1 sm:flex-none">
-              <Icon name="add" className="mr-2 h-4 w-4" size={16}/> Add Employee
+              <Icon name="add" className="mr-2 h-4 w-4" size={16}/> Add Team Member
             </Button>
           </div>
         </div>
 
-        {/* Header toolbar row: Employee Count & Manage Department */}
+        {/* Header toolbar row: Team Member Count & Manage Department */}
         <div className="px-4 sm:px-5 py-3 border-b border-black/[0.06] dark:border-white/[0.08] flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
             <Icon name="group" className="text-primary" size={18}/>
-            <span>All Employees</span>
+            <span>All Team Members</span>
             <Badge variant="secondary" className="text-xs shrink-0 font-bold">{filteredEmployees.length}</Badge>
           </div>
           <Button variant="ghost" size="sm" onClick={() => setShowDeptManager(true)} className="rounded-full h-8 px-3 text-xs flex items-center gap-1.5 text-muted-foreground hover:text-foreground">
@@ -1007,7 +1007,7 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
         {filteredEmployees.length === 0 ? (
           <div className="text-center py-20 flex flex-col items-center">
             <Icon name="group" className="h-16 w-16 mb-4 text-muted-foreground/50" size={64}/>
-            <h3 className="text-xl font-medium text-foreground mb-4">No employees found</h3>
+            <h3 className="text-xl font-medium text-foreground mb-4">No team members found</h3>
             <Button variant="outline" onClick={() => {setSearchTerm(''); setDeptFilter('All')}}>Clear Filters</Button>
           </div>
         ) : (
@@ -1268,7 +1268,7 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               {editingEmployee ? <Icon name="edit" className="h-5 w-5 text-primary" size={20}/> : <Icon name="person_add" className="h-5 w-5 text-primary" size={20}/>}
-              {editingEmployee ? 'Edit Employee Profile' : 'New Employee Record'}
+              {editingEmployee ? 'Edit Team Member Profile' : 'New Team Member Record'}
             </DialogTitle>
           </DialogHeader>
 
@@ -1298,7 +1298,7 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
               </div>
 
               <div className="flex flex-col flex-1 text-center sm:text-left gap-1.5">
-                <span className="text-sm font-semibold text-foreground">Employee Profile Photo</span>
+                <span className="text-sm font-semibold text-foreground">Team Member Profile Photo</span>
                 <p className="text-fluid-xs text-muted-foreground">
                   Recommended: <strong className="text-foreground">1:1 Square Ratio</strong> • File Size: <strong className="text-foreground">Max 500 KB</strong> (Auto-optimized to ~25 KB WebP/JPEG)
                 </p>
@@ -1361,7 +1361,7 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium">Employee ID</label>
+                <label className="text-sm font-medium">Team Member ID</label>
                 <Input required value={newEmpId} onChange={(e) => setNewEmpId(e.target.value.trim().toUpperCase())} className="font-sans" />
               </div>
               <div className="flex flex-col gap-2">
@@ -1409,7 +1409,7 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
                         }} 
                         className="rounded border-input text-primary focus:ring-primary w-4 h-4"
                       />
-                      Employee Directory
+                      Team Directory
                     </label>
                     <label className="flex items-center gap-2 text-sm cursor-pointer hover:text-primary transition-colors">
                       <input 

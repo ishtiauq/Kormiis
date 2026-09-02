@@ -158,7 +158,7 @@ export default function DashboardShell({ user, themeMode, isDarkMode, toggleThem
   const unreadCount = appData.notifications.filter(n => !n.read).length
 
   return (
-    <div className="dashboard-root app-shell relative" style={{ display: 'flex', height: '100vh', width: '100vw', maxWidth: '100vw', overflow: 'hidden', boxSizing: 'border-box' }}>
+    <div className="dashboard-root app-shell relative" style={{ display: 'flex', width: '100vw', maxWidth: '100vw', overflow: 'hidden', boxSizing: 'border-box' }}>
       <main 
         className={`content dashboard-content ${isMobile ? 'pb-24' : 'pb-12'} px-0 flex-1 overflow-y-auto overflow-x-hidden flex flex-col items-center w-full max-w-[100vw] transition-all duration-300`} 
         style={{ scrollbarGutter: 'stable' }}

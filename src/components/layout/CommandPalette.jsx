@@ -75,7 +75,7 @@ export default function CommandPalette({ showCommandPalette, setShowCommandPalet
                             <span>{item.label}</span>
                           </div>
                           <span className="command-palette-item-shortcut">
-                            {item.category === 'Pages' ? '\u23CE' : (item.category === 'Employees' ? 'View' : 'Action')}
+                            {item.category === 'Pages' ? '↵' : (item.category === 'Team Members' || item.category === 'Employees' ? 'View' : 'Action')}
                           </span>
                         </div>
                       </div>

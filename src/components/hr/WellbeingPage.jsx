@@ -108,7 +108,7 @@ export default function WellbeingPage({ adminUid, currentUser, addToast }) {
               <Table className="min-w-[760px]">
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Employee</TableHead>
+                    <TableHead>Team Member</TableHead>
                     <TableHead className="text-center">Mon/Fri Sick</TableHead>
                     <TableHead className="text-center">Avg Late (min)</TableHead>
                     <TableHead className="text-center">Unauth. Absences</TableHead>

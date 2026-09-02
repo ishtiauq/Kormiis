@@ -442,8 +442,8 @@ export default function PerformancePage({ adminUid, currentUser, addToast, defau
 
           <Card className="border border-border/80 shadow-sm rounded-2xl">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-              <CardTitle className="text-base font-bold">Employee Performance Tracker • {month}</CardTitle>
-              <Badge variant="secondary">{scores.length} employees evaluated</Badge>
+              <CardTitle className="text-base font-bold">Team Performance Tracker • {month}</CardTitle>
+              <Badge variant="secondary">{scores.length} members evaluated</Badge>
             </CardHeader>
             <CardContent className="p-0">
               {loading ? (
@@ -458,7 +458,7 @@ export default function PerformancePage({ adminUid, currentUser, addToast, defau
                   <Table className="min-w-[640px]">
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Employee</TableHead>
+                        <TableHead>Team Member</TableHead>
                         <TableHead className="text-center">Score</TableHead>
                         <TableHead className="text-center">Grade</TableHead>
                         <TableHead className="text-center">Rank</TableHead>

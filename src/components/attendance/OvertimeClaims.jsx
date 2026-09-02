@@ -89,7 +89,7 @@ export default function OvertimeClaims({ employees, overtimeClaims, setOvertimeC
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[180px]">Employee</TableHead>
+                    <TableHead className="w-[180px]">Team Member</TableHead>
                     <TableHead className="w-[140px]">Date</TableHead>
                     <TableHead className="w-[80px]">Hours</TableHead>
                     <TableHead className="w-[100px]">Status</TableHead>

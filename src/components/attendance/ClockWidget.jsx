@@ -90,7 +90,7 @@ export default function ClockWidget({ employees = [], attendance = {}, setAttend
           <Select 
             value={clockEmpId} 
             onChange={(key) => setClockEmpId(key)} 
-            placeholder="- Select employee -"
+            placeholder="- Select team member -"
             className="min-w-[170px]"
           >
             {(employees || []).map(emp => (

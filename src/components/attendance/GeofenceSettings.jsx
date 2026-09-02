@@ -119,7 +119,7 @@ export default function GeofenceSettings({ settings, setSettings, addToast, addL
           <div>
             <CardTitle className="text-fluid-lg font-bold">Office Geofence Location</CardTitle>
             <CardDescription className="text-fluid-xs text-muted-foreground">
-              Define the physical perimeter required for employee attendance check-ins and check-outs.
+              Define the physical perimeter required for team member attendance check-ins and check-outs.
             </CardDescription>
           </div>
         </div>

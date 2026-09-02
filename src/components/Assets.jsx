@@ -463,7 +463,7 @@ function AssignAssetModal({ showAssignModal, setShowAssignModal, assignTarget, a
         </DialogHeader>
         
         <form onSubmit={handleAssignAsset} className="flex flex-col gap-4 py-4">
-          <Select label="Select Employee" value={assignForm.employeeId} onChange={(val) => setAssignForm(p => ({...p, employeeId: val}))} placeholder="-- Choose Employee --">
+          <Select label="Select Team Member" value={assignForm.employeeId} onChange={(val) => setAssignForm(p => ({...p, employeeId: val}))} placeholder="-- Choose Team Member --">
             {employees.map(emp => (
               <SelectItem key={emp.id} id={emp.id}>{emp.name} ({emp.department})</SelectItem>
             ))}
@@ -498,7 +498,7 @@ function AssetRequests({ assetRequests, employees, handleRequestAction }) {
                <Icon name="chat" className="h-10 w-10 text-muted-foreground opacity-50" size={40}/>
             </div>
             <h3 className="text-lg font-semibold text-foreground">No Pending Requests</h3>
-            <p className="text-fluid-sm text-muted-foreground mt-1 max-w-sm">There are currently no open asset requests from employees. When employees request new equipment, it will appear here.</p>
+            <p className="text-fluid-sm text-muted-foreground mt-1 max-w-sm">There are currently no open asset requests from team members. When team members request new equipment, it will appear here.</p>
           </CardContent>
         </Card>
       ) : (
@@ -879,7 +879,7 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
 
   const handleAssignAsset = (e) => {
     e.preventDefault()
-    if (!assignForm.employeeId) return addToast('Select an employee', 'warning')
+    if (!assignForm.employeeId) return addToast('Select a team member', 'warning')
 
     setAssets(prev => prev.map(a => {
       if (a.id === assignTarget.id) {
@@ -945,7 +945,7 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
       doc.setFont('helvetica', 'normal')
       doc.setTextColor(40, 40, 40)
       doc.text(`Date: ${formatDate(new Date().toISOString().split('T')[0])}`, 20, startY)
-      doc.text(`Employee Name: ${employee.name} (${employee.department || 'General'})`, 20, startY + 8)
+      doc.text(`Team Member Name: ${employee.name} (${employee.department || 'General'})`, 20, startY + 8)
       doc.text('This document confirms the assignment of the following company property:', 20, startY + 18)
 
       autoTable(doc, {
@@ -969,11 +969,11 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
       doc.setFontSize(9.5)
       doc.setTextColor(60, 60, 60)
       doc.text(`1. The asset remains the sole property of ${companyName}.`, 20, finalY + 8)
-      doc.text('2. The employee agrees to maintain the asset in proper working condition.', 20, finalY + 16)
-      doc.text('3. The employee must return the asset upon request or employment termination.', 20, finalY + 24)
+      doc.text('2. The team member agrees to maintain the asset in proper working condition.', 20, finalY + 16)
+      doc.text('3. The team member must return the asset upon request or employment termination.', 20, finalY + 24)
 
       doc.setTextColor(30, 30, 30)
-      doc.text('Employee Signature: _______________________', 20, finalY + 48)
+      doc.text('Team Member Signature: _______________________', 20, finalY + 48)
       doc.text('Date: ________________', 130, finalY + 48)
 
       doc.text(`${companyName} HR Signature: _______________________`, 20, finalY + 66)

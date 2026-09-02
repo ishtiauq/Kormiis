@@ -26,7 +26,7 @@ export default function LeaveBalanceCard({ employees, balances, leaves = [], set
           <Table className="min-w-[640px]">
             <TableHeader>
               <TableRow>
-                <TableHead>Employee</TableHead>
+                <TableHead>Team Member</TableHead>
                 {leaveTypes.map(type => (
                   <TableHead key={type} className="text-center">{type}</TableHead>
                 ))}

@@ -457,7 +457,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
             <div>
               <h4 className="font-bold text-sm text-foreground">Workspace Demo Dataset</h4>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Load or remove realistic sample data across all widgets (Employees, Attendance, Payroll, Expenses, Tasks, Assets, Events & Announcements).
+                Load or remove realistic sample data across all widgets (Team, Attendance, Payroll, Expenses, Tasks, Assets, Events & Announcements).
               </p>
             </div>
           </div>
@@ -1163,7 +1163,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                     <div className="flex flex-col gap-1.5 p-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] border border-border/40">
                       <div className="flex items-center gap-2">
                         <Icon name="qr_code_2" size={15} className="text-emerald-600 dark:text-emerald-400" />
-                        <span className="text-xs font-bold text-foreground">Employee Opt-In Link</span>
+                        <span className="text-xs font-bold text-foreground">Team Opt-In Link</span>
                         {whatsappOptInCount > 0 && (
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
                             {whatsappOptInCount} opted in
@@ -1171,7 +1171,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                         )}
                       </div>
                       <span className="text-[11px] text-muted-foreground">
-                        Share with your team. Each employee sends any message to your Business number once to opt in — messages to them stay ban-safe.
+                        Share with your team. Each team member sends any message to your Business number once to opt in — messages to them stay ban-safe.
                       </span>
                       <div className="flex items-center gap-2">
                         <code className="flex-1 font-mono text-[10px] bg-muted/60 px-2 py-1.5 rounded-lg break-all">{getWhatsAppOptInLink(whatsappBusinessPhone, companyName) || 'Enter business phone first'}</code>
@@ -1194,7 +1194,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                         <Table>
                           <TableHeader>
                             <TableRow>
-                              <TableHead>Employee</TableHead>
+                              <TableHead>Team Member</TableHead>
                               <TableHead>Event</TableHead>
                               <TableHead className="text-right">Status</TableHead>
                             </TableRow>

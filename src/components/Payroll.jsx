@@ -478,7 +478,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
     doc.setFontSize(9)
     doc.setFont('helvetica', 'normal')
     const infoLeft = [
-      `Employee: ${entry.employee.name}`,
+      `Team Member: ${entry.employee.name}`,
       `Role: ${entry.employee.role}`,
       `Department: ${entry.employee.department || '-'}`
     ]
@@ -671,7 +671,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
     doc.setTextColor(100)
     doc.text(`Pay Period: ${monthLabel}`, 14, 30)
 
-    const tableColumn = ["Employee", "Job Title", "Basic", "Allowances", "Deductions", "Net Salary", "Status"]
+    const tableColumn = ["Team Member", "Job Title", "Basic", "Allowances", "Deductions", "Net Salary", "Status"]
     const tableRows = []
 
     entries.forEach(entry => {

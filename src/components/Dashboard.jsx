@@ -28,7 +28,7 @@ export const DashboardWidget = memo(({
 }) => {
   return (
     <Card className={`flex flex-col p-0 h-full dashboard-widget ${cardClass}`}>
-      <CardHeader className="flex-row items-center justify-between pb-3.5 space-y-0 gap-3">
+      <CardHeader className="flex-row items-center justify-between px-3.5 sm:px-4 pt-3.5 pb-2.5 space-y-0 gap-3">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="shrink-0 flex items-center justify-center [&_.msr]:!text-foreground">
             {icon}
@@ -37,7 +37,7 @@ export const DashboardWidget = memo(({
         </div>
         {action}
       </CardHeader>
-      <CardContent className={`flex-1 ${contentClass} p-3.5 sm:p-4`}>
+      <CardContent className={`flex-1 ${contentClass} p-2.5 sm:p-3`}>
         {children}
       </CardContent>
     </Card>
