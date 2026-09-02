@@ -136,7 +136,7 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
         const detailStr = log.checkOut && log.checkOut !== '--'
           ? `Checked In: ${log.checkIn} • Out: ${log.checkOut}`
           : `Checked In: ${log.checkIn || 'On time'}`
-        return { status: 'Present', label: 'Present', variant: 'emerald', icon: 'check_circle', detail: detailStr }
+        return { status: 'Present', label: 'At Office', variant: 'emerald', icon: 'check_circle', detail: detailStr }
       }
       if (log.status === 'Absent') {
         return { status: 'Absent', label: 'Absent', variant: 'rose', icon: 'cancel', detail: 'Absent (Not Checked In)' }
@@ -1014,24 +1014,7 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
                     key={emp.id} 
                     className="employee-card-transparent relative group rounded-[28px] p-5 sm:p-5.5 bg-transparent text-foreground border border-black/[0.08] dark:border-white/[0.09] hover:border-primary/50 dark:hover:border-primary/40 shadow-none hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between overflow-hidden isolate [backdrop-filter:none] [-webkit-backdrop-filter:none]"
                   >
-                    {/* 1. Top Header: Functional Live Attendance Status Badge on Top Right */}
-                    <div className="flex items-center justify-end mb-2 relative z-10">
-                      {/* Functional Attendance Status Badge (Present / Absent / On Leave) */}
-                      <div 
-                        title={liveStatus.detail}
-                        className={`inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-normal tracking-tight border transition-all select-none ${
-                          liveStatus.status === 'Present'
-                            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/25 shadow-none'
-                            : liveStatus.status === 'On Leave'
-                              ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/25 shadow-none'
-                              : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/25 shadow-none'
-                        }`}
-                      >
-                        <span>{liveStatus.label}</span>
-                      </div>
-                    </div>
-
-                    {/* 2. Hero Section: Profile Avatar on Left, First Name -> Role -> Department on Right */}
+                    {/* Hero Section: Profile Avatar on Left, First Name -> Role -> Department & Live Status on Right */}
                     <div className="flex items-start gap-3.5 my-1.5 relative z-10">
                       {/* Left: Avatar with Squircle Frame & Upload Overlay */}
                       <div className="relative shrink-0 group/avatar mt-0.5">
@@ -1066,7 +1049,7 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
                         </div>
                       </div>
 
-                      {/* Right: First Name -> Role -> Department */}
+                      {/* Right: First Name -> Role -> Department & Live Status */}
                       <div className="flex flex-col min-w-0 flex-1 text-left justify-center space-y-1">
                         {/* 1. Name (Only Heavy / Bold Font in the Card) */}
                         <h4 
@@ -1083,7 +1066,7 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
                           <span className="truncate">{displayRole}</span>
                         </div>
 
-                        {/* 3. Department & Employee ID */}
+                        {/* 3. Department • Employee ID • Attendance Live Status (At Office, On Leave, Absent) */}
                         <div className="flex items-center gap-2 flex-wrap pt-0.5 text-xs font-normal">
                           <span className="inline-flex items-center gap-1 font-normal text-muted-foreground truncate">
                             <Icon name="apartment" size={13} className="text-primary/70 shrink-0" />
@@ -1091,8 +1074,21 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
                           </span>
                           <span className="text-muted-foreground/40 font-mono text-xs">•</span>
                           <span className="inline-flex items-center gap-1 font-mono font-normal text-muted-foreground">
-                            <Icon name="badge" size={13} className="text-primary/70 shrink-0" />
+                            <Icon name="credit_card" size={13} className="text-primary/70 shrink-0" />
                             {emp.id}
+                          </span>
+                          <span className="text-muted-foreground/40 font-mono text-xs">•</span>
+                          <span 
+                            title={liveStatus.detail}
+                            className={`inline-flex items-center font-medium select-none ${
+                              liveStatus.status === 'Present'
+                                ? 'text-emerald-600 dark:text-emerald-400'
+                                : liveStatus.status === 'On Leave'
+                                  ? 'text-amber-600 dark:text-amber-400'
+                                  : 'text-rose-600 dark:text-rose-400'
+                            }`}
+                          >
+                            {liveStatus.label}
                           </span>
                         </div>
                       </div>
