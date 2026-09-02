@@ -6,9 +6,20 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectItem } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { DatePicker } from "@/components/ui/date-picker"
 import { formatDate } from '../../services/date.js'
 import { DashboardWidget } from '../Dashboard.jsx'
 import { generateAnnouncementMessage, queueWhatsAppMessages } from '../../services/whatsappService.js'
+
+const EVENT_TYPES = [
+  { id: 'meeting', label: 'Meeting', icon: 'groups' },
+  { id: 'holiday', label: 'Holiday', icon: 'beach_access' },
+  { id: 'birthday', label: 'Birthday', icon: 'cake' },
+  { id: 'deadline', label: 'Deadline', icon: 'warning' },
+  { id: 'social', label: 'Social', icon: 'celebration' },
+  { id: 'training', label: 'Training', icon: 'school' },
+  { id: 'other', label: 'Other', icon: 'event' },
+]
 
 export const AnnouncementsWidget = memo(({
   announcements = [],
@@ -17,6 +28,8 @@ export const AnnouncementsWidget = memo(({
   employees = [],
   upcomingMilestones = [],
   upcomingEvents = [],
+  events = [],
+  setEvents,
   setCurrentView,
   addToast,
   addLog,
@@ -28,9 +41,20 @@ export const AnnouncementsWidget = memo(({
   const [activeTab, setActiveTab] = useState('feed') // 'feed' | 'notice' | 'upcoming'
   const [isNoticeModalOpen, setIsNoticeModalOpen] = useState(false)
   const [isFeedModalOpen, setIsFeedModalOpen] = useState(false)
+  const [isEventModalOpen, setIsEventModalOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const upcomingCount = (upcomingMilestones?.length || 0) + (upcomingEvents?.length || 0)
+
+  // Event Form State
+  const [eventTitle, setEventTitle] = useState('')
+  const [eventDate, setEventDate] = useState(() => {
+    const now = new Date()
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+  })
+  const [eventTime, setEventTime] = useState('')
+  const [eventType, setEventType] = useState('meeting')
+  const [eventDescription, setEventDescription] = useState('')
 
   // Notice Form State
   const [noticeTitle, setNoticeTitle] = useState('')
@@ -242,6 +266,53 @@ export const AnnouncementsWidget = memo(({
     setIsSubmitting(false)
   }
 
+  const handleCreateEvent = (e) => {
+    e.preventDefault()
+    const trimmedTitle = eventTitle.trim()
+    if (!trimmedTitle || !eventDate) {
+      addToast?.('Event title and date are required', 'warning')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const newEvent = {
+        id: `evt-${Date.now()}`,
+        title: trimmedTitle,
+        date: eventDate,
+        time: eventTime || '',
+        type: eventType || 'meeting',
+        description: eventDescription.trim() || '',
+        createdBy: currentUser?.id || currentUser?.uid || 'unknown',
+        createdAt: new Date().toISOString(),
+      }
+
+      if (setEvents) {
+        setEvents((prev) => [...(Array.isArray(prev) ? prev : []), newEvent])
+      }
+
+      addToast?.('Event created successfully', 'success')
+      addLog?.('Event Created', `${trimmedTitle} on ${eventDate}`)
+      if (addNotification) {
+        addNotification(`New company event scheduled: "${trimmedTitle}" on ${eventDate}`, 'calendar', {
+          title: 'New Event',
+          category: 'event'
+        })
+      }
+
+      setIsEventModalOpen(false)
+      setEventTitle('')
+      setEventTime('')
+      setEventType('meeting')
+      setEventDescription('')
+    } catch (err) {
+      console.error('Failed to create event:', err)
+      addToast?.('Failed to create event', 'error')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   const handleCreateFeed = (e) => {
     e.preventDefault()
     const trimmedContent = feedContent.trim()
@@ -408,7 +479,7 @@ export const AnnouncementsWidget = memo(({
                 return (
                   <div
                     key={post.id}
-                    className="p-3.5 sm:p-4 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.08] hover:border-black/15 dark:hover:border-white/15 transition-all flex flex-col gap-2.5"
+                    className="p-3.5 sm:p-4 rounded-2xl liquid-widget-item border-black/[0.06] dark:border-white/[0.08] flex flex-col gap-2.5"
                   >
                     {/* Header Row: Author info, date (No right-side tag) */}
                     <div className="flex items-center justify-between gap-2">
@@ -577,11 +648,11 @@ export const AnnouncementsWidget = memo(({
               </div>
               {setCurrentView && (
                 <button
-                  onClick={() => setCurrentView('calendar')}
+                  onClick={() => setIsEventModalOpen(true)}
                   className="apple-glass-btn text-xs font-semibold px-4 h-8 rounded-full text-foreground hover:text-foreground/90 flex items-center gap-1.5 cursor-pointer mt-1"
                 >
-                  <Icon name="calendar_month" size={16}/>
-                  <span>Open Calendar</span>
+                  <Icon name="add" size={16}/>
+                  <span>Add Event</span>
                 </button>
               )}
             </div>
@@ -634,7 +705,7 @@ export const AnnouncementsWidget = memo(({
           )
         )}
 
-        {/* Widget Footer: Post / Serve Notice / Calendar Action Button (No separator line, colorless/blurless clean button) */}
+        {/* Widget Footer: Post / Serve Notice / Add Event Action Button (No separator line, colorless/blurless clean button) */}
         <div className="px-4 sm:px-5 pb-3 pt-0 flex items-center">
           {activeTab === 'feed' ? (
             <button
@@ -657,11 +728,11 @@ export const AnnouncementsWidget = memo(({
           ) : (
             <button
               type="button"
-              onClick={() => setCurrentView && setCurrentView('calendar')}
+              onClick={() => setIsEventModalOpen(true)}
               className="w-full h-8.5 rounded-xl font-semibold text-xs transition-all cursor-pointer select-none flex items-center justify-center gap-2 bg-transparent text-foreground/80 hover:text-foreground border border-black/10 dark:border-white/15 hover:border-black/25 dark:hover:border-white/30 active:scale-[0.99]"
             >
-              <Icon name="calendar_month" size={15} className="text-foreground" />
-              <span>View Full Calendar & Events</span>
+              <Icon name="add" size={15} className="text-foreground" />
+              <span>Add Event</span>
             </button>
           )}
         </div>
@@ -879,6 +950,135 @@ export const AnnouncementsWidget = memo(({
                   <div className="flex items-center gap-1.5">
                     <Icon name="campaign" size={16}/>
                     <span>Publish Notice</span>
+                  </div>
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* --- CREATE EVENT MODAL --- */}
+      <Dialog open={isEventModalOpen} onOpenChange={setIsEventModalOpen}>
+        <DialogContent
+          className="max-w-[460px] glass-kormiis border border-white/20 dark:border-white/10 rounded-3xl overflow-hidden shadow-none"
+          dialogClassName="p-5 sm:p-6 outline-none flex flex-col"
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between pb-1 shrink-0">
+            <h3 className="text-base sm:text-lg font-bold text-foreground m-0 flex items-center gap-2">
+              <Icon name="calendar_month" size={20} className="text-foreground" />
+              <span>Create Event</span>
+            </h3>
+            <button
+              type="button"
+              onClick={() => setIsEventModalOpen(false)}
+              className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer p-0 bg-transparent border-0 flex items-center justify-center outline-none focus:outline-none"
+              aria-label="Close"
+            >
+              <Icon name="close" size={20} />
+            </button>
+          </div>
+
+          <form onSubmit={handleCreateEvent} className="flex flex-col flex-1 mt-3 gap-3.5">
+            {/* Title */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-fluid-xs font-semibold text-foreground">
+                Event Title <span className="text-red-500">*</span>
+              </label>
+              <Input
+                required
+                type="text"
+                value={eventTitle}
+                onChange={(e) => setEventTitle(e.target.value)}
+                placeholder="e.g. Quarterly Review, Tech Workshop, Team Lunch"
+                className="h-11 rounded-2xl bg-muted/40"
+              />
+            </div>
+
+            {/* Date & Time Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="flex flex-col gap-1.5">
+                <DatePicker
+                  label="Date *"
+                  required
+                  value={eventDate}
+                  onChange={setEventDate}
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-fluid-xs font-semibold text-foreground">Time (Optional)</label>
+                <Input
+                  type="time"
+                  value={eventTime}
+                  onChange={(e) => setEventTime(e.target.value)}
+                  className="h-11 rounded-2xl bg-muted/40"
+                />
+              </div>
+            </div>
+
+            {/* Event Type Pills */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-fluid-xs font-semibold text-foreground">Event Type</label>
+              <div className="flex gap-2 flex-wrap">
+                {EVENT_TYPES.map((t) => {
+                  const isActive = eventType === t.id
+                  return (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => setEventType(t.id)}
+                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer select-none ${
+                        isActive
+                          ? 'bg-foreground text-background font-bold border border-foreground'
+                          : 'bg-muted/40 text-foreground/80 hover:bg-muted/70 hover:text-foreground border border-black/10 dark:border-white/10'
+                      }`}
+                    >
+                      <Icon name={t.icon} size={14} />
+                      <span>{t.label}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Description */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-fluid-xs font-semibold text-foreground">Description (Optional)</label>
+              <textarea
+                rows={3}
+                value={eventDescription}
+                onChange={(e) => setEventDescription(e.target.value)}
+                placeholder="Details about location, agenda or requirements..."
+                className="w-full rounded-2xl border border-input bg-muted/40 px-3.5 py-2.5 text-fluid text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none min-h-[75px]"
+              />
+            </div>
+
+            <DialogFooter className="pt-2 gap-2.5 border-t border-border/60 dark:border-white/10 mt-1">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsEventModalOpen(false)}
+                className="rounded-full h-11 px-5 font-semibold"
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                className="rounded-full h-11 px-6 font-semibold"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <div className="flex items-center gap-2">
+                    <span className="liquid-spinner" />
+                    <span>Creating...</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1.5">
+                    <Icon name="add" size={16}/>
+                    <span>Create Event</span>
                   </div>
                 )}
               </Button>

@@ -92,7 +92,7 @@ const VirtualizedList = memo(({ items, filter }) => {
 
 VirtualizedList.displayName = 'VirtualizedList'
 
-export default function Dashboard({ employees, onSync, attendance, setAttendance, currentUser, addToast, setCurrentView, announcements, setAnnouncements, addLog, addNotification, events, payroll, isSidebarCollapsed, hasPermission, tasks = [], documents = [], assets = [], settings, notes = [], setNotes }) {
+export default function Dashboard({ employees, onSync, attendance, setAttendance, currentUser, addToast, setCurrentView, announcements, setAnnouncements, addLog, addNotification, events, setEvents, payroll, isSidebarCollapsed, hasPermission, tasks = [], documents = [], assets = [], settings, notes = [], setNotes }) {
   const [expandedWidgets, setExpandedWidgets] = useState([])
   const [attFilter, setAttFilter] = useState(null)
   const [attTab, setAttTab] = useState('donut')
@@ -415,6 +415,8 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
             employees={employees}
             upcomingMilestones={upcomingMilestones}
             upcomingEvents={upcomingEvents}
+            events={events}
+            setEvents={setEvents}
             setCurrentView={setCurrentView}
             addToast={addToast}
             addLog={addLog}
