@@ -39,10 +39,16 @@ export const AnnouncementsWidget = memo(({
   ...wProps
 }) => {
   const [activeTab, setActiveTab] = useState('feed') // 'feed' | 'notice' | 'upcoming'
+  const [seenTabs, setSeenTabs] = useState(() => new Set(['feed']))
   const [isNoticeModalOpen, setIsNoticeModalOpen] = useState(false)
   const [isFeedModalOpen, setIsFeedModalOpen] = useState(false)
   const [isEventModalOpen, setIsEventModalOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const handleTabClick = (tab) => {
+    setActiveTab(tab)
+    setSeenTabs(prev => new Set([...prev, tab]))
+  }
 
   const upcomingCount = (upcomingMilestones?.length || 0) + (upcomingEvents?.length || 0)
 
@@ -385,65 +391,88 @@ export const AnnouncementsWidget = memo(({
         contentClass="flex flex-col p-0 overflow-hidden"
         {...wProps}
       >
-        {/* Full-width Subheader: Feed, Notice & Upcoming Tab Switcher */}
-        <div className="px-2.5 sm:px-3 pt-0 pb-2.5 -mt-1.5 sm:-mt-2">
-          <div className="w-full p-1 rounded-2xl bg-muted/60 dark:bg-white/[0.06] border border-border/80 dark:border-white/10 flex items-center gap-1">
+        {/* Separate Split Buttons: Feed, Notice & Events */}
+        <div className="px-2.5 sm:px-3 pt-0 pb-2.5 -mt-1 sm:-mt-1.5">
+          <div className="grid grid-cols-3 gap-2 sm:gap-2.5 w-full">
+            {/* Feed Split Button */}
             <button
               type="button"
-              onClick={() => setActiveTab('feed')}
-              className={`flex-1 h-9 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer select-none flex items-center justify-center gap-1.5 sm:gap-2 ${
+              onClick={() => handleTabClick('feed')}
+              style={activeTab === 'feed' ? { backgroundColor: '#FE3501', color: '#ffffff', borderColor: '#FE3501' } : {}}
+              className={`relative h-8 sm:h-8.5 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer select-none flex items-center justify-center gap-1.5 sm:gap-2 px-2 border active:scale-[0.97] ${
                 activeTab === 'feed'
-                  ? 'bg-background text-foreground shadow-sm font-bold border border-black/10 dark:border-white/15'
-                  : 'text-foreground/70 hover:text-foreground hover:bg-background/40'
+                  ? 'bg-[#FE3501] !text-white border-[#FE3501] shadow-xs'
+                  : 'bg-black/[0.04] dark:bg-white/[0.06] text-foreground hover:bg-black/[0.08] dark:hover:bg-white/[0.12] border-black/10 dark:border-white/12'
               }`}
             >
-              <Icon name="forum" size={15} className="text-foreground/70" />
-              <span>Feed</span>
-              <span className={`text-[11px] sm:text-xs tabular-nums px-1.5 sm:px-2 py-0.5 rounded-full font-bold ${
-                activeTab === 'feed'
-                  ? 'bg-foreground/15 text-foreground'
-                  : 'bg-foreground/5 text-muted-foreground'
-              }`}>
-                {feedPosts.length}
+              <Icon 
+                name="forum" 
+                size={15} 
+                className={`shrink-0 ${activeTab === 'feed' ? '!text-white' : 'text-foreground/80'}`} 
+              />
+              <span 
+                style={activeTab === 'feed' ? { color: '#ffffff' } : {}}
+                className={`whitespace-nowrap text-xs sm:text-sm font-bold tracking-tight ${activeTab === 'feed' ? '!text-white' : 'text-foreground'}`}
+              >
+                Feed
               </span>
+              {feedPosts.length > 0 && !seenTabs.has('feed') && (
+                <span className="absolute top-1 right-1.5 size-2 rounded-full bg-[#FE3501] ring-1.5 ring-background shrink-0 pointer-events-none" />
+              )}
             </button>
+
+            {/* Notice Split Button */}
             <button
               type="button"
-              onClick={() => setActiveTab('notice')}
-              className={`flex-1 h-9 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer select-none flex items-center justify-center gap-1.5 sm:gap-2 ${
+              onClick={() => handleTabClick('notice')}
+              style={activeTab === 'notice' ? { backgroundColor: '#FE3501', color: '#ffffff', borderColor: '#FE3501' } : {}}
+              className={`relative h-8 sm:h-8.5 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer select-none flex items-center justify-center gap-1.5 sm:gap-2 px-2 border active:scale-[0.97] ${
                 activeTab === 'notice'
-                  ? 'bg-background text-foreground shadow-sm font-bold border border-black/10 dark:border-white/15'
-                  : 'text-foreground/70 hover:text-foreground hover:bg-background/40'
+                  ? 'bg-[#FE3501] !text-white border-[#FE3501] shadow-xs'
+                  : 'bg-black/[0.04] dark:bg-white/[0.06] text-foreground hover:bg-black/[0.08] dark:hover:bg-white/[0.12] border-black/10 dark:border-white/12'
               }`}
             >
-              <Icon name="campaign" size={16} className="text-foreground/70" />
-              <span>Notice</span>
-              <span className={`text-[11px] sm:text-xs tabular-nums px-1.5 sm:px-2 py-0.5 rounded-full font-bold ${
-                activeTab === 'notice'
-                  ? 'bg-foreground/15 text-foreground'
-                  : 'bg-foreground/5 text-muted-foreground'
-              }`}>
-                {noticePosts.length}
+              <Icon 
+                name="campaign" 
+                size={16} 
+                className={`shrink-0 ${activeTab === 'notice' ? '!text-white' : 'text-foreground/80'}`} 
+              />
+              <span 
+                style={activeTab === 'notice' ? { color: '#ffffff' } : {}}
+                className={`whitespace-nowrap text-xs sm:text-sm font-bold tracking-tight ${activeTab === 'notice' ? '!text-white' : 'text-foreground'}`}
+              >
+                Notice
               </span>
+              {noticePosts.length > 0 && !seenTabs.has('notice') && (
+                <span className="absolute top-1 right-1.5 size-2 rounded-full bg-[#FE3501] ring-1.5 ring-background shrink-0 pointer-events-none" />
+              )}
             </button>
+
+            {/* Events Split Button */}
             <button
               type="button"
-              onClick={() => setActiveTab('upcoming')}
-              className={`flex-1 h-9 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer select-none flex items-center justify-center gap-1.5 sm:gap-2 ${
+              onClick={() => handleTabClick('upcoming')}
+              style={activeTab === 'upcoming' ? { backgroundColor: '#FE3501', color: '#ffffff', borderColor: '#FE3501' } : {}}
+              className={`relative h-8 sm:h-8.5 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer select-none flex items-center justify-center gap-1.5 sm:gap-2 px-2 border active:scale-[0.97] ${
                 activeTab === 'upcoming'
-                  ? 'bg-background text-foreground shadow-sm font-bold border border-black/10 dark:border-white/15'
-                  : 'text-foreground/70 hover:text-foreground hover:bg-background/40'
+                  ? 'bg-[#FE3501] !text-white border-[#FE3501] shadow-xs'
+                  : 'bg-black/[0.04] dark:bg-white/[0.06] text-foreground hover:bg-black/[0.08] dark:hover:bg-white/[0.12] border-black/10 dark:border-white/12'
               }`}
             >
-              <Icon name="calendar_month" size={15} className="text-foreground/70" />
-              <span>Events</span>
-              <span className={`text-[11px] sm:text-xs tabular-nums px-1.5 sm:px-2 py-0.5 rounded-full font-bold ${
-                activeTab === 'upcoming'
-                  ? 'bg-foreground/15 text-foreground'
-                  : 'bg-foreground/5 text-muted-foreground'
-              }`}>
-                {upcomingCount}
+              <Icon 
+                name="calendar_month" 
+                size={15} 
+                className={`shrink-0 ${activeTab === 'upcoming' ? '!text-white' : 'text-foreground/80'}`} 
+              />
+              <span 
+                style={activeTab === 'upcoming' ? { color: '#ffffff' } : {}}
+                className={`whitespace-nowrap text-xs sm:text-sm font-bold tracking-tight ${activeTab === 'upcoming' ? '!text-white' : 'text-foreground'}`}
+              >
+                Events
               </span>
+              {upcomingCount > 0 && !seenTabs.has('upcoming') && (
+                <span className="absolute top-1 right-1.5 size-2 rounded-full bg-[#FE3501] ring-1.5 ring-background shrink-0 pointer-events-none" />
+              )}
             </button>
           </div>
         </div>
