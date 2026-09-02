@@ -353,10 +353,16 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
   const currentPayrollMonth = payroll && typeof payroll === 'object' && Object.keys(payroll).length > 0
     ? Object.keys(payroll).sort().reverse()[0]
     : null
-  const currentPayrollData = (currentPayrollMonth && Array.isArray(payroll[currentPayrollMonth])) ? payroll[currentPayrollMonth] : []
+  const rawCurrentData = (currentPayrollMonth && payroll) ? payroll[currentPayrollMonth] : null
+  const currentPayrollData = Array.isArray(rawCurrentData)
+    ? rawCurrentData
+    : (Array.isArray(rawCurrentData?.records) ? rawCurrentData.records : (Array.isArray(rawCurrentData?.entries) ? rawCurrentData.entries : []))
   const paidCount = currentPayrollData.filter(p => p && p.status === 'Paid').length
   const pendingCount = currentPayrollData.filter(p => p && p.status === 'Pending').length
-  const totalPayrollCost = currentPayrollData.reduce((acc, curr) => acc + (Number(curr?.netSalary) || 0), 0)
+  const totalPayrollCost = currentPayrollData.reduce((acc, curr) => {
+    const net = Number(curr?.netSalary || curr?.net || (Number(curr?.grossSalary || 0) - Number(curr?.deductions || 0))) || 0
+    return acc + net
+  }, 0)
 
   const efficiencyScore = totalTracked > 0 ? Math.min(100, Math.round((todayStats.present / totalTracked) * 100 + 5)) : 100
   const taskList = Array.isArray(tasks) ? tasks : []

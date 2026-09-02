@@ -228,24 +228,16 @@ export const DEMO_ATTENDANCE = {
 }
 
 export const DEMO_PAYROLL = {
-  [new Date().toISOString().slice(0, 7)]: {
-    month: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
-    status: 'Processed',
-    generatedAt: new Date().toISOString(),
-    totalGross: 995000,
-    totalNet: 945250,
-    totalDeductions: 49750,
-    records: [
-      { employeeId: 'emp-101', name: 'Sarah Rahman', basic: 82500, hra: 41250, medical: 16500, conveyance: 16500, pf: 8250, net: 156750, status: 'Paid' },
-      { employeeId: 'emp-102', name: 'Tanvir Hossain', basic: 67500, hra: 33750, medical: 13500, conveyance: 13500, pf: 6750, net: 128250, status: 'Paid' },
-      { employeeId: 'emp-103', name: 'Nusrat Jahan', basic: 55000, hra: 27500, medical: 11000, conveyance: 11000, pf: 5500, net: 104500, status: 'Paid' },
-      { employeeId: 'emp-104', name: 'Arif Chowdhury', basic: 77500, hra: 38750, medical: 15500, conveyance: 15500, pf: 7750, net: 147250, status: 'Paid' },
-      { employeeId: 'emp-105', name: 'Farhana Haque', basic: 60000, hra: 30000, medical: 12000, conveyance: 12000, pf: 6000, net: 114000, status: 'Paid' },
-      { employeeId: 'emp-106', name: 'Mahmud Hasan', basic: 62500, hra: 31250, medical: 12500, conveyance: 12500, pf: 6250, net: 118750, status: 'Paid' },
-      { employeeId: 'emp-107', name: 'Aylin Sultana', basic: 47500, hra: 23750, medical: 9500, conveyance: 9500, pf: 4750, net: 90250, status: 'Paid' },
-      { employeeId: 'emp-108', name: 'Kazi Shakil', basic: 45000, hra: 22500, medical: 9000, conveyance: 9000, pf: 4500, net: 85500, status: 'Paid' }
-    ]
-  }
+  [new Date().toISOString().slice(0, 7)]: [
+    { employeeId: 'emp-101', grossSalary: 165000, baseSalary: 82500, allowance: 74250, deductions: 8250, advance: 0, loan: { total: 0, installment: 0, remaining: 0 }, status: 'Paid', paymentDate: getTodayStr() },
+    { employeeId: 'emp-102', grossSalary: 135000, baseSalary: 67500, allowance: 60750, deductions: 6750, advance: 0, loan: { total: 0, installment: 0, remaining: 0 }, status: 'Paid', paymentDate: getTodayStr() },
+    { employeeId: 'emp-103', grossSalary: 110000, baseSalary: 55000, allowance: 49500, deductions: 5500, advance: 0, loan: { total: 0, installment: 0, remaining: 0 }, status: 'Paid', paymentDate: getTodayStr() },
+    { employeeId: 'emp-104', grossSalary: 155000, baseSalary: 77500, allowance: 69750, deductions: 7750, advance: 0, loan: { total: 0, installment: 0, remaining: 0 }, status: 'Paid', paymentDate: getTodayStr() },
+    { employeeId: 'emp-105', grossSalary: 120000, baseSalary: 60000, allowance: 54000, deductions: 6000, advance: 0, loan: { total: 0, installment: 0, remaining: 0 }, status: 'Paid', paymentDate: getTodayStr() },
+    { employeeId: 'emp-106', grossSalary: 125000, baseSalary: 62500, allowance: 56250, deductions: 6250, advance: 0, loan: { total: 0, installment: 0, remaining: 0 }, status: 'Paid', paymentDate: getTodayStr() },
+    { employeeId: 'emp-107', grossSalary: 95000, baseSalary: 47500, allowance: 42750, deductions: 4750, advance: 0, loan: { total: 0, installment: 0, remaining: 0 }, status: 'Paid', paymentDate: getTodayStr() },
+    { employeeId: 'emp-108', grossSalary: 90000, baseSalary: 45000, allowance: 40500, deductions: 4500, advance: 0, loan: { total: 0, installment: 0, remaining: 0 }, status: 'Paid', paymentDate: getTodayStr() }
+  ]
 }
 
 export const DEMO_EXPENSES = [

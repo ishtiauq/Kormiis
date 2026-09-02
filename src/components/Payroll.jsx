@@ -78,10 +78,21 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
 
   const monthLabel = `${monthNames[currentMonth - 1]} ${currentYear}`
 
+  // Safe helper to extract monthly records from any payroll data structure
+  const getMonthRecords = (data, monthKey) => {
+    if (!data || typeof data !== 'object') return null
+    const raw = data[monthKey]
+    if (!raw) return null
+    if (Array.isArray(raw)) return raw
+    if (Array.isArray(raw.records)) return raw.records
+    if (Array.isArray(raw.entries)) return raw.entries
+    return null
+  }
+
   // Map/Sync payroll items with current employees list for the selected month
   const getPayrollEntries = () => {
-    const monthData = payroll[selectedMonth]
-    if (!monthData) return null // Requires initialization
+    const monthData = getMonthRecords(payroll, selectedMonth)
+    if (!monthData || !Array.isArray(monthData)) return null // Requires initialization
 
     const basicComp = structure.find(s => s.id === 'basic' || s.name.toLowerCase().includes('basic'))
     const basicPercent = basicComp ? basicComp.percentage : 50
@@ -92,19 +103,21 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
     const deductionComps = structure.filter(s => s.type === 'deduction')
     const deductionPercent = deductionComps.reduce((a, c) => a + c.percentage, 0)
 
-    return employees.map(emp => {
-      const existing = monthData.find(p => p.employeeId === emp.id)
+    return (employees || []).map(emp => {
+      const existing = monthData.find(p => p && p.employeeId === emp.id)
       
       // Default Gross salaries by role
       let gross = 3200
       if (existing && existing.grossSalary) {
         gross = existing.grossSalary
+      } else if (existing && existing.basic) {
+        gross = (existing.basic || 0) + (existing.hra || 0) + (existing.medical || 0) + (existing.conveyance || 0)
       } else {
-        if (emp.role.includes('Manager')) {
+        if (emp.role?.includes('Manager')) {
           gross = 4500
-        } else if (emp.role.includes('Lead') || emp.role.includes('Senior')) {
+        } else if (emp.role?.includes('Lead') || emp.role?.includes('Senior')) {
           gross = 5200
-        } else if (emp.role.includes('Engineer')) {
+        } else if (emp.role?.includes('Engineer')) {
           gross = 4000
         }
       }
@@ -139,10 +152,10 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
   const handleInitializeMonth = () => {
     const [y, m] = selectedMonth.split('-').map(Number)
     const prevMonthVal = m === 1 ? `${y-1}-12` : `${y}-${String(m-1).padStart(2, '0')}`
-    const prevMonthData = payroll[prevMonthVal] || []
+    const prevMonthData = getMonthRecords(payroll, prevMonthVal) || []
 
-    const newEntries = employees.map(emp => {
-      const prevRecord = prevMonthData.find(p => p.employeeId === emp.id)
+    const newEntries = (employees || []).map(emp => {
+      const prevRecord = prevMonthData.find(p => p && p.employeeId === emp.id)
       const prevRemaining = prevRecord?.loan?.remaining || 0
       const prevInstallment = prevRecord?.loan?.installment || 0
       const prevTotal = prevRecord?.loan?.total || 0
@@ -155,9 +168,9 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
 
       let gross = salaryOverrides[emp.id] || prevRecord?.grossSalary || 3200
       if (!prevRecord && !salaryOverrides[emp.id]) {
-        if (emp.role.includes('Manager')) gross = 4500
-        else if (emp.role.includes('Lead') || emp.role.includes('Senior')) gross = 5200
-        else if (emp.role.includes('Engineer')) gross = 4000
+        if (emp.role?.includes('Manager')) gross = 4500
+        else if (emp.role?.includes('Lead') || emp.role?.includes('Senior')) gross = 5200
+        else if (emp.role?.includes('Engineer')) gross = 4000
       }
 
       return {
@@ -178,7 +191,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
     })
 
     setPayroll(prev => ({
-      ...prev,
+      ...(prev || {}),
       [selectedMonth]: newEntries
     }))
 
@@ -231,13 +244,13 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
     setTimeout(() => {
       const today = formatDate(new Date().toISOString().split('T')[0])
       
-      const loanDeduction = Math.min(entry.loan.remaining, entry.loan.installment)
-      const nextRemaining = Math.max(0, entry.loan.remaining - loanDeduction)
+      const loanDeduction = Math.min(entry.loan?.remaining || 0, entry.loan?.installment || 0)
+      const nextRemaining = Math.max(0, (entry.loan?.remaining || 0) - loanDeduction)
 
       // Update state for selected month dictionary key
       setPayroll(prev => {
-        const monthData = prev[selectedMonth] || []
-        const index = monthData.findIndex(p => p.employeeId === entry.employeeId)
+        const monthData = getMonthRecords(prev, selectedMonth) || []
+        const index = monthData.findIndex(p => p && p.employeeId === entry.employeeId)
         
         const updatedEntry = {
           employeeId: entry.employeeId,
@@ -249,8 +262,8 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
           paymentDate: today,
           advance: 0,
           loan: {
-            total: entry.loan.total,
-            installment: entry.loan.installment,
+            total: entry.loan?.total || 0,
+            installment: entry.loan?.installment || 0,
             remaining: nextRemaining
           }
         }
@@ -263,14 +276,14 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
         }
 
         return {
-          ...prev,
+          ...(prev || {}),
           [selectedMonth]: nextMonthData
         }
       })
 
-      const finalNet = entry.baseSalary + entry.allowance - entry.deductions - entry.advance - loanDeduction
-      addLog('Salary Disbursed', `Processed salary payout of ${currency}${finalNet} to ${entry.employee.name}`, 'success')
-      if (addAuditLog) addAuditLog('UPDATE', 'Payroll', `Executed payment for ${entry.employee.name} in ${selectedMonth}`)
+      const finalNet = entry.baseSalary + entry.allowance - entry.deductions - (entry.advance || 0) - loanDeduction
+      addLog('Salary Disbursed', `Processed salary payout of ${currency}${finalNet} to ${entry.employee?.name || 'employee'}`, 'success')
+      if (addAuditLog) addAuditLog('UPDATE', 'Payroll', `Executed payment for ${entry.employee?.name || entry.employeeId} in ${selectedMonth}`)
       setProcessingId(null)
 
       // Download Payslip text receipt
@@ -333,10 +346,10 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
     setTimeout(() => {
       const today = formatDate(new Date().toISOString().split('T')[0])
       setPayroll(prev => {
-        const monthData = prev[selectedMonth] || []
+        const monthData = getMonthRecords(prev, selectedMonth) || []
         const updatedMonthData = monthData.map(entry => {
           if (entry.status === 'Pending') {
-            const loanDeduction = Math.min(entry.loan.remaining, entry.loan.installment)
+            const loanDeduction = Math.min(entry.loan?.remaining || 0, entry.loan?.installment || 0)
             return {
               ...entry,
               status: 'Paid',
@@ -344,13 +357,13 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
               advance: 0,
               loan: {
                 ...entry.loan,
-                remaining: Math.max(0, entry.loan.remaining - loanDeduction)
+                remaining: Math.max(0, (entry.loan?.remaining || 0) - loanDeduction)
               }
             }
           }
           return entry
         })
-        return { ...prev, [selectedMonth]: updatedMonthData }
+        return { ...(prev || {}), [selectedMonth]: updatedMonthData }
       })
       addLog('Bulk Disbursed', `Processed salary payout for ${pendingEntries.length} employees`, 'success')
       if (addAuditLog) addAuditLog('UPDATE', 'Payroll', `Bulk executed ${pendingEntries.length} payments in ${selectedMonth}`)
@@ -368,10 +381,10 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
     setTimeout(() => {
       const today = formatDate(new Date().toISOString().split('T')[0])
       setPayroll(prev => {
-        const monthData = prev[selectedMonth] || []
+        const monthData = getMonthRecords(prev, selectedMonth) || []
         const updatedMonthData = monthData.map(entry => {
           if (selectedRows.includes(entry.employeeId) && entry.status === 'Pending') {
-            const loanDeduction = Math.min(entry.loan.remaining, entry.loan.installment)
+            const loanDeduction = Math.min(entry.loan?.remaining || 0, entry.loan?.installment || 0)
             return {
               ...entry,
               status: 'Paid',
@@ -379,13 +392,13 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
               advance: 0,
               loan: {
                 ...entry.loan,
-                remaining: Math.max(0, entry.loan.remaining - loanDeduction)
+                remaining: Math.max(0, (entry.loan?.remaining || 0) - loanDeduction)
               }
             }
           }
           return entry
         })
-        return { ...prev, [selectedMonth]: updatedMonthData }
+        return { ...(prev || {}), [selectedMonth]: updatedMonthData }
       })
       addLog('Bulk Disbursed', `Processed salary payout for ${entriesToPay.length} selected employees`, 'success')
       if (addAuditLog) addAuditLog('UPDATE', 'Payroll', `Bulk executed ${entriesToPay.length} payments in ${selectedMonth}`)
@@ -589,8 +602,8 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
     const newGross = Number(grossSalaryInput) || 3200
 
     setPayroll(prev => {
-      const monthData = prev[selectedMonth] || []
-      const index = monthData.findIndex(p => p.employeeId === selectedEmpLog.employeeId)
+      const monthData = getMonthRecords(prev, selectedMonth) || []
+      const index = monthData.findIndex(p => p && p.employeeId === selectedEmpLog.employeeId)
 
       const updatedEntry = {
         employeeId: selectedEmpLog.employeeId,
@@ -623,9 +636,9 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
         })
         // Also update all existing months' entries for this employee
         const updatedPayroll = {}
-        Object.keys(prev).forEach(monthKey => {
-          const monthEntries = prev[monthKey].map(entry =>
-            entry.employeeId === selectedEmpLog.employeeId
+        Object.keys(prev || {}).forEach(monthKey => {
+          const monthEntries = (getMonthRecords(prev, monthKey) || []).map(entry =>
+            entry && entry.employeeId === selectedEmpLog.employeeId
               ? { ...entry, grossSalary: newGross }
               : entry
           )
@@ -634,7 +647,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
         return { ...updatedPayroll, [selectedMonth]: nextMonthData }
       }
 
-      return { ...prev, [selectedMonth]: nextMonthData }
+      return { ...(prev || {}), [selectedMonth]: nextMonthData }
     })
 
     setIsDrawerOpen(false)

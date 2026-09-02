@@ -1143,7 +1143,22 @@ function AttendanceView({
 
 function PayslipsView({ currentUser, payroll, employees, expenses, setExpenses, addLog, addToast, settings, addNotification, initialSubTab = 'payslips' }) {
   const [subTab, setSubTab] = useState(initialSubTab)
-  const myPayslips = (payroll?.history || []).filter(p => p.employeeId === currentUser.id)
+  const myPayslips = useMemo(() => {
+    if (!payroll || typeof payroll !== 'object') return []
+    if (Array.isArray(payroll.history)) {
+      return payroll.history.filter(p => p && p.employeeId === currentUser?.id)
+    }
+    const list = []
+    Object.entries(payroll).forEach(([monthKey, records]) => {
+      const arr = Array.isArray(records) ? records : (Array.isArray(records?.records) ? records.records : (Array.isArray(records?.entries) ? records.entries : []))
+      arr.forEach(rec => {
+        if (rec && rec.employeeId === currentUser?.id) {
+          list.push({ ...rec, date: rec.paymentDate || monthKey, month: monthKey })
+        }
+      })
+    })
+    return list
+  }, [payroll, currentUser?.id])
 
   const downloadSlipPDF = async (slip) => {
     try {
