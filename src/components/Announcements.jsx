@@ -219,9 +219,9 @@ export default function Announcements({ employees, announcements, setAnnouncemen
 
   const handleReaction = (postId, type) => {
     const userId = currentUser?.id || 'admin'
-    setAnnouncements(prev => prev.map(p => {
+    setAnnouncements(prev => (prev || []).map(p => {
       if (p.id === postId) {
-        let newReactions = { ...p.reactions }
+        let newReactions = { ...(p.reactions || {}) }
         let wasAlreadyReacted = false
 
         Object.keys(newReactions).forEach(t => {
@@ -276,11 +276,11 @@ export default function Announcements({ employees, announcements, setAnnouncemen
   const handleDeleteComment = async (postId, commentId) => {
     const ok = await confirm('Delete this comment?', 'Delete Comment', { destructive: true })
     if (!ok) return
-    setAnnouncements(prev => prev.map(p => {
+    setAnnouncements(prev => (prev || []).map(p => {
       if (p.id === postId) {
         return {
           ...p,
-          comments: p.comments.filter(c => c.id !== commentId)
+          comments: (p.comments || []).filter(c => c.id !== commentId)
         }
       }
       return p
@@ -289,13 +289,13 @@ export default function Announcements({ employees, announcements, setAnnouncemen
 
   const handleCommentReaction = (postId, commentId, type) => {
     const userId = currentUser?.id || 'admin'
-    setAnnouncements(prev => prev.map(p => {
+    setAnnouncements(prev => (prev || []).map(p => {
       if (p.id === postId) {
         return {
           ...p,
-          comments: p.comments.map(c => {
+          comments: (p.comments || []).map(c => {
             if (c.id === commentId) {
-              let newReactions = { ...c.reactions }
+              let newReactions = { ...(c.reactions || {}) }
               let wasAlreadyReacted = false
               
               Object.keys(newReactions).forEach(t => {
@@ -324,11 +324,11 @@ export default function Announcements({ employees, announcements, setAnnouncemen
     const text = commentInputs[replyKey]?.trim()
     if (!text) return
 
-    setAnnouncements(prev => prev.map(p => {
+    setAnnouncements(prev => (prev || []).map(p => {
       if (p.id === postId) {
         return {
           ...p,
-          comments: p.comments.map(c => {
+          comments: (p.comments || []).map(c => {
             if (c.id === commentId) {
               return {
                 ...c,
@@ -353,17 +353,17 @@ export default function Announcements({ employees, announcements, setAnnouncemen
 
   const handleReplyReaction = (postId, commentId, replyId, type) => {
     const userId = currentUser?.id || 'admin'
-    setAnnouncements(prev => prev.map(p => {
+    setAnnouncements(prev => (prev || []).map(p => {
       if (p.id === postId) {
         return {
           ...p,
-          comments: p.comments.map(c => {
+          comments: (p.comments || []).map(c => {
             if (c.id === commentId) {
               return {
                 ...c,
-                replies: c.replies.map(r => {
+                replies: (c.replies || []).map(r => {
                   if (r.id === replyId) {
-                    let newReactions = { ...r.reactions }
+                    let newReactions = { ...(r.reactions || {}) }
                     let wasAlreadyReacted = false
                     
                     Object.keys(newReactions).forEach(t => {
@@ -394,13 +394,13 @@ export default function Announcements({ employees, announcements, setAnnouncemen
   const handleDeleteReply = async (postId, commentId, replyId) => {
     const ok = await confirm('Delete this reply?', 'Delete Reply', { destructive: true })
     if (!ok) return
-    setAnnouncements(prev => prev.map(p => {
+    setAnnouncements(prev => (prev || []).map(p => {
       if (p.id === postId) {
         return {
           ...p,
-          comments: p.comments.map(c => {
+          comments: (p.comments || []).map(c => {
             if (c.id === commentId) {
-              return { ...c, replies: c.replies.filter(r => r.id !== replyId) }
+              return { ...c, replies: (c.replies || []).filter(r => r.id !== replyId) }
             }
             return c
           })
@@ -413,11 +413,11 @@ export default function Announcements({ employees, announcements, setAnnouncemen
   const handleSaveEditComment = (postId, commentId) => {
     const text = editingComment?.text?.trim()
     if (!text) return
-    setAnnouncements(prev => prev.map(p => {
+    setAnnouncements(prev => (prev || []).map(p => {
       if (p.id === postId) {
         return {
           ...p,
-          comments: p.comments.map(c => c.id === commentId ? { ...c, text } : c)
+          comments: (p.comments || []).map(c => c.id === commentId ? { ...c, text } : c)
         }
       }
       return p
@@ -428,15 +428,15 @@ export default function Announcements({ employees, announcements, setAnnouncemen
   const handleSaveEditReply = (postId, commentId, replyId) => {
     const text = editingReply?.text?.trim()
     if (!text) return
-    setAnnouncements(prev => prev.map(p => {
+    setAnnouncements(prev => (prev || []).map(p => {
       if (p.id === postId) {
         return {
           ...p,
-          comments: p.comments.map(c => {
+          comments: (p.comments || []).map(c => {
             if (c.id === commentId) {
               return {
                 ...c,
-                replies: c.replies.map(r => r.id === replyId ? { ...r, text } : r)
+                replies: (c.replies || []).map(r => r.id === replyId ? { ...r, text } : r)
               }
             }
             return c
@@ -658,7 +658,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
           </Card>
         ) : (
           filteredAnnouncements.map(post => {
-            const author = post.authorId === 'system' ? { name: 'System Auto-Post', avatar: '' } : employees.find(e => e.id === post.authorId) || { name: 'Unknown User' }
+            const author = post.authorId === 'system' ? { name: 'System Auto-Post', avatar: '' } : employees.find(e => e.id === post.authorId) || { name: post.author || 'Unknown User' }
             const dateStr = formatDateTime(post.date)
             const isUrgent = post.priority === 'Urgent'
 
@@ -705,15 +705,15 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                     {post.content}
                   </div>
 
-                  {post.poll && (
+                  {post.poll && post.poll.options && (
                     <div className="mt-6 p-4 rounded-xl border border-border/50 bg-muted/20">
                       <h4 className="font-medium text-sm mb-4 flex items-center gap-2 text-foreground">
                          <span className="text-lg">📊</span> {post.poll.question}
                       </h4>
                       <div className="flex flex-col gap-3">
                         {post.poll.options.map((opt, i) => {
-                          const votes = opt.votes.length
-                          const totalVotes = post.poll.options.reduce((sum, o) => sum + o.votes.length, 0)
+                          const votes = Array.isArray(opt.votes) ? opt.votes.length : (opt.votes || 0)
+                          const totalVotes = post.poll.options.reduce((sum, o) => sum + (Array.isArray(o.votes) ? o.votes.length : (o.votes || 0)), 0)
                           const pct = totalVotes === 0 ? 0 : Math.round((votes / totalVotes) * 100)
                           return (
                             <div key={i} className="flex items-center gap-3">
@@ -734,19 +734,19 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                 
                 <CardFooter className="pt-3 pb-3 border-t flex flex-wrap justify-between items-center gap-3">
                   <div className="flex flex-wrap gap-1 -ml-2">
-                    <HoverTooltip content={getReactionTitle(post.reactions['👍'])}>
+                    <HoverTooltip content={getReactionTitle(post.reactions?.['👍'])}>
                       <Button variant="ghost" size="sm" onClick={() => handleReaction(post.id, '👍')} className="h-8 px-2 text-muted-foreground hover:text-foreground hover:bg-muted/50">
-                        👍 <span className="ml-1.5 text-xs font-medium">{getReactionCount(post.reactions['👍'])}</span>
+                        👍 <span className="ml-1.5 text-xs font-medium">{getReactionCount(post.reactions?.['👍'])}</span>
                       </Button>
                     </HoverTooltip>
-                    <HoverTooltip content={getReactionTitle(post.reactions['❤️'])}>
+                    <HoverTooltip content={getReactionTitle(post.reactions?.['❤️'])}>
                       <Button variant="ghost" size="sm" onClick={() => handleReaction(post.id, '❤️')} className="h-8 px-2 text-muted-foreground hover:text-foreground hover:bg-muted/50">
-                        ❤️ <span className="ml-1.5 text-xs font-medium">{getReactionCount(post.reactions['❤️'])}</span>
+                        ❤️ <span className="ml-1.5 text-xs font-medium">{getReactionCount(post.reactions?.['❤️'])}</span>
                       </Button>
                     </HoverTooltip>
-                    <HoverTooltip content={getReactionTitle(post.reactions['👎'])}>
+                    <HoverTooltip content={getReactionTitle(post.reactions?.['👎'])}>
                       <Button variant="ghost" size="sm" onClick={() => handleReaction(post.id, '👎')} className="h-8 px-2 text-muted-foreground hover:text-foreground hover:bg-muted/50">
-                        👎 <span className="ml-1.5 text-xs font-medium">{getReactionCount(post.reactions['👎'])}</span>
+                        👎 <span className="ml-1.5 text-xs font-medium">{getReactionCount(post.reactions?.['👎'])}</span>
                       </Button>
                     </HoverTooltip>
                     <Button variant="ghost" size="sm" onClick={() => toggleComments(post.id)} className="h-8 px-2 ml-1 text-muted-foreground hover:text-foreground hover:bg-muted/50">

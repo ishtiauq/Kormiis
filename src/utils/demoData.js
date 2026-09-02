@@ -398,8 +398,16 @@ export const DEMO_ANNOUNCEMENTS = [
     content: 'Join us this Thursday at 4:00 PM for our quarterly townhall! We will review our product roadmap, celebrate key milestones, and announce our Employee of the Quarter awards.',
     date: getTodayStr(),
     author: 'Nusrat Jahan (HR Lead)',
+    authorId: 'emp-101',
     pinned: true,
-    category: 'Company'
+    category: 'Company',
+    priority: 'Normal',
+    audience: 'all',
+    attachments: [],
+    reactions: { '👍': ['emp-101', 'emp-102'], '❤️': ['emp-103'], '👎': [] },
+    comments: [],
+    readBy: ['emp-101', 'emp-102', 'emp-103'],
+    poll: null
   },
   {
     id: 'ann-502',
@@ -407,8 +415,16 @@ export const DEMO_ANNOUNCEMENTS = [
     content: 'We have upgraded all teammate health coverage to include enhanced OPD, dental, and dependent healthcare benefits. Please review the updated handbook.',
     date: getPastDateStr(3),
     author: 'HR Operations',
+    authorId: 'emp-102',
     pinned: true,
-    category: 'Benefits'
+    category: 'Benefits',
+    priority: 'Important',
+    audience: 'all',
+    attachments: [],
+    reactions: { '👍': ['emp-101'], '❤️': ['emp-102', 'emp-104'], '👎': [] },
+    comments: [],
+    readBy: ['emp-101', 'emp-102'],
+    poll: null
   },
   {
     id: 'ann-503',
@@ -416,8 +432,16 @@ export const DEMO_ANNOUNCEMENTS = [
     content: 'Starting next month, teammates can choose flexible work-from-anywhere days on Wednesdays and Thursdays with asynchronous daily pulse standups.',
     date: getPastDateStr(7),
     author: 'Leadership Team',
+    authorId: 'emp-103',
     pinned: false,
-    category: 'Policy'
+    category: 'Policy',
+    priority: 'Normal',
+    audience: 'all',
+    attachments: [],
+    reactions: { '👍': ['emp-102', 'emp-103'], '❤️': ['emp-101'], '👎': [] },
+    comments: [],
+    readBy: ['emp-101', 'emp-102', 'emp-103'],
+    poll: null
   }
 ]
 
