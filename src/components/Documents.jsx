@@ -61,7 +61,7 @@ export default function Documents({
   const [showUploadModal, setShowUploadModal] = useState(false)
   const [editingDoc, setEditingDoc] = useState(null)
   const [isUploading, setIsUploading] = useState(false)
-  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth <= 1368 : false)
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 640 : false)
   const [categories, setCategories] = useState(defaultCategories)
   const [showCategoryModal, setShowCategoryModal] = useState(false)
   const [editingCategory, setEditingCategory] = useState(null)
@@ -291,7 +291,7 @@ export default function Documents({
 
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth <= 1368)
+      setIsMobile(window.innerWidth < 640)
       setTimeout(checkCategoryScroll, 50)
     }
     window.addEventListener('resize', handleResize)

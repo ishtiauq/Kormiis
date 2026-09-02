@@ -114,7 +114,7 @@ export default function EmployeePortal({
     if (setCurrentView) setCurrentView(tab)
     else setLocalActiveTab(tab)
   }
-  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' ? window.innerWidth <= 1368 : false)
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' ? window.innerWidth < 640 : false)
   const [showAiModal, setShowAiModal] = useState(false)
   const [showAiHistory, setShowAiHistory] = useState(false)
   const [aiModalAction, setAiModalAction] = useState(null)
@@ -165,7 +165,7 @@ export default function EmployeePortal({
   }
 
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth <= 1368)
+    const handleResize = () => setIsMobile(window.innerWidth < 640)
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
   }, [])

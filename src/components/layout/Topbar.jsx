@@ -56,7 +56,7 @@ export default function Topbar({
   visibleNavItems = [],
   currentView
 }) {
-  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' ? window.innerWidth <= 1368 : false)
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' ? window.innerWidth < 640 : false)
   const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true)
   const buttonRef = useRef(null)
   const [notificationTab, setNotificationTab] = useState('all')
@@ -192,7 +192,7 @@ export default function Topbar({
     let resizeTimer
     const handleResize = () => {
       clearTimeout(resizeTimer)
-      resizeTimer = setTimeout(() => setIsMobile(window.innerWidth <= 1368), 150)
+      resizeTimer = setTimeout(() => setIsMobile(window.innerWidth < 640), 150)
     }
     window.addEventListener('resize', handleResize)
     return () => { clearTimeout(resizeTimer); window.removeEventListener('resize', handleResize) }
@@ -308,20 +308,20 @@ export default function Topbar({
       {/* Row 1: Unified Top Navigation Header (Logo Left, Inline Menu on XL+ screens, Actions Right) */}
       <header 
         aria-label="Top navigation bar" 
-        className="relative z-10 pointer-events-auto w-full h-14 sm:h-16 md:h-18 min-[1369px]:h-22 px-4 sm:px-6 md:px-8 flex items-center justify-between pt-2 sm:pt-3 md:pt-4 min-[1369px]:pt-5 pb-1 sm:pb-1.5 md:pb-2 min-[1369px]:pb-3.5 gap-2 sm:gap-4 text-foreground bg-transparent !bg-transparent border-none !border-none shadow-none backdrop-blur-[32px] backdrop-saturate-[190%]"
+        className="relative z-10 pointer-events-auto w-full h-14 sm:h-16 md:h-18 lg:h-20 px-4 sm:px-6 md:px-8 flex items-center justify-between pt-2 sm:pt-3 md:pt-4 pb-1 sm:pb-1.5 md:pb-2 gap-2 sm:gap-4 text-foreground bg-transparent !bg-transparent border-none !border-none shadow-none backdrop-blur-[32px] backdrop-saturate-[190%]"
         style={{ background: 'transparent', backgroundColor: 'transparent', border: 'none', boxShadow: 'none', backdropFilter: 'saturate(190%) blur(32px)', WebkitBackdropFilter: 'saturate(190%) blur(32px)' }}
       >
         
-        {/* 1. Leftmost: Desktop Brand Logo & Data Integrity Alert */}
+        {/* 1. Leftmost: Desktop & Tablet Brand Logo & Data Integrity Alert */}
         <div className="flex items-center gap-2 sm:gap-3 shrink-0 h-[48px] sm:h-[54px]">
-          {/* Desktop Leftmost Brand Logo (min-[1369px]+ screens) */}
+          {/* Brand Logo (sm+ screens: Tablets, iPads & Desktop) */}
           <a
             href="#"
             onClick={(e) => {
               e.preventDefault();
               if (setCurrentView) setCurrentView('dashboard');
             }}
-            className="hidden min-[1369px]:flex items-center justify-center cursor-pointer outline-none no-underline border-none bg-transparent p-0 m-0 shadow-none select-none h-full transition-transform active:scale-95"
+            className="hidden sm:flex items-center justify-center cursor-pointer outline-none no-underline border-none bg-transparent p-0 m-0 shadow-none select-none h-full transition-transform active:scale-95"
             style={{ background: 'transparent', border: 'none', boxShadow: 'none', padding: 0, margin: 0 }}
             title="Kormiis Dashboard"
           >
@@ -346,8 +346,8 @@ export default function Topbar({
           )}
         </div>
 
-        {/* 2. Centered Brand Logo on Mobile, iPad Mini, iPad, Tablet & iPad Pro (< 1369px screens) */}
-        <div className="min-[1369px]:hidden absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center pointer-events-auto">
+        {/* 2. Centered Brand Logo on Mobile Handsets only (< 640px screens) */}
+        <div className="sm:hidden absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center pointer-events-auto">
           <a
             href="#"
             onClick={(e) => {
@@ -367,9 +367,9 @@ export default function Topbar({
           </a>
         </div>
 
-        {/* 3. Center: Centered Menu Bar Dock (Desktop widescreen min-[1369px]+ only; hidden on mobile, tablets & iPad Pro) */}
+        {/* 3. Center: Centered Menu Bar Dock (Tablets, iPads & Desktop >= 640px) */}
         {!isMobile && (
-          <div className="hidden min-[1369px]:flex flex-1 items-center justify-center min-w-0 px-2 sm:px-3 md:px-4">
+          <div className="hidden sm:flex flex-1 items-center justify-center min-w-0 px-2 sm:px-3 md:px-4">
             <NavigationDock 
               visibleNavItems={visibleNavItems} 
               currentView={currentView} 
@@ -381,7 +381,7 @@ export default function Topbar({
         )}
 
         {/* 4. Rightmost: Actions Group (Containerless Standalone Icons, Ultra-Compact gap-[1.6px]) */}
-        <div className="flex items-center gap-[1.6px] shrink-0 h-[48px] sm:h-[54px] ml-auto min-[1369px]:ml-0">
+        <div className="flex items-center gap-[1.6px] shrink-0 h-[48px] sm:h-[54px] ml-auto sm:ml-0">
           {/* Kormiis AI Trigger (Desktop & iPad / Tablet - plain icon, expands to orange pill + label when active like menu bar) */}
           <div className="hidden sm:flex items-center justify-center">
             <TooltipPopover label="Open Kormiis AI (Ctrl+Space)" side="bottom">
