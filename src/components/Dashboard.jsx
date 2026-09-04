@@ -1,10 +1,12 @@
-import { useEffect, useState, useMemo, useDeferredValue, memo } from 'react'
+import { useState, useMemo, memo } from 'react'
 import Icon from "@/components/ui/Icon.jsx"
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { formatDateShort } from '../services/date.js'
+import { normalizeAttendanceStatus, addDays } from '../services/attendance.js'
 import GeoCheckInWidget from './attendance/GeoCheckInWidget.jsx'
 import DailyChecklistWidget from './DailyChecklistWidget.jsx'
 import HrOverview from './hr/HrOverview.jsx'
@@ -57,11 +59,15 @@ const EmployeeRow = memo(({ emp }) => (
       </Avatar>
       <div className="flex flex-col min-w-0">
         <span className="text-xs font-bold text-foreground break-words ">{emp.name}</span>
-        <span className="text-[10px] text-muted-foreground break-words ">{emp.role || 'Teammate'}</span>
+        <span className="text-[10px] text-muted-foreground break-words ">{emp.sub || emp.role || 'Teammate'}</span>
       </div>
     </div>
     {emp.time ? (
-      <span className="text-[11px] font-mono font-bold text-foreground bg-emerald-500/10 px-2 py-0.5 rounded-lg border border-emerald-500/20 shrink-0">
+      <span className={`text-[11px] font-mono font-bold px-2 py-0.5 rounded-lg border shrink-0 ${
+        emp.isLate
+          ? 'text-amber-700 dark:text-amber-400 bg-amber-500/10 border-amber-500/25'
+          : 'text-foreground bg-emerald-500/10 border-emerald-500/20'
+      }`}>
         {emp.time}
       </span>
     ) : (
@@ -74,7 +80,7 @@ const EmployeeRow = memo(({ emp }) => (
 
 EmployeeRow.displayName = 'EmployeeRow'
 
-const VirtualizedList = memo(({ items, filter }) => {
+const VirtualizedList = memo(({ items, filter, className = 'max-h-36' }) => {
   if (!items?.length) return (
     <p className="text-center py-3 text-xs text-muted-foreground">
       No teammates in this category.
@@ -82,7 +88,7 @@ const VirtualizedList = memo(({ items, filter }) => {
   )
   
   return (
-    <div className="max-h-36 overflow-y-auto pr-1 flex flex-col divide-y divide-border/40 dark:divide-white/6">
+    <div className={`${className} overflow-y-auto pr-1 flex flex-col divide-y divide-border/40 dark:divide-white/6`}>
       {items.map((emp) => (
         <EmployeeRow key={emp.id} emp={emp} />
       ))}
@@ -92,15 +98,10 @@ const VirtualizedList = memo(({ items, filter }) => {
 
 VirtualizedList.displayName = 'VirtualizedList'
 
-export default function Dashboard({ employees, onSync, attendance, setAttendance, currentUser, addToast, setCurrentView, announcements, setAnnouncements, addLog, addNotification, events, setEvents, payroll, isSidebarCollapsed, hasPermission, tasks = [], documents = [], assets = [], settings, notes = [], setNotes }) {
+export default function Dashboard({ employees, onSync, attendance, setAttendance, currentUser, addToast, setCurrentView, announcements, setAnnouncements, addLog, addNotification, events, setEvents, payroll, isSidebarCollapsed, hasPermission, tasks = [], documents = [], assets = [], settings, notes = [], setNotes, roster = [] }) {
   const [expandedWidgets, setExpandedWidgets] = useState([])
-  const [attFilter, setAttFilter] = useState(null)
-  const [attTab, setAttTab] = useState('donut')
+  const [attDialog, setAttDialog] = useState(null)
   const [selectedDayIndex, setSelectedDayIndex] = useState(6)
-  
-  // Defer filter updates to keep UI responsive during scroll
-  const deferredAttFilter = useDeferredValue(attFilter)
-  const deferredSelectedDayIndex = useDeferredValue(selectedDayIndex)
 
   const toggleWidget = (id) => setExpandedWidgets(prev => prev.includes(id) ? prev.filter(w => w !== id) : [...prev, id])
   const wProps = { expandedWidgets, toggleWidget }
@@ -118,170 +119,158 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
   const firstName = (currentUser?.name || '').split(' ')[0]
 
-  const [todayStats, setTodayStats] = useState({ present: 0, absent: 0, onLeave: 0 })
-  const [attendanceLists, setAttendanceLists] = useState({ present: [], absent: [], onLeave: [] })
-
   const activeEmps = useMemo(() => employees.filter(e => e.status !== 'Terminated'), [employees])
-  const activeCount = useMemo(() => Math.max(1, activeEmps.length), [activeEmps])
 
-  const weeklyTrendData = useMemo(() => {
+  const weekDays = useMemo(() => {
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
     const today = new Date()
-    const result = []
-
+    const out = []
     for (let i = 6; i >= 0; i--) {
       const d = new Date(today)
       d.setDate(d.getDate() - i)
-      const iso = d.toISOString().split('T')[0]
-      const dayName = days[d.getDay()]
-      const logs = attendance?.dailyLogs?.[iso]
-      
-      let presentCount = 0
-      let absentCount = 0
-      let onLeaveCount = 0
-
-      if (i === 0) {
-        presentCount = todayStats.present
-        absentCount = todayStats.absent
-        onLeaveCount = todayStats.onLeave
-      } else if (logs && Object.keys(logs).length > 0) {
-        activeEmps.forEach(emp => {
-          const log = logs[emp.id]
-          if (log) {
-            const s = String(log.status || '').trim()
-            if (s === 'In Office' || s === 'Present' || s === 'Late' || s === 'Remote' || s === 'WFH' || s === 'On-Field') presentCount++
-            else if (s === 'On Leave') onLeaveCount++
-            else absentCount++
-          } else {
-            if (emp.status === 'On Leave') onLeaveCount++
-            else absentCount++
-          }
-        })
-      } else {
-        const seed = (d.getDate() * 5 + i * 2) % 3
-        const leaveSeed = (d.getDate() + i) % 2
-        onLeaveCount = Math.min(activeCount - 1, leaveSeed)
-        absentCount = Math.min(activeCount - onLeaveCount - 1, seed)
-        presentCount = Math.max(0, activeCount - absentCount - onLeaveCount)
-      }
-
-      const rate = Math.min(100, Math.round((presentCount / activeCount) * 100))
-      result.push({
-        day: dayName,
-        isToday: i === 0,
-        date: iso,
-        present: presentCount,
-        absent: absentCount,
-        onLeave: onLeaveCount,
-        total: activeCount,
-        rate: rate
-      })
+      out.push({ day: days[d.getDay()], date: d.toISOString().split('T')[0], isToday: i === 0 })
     }
-    return result
-  }, [attendance, activeEmps, activeCount, todayStats])
+    return out
+  }, [])
 
-  const selectedDayData = useMemo(() => {
-    const todayDayName = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][new Date().getDay()]
-    return weeklyTrendData[deferredSelectedDayIndex] || weeklyTrendData[weeklyTrendData.length - 1] || {
-      day: todayDayName,
-      isToday: true,
-      date: new Date().toISOString().split('T')[0],
-      present: todayStats.present,
-      absent: todayStats.absent,
-      onLeave: todayStats.onLeave,
-      total: activeCount,
-      rate: 100
-    }
-  }, [weeklyTrendData, deferredSelectedDayIndex, todayStats, activeCount])
+  const selectedDay = weekDays[selectedDayIndex] || weekDays[6]
+  const selectedIso = selectedDay.date
+  const isTodaySelected = selectedIso === weekDays[6].date
+  const selectedDayLabel = isTodaySelected ? 'Today' : formatDateShort(selectedIso)
 
-  const selectedDayLists = useMemo(() => {
-    const selectedDay = weeklyTrendData[deferredSelectedDayIndex] || weeklyTrendData[weeklyTrendData.length - 1]
-    if (!selectedDay) return attendanceLists
+  const rosterForDay = useMemo(
+    () => (Array.isArray(roster) ? roster.filter(r => r && r.date === selectedIso) : []),
+    [roster, selectedIso]
+  )
 
-    const iso = selectedDay.date
-    const todayIso = new Date().toISOString().split('T')[0]
-    if (iso === todayIso && attendanceLists.present.length > 0) {
-      return attendanceLists
-    }
+  const leavesOnDay = useMemo(() => {
+    const ls = Array.isArray(attendance?.leaves) ? attendance.leaves : []
+    return ls.filter(l => l && l.status === 'Approved' && l.startDate && l.endDate && l.startDate <= selectedIso && l.endDate >= selectedIso)
+  }, [attendance, selectedIso])
 
-    const logs = attendance?.dailyLogs?.[iso] || {}
-    const pList = []
-    const aList = []
-    const lList = []
+  const leaveIdsOnDay = useMemo(() => new Set(leavesOnDay.map(l => l.employeeId)), [leavesOnDay])
 
+  const expectedIds = useMemo(() => {
+    if (rosterForDay.length === 0) return new Set()
+    const activeIds = new Set(activeEmps.map(e => e.id))
+    return new Set(
+      rosterForDay
+        .filter(r => r.templateId !== 'Off' && activeIds.has(r.employeeId) && !leaveIdsOnDay.has(r.employeeId))
+        .map(r => r.employeeId)
+    )
+  }, [rosterForDay, activeEmps, leaveIdsOnDay])
+
+  const hasRoster = rosterForDay.length > 0
+  const expectedCount = expectedIds.size
+
+  const dayEntries = useMemo(() => {
+    const entries = new Map()
+    const dayLogs = attendance?.dailyLogs?.[selectedIso] || {}
     activeEmps.forEach(emp => {
-      const log = logs[emp.id]
+      const log = dayLogs[emp.id]
       const designation = emp.designation && emp.designation.toLowerCase() !== 'teammate' ? emp.designation : (emp.role && emp.role.toLowerCase() !== 'teammate' ? emp.role : '')
-      const s = String(log?.status || '').trim()
-      const fallbackStatus = emp.status === 'On Leave' ? 'On Leave' : 'Off Duty'
-      const entry = {
+      const rawS = String(log?.status || '').trim()
+      const normS = normalizeAttendanceStatus(rawS)
+      const isLate = rawS === 'Late' || log?.isLate === true
+      const arrived = normS === 'In Office' || normS === 'Remote' || normS === 'On-Field'
+      const isLeave = normS === 'On Leave' || emp.status === 'On Leave' || leaveIdsOnDay.has(emp.id)
+      entries.set(emp.id, {
         id: emp.id,
         name: emp.name,
         avatar: emp.avatar,
         role: designation,
         designation,
         time: log?.checkIn || null,
-        status: s || fallbackStatus
-      }
-      if (log) {
-        if (s === 'In Office' || s === 'Present' || s === 'Late' || s === 'Remote' || s === 'WFH' || s === 'On-Field') pList.push(entry)
-        else if (s === 'On Leave') lList.push(entry)
-        else aList.push(entry)
+        isLate,
+        arrived,
+        isLeave,
+        sub: null,
+        status: isLate ? 'Late' : (normS || (emp.status === 'On Leave' ? 'On Leave' : 'Off Duty'))
+      })
+    })
+    return entries
+  }, [activeEmps, attendance, selectedIso, leaveIdsOnDay])
+
+  const buckets = useMemo(() => {
+    const inOffice = []
+    const noShow = []
+    const offDuty = []
+    const onLeave = []
+    dayEntries.forEach(entry => {
+      if (entry.isLeave) {
+        const leave = leavesOnDay.find(l => l.employeeId === entry.id)
+        const days = Number(leave?.days) || 1
+        onLeave.push({
+          ...entry,
+          sub: leave ? `${leave.type || leave.leaveType || 'Leave'} • ${days} day${days > 1 ? 's' : ''} • back ${formatDateShort(addDays(leave.endDate, 1))}` : null
+        })
+      } else if (entry.arrived) {
+        inOffice.push(entry)
+      } else if (expectedIds.has(entry.id)) {
+        noShow.push(entry)
       } else {
-        if (emp.status === 'On Leave') lList.push(entry)
-        else aList.push(entry)
+        offDuty.push(entry)
       }
     })
+    return { inOffice, noShow, offDuty, onLeave }
+  }, [dayEntries, leavesOnDay, expectedIds])
 
-    return { present: pList, absent: aList, onLeave: lList }
-  }, [deferredSelectedDayIndex, weeklyTrendData, attendance, activeEmps, attendanceLists])
+  const arrivedCount = buckets.inOffice.length
+  const noShowCount = buckets.noShow.length
+  const offDutyCount = buckets.offDuty.length
+  const onLeaveCount = buckets.onLeave.length
+  const lateCount = useMemo(() => {
+    let c = 0
+    dayEntries.forEach(e => { if (e.isLate) c++ })
+    return c
+  }, [dayEntries])
 
-  useEffect(() => {
-    const todayIso = new Date().toISOString().split('T')[0]
-    const todayLogs = attendance?.dailyLogs?.[todayIso] || attendance?.dailyLogs?.['2026-07-17'] || {}
-    
-    const presentList = []
-    const absentList = []
-    const onLeaveList = []
+  const rate = expectedCount > 0 ? Math.round((arrivedCount / expectedCount) * 100) : 0
+  const totalTracked = arrivedCount + noShowCount + offDutyCount + onLeaveCount
+  const attendanceRate = hasRoster ? rate : (totalTracked > 0 ? Math.round((arrivedCount / totalTracked) * 100) : 0)
+  const efficiencyScore = totalTracked > 0 ? Math.min(100, Math.round((arrivedCount / totalTracked) * 100 + 5)) : 100
 
-    activeEmps.forEach(emp => {
-      const log = todayLogs[emp.id]
-      const designation = emp.designation && emp.designation.toLowerCase() !== 'teammate' ? emp.designation : (emp.role && emp.role.toLowerCase() !== 'teammate' ? emp.role : '')
-      const s = String(log?.status || '').trim()
-      const fallbackStatus = emp.status === 'On Leave' ? 'On Leave' : 'Off Duty'
-      const entry = { 
-        id: emp.id, 
-        name: emp.name, 
-        avatar: emp.avatar, 
-        role: designation, 
-        designation, 
-        time: log?.checkIn || null,
-        status: s || fallbackStatus
-      }
-      if (log) {
-        if (s === 'In Office' || s === 'Present' || s === 'Late' || s === 'Remote' || s === 'WFH' || s === 'On-Field') {
-          presentList.push(entry)
-        } else if (s === 'On Leave') {
-          onLeaveList.push(entry)
-        } else {
-          absentList.push(entry)
+  const perDayArrived = useMemo(() => {
+    const counts = {}
+    weekDays.forEach(d => {
+      const logs = attendance?.dailyLogs?.[d.date] || {}
+      let c = 0
+      activeEmps.forEach(emp => {
+        const log = logs[emp.id]
+        if (!log) return
+        const normS = normalizeAttendanceStatus(String(log.status || '').trim())
+        if (normS === 'In Office' || normS === 'Remote' || normS === 'On-Field') c++
+      })
+      counts[d.date] = c
+    })
+    return counts
+  }, [weekDays, attendance, activeEmps])
+
+  const filteredList = attDialog ? buckets[attDialog] || [] : []
+
+  const attDialogMeta = {
+    inOffice: { title: 'In Office', icon: 'check_circle' },
+    noShow: { title: 'No-Show', icon: 'cancel' },
+    offDuty: { title: 'Off Duty', icon: 'schedule' },
+    onLeave: { title: 'On Leave', icon: 'event_busy' }
+  }
+
+  const pendingLeaves = useMemo(() => {
+    const leaves = Array.isArray(attendance?.leaves) ? attendance.leaves : []
+    return leaves
+      .filter(l => l && l.status === 'Pending')
+      .map(l => {
+        const emp = employees.find(e => e.id === l.employeeId)
+        return {
+          ...l,
+          type: l.type || l.leaveType || 'Leave',
+          name: l.employeeName || emp?.name || 'Team member'
         }
-      } else {
-        if (emp.status === 'On Leave') {
-          onLeaveList.push(entry)
-        } else {
-          absentList.push(entry)
-        }
-      }
-    })
+      })
+      .sort((a, b) => new Date(a.startDate || a.appliedOn || 0) - new Date(b.startDate || b.appliedOn || 0))
+  }, [attendance, employees])
 
-    setTodayStats({
-      present: presentList.length,
-      absent: absentList.length,
-      onLeave: onLeaveList.length
-    })
-    setAttendanceLists({ present: presentList, absent: absentList, onLeave: onLeaveList })
-  }, [activeEmps, attendance])
+  const pendingPreview = pendingLeaves.slice(0, 2).map(l => `${l.name} — ${l.type}`).join(' • ')
 
   const calculateUpcomingMilestones = (employeesList) => {
     const today = new Date()
@@ -344,8 +333,6 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
   }
 
   const upcomingMilestones = calculateUpcomingMilestones(employees)
-  const totalTracked = todayStats.present + todayStats.absent + todayStats.onLeave
-  const attendanceRate = totalTracked > 0 ? Math.round((todayStats.present / totalTracked) * 100) : 0
 
   const upcomingEvents = events
     ? [...events]
@@ -368,7 +355,6 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
     return acc + net
   }, 0)
 
-  const efficiencyScore = totalTracked > 0 ? Math.min(100, Math.round((todayStats.present / totalTracked) * 100 + 5)) : 100
   const taskList = Array.isArray(tasks) ? tasks : []
   const completedTasksCount = taskList.filter(t => t && t.status === 'Done').length
   const taskCompletionRate = taskList.length > 0 ? Math.round((completedTasksCount / taskList.length) * 100) : 0
@@ -436,17 +422,9 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
               id="w2"
               title="Attendance"
               icon={<Icon name="group" className="text-foreground shrink-0" size={22}/>}
-              cardClass="flex-1"
+              cardClass="!h-auto min-h-0"
               action={
                 <div className="flex items-center gap-1.5 sm:gap-2">
-                  {attFilter && (
-                    <button
-                      onClick={() => setAttFilter(null)}
-                      className="text-[11px] font-semibold text-muted-foreground hover:text-foreground px-2 py-0.5 rounded-lg transition-colors cursor-pointer"
-                    >
-                      Reset
-                    </button>
-                  )}
                   <button
                     onClick={() => setCurrentView && setCurrentView('attendance')}
                     className="apple-glass-btn text-xs font-semibold px-3.5 h-7 rounded-full cursor-pointer shrink-0"
@@ -455,24 +433,24 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
                   </button>
                 </div>
               }
-              contentClass="flex flex-col justify-between pt-1"
+              contentClass="flex flex-col justify-between pt-1 min-h-0"
               {...wProps}
             >
-              {/* ================= 7-DAY DAY-WISE SELECTOR & BREAKDOWN ================= */}
+              {/* ================= 7-DAY TREND + TODAY BREAKDOWN ================= */}
               <div className="flex flex-col gap-3 py-1">
-                {/* 1. Top: Full-Width 7-Day Day Selector Strip */}
+                {/* 1. Top: 7-Day Interactive Day Selector */}
                 <div className="flex flex-col gap-1.5 w-full">
                   <div className="flex items-center justify-between px-0.5">
                     <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-                      LAST 7 DAYS
+                      Last 7 Days
                     </span>
                     <span className="text-[11px] font-bold text-foreground font-mono">
-                      {selectedDayData.isToday ? 'Today' : selectedDayData.date}
+                      {selectedDayLabel}
                     </span>
                   </div>
 
                   <div className="grid grid-cols-7 gap-1 sm:gap-1.5 p-1 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/8 dark:border-white/10">
-                    {weeklyTrendData.map((item, idx) => {
+                    {weekDays.map((item, idx) => {
                       const isSelected = selectedDayIndex === idx
                       const dayNum = item.date ? item.date.split('-')[2] : ''
                       return (
@@ -481,7 +459,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
                           type="button"
                           onClick={() => {
                             setSelectedDayIndex(idx)
-                            setAttFilter(null)
+                            setAttDialog(null)
                           }}
                           className={`flex flex-col items-center justify-center py-2 px-0.5 rounded-xl transition-all duration-200 cursor-pointer select-none ${
                             isSelected
@@ -496,11 +474,11 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
                             {dayNum}
                           </span>
                           <span
-                            className={`size-1.5 rounded-full mt-1.5 day-dot ${
+                            className={`size-1.5 rounded-full mt-1.5 ${
                               isSelected
                                 ? ''
-                                : item.present > 0
-                                  ? 'bg-foreground'
+                                : perDayArrived[item.date] > 0
+                                  ? 'bg-emerald-500/80'
                                   : 'bg-foreground/20'
                             }`}
                           />
@@ -510,99 +488,137 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
                   </div>
                 </div>
 
-                {/* 2. Bottom: Selected Day Interactive Status Cards (Horizontal 3-Column Grid) */}
-                <div className="grid grid-cols-3 gap-2 sm:gap-2.5">
-                  {/* Present Card */}
+                {/* 2. Present Rate Progress Bar */}
+                <div className="flex flex-col gap-2 p-2.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/8 dark:border-white/10">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold text-foreground uppercase tracking-wider">
+                      {selectedDayLabel} • {hasRoster ? `${rate}% present` : 'No roster'}
+                    </span>
+                    {lateCount > 0 && (
+                      <span className="flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/25 shrink-0">
+                        <Icon name="schedule" size={12} className="shrink-0" />
+                        {lateCount} late
+                      </span>
+                    )}
+                  </div>
+
+                  {hasRoster ? (
+                    <>
+                      <div className="h-2.5 rounded-full bg-black/[0.05] dark:bg-white/[0.06] overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-emerald-500/80 transition-all duration-500"
+                          style={{ width: `${Math.min(100, rate)}%` }}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between text-[10px] text-muted-foreground font-semibold">
+                        <span>{arrivedCount} of {expectedCount} expected</span>
+                        <span className="font-bold text-foreground tabular-nums">{rate}%</span>
+                      </div>
+                    </>
+                  ) : (
+                    <p className="text-[10px] text-muted-foreground font-semibold">
+                      No roster for this day — assign shifts to track presence.
+                    </p>
+                  )}
+                </div>
+
+                {/* 3. Today Status Cards (4-Column Grid) */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5">
+                  {/* In Office Card */}
                   <button
                     type="button"
-                    onClick={() => setAttFilter(attFilter === 'present' ? null : 'present')}
-                    className={`flex flex-col items-center justify-center p-2.5 sm:p-3 rounded-2xl transition-all cursor-pointer select-none text-center relative overflow-hidden ${
-                      attFilter === 'present'
-                        ? 'bg-black/15 dark:bg-white/20 border-2 border-black/30 dark:border-white/40 shadow-xs scale-[1.02]'
-                        : 'bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/10 hover:bg-black/[0.06] dark:hover:bg-white/[0.08]'
-                    }`}
+                    onClick={() => setAttDialog('inOffice')}
+                    className="flex flex-col items-center justify-center p-2.5 sm:p-3 rounded-2xl transition-all cursor-pointer select-none text-center relative overflow-hidden bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/10 hover:bg-black/[0.06] dark:hover:bg-white/[0.08]"
                   >
                     <div className="flex items-center gap-1.5 mb-1">
                       <Icon name="check_circle" size={16} className="text-foreground shrink-0" />
                       <span className="text-fluid-lg sm:text-fluid-xl font-black text-foreground tabular-nums">
-                        {selectedDayData.present}
+                        {arrivedCount}
                       </span>
                     </div>
                     <span className="text-[11px] font-bold text-foreground">In Office</span>
                     <span className="text-[10px] text-muted-foreground font-semibold">
-                      {selectedDayData.total > 0 ? `${Math.round((selectedDayData.present / selectedDayData.total) * 100)}%` : '0%'}
+                      {hasRoster ? `${rate}% of roster` : '—'}
+                    </span>
+                  </button>
+
+                  {/* No-Show Card */}
+                  <button
+                    type="button"
+                    onClick={() => setAttDialog('noShow')}
+                    className="flex flex-col items-center justify-center p-2.5 sm:p-3 rounded-2xl transition-all cursor-pointer select-none text-center relative overflow-hidden bg-rose-500/[0.05] dark:bg-rose-500/[0.08] border border-rose-500/15 dark:border-rose-500/20 hover:bg-rose-500/[0.1] dark:hover:bg-rose-500/[0.14]"
+                  >
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <Icon name="cancel" size={16} className="text-rose-500/90 shrink-0" />
+                      <span className="text-fluid-lg sm:text-fluid-xl font-black text-rose-600 dark:text-rose-400 tabular-nums">
+                        {noShowCount}
+                      </span>
+                    </div>
+                    <span className="text-[11px] font-bold text-foreground">No-Show</span>
+                    <span className="text-[10px] text-muted-foreground font-semibold">
+                      {hasRoster && expectedCount > 0 ? `${Math.round((noShowCount / expectedCount) * 100)}% of roster` : '—'}
                     </span>
                   </button>
 
                   {/* Off Duty Card */}
                   <button
                     type="button"
-                    onClick={() => setAttFilter(attFilter === 'absent' ? null : 'absent')}
-                    className={`flex flex-col items-center justify-center p-2.5 sm:p-3 rounded-2xl transition-all cursor-pointer select-none text-center relative overflow-hidden ${
-                      attFilter === 'absent'
-                        ? 'bg-black/15 dark:bg-white/20 border-2 border-black/30 dark:border-white/40 shadow-xs scale-[1.02]'
-                        : 'bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/10 hover:bg-black/[0.06] dark:hover:bg-white/[0.08]'
-                    }`}
+                    onClick={() => setAttDialog('offDuty')}
+                    className="flex flex-col items-center justify-center p-2.5 sm:p-3 rounded-2xl transition-all cursor-pointer select-none text-center relative overflow-hidden bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/10 hover:bg-black/[0.06] dark:hover:bg-white/[0.08]"
                   >
                     <div className="flex items-center gap-1.5 mb-1">
                       <Icon name="schedule" size={16} className="text-foreground/75 shrink-0" />
                       <span className="text-fluid-lg sm:text-fluid-xl font-black text-foreground tabular-nums">
-                        {selectedDayData.absent}
+                        {offDutyCount}
                       </span>
                     </div>
                     <span className="text-[11px] font-bold text-foreground">Off Duty</span>
                     <span className="text-[10px] text-muted-foreground font-semibold">
-                      {selectedDayData.total > 0 ? `${Math.round((selectedDayData.absent / selectedDayData.total) * 100)}%` : '0%'}
+                      Not on roster
                     </span>
                   </button>
 
                   {/* On Leave Card */}
                   <button
                     type="button"
-                    onClick={() => setAttFilter(attFilter === 'onLeave' ? null : 'onLeave')}
-                    className={`flex flex-col items-center justify-center p-2.5 sm:p-3 rounded-2xl transition-all cursor-pointer select-none text-center relative overflow-hidden ${
-                      attFilter === 'onLeave'
-                        ? 'bg-black/15 dark:bg-white/20 border-2 border-black/30 dark:border-white/40 shadow-xs scale-[1.02]'
-                        : 'bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/10 hover:bg-black/[0.06] dark:hover:bg-white/[0.08]'
-                    }`}
+                    onClick={() => setAttDialog('onLeave')}
+                    className="flex flex-col items-center justify-center p-2.5 sm:p-3 rounded-2xl transition-all cursor-pointer select-none text-center relative overflow-hidden bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/10 hover:bg-black/[0.06] dark:hover:bg-white/[0.08]"
                   >
                     <div className="flex items-center gap-1.5 mb-1">
                       <Icon name="event_busy" size={16} className="text-foreground/75 shrink-0" />
                       <span className="text-fluid-lg sm:text-fluid-xl font-black text-foreground tabular-nums">
-                        {selectedDayData.onLeave}
+                        {onLeaveCount}
                       </span>
                     </div>
                     <span className="text-[11px] font-bold text-foreground">On Leave</span>
                     <span className="text-[10px] text-muted-foreground font-semibold">
-                      {selectedDayData.total > 0 ? `${Math.round((selectedDayData.onLeave / selectedDayData.total) * 100)}%` : '0%'}
+                      Approved
                     </span>
                   </button>
                 </div>
-              </div>
 
-              {/* Interactive Personnel List (Drill-Down on Filter) */}
-              {attFilter && (
-                <div className="mt-3 p-3 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-border/60 dark:border-white/8 flex flex-col gap-2 animate-in fade-in-50 duration-200">
-                  <div className="flex items-center justify-between px-1">
-                    <span className="text-xs font-bold text-foreground capitalize flex items-center gap-1.5">
-                      <Icon
-                        name={attFilter === 'present' ? 'check_circle' : attFilter === 'absent' ? 'schedule' : 'event_busy'}
-                        size={14}
-                        className="text-foreground shrink-0"
-                      />
-                      {attFilter === 'present' ? 'In Office' : attFilter === 'absent' ? 'Off Duty' : 'On Leave'} ({selectedDayLists[attFilter]?.length || 0}) • <span className="font-mono text-muted-foreground text-[11px]">{selectedDayData.isToday ? 'Today' : selectedDayData.day}</span>
+                {/* 3. Pending Leave Banner */}
+                {pendingLeaves.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setCurrentView && setCurrentView('leaves')}
+                    className="flex items-center gap-2.5 w-full p-3 rounded-2xl bg-amber-500/[0.08] dark:bg-amber-500/[0.1] border border-amber-500/25 hover:bg-amber-500/[0.14] transition-all cursor-pointer text-left"
+                  >
+                    <span className="shrink-0 size-8 rounded-xl flex items-center justify-center bg-amber-500/15 border border-amber-500/25">
+                      <Icon name="event_busy" size={16} className="text-amber-600 dark:text-amber-400 shrink-0" />
                     </span>
-                    <button
-                      onClick={() => setAttFilter(null)}
-                      className="text-[11px] font-semibold text-foreground hover:underline cursor-pointer"
-                    >
-                      Hide
-                    </button>
-                  </div>
-
-                  <VirtualizedList items={selectedDayLists[deferredAttFilter]} filter={deferredAttFilter} />
-                </div>
-              )}
+                    <span className="flex-1 min-w-0">
+                      <span className="block text-xs font-bold text-foreground">
+                        {pendingLeaves.length} pending leave{pendingLeaves.length > 1 ? 's' : ''}
+                      </span>
+                      <span className="block text-[11px] text-muted-foreground truncate">
+                        {pendingPreview}
+                      </span>
+                    </span>
+                    <Icon name="chevron_right" size={16} className="text-muted-foreground shrink-0" />
+                  </button>
+                )}
+              </div>
             </DashboardWidget>
           )}
 
@@ -612,7 +628,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
             taskCompletionRate={taskCompletionRate}
             attendanceRate={attendanceRate}
             setCurrentView={setCurrentView}
-            cardClass="flex-1"
+            cardClass="!h-auto min-h-0"
             {...wProps}
           />
         </div>
@@ -681,6 +697,43 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
 
         <div className="h-8 col-span-full"></div>
       </div>
+
+      {/* Attendance Category Popup */}
+      <Dialog open={attDialog !== null} onOpenChange={(open) => { if (!open) setAttDialog(null) }}>
+        <DialogContent className="max-w-sm relative">
+          <button
+            type="button"
+            onClick={() => setAttDialog(null)}
+            aria-label="Close attendance popup"
+            className="absolute top-4 right-4 size-9 flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-black/[0.05] dark:hover:bg-white/10 transition-colors cursor-pointer z-10"
+          >
+            <Icon name="close" size={18} className="shrink-0" />
+          </button>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Icon
+                name={attDialog ? attDialogMeta[attDialog]?.icon || 'group' : 'group'}
+                size={18}
+                className="text-foreground shrink-0"
+              />
+              {attDialog ? attDialogMeta[attDialog]?.title || 'Attendance' : 'Attendance'}
+              <span className="text-muted-foreground font-semibold">
+                ({filteredList.length})
+              </span>
+            </DialogTitle>
+            <DialogDescription>{selectedDayLabel} • {arrivedCount} present</DialogDescription>
+          </DialogHeader>
+          <div className="mt-4">
+            {filteredList.length > 0 ? (
+              <VirtualizedList items={filteredList} className="max-h-[55vh]" />
+            ) : (
+              <p className="text-center py-8 text-xs text-muted-foreground">
+                No one in this category today.
+              </p>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
