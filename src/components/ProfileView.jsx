@@ -387,17 +387,14 @@ export default function ProfileView({
 
       {/* Hero Profile Glass Card */}
       <div className="glass-kormiis rounded-3xl p-6 sm:p-8 border border-white/25 dark:border-white/10 shadow-lg relative overflow-hidden">
-        {/* Subtle Ambient Background Flare */}
-        <div className="absolute top-0 right-0 w-72 h-72 bg-primary/5 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
-        
         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center gap-6">
           {/* Avatar with Status Ring */}
           <div className="relative shrink-0 group">
-            <Avatar className="size-22 sm:size-24 rounded-3xl border-2 border-white/40 dark:border-white/15 shadow-md ring-4 ring-primary/10">
+            <Avatar className="size-22 sm:size-24 rounded-3xl border-2 border-white/40 dark:border-white/15 shadow-md ring-4 ring-black/5 dark:ring-white/10">
               {currentUser?.avatar ? (
                 <AvatarImage src={currentUser.avatar} alt={currentUser.name} className="object-cover" />
               ) : null}
-              <AvatarFallback className="bg-gradient-to-br from-primary/80 to-primary text-primary-foreground font-bold text-2xl sm:text-3xl rounded-3xl">
+              <AvatarFallback className="bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 font-bold text-2xl sm:text-3xl rounded-3xl">
                 {getInitials(currentUser?.name)}
               </AvatarFallback>
             </Avatar>

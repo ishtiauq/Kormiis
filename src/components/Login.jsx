@@ -629,7 +629,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
           <img 
             src={kormiisWhiteLogo} 
             alt="Kormiis Logo" 
-            className="h-5.5 w-auto object-contain select-none" 
+            className="h-5 w-auto object-contain select-none" 
             style={{ filter: 'none', boxShadow: 'none' }}
           />
         </a>
@@ -648,7 +648,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
             <img 
               src={kormiisWhiteLogo} 
               alt="Kormiis Logo" 
-              className="h-6 sm:h-7 md:h-8 w-auto object-contain select-none" 
+              className="h-5 sm:h-5.5 md:h-6 w-auto object-contain select-none" 
               style={{ filter: 'none', boxShadow: 'none' }}
             />
           </a>

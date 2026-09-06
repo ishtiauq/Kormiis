@@ -21,18 +21,18 @@ export function timestampArrayChanges(prev, next) {
 }
 
 export const allNavItems = [
-  { id: 'dashboard', label: 'Dashboard', icon: createElement(Icon, { name: 'dashboard', size: 18 }) },
-  { id: 'tasks', label: 'Tasks', icon: createElement(Icon, { name: 'check_box', size: 18 }) },
-  { id: 'announcements', label: 'Announcements', icon: createElement(Icon, { name: 'rss_feed', size: 18 }) },
-  { id: 'documents', label: 'Documents', icon: createElement(Icon, { name: 'folder_open', size: 18 }) },
-  { id: 'employees', label: 'Team', icon: createElement(Icon, { name: 'group', size: 18 }) },
-  { id: 'payroll', label: 'Payroll', icon: createElement(Icon, { name: 'account_balance', size: 18 }) },
-  { id: 'attendance', label: 'Attendance', icon: createElement(Icon, { name: 'schedule', size: 18 }) },
-  { id: 'assets', label: 'Assets', icon: createElement(Icon, { name: 'devices_other', size: 18 }) },
-  { id: 'gigs', label: 'Help Hub', icon: createElement(Icon, { name: 'handshake', size: 18 }) },
-  { id: 'performance', label: 'Performance', icon: createElement(Icon, { name: 'insights', size: 18 }) },
-  { id: 'settings', label: 'Settings', icon: createElement(Icon, { name: 'settings', size: 18 }) },
-  { id: 'profile', label: 'Profile', icon: createElement(Icon, { name: 'person', size: 18 }) },
+  { id: 'dashboard', label: 'Dashboard', icon: createElement(Icon, { name: 'dashboard', size: 20 }) },
+  { id: 'tasks', label: 'Tasks', icon: createElement(Icon, { name: 'check_box', size: 20 }) },
+  { id: 'announcements', label: 'Announcements', icon: createElement(Icon, { name: 'rss_feed', size: 20 }) },
+  { id: 'documents', label: 'Documents', icon: createElement(Icon, { name: 'folder_open', size: 20 }) },
+  { id: 'employees', label: 'Team', icon: createElement(Icon, { name: 'group', size: 20 }) },
+  { id: 'payroll', label: 'Payroll', icon: createElement(Icon, { name: 'account_balance', size: 20 }) },
+  { id: 'attendance', label: 'Attendance', icon: createElement(Icon, { name: 'schedule', size: 20 }) },
+  { id: 'assets', label: 'Assets', icon: createElement(Icon, { name: 'devices_other', size: 20 }) },
+  { id: 'gigs', label: 'Help Hub', icon: createElement(Icon, { name: 'handshake', size: 20 }) },
+  { id: 'performance', label: 'Performance', icon: createElement(Icon, { name: 'insights', size: 20 }) },
+  { id: 'settings', label: 'Settings', icon: createElement(Icon, { name: 'settings', size: 20 }) },
+  { id: 'profile', label: 'Profile', icon: createElement(Icon, { name: 'person', size: 20 }) },
 ]
 
 export function getDeviceInfo() {

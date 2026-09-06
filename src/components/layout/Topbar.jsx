@@ -328,7 +328,7 @@ export default function Topbar({
             <img
               src={isDark ? kormiisWhiteLogo : kormiisLogo}
               alt="Kormiis Logo"
-              className="h-7 sm:h-8 md:h-8.5 w-auto max-w-[120px] sm:max-w-[140px] md:max-w-[150px] object-contain shrink-0 select-none block"
+              className="h-6 sm:h-6.5 md:h-7 w-auto max-w-[105px] sm:max-w-[120px] md:max-w-[130px] object-contain shrink-0 select-none block"
               style={{ background: 'transparent', border: 'none', boxShadow: 'none', filter: 'none' }}
             />
           </a>
@@ -361,7 +361,7 @@ export default function Topbar({
             <img
               src={isDark ? kormiisWhiteLogo : kormiisLogo}
               alt="Kormiis Logo"
-              className="h-7 sm:h-8 md:h-8.5 w-auto max-w-[125px] sm:max-w-[145px] md:max-w-[155px] object-contain shrink-0 select-none block"
+              className="h-5.5 sm:h-6 w-auto max-w-[110px] sm:max-w-[125px] object-contain shrink-0 select-none block"
               style={{ background: 'transparent', border: 'none', boxShadow: 'none', filter: 'none' }}
             />
           </a>
@@ -401,7 +401,7 @@ export default function Topbar({
                 style={isAiOpen ? { background: 'linear-gradient(135deg, #FE3501 0%, #e62f00 100%)', color: '#ffffff', border: 'none', outline: 'none' } : { background: 'transparent', border: 'none', boxShadow: 'none', outline: 'none' }}
               >
                 <span className={`relative z-10 shrink-0 flex items-center justify-center ${isAiOpen ? 'text-white scale-105' : ''}`}>
-                  <AiQuantumGlyph size={24} />
+                  <AiQuantumGlyph size={20} />
                 </span>
 
                 <AnimatePresence initial={false}>
@@ -430,7 +430,7 @@ export default function Topbar({
                 className="size-9 sm:size-10 bg-transparent border-none shadow-none outline-none text-foreground/75 hover:text-foreground shrink-0 flex items-center justify-center cursor-pointer active:scale-90 transition-all p-0"
                 style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}
               >
-                {themeMode === 'light' ? <Icon name="light_mode" size={24} /> : <Icon name="dark_mode" size={24} />}
+                {themeMode === 'light' ? <Icon name="light_mode" size={20} /> : <Icon name="dark_mode" size={20} />}
               </button>
             </TooltipPopover>
           )}
@@ -450,7 +450,7 @@ export default function Topbar({
                 style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}
                 id="notification-trigger"
               >
-                <Icon name="notifications_active" size={24} />
+                <Icon name="notifications_active" size={20} />
                 {totalUnreadCount > 0 && (
                   <span className="absolute top-1.5 right-1.5 flex size-2.5">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
@@ -474,9 +474,9 @@ export default function Topbar({
                   style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}
                 >
                   {user?.avatar ? (
-                    <img src={user.avatar} alt={user.name || 'User'} className="w-7.5 h-7.5 sm:w-8.5 sm:h-8.5 object-cover rounded-full select-none" />
+                    <img src={user.avatar} alt={user.name || 'User'} className="w-6 h-6 sm:w-6.5 sm:h-6.5 object-cover rounded-full select-none" />
                   ) : (
-                    <Icon name="person" size={25} />
+                    <Icon name="person" size={20} />
                   )}
                 </button>
               </TooltipPopover>
