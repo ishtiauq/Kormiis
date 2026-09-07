@@ -29,7 +29,6 @@ export const allNavItems = [
   { id: 'payroll', label: 'Payroll', icon: createElement(Icon, { name: 'account_balance', size: 20 }) },
   { id: 'attendance', label: 'Attendance', icon: createElement(Icon, { name: 'schedule', size: 20 }) },
   { id: 'assets', label: 'Assets', icon: createElement(Icon, { name: 'devices_other', size: 20 }) },
-  { id: 'gigs', label: 'Help Hub', icon: createElement(Icon, { name: 'handshake', size: 20 }) },
   { id: 'performance', label: 'Performance', icon: createElement(Icon, { name: 'insights', size: 20 }) },
   { id: 'settings', label: 'Settings', icon: createElement(Icon, { name: 'settings', size: 20 }) },
   { id: 'profile', label: 'Profile', icon: createElement(Icon, { name: 'person', size: 20 }) },

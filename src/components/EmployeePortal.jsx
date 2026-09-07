@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import Icon from "@/components/ui/Icon.jsx"
 import NavigationDock from './layout/NavigationDock.jsx'
@@ -30,7 +30,6 @@ import MobileTabButton from './layout/MobileTabButton.jsx'
 import ProfileView from './ProfileView.jsx'
 import GeoCheckInWidget from './attendance/GeoCheckInWidget.jsx'
 import AttendancePage from './attendance/AttendancePage.jsx'
-import GigBoardPage from './hr/GigBoardPage.jsx'
 import PerformancePage from './hr/PerformancePage.jsx'
 import AiAssistantPage from './ai/AiAssistantPage.jsx'
 
@@ -309,8 +308,6 @@ export default function EmployeePortal({
         return <div className="max-w-[1200px] mx-auto w-full"><Tasks tasks={tasks} setTasks={setTasks} employees={employees} currentUser={currentUser} addToast={addToast} addLog={addLog} addNotification={addNotification} notes={notes} setNotes={setNotes} defaultTab={activeTab === 'notes' ? 'notes' : 'tasks'} /></div>
       case 'documents':
         return <div className="max-w-[1200px] mx-auto w-full"><Documents documents={documents} setDocuments={setDocuments} addLog={addLog} addToast={addToast} currentUser={currentUser} addNotification={addNotification} /></div>
-      case 'gigs':
-        return <div className="max-w-[1200px] mx-auto w-full"><GigBoardPage adminUid={currentUser.adminUid} currentUser={currentUser} employees={employees} addToast={addToast} /></div>
       case 'performance':
       case 'wellbeing':
         return <div className="max-w-[1200px] mx-auto w-full"><PerformancePage adminUid={currentUser.adminUid} currentUser={currentUser} employees={employees} addToast={addToast} defaultTab={activeTab === 'wellbeing' ? 'wellbeing' : 'performance'} /></div>
@@ -370,7 +367,6 @@ export default function EmployeePortal({
     { id: 'payslips', icon: <Icon name="account_balance" size={20}/>, label: 'Payroll' },
     { id: 'documents', icon: <Icon name="folder_open" size={20}/>, label: 'Documents' },
     { id: 'my-assets', icon: <Icon name="devices_other" size={20}/>, label: 'Assets' },
-    { id: 'gigs', icon: <Icon name="handshake" size={20}/>, label: 'Help Hub' },
     { id: 'performance', icon: <Icon name="insights" size={20}/>, label: 'Performance' },
     ...(currentUser?.permissions?.includes('manage_attendance') ? [{ id: 'team_attendance', icon: <Icon name="check_circle" size={20}/>, label: 'Team Attendance' }] : []),
     { id: 'profile', icon: <Icon name="person" size={20}/>, label: 'Profile' }

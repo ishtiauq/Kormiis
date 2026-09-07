@@ -23,7 +23,6 @@ setGlobalOptions({ region: 'asia-south1' });
 admin.initializeApp();
 
 const burnout = require('./burnout');
-const gigs = require('./gigs');
 const performance = require('./performance');
 const push = require('./push');
 
@@ -32,16 +31,6 @@ module.exports = {
   getBurnoutRisks: burnout.getBurnoutRisks,
   acknowledgeRiskAlert: burnout.acknowledgeRiskAlert,
   runBurnoutAnalysisNow: burnout.runBurnoutAnalysisNow,
-
-  // Feature 2
-  createGig: gigs.createGig,
-  getOpenGigs: gigs.getOpenGigs,
-  applyForGig: gigs.applyForGig,
-  assignGig: gigs.assignGig,
-  completeGig: gigs.completeGig,
-  getMySkills: gigs.getMySkills,
-  addSkill: gigs.addSkill,
-  removeSkill: gigs.removeSkill,
 
   // Feature 5
   calculateMonthlyPerformance: performance.calculateMonthlyPerformance,

@@ -3,8 +3,8 @@
 /**
  * Feature 5 — Employee Performance Tracker.
  *
- * Monthly score from punctuality, leave habits, overtime behaviour and gig
- * contributions. Weights are configurable in companies/{id}/snapshots/performance_weights.
+ * Monthly score from punctuality, leave habits and overtime behaviour.
+ * Weights are configurable in companies/{id}/snapshots/performance_weights.
  */
 
 const {
@@ -29,7 +29,6 @@ const DEFAULT_WEIGHTS = {
   absence_penalty: 20,
   overtime_discourage: 10,
   leave_utilization: 10,
-  gig_contribution: 20,
 };
 
 const EXPECTED_START_MIN = 9 * 60;
@@ -79,7 +78,7 @@ function leaveUsage(leaveBalances, settings, empId) {
   return { usedTotal, limitTotal };
 }
 
-async function computeEmployee(companyId, emp, ym, weights, logs, leaves, leaveBalances, settings, contributions) {
+async function computeEmployee(companyId, emp, ym, weights, logs, leaves, leaveBalances, settings) {
   const dates = datesInMonth(ym);
   const workdays = dates.filter((d) => {
     const dow = dowOfDate(d);
@@ -141,12 +140,8 @@ async function computeEmployee(companyId, emp, ym, weights, logs, leaves, leaveB
     leaveUtilizationPoints = Math.round(Math.min(1, utilization / 0.75) * weights.leave_utilization);
   }
 
-  // Gig contributions: +10 per completed gig in the month, capped.
-  const completedGigs = (contributions || []).filter((g) => g.employeeId === emp.id && (g.yearMonth || (g.completedAt && g.completedAt.seconds ? new Date(g.completedAt.seconds * 1000).toISOString().slice(0, 7) : null)) === ym).length;
-  const gigPoints = Math.min(weights.gig_contribution, completedGigs * 10);
-
   const totalScore = clampScore(
-    onTimePoints - latePenalty - absencePenalty - overtimeDeduct + leaveUtilizationPoints + gigPoints
+    onTimePoints - latePenalty - absencePenalty - overtimeDeduct + leaveUtilizationPoints
   );
 
   return {
@@ -155,7 +150,6 @@ async function computeEmployee(companyId, emp, ym, weights, logs, leaves, leaveB
     absencePenalty,
     overtimeDeduct: Math.round(overtimeDeduct * 10) / 10,
     leaveUtilizationPoints,
-    gigPoints,
     totalScore,
     grade: grade(totalScore),
     totalWorkingDays,
@@ -163,7 +157,6 @@ async function computeEmployee(companyId, emp, ym, weights, logs, leaves, leaveB
     lateCount,
     absences,
     overtimeHours: Math.round(overtimeHours * 10) / 10,
-    completedGigs,
   };
 }
 
@@ -174,7 +167,6 @@ async function runPerformanceCalculation(companyId, ym) {
   const leaves = (await getSnapshot(companyId, 'leave_requests', [])) || [];
   const leaveBalances = (await getSnapshot(companyId, 'leave_balances', {})) || {};
   const settings = (await getSnapshot(companyId, 'settings', {})) || {};
-  const contributions = (await getSnapshot(companyId, 'gig_contributions', [])) || [];
 
   let existing = (await getSnapshot(companyId, 'performance_scores', [])) || [];
   existing = existing.filter((s) => s.yearMonth !== ym);
@@ -183,7 +175,7 @@ async function runPerformanceCalculation(companyId, ym) {
   for (const emp of employees) {
     const s = String(emp.status || 'Active').toLowerCase();
     if (s === 'inactive' || s === 'terminated') continue;
-    const r = await computeEmployee(companyId, emp, ym, weights, logs, leaves, leaveBalances, settings, contributions);
+    const r = await computeEmployee(companyId, emp, ym, weights, logs, leaves, leaveBalances, settings);
     rows.push({
       id: `${emp.id}-${ym}`,
       employeeId: emp.id,
@@ -226,7 +218,6 @@ exports.getPerformanceScores = onCall(async (request) => {
       absencePenalty: s.absencePenalty,
       overtimeDeduct: s.overtimeDeduct,
       leaveUtilizationPoints: s.leaveUtilizationPoints,
-      gigPoints: s.gigPoints,
       totalScore: s.totalScore,
       grade: s.grade,
     }));

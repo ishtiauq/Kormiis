@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import Icon from "@/components/ui/Icon.jsx"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { burnoutApi, gigApi, lastMonthKey } from '../../services/hr.js'
+import { burnoutApi, lastMonthKey } from '../../services/hr.js'
 
 const stat = (icon, label, value, toneColor, iconBg, view, setCurrentView) => (
   <button 
@@ -17,18 +17,16 @@ const stat = (icon, label, value, toneColor, iconBg, view, setCurrentView) => (
 )
 
 export default function HrOverview({ adminUid, currentUser, setCurrentView, addToast, cardClass = '' }) {
-  const [counts, setCounts] = useState({ highRisk: '-', gigs: '-' })
+  const [counts, setCounts] = useState({ highRisk: '-' })
 
   const load = useCallback(async () => {
     if (!adminUid) return
     const results = await Promise.allSettled([
       burnoutApi.getBurnoutRisks({ month: lastMonthKey() }),
-      gigApi.getOpenGigs({ view: 'browse' }),
     ])
-    const [wb, gg] = results.map((r) => (r.status === 'fulfilled' ? r.value : null))
+    const [wb] = results.map((r) => (r.status === 'fulfilled' ? r.value : null))
     setCounts({
       highRisk: wb?.highRiskCount ?? 0,
-      gigs: gg?.gigs?.length ?? 0,
     })
   }, [adminUid])
 
@@ -57,7 +55,6 @@ export default function HrOverview({ adminUid, currentUser, setCurrentView, addT
       <CardContent className="flex-1 p-2.5 sm:p-3 flex flex-col pt-1">
         <div className="grid grid-cols-2 gap-2.5 sm:gap-3 py-1">
           {stat('favorite', 'Well-being risks', counts.highRisk, 'text-rose-500', 'bg-rose-500/15', 'wellbeing', setCurrentView)}
-          {stat('workspaces', 'Open gigs', counts.gigs, 'text-emerald-500', 'bg-emerald-500/15', 'gigs', setCurrentView)}
         </div>
       </CardContent>
     </Card>

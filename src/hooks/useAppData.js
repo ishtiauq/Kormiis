@@ -175,7 +175,7 @@ export default function useAppData({ user, addToast }) {
     
     // For Teammates, base permissions + custom permissions
     if (currentRole === 'Teammate') {
-      const basePerms = ['dashboard', 'attendance', 'leaves', 'expenses', 'calendar', 'tasks', 'profile', 'notes', 'gigs', 'performance']
+      const basePerms = ['dashboard', 'attendance', 'leaves', 'expenses', 'calendar', 'tasks', 'profile', 'notes', 'performance']
       const customPerms = user?.permissions || []
       return basePerms.includes(resource) || customPerms.includes(resource)
     }
@@ -777,21 +777,12 @@ export default function useAppData({ user, addToast }) {
       let risksData = await fetchTableFromFirestore(adminUid, 'burnout_risks') || []
       const fixedRisks = Array.isArray(risksData) ? risksData.filter(r => seenIds.has(r.employeeId)) : []
 
-      // 7. Leave Balances & Skills
+      // 7. Leave Balances
       let balancesData = await fetchTableFromFirestore(adminUid, 'leave_balances') || {}
       const fixedBalances = { ...balancesData }
       Object.keys(fixedBalances).forEach(empId => {
         if (!seenIds.has(empId)) delete fixedBalances[empId]
       })
-
-      let skillsData = await fetchTableFromFirestore(adminUid, 'employee_skills') || {}
-      const fixedSkills = { ...skillsData }
-      Object.keys(fixedSkills).forEach(empId => {
-        if (!seenIds.has(empId)) delete fixedSkills[empId]
-      })
-
-      let contribsData = await fetchTableFromFirestore(adminUid, 'gig_contributions') || []
-      const fixedContribs = Array.isArray(contribsData) ? contribsData.filter(c => seenIds.has(c.employeeId)) : []
 
       // 8. Tasks & Assets (Unassign deleted employees)
       let tasksData = await fetchTableFromFirestore(adminUid, 'tasks') || []
@@ -829,8 +820,6 @@ export default function useAppData({ user, addToast }) {
         writeToTable(adminUid, 'expenses', fixedExpenses),
         writeToTable(adminUid, 'performance_scores', fixedScores),
         writeToTable(adminUid, 'burnout_risks', fixedRisks),
-        writeToTable(adminUid, 'employee_skills', fixedSkills),
-        writeToTable(adminUid, 'gig_contributions', fixedContribs),
         writeToTable(adminUid, 'tasks', fixedTasks),
         writeToTable(adminUid, 'assets', fixedAssets),
         writeToTable(adminUid, 'notifications', fixedNotifs)

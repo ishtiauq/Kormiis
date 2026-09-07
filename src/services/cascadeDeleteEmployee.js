@@ -144,19 +144,7 @@ export async function cascadeDeleteEmployees(adminUid, employeeIds = [], employe
       return expenses.filter(e => !idSet.has(e.employeeId) && (!e.employeeEmail || !emailSet.has(e.employeeEmail.toLowerCase())));
     });
 
-    // 12. Purge Employee Skills & Gig Contributions
-    await cleanSnapshot('employee_skills', (skills) => {
-      if (!skills || typeof skills !== 'object') return {};
-      const next = { ...skills };
-      idSet.forEach(id => { delete next[id]; });
-      return next;
-    });
-
-    await cleanSnapshot('gig_contributions', (contribs) => {
-      if (!Array.isArray(contribs)) return [];
-      return contribs.filter(c => !idSet.has(c.employeeId));
-    });
-
+    // 12. Purge Login Activity
     await cleanSnapshot('login_activity', (activity) => {
       if (!activity || typeof activity !== 'object') return {};
       const next = { ...activity };

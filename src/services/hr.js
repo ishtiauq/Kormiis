@@ -1,9 +1,8 @@
 import { doc, getDoc, setDoc } from 'firebase/firestore'
 import { db } from './firebase.js'
-import { burnoutApiLocal, gigApiLocal, performanceApiLocal, lastMonthKey as getLMK } from './backendLogic.js'
+import { burnoutApiLocal, performanceApiLocal, lastMonthKey as getLMK } from './backendLogic.js'
 
 export const burnoutApi = burnoutApiLocal;
-export const gigApi = gigApiLocal;
 export const performanceApi = performanceApiLocal;
 
 export const currentMonthKey = () => {

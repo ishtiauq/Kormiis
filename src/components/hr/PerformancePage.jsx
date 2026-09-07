@@ -23,7 +23,6 @@ const DEFAULT_WEIGHTS = {
   absence_penalty: 20,
   overtime_discourage: 10,
   leave_utilization: 10,
-  gig_contribution: 20,
 }
 
 export default function PerformancePage({ adminUid, currentUser, addToast, defaultTab = 'performance', employees = [] }) {
@@ -239,18 +238,6 @@ export default function PerformancePage({ adminUid, currentUser, addToast, defau
             </div>
             <span className="text-[11px] text-muted-foreground mt-1.5">Rewarded for taking healthy, approved time off.</span>
           </div>
-
-          <div className="p-3 rounded-xl bg-muted/30 border border-border/60 flex flex-col justify-between">
-            <div className="flex items-center justify-between gap-1">
-              <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                <Icon name="handshake" className="text-emerald-500" size={15}/> Help Hub Contributions
-              </span>
-              <Badge variant="secondary" className="text-xs font-bold bg-emerald-500/10 text-emerald-600 border-emerald-500/20">
-                +{weights.gig_contribution || 20} pts
-              </Badge>
-            </div>
-            <span className="text-[11px] text-muted-foreground mt-1.5">Rewarded for completing requests helping colleagues.</span>
-          </div>
         </CardContent>
 
         {/* Grade Threshold Scale */}
@@ -357,10 +344,6 @@ export default function PerformancePage({ adminUid, currentUser, addToast, defau
                   <div className="p-4 rounded-xl bg-muted/40 border border-border flex flex-col justify-between">
                     <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Leave Utilization</span>
                     <span className="text-fluid-2xl font-black text-emerald-600 mt-2">+{myScore.leaveUtilizationPoints ?? 0} pts</span>
-                  </div>
-                  <div className="p-4 rounded-xl bg-muted/40 border border-border flex flex-col justify-between">
-                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Help Hub Contributions</span>
-                    <span className="text-fluid-2xl font-black text-emerald-600 mt-2">+{myScore.gigPoints ?? 0} pts</span>
                   </div>
                 </CardContent>
               </Card>
@@ -559,16 +542,6 @@ export default function PerformancePage({ adminUid, currentUser, addToast, defau
                   type="number"
                   value={editWeights.leave_utilization ?? 10}
                   onChange={(e) => setEditWeights({ ...editWeights, leave_utilization: Number(e.target.value) })}
-                  className="h-9 rounded-xl border-input bg-background text-xs font-bold"
-                />
-              </div>
-
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-foreground">Help Hub Contributions (Pts)</label>
-                <Input
-                  type="number"
-                  value={editWeights.gig_contribution ?? 20}
-                  onChange={(e) => setEditWeights({ ...editWeights, gig_contribution: Number(e.target.value) })}
                   className="h-9 rounded-xl border-input bg-background text-xs font-bold"
                 />
               </div>

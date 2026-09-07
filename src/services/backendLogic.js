@@ -1,4 +1,4 @@
-import { db, doc, getDoc, setDoc } from './firebase.js';
+﻿import { db, doc, getDoc, setDoc } from './firebase.js';
 import { getAuth } from 'firebase/auth';
 
 // --- Common Helpers ---
@@ -326,332 +326,9 @@ export const burnoutApiLocal = {
   })
 };
 
-// --- Gigs Logic ---
-
-function normalizeSkill(s) { return String(s || '').trim().toLowerCase(); }
-
-async function getSkillsForCompany(companyId) { return (await getSnapshot(companyId, 'employee_skills', {})) || {}; }
-
-async function pushNotification(companyId, employeeId, message, ref) {
-  await updateSnapshot(companyId, 'notifications', async (current) => {
-    const list = Array.isArray(current) ? current : [];
-    return [{ id: `n-${Date.now()}-${Math.floor(Math.random() * 1e6)}`, employeeId, message, ref, read: false, createdAt: new Date().toISOString() }, ...list].slice(0, 100);
-  }, []);
-}
-
-function formatCleanName(rawName, rawEmail, fallback = 'Colleague') {
-  if (rawName && typeof rawName === 'string' && rawName.trim() && !rawName.includes('@')) {
-    return rawName.trim();
-  }
-  try {
-    const local = localStorage.getItem('kormiis_user');
-    if (local) {
-      const parsed = JSON.parse(local);
-      if (parsed.name && !parsed.name.includes('@')) return parsed.name;
-      if (parsed.displayName && !parsed.displayName.includes('@')) return parsed.displayName;
-    }
-  } catch(e) {}
-
-  const str = String(rawName || rawEmail || '').trim();
-  if (str.includes('@')) {
-    const handle = str.split('@')[0];
-    return handle.charAt(0).toUpperCase() + handle.slice(1);
-  }
-  return str || fallback;
-}
-
-export const gigApiLocal = {
-  createGig: onCall(async (request) => {
-    const uid = assertAuth(request);
-    const companyId = await getCompanyIdForUid(uid);
-    if (!companyId) throw new Error('failed-precondition: Account is not linked to a company.');
-
-    const data = request.data || {};
-    const title = String(data.title || '').trim();
-    if (!title) throw new Error('invalid-argument: Title is required.');
-    const description = String(data.description || '').trim();
-    
-    // Default destroying time: 24 hours if not provided
-    const expiresAt = data.expiresAt ? new Date(data.expiresAt).toISOString() : new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
-
-    const poster = await getUser(uid);
-    const posterEmployeeId = (poster && poster.employeeId) || uid;
-    const posterName = formatCleanName(poster?.name, poster?.email, 'Colleague');
-    const posterAvatar = (poster && poster.avatar) || `https://i.pravatar.cc/150?u=${posterEmployeeId}`;
-
-    const gig = {
-      id: `gig-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-      title, description, postedBy: posterEmployeeId, postedByUid: uid,
-      postedByName: posterName, posterAvatar,
-      expiresAt,
-      status: 'open', helper: null, offers: [], createdAt: timestamp(), completedAt: null,
-    };
-
-    await updateSnapshot(companyId, 'gigs', async (current) => { const list = Array.isArray(current) ? current : []; return [gig, ...list]; }, []);
-    return { gig };
-  }),
-  updateGig: onCall(async (request) => {
-    const uid = assertAuth(request);
-    const companyId = await getCompanyIdForUid(uid);
-    if (!companyId) throw new Error('failed-precondition: Account is not linked to a company.');
-
-    const { gigId, title, description, expiresAt } = request.data || {};
-    if (!gigId) throw new Error('invalid-argument: Missing gigId.');
-    if (!title || !String(title).trim()) throw new Error('invalid-argument: Title is required.');
-
-    const isHr = await requireAdmin(request).then(() => true).catch(() => false);
-    const me = await getUser(uid);
-    const myEmployeeId = (me && me.employeeId) || uid;
-
-    const gigs = (await getSnapshot(companyId, 'gigs', [])) || [];
-    const gig = gigs.find((g) => g.id === gigId);
-    if (!gig) throw new Error('not-found: Gig not found.');
-    if (!isHr && gig.postedBy !== myEmployeeId) throw new Error('permission-denied: Only poster or admin can edit.');
-
-    const updated = gigs.map((g) => g.id === gigId ? {
-      ...g,
-      title: String(title).trim(),
-      description: String(description || '').trim(),
-      expiresAt: expiresAt ? new Date(expiresAt).toISOString() : g.expiresAt,
-    } : g);
-
-    await setSnapshot(companyId, 'gigs', updated);
-    return { ok: true };
-  }),
-  deleteGig: onCall(async (request) => {
-    const uid = assertAuth(request);
-    const companyId = await getCompanyIdForUid(uid);
-    if (!companyId) throw new Error('failed-precondition: Account is not linked to a company.');
-
-    const gigId = request.data && request.data.gigId;
-    if (!gigId) throw new Error('invalid-argument: Missing gigId.');
-
-    const isHr = await requireAdmin(request).then(() => true).catch(() => false);
-    const me = await getUser(uid);
-    const myEmployeeId = (me && me.employeeId) || uid;
-
-    const gigs = (await getSnapshot(companyId, 'gigs', [])) || [];
-    const gig = gigs.find((g) => g.id === gigId);
-    if (!gig) throw new Error('not-found: Gig not found.');
-    if (!isHr && gig.postedBy !== myEmployeeId) throw new Error('permission-denied: Only poster or admin can delete.');
-
-    await setSnapshot(companyId, 'gigs', gigs.filter((g) => g.id !== gigId));
-    return { ok: true };
-  }),
-  getOpenGigs: onCall(async (request) => {
-    const uid = assertAuth(request);
-    const companyId = await getCompanyIdForUid(uid);
-    if (!companyId) throw new Error('failed-precondition: Account is not linked to a company.');
-
-    const me = await getUser(uid);
-    const myEmployeeId = (me && me.employeeId) || uid;
-
-    let gigs = (await getSnapshot(companyId, 'gigs', [])) || [];
-    const employees = (await getSnapshot(companyId, 'employees', [])) || [];
-    const empMap = new Map(employees.map((e) => [e.id, e]));
-
-    const now = new Date();
-    // Filter out unaccepted expired gigs (Auto-delete)
-    gigs = gigs.filter((g) => {
-      if (g.status === 'open' && g.expiresAt && new Date(g.expiresAt) <= now) {
-        return false; // Auto-deleted on expiry if not accepted
-      }
-      return true;
-    });
-
-    const decorate = (g) => {
-      const offers = (Array.isArray(g.offers) ? g.offers : []).map((o) => {
-        const oEmp = empMap.get(o.id);
-        return {
-          ...o,
-          name: formatCleanName(oEmp?.name || o.name, oEmp?.email, 'Colleague'),
-          avatar: oEmp?.avatar || o.avatar || `https://i.pravatar.cc/150?u=${o.id}`,
-        };
-      });
-      const hasOffered = offers.some((o) => o.id === myEmployeeId);
-      const emp = empMap.get(g.postedBy) || empMap.get(g.postedByUid) || employees.find((e) => e.uid === g.postedByUid || e.uid === g.postedBy);
-      let rawPosterName = emp?.name || g.postedByName;
-      let posterAvatar = emp?.avatar || g.posterAvatar || (g.postedByUid === uid ? me?.avatar : null) || `https://i.pravatar.cc/150?u=${g.postedBy}`;
-      let posterName = formatCleanName(rawPosterName, emp?.email || me?.email, 'Colleague');
-      if (g.postedByUid === uid || g.postedBy === myEmployeeId) {
-        posterAvatar = me?.avatar || posterAvatar;
-      }
-      const helperEmp = g.helper ? empMap.get(g.helper.id) : null;
-      const helperName = g.helper ? formatCleanName(helperEmp?.name || g.helper.name, helperEmp?.email, 'Helper') : null;
-      const helperAvatar = g.helper ? (helperEmp?.avatar || g.helper.avatar || `https://i.pravatar.cc/150?u=${g.helper.id}`) : null;
-
-      return {
-        id: g.id, title: g.title, description: g.description || '',
-        postedBy: g.postedBy, postedByName: posterName, posterAvatar,
-        expiresAt: g.expiresAt, status: g.status,
-        helper: g.helper ? { id: g.helper.id, name: helperName, avatar: helperAvatar } : null,
-        offers,
-        hasOffered,
-        createdAt: iso(g.createdAt), completedAt: iso(g.completedAt),
-      };
-    };
-
-    const open = gigs.filter((g) => g.status === 'open').map(decorate);
-    const myPosted = gigs.filter((g) => g.postedBy === myEmployeeId).map(decorate);
-    const myAssigned = gigs.filter((g) => g.helper && g.helper.id === myEmployeeId).map(decorate);
-
-    return { open, myPosted, myAssigned, myEmployeeId };
-  }),
-  offerHelp: onCall(async (request) => {
-    const uid = assertAuth(request);
-    const companyId = await getCompanyIdForUid(uid);
-    if (!companyId) throw new Error('failed-precondition: Account is not linked to a company.');
-    const gigId = request.data && request.data.gigId;
-    if (!gigId) throw new Error('invalid-argument: Missing gigId.');
-
-    const me = await getUser(uid);
-    const myEmployeeId = (me && me.employeeId) || uid;
-    const myName = (me && me.name) || 'A colleague';
-
-    const gigs = (await getSnapshot(companyId, 'gigs', [])) || [];
-    const gig = gigs.find((g) => g.id === gigId);
-    if (!gig) throw new Error('not-found: Gig not found.');
-    if (gig.status !== 'open') throw new Error('failed-precondition: This help request is no longer open.');
-    if (gig.postedBy === myEmployeeId) throw new Error('failed-precondition: You cannot offer help to your own request.');
-
-    const currentOffers = Array.isArray(gig.offers) ? gig.offers : [];
-    if (!currentOffers.some((o) => o.id === myEmployeeId)) {
-      currentOffers.push({ id: myEmployeeId, name: myName, offeredAt: new Date().toISOString() });
-    }
-
-    await setSnapshot(companyId, 'gigs', gigs.map((g) => g.id === gigId ? { ...g, offers: currentOffers } : g));
-    await pushNotification(companyId, gig.postedBy, `${myName} offered to help with "${gig.title}".`, { table: 'gigs', id: gigId });
-    return { ok: true };
-  }),
-  acceptHelp: onCall(async (request) => {
-    const uid = assertAuth(request);
-    const companyId = await getCompanyIdForUid(uid);
-    if (!companyId) throw new Error('failed-precondition: Account is not linked to a company.');
-
-    const { gigId, helperId } = request.data || {};
-    if (!gigId || !helperId) throw new Error('invalid-argument: gigId and helperId are required.');
-
-    const me = await getUser(uid);
-    const myEmployeeId = (me && me.employeeId) || uid;
-
-    const gigs = (await getSnapshot(companyId, 'gigs', [])) || [];
-    const gig = gigs.find((g) => g.id === gigId);
-    if (!gig) throw new Error('not-found: Gig not found.');
-    if (gig.postedBy !== myEmployeeId) throw new Error('permission-denied: Only the poster can accept help.');
-
-    const employees = (await getSnapshot(companyId, 'employees', [])) || [];
-    const helperEmp = employees.find((e) => e.id === helperId);
-    const helperName = helperEmp?.name || 'Helper';
-    const helperAvatar = helperEmp?.avatar || helperEmp?.photoURL || '';
-
-    const updatedGig = {
-      ...gig,
-      status: 'accepted',
-      helper: { id: helperId, name: helperName, avatar: helperAvatar },
-    };
-
-    await setSnapshot(companyId, 'gigs', gigs.map((g) => g.id === gigId ? updatedGig : g));
-    await pushNotification(companyId, helperId, `Your offer to help with "${gig.title}" was accepted!`, { table: 'gigs', id: gigId });
-    return { gig: updatedGig };
-  }),
-  declineHelp: onCall(async (request) => {
-    const uid = assertAuth(request);
-    const companyId = await getCompanyIdForUid(uid);
-    if (!companyId) throw new Error('failed-precondition: Account is not linked to a company.');
-
-    const { gigId, helperId } = request.data || {};
-    if (!gigId || !helperId) throw new Error('invalid-argument: gigId and helperId are required.');
-
-    const me = await getUser(uid);
-    const myEmployeeId = (me && me.employeeId) || uid;
-
-    const gigs = (await getSnapshot(companyId, 'gigs', [])) || [];
-    const gig = gigs.find((g) => g.id === gigId);
-    if (!gig) throw new Error('not-found: Gig not found.');
-    if (gig.postedBy !== myEmployeeId) throw new Error('permission-denied: Only the poster can decline help.');
-
-    const currentOffers = Array.isArray(gig.offers) ? gig.offers : [];
-    const updatedOffers = currentOffers.filter((o) => o.id !== helperId);
-
-    const updatedGig = {
-      ...gig,
-      offers: updatedOffers,
-    };
-
-    await setSnapshot(companyId, 'gigs', gigs.map((g) => g.id === gigId ? updatedGig : g));
-    return { ok: true };
-  }),
-  completeGig: onCall(async (request) => {
-    const uid = assertAuth(request);
-    const companyId = await getCompanyIdForUid(uid);
-    if (!companyId) throw new Error('failed-precondition: Account is not linked to a company.');
-    const gigId = request.data && request.data.gigId;
-    if (!gigId) throw new Error('invalid-argument: Missing gigId.');
-
-    const me = await getUser(uid);
-    const myEmployeeId = (me && me.employeeId) || uid;
-
-    const gigs = (await getSnapshot(companyId, 'gigs', [])) || [];
-    const gig = gigs.find((g) => g.id === gigId);
-    if (!gig) throw new Error('not-found: Gig not found.');
-    if (gig.status !== 'accepted' && gig.status !== 'in_progress') throw new Error('failed-precondition: Only accepted help requests can be completed.');
-    if (gig.postedBy !== myEmployeeId && (!gig.helper || gig.helper.id !== myEmployeeId)) throw new Error('permission-denied: Only poster or accepted helper can complete.');
-
-    const completedAt = timestamp();
-    await setSnapshot(companyId, 'gigs', gigs.map((g) => g.id === gigId ? { ...g, status: 'completed', completedAt } : g));
-    if (gig.helper) {
-      await updateSnapshot(companyId, 'gig_contributions', async (current) => {
-        const list = Array.isArray(current) ? current : [];
-        return [{ id: `contrib-${Date.now()}-${Math.floor(Math.random() * 1000)}`, employeeId: gig.helper.id, gigId, completedAt, yearMonth: new Date().toISOString().slice(0, 7) }, ...list];
-      }, []);
-    }
-
-    return { ok: true };
-  }),
-  getMySkills: onCall(async (request) => {
-    const uid = assertAuth(request);
-    const companyId = await getCompanyIdForUid(uid);
-    if (!companyId) throw new Error('failed-precondition: Account is not linked to a company.');
-    const me = await getUser(uid);
-    const myEmployeeId = (me && me.employeeId) || uid;
-    const skills = await getSkillsForCompany(companyId);
-    return { skills: skills[myEmployeeId] || [] };
-  }),
-  addSkill: onCall(async (request) => {
-    const uid = assertAuth(request);
-    const companyId = await getCompanyIdForUid(uid);
-    if (!companyId) throw new Error('failed-precondition: Account is not linked to a company.');
-    const skill = String((request.data && request.data.skillName) || '').trim();
-    if (!skill) throw new Error('invalid-argument: skillName is required.');
-    const me = await getUser(uid);
-    const myEmployeeId = (me && me.employeeId) || uid;
-
-    const skills = await getSkillsForCompany(companyId);
-    const current = skills[myEmployeeId] || [];
-    if (!current.some((s) => normalizeSkill(s) === normalizeSkill(skill))) {
-      skills[myEmployeeId] = [...current, skill];
-      await setSnapshot(companyId, 'employee_skills', skills);
-    }
-    return { skills: skills[myEmployeeId] };
-  }),
-  removeSkill: onCall(async (request) => {
-    const uid = assertAuth(request);
-    const companyId = await getCompanyIdForUid(uid);
-    if (!companyId) throw new Error('failed-precondition: Account is not linked to a company.');
-    const skill = String((request.data && request.data.skillName) || '').trim();
-    const me = await getUser(uid);
-    const myEmployeeId = (me && me.employeeId) || uid;
-
-    const skills = await getSkillsForCompany(companyId);
-    skills[myEmployeeId] = (skills[myEmployeeId] || []).filter((s) => normalizeSkill(s) !== normalizeSkill(skill));
-    await setSnapshot(companyId, 'employee_skills', skills);
-    return { skills: skills[myEmployeeId] };
-  })
-};
-
 // --- Performance Logic ---
 
-const DEFAULT_WEIGHTS = { on_time: 30, late_penalty: 10, absence_penalty: 20, overtime_discourage: 10, leave_utilization: 10, gig_contribution: 20 };
+const DEFAULT_WEIGHTS = { on_time: 30, late_penalty: 10, absence_penalty: 20, overtime_discourage: 10, leave_utilization: 10 };
 const GRACE_MIN = 10;
 
 function clampScore(n) { return Math.max(0, Math.min(100, Math.round(n))); }
@@ -675,7 +352,7 @@ function leaveUsage(leaveBalances, settings, empId) {
   return { usedTotal, limitTotal };
 }
 
-async function computeEmployee(companyId, emp, ym, weights, logs, leaves, leaveBalances, settings, contributions) {
+async function computeEmployee(companyId, emp, ym, weights, logs, leaves, leaveBalances, settings) {
   const dates = datesInMonth(ym);
   const workdays = dates.filter((d) => { const dow = dowOfDate(d); return dow >= 1 && dow <= 5; });
   const empLeaves = leaves.filter((l) => l.employeeId === emp.id && l.status === 'Approved' && l.startDate);
@@ -726,11 +403,8 @@ async function computeEmployee(companyId, emp, ym, weights, logs, leaves, leaveB
     leaveUtilizationPoints = Math.round(Math.min(1, utilization / 0.75) * weights.leave_utilization);
   }
 
-  const completedGigs = (contributions || []).filter((g) => g.employeeId === emp.id && (g.yearMonth || (g.completedAt && g.completedAt.seconds ? new Date(g.completedAt.seconds * 1000).toISOString().slice(0, 7) : null)) === ym).length;
-  const gigPoints = Math.min(weights.gig_contribution, completedGigs * 10);
-
-  const totalScore = clampScore(onTimePoints - latePenalty - absencePenalty - overtimeDeduct + leaveUtilizationPoints + gigPoints);
-  return { onTimePoints, latePenalty, absencePenalty, overtimeDeduct: Math.round(overtimeDeduct * 10) / 10, leaveUtilizationPoints, gigPoints, totalScore, grade: grade(totalScore), totalWorkingDays, onTimeDays, lateCount, absences, overtimeHours: Math.round(overtimeHours * 10) / 10, completedGigs };
+  const totalScore = clampScore(onTimePoints - latePenalty - absencePenalty - overtimeDeduct + leaveUtilizationPoints);
+  return { onTimePoints, latePenalty, absencePenalty, overtimeDeduct: Math.round(overtimeDeduct * 10) / 10, leaveUtilizationPoints, totalScore, grade: grade(totalScore), totalWorkingDays, onTimeDays, lateCount, absences, overtimeHours: Math.round(overtimeHours * 10) / 10 };
 }
 
 async function runPerformanceCalculation(companyId, ym) {
@@ -740,7 +414,6 @@ async function runPerformanceCalculation(companyId, ym) {
   const leaves = (await getSnapshot(companyId, 'leave_requests', [])) || [];
   const leaveBalances = (await getSnapshot(companyId, 'leave_balances', {})) || {};
   const settings = (await getSnapshot(companyId, 'settings', {})) || {};
-  const contributions = (await getSnapshot(companyId, 'gig_contributions', [])) || [];
 
   let existing = (await getSnapshot(companyId, 'performance_scores', [])) || [];
   existing = existing.filter((s) => s.yearMonth !== ym);
@@ -749,7 +422,7 @@ async function runPerformanceCalculation(companyId, ym) {
   for (const emp of employees) {
     const s = String(emp.status || 'Active').toLowerCase();
     if (s === 'inactive' || s === 'terminated') continue;
-    const r = await computeEmployee(companyId, emp, ym, weights, logs, leaves, leaveBalances, settings, contributions);
+    const r = await computeEmployee(companyId, emp, ym, weights, logs, leaves, leaveBalances, settings);
     rows.push({ id: `${emp.id}-${ym}`, employeeId: emp.id, yearMonth: ym, ...r, calculatedAt: timestamp() });
   }
   await setSnapshot(companyId, 'performance_scores', [...existing, ...rows]);
@@ -776,7 +449,7 @@ export const performanceApiLocal = {
       .sort((a, b) => b.totalScore - a.totalScore)
       .map((s) => ({
         id: s.id, employeeId: s.employeeId, employeeName: (empMap.get(s.employeeId) || {}).name || s.employeeId, department: (empMap.get(s.employeeId) || {}).department || 'General',
-        onTimePoints: s.onTimePoints, latePenalty: s.latePenalty, absencePenalty: s.absencePenalty, overtimeDeduct: s.overtimeDeduct, leaveUtilizationPoints: s.leaveUtilizationPoints, gigPoints: s.gigPoints, totalScore: s.totalScore, grade: s.grade,
+        onTimePoints: s.onTimePoints, latePenalty: s.latePenalty, absencePenalty: s.absencePenalty, overtimeDeduct: s.overtimeDeduct, leaveUtilizationPoints: s.leaveUtilizationPoints, totalScore: s.totalScore, grade: s.grade,
       }));
     return { month: ym, scores: list };
   }),

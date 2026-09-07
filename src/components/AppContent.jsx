@@ -16,7 +16,6 @@ const Settings = lazy(() => import('./Settings.jsx'))
 const Tasks = lazy(() => import('./Tasks.jsx'))
 const ProfileView = lazy(() => import('./ProfileView.jsx'))
 const Notes = lazy(() => import('./Notes.jsx'))
-const GigBoardPage = lazy(() => import('./hr/GigBoardPage.jsx'))
 const PerformancePage = lazy(() => import('./hr/PerformancePage.jsx'))
 const WellbeingPage = lazy(() => import('./hr/WellbeingPage.jsx'))
 const AiAssistantPage = lazy(() => import('./ai/AiAssistantPage.jsx'))
@@ -36,7 +35,6 @@ const viewPreloadMap = {
   tasks: () => import('./Tasks.jsx'),
   profile: () => import('./ProfileView.jsx'),
   notes: () => import('./Notes.jsx'),
-  gigs: () => import('./hr/GigBoardPage.jsx'),
   performance: () => import('./hr/PerformancePage.jsx'),
   wellbeing: () => import('./hr/WellbeingPage.jsx'),
   ai: () => import('./ai/AiAssistantPage.jsx'),
@@ -136,9 +134,6 @@ export default function AppContent({ currentView, setCurrentView, isAppLoading, 
       break
     case 'notes':
       view = <Tasks tasks={data.tasks} setTasks={data.handleSetTasks} employees={data.employees} currentUser={user} addToast={data.addToast} addLog={data.addLog} addNotification={data.addNotification} notes={data.notes} setNotes={data.handleSetNotes} defaultTab="notes" />
-      break
-    case 'gigs':
-      view = <GigBoardPage adminUid={data.adminUid} currentUser={user} employees={data.employees} addToast={data.addToast} />
       break
     case 'performance':
       view = <PerformancePage adminUid={data.adminUid} currentUser={user} employees={data.employees} addToast={data.addToast} defaultTab="performance" />
