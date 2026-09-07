@@ -508,7 +508,7 @@ export const AnnouncementsWidget = memo(({
                 return (
                   <div
                     key={post.id}
-                    className="p-3.5 sm:p-4 rounded-2xl liquid-widget-item border-black/[0.06] dark:border-white/[0.08] flex flex-col gap-2.5"
+                    className="w-full p-3.5 sm:p-4 rounded-2xl liquid-widget-item border-black/[0.06] dark:border-white/[0.08] flex flex-col gap-2.5"
                   >
                     {/* Header Row: Author info, date (No right-side tag) */}
                     <div className="flex items-center justify-between gap-2">
@@ -627,7 +627,7 @@ export const AnnouncementsWidget = memo(({
                 return (
                   <div
                     key={ann.id || idx}
-                    className="flex items-center gap-3.5 p-3 px-4 rounded-2xl liquid-widget-item cursor-pointer select-none active:scale-[0.99] border-black/[0.06] dark:border-white/[0.08]"
+                    className="w-full flex items-center gap-3.5 p-3 px-4 rounded-2xl liquid-widget-item cursor-pointer select-none active:scale-[0.99] border-black/[0.06] dark:border-white/[0.08]"
                     onClick={() => setCurrentView && setCurrentView('announcements')}
                   >
                     <div className="size-9 rounded-xl flex items-center justify-center bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0">
@@ -687,7 +687,7 @@ export const AnnouncementsWidget = memo(({
             <div className="flex-1 min-h-0 overflow-y-auto max-h-[360px] lg:max-h-[480px] flex flex-col gap-2.5 px-2.5 sm:px-3 pb-2.5 chat-scrollbar">
               {/* Milestones (Birthdays & Work Anniversaries) */}
               {upcomingMilestones.map((milestone, i) => (
-                <div key={`ms-${i}`} className="flex items-center gap-3 p-2.5 px-3.5 rounded-2xl liquid-widget-item border-black/[0.06] dark:border-white/[0.08]">
+                <div key={`ms-${i}`} className="w-full flex items-center gap-3 p-2.5 px-3.5 rounded-2xl liquid-widget-item border-black/[0.06] dark:border-white/[0.08]">
                   <Avatar className="size-8 shrink-0 rounded-xl border border-black/10 dark:border-white/15">
                     {milestone.avatar ? <AvatarImage src={milestone.avatar} alt={milestone.empName} className="object-cover" /> : null}
                     <AvatarFallback className="bg-foreground/10 text-foreground rounded-xl font-bold text-xs">
@@ -708,7 +708,7 @@ export const AnnouncementsWidget = memo(({
               {upcomingEvents.map((evt, idx) => (
                 <div
                   key={`ev-${evt.id || idx}`}
-                  className="flex items-center gap-3.5 p-2.5 px-3.5 rounded-2xl liquid-widget-item border-black/[0.06] dark:border-white/[0.08] cursor-pointer select-none active:scale-[0.99]"
+                  className="w-full flex items-center gap-3.5 p-2.5 px-3.5 rounded-2xl liquid-widget-item border-black/[0.06] dark:border-white/[0.08] cursor-pointer select-none active:scale-[0.99]"
                   onClick={() => setCurrentView && setCurrentView('calendar')}
                   role="button"
                   tabIndex={0}

@@ -5,7 +5,6 @@ import NavigationDock from './layout/NavigationDock.jsx'
 import MobileResponsiveBottomBar from './layout/MobileResponsiveBottomBar.jsx'
 import AiCoPilotModal from './ai/AiCoPilotModal.jsx'
 import AiExpandableFab, { AiQuantumGlyph } from './ai/AiExpandableFab.jsx'
-import DailyChecklistWidget from './DailyChecklistWidget.jsx'
 import { useModal } from '../services/useModal.js'
 import { formatDate, formatDateShort, formatDateTime, formatMonthYear, formatDateWithWeekday } from '../services/date.js'
 import { parseMin } from '../services/attendance.js'
@@ -32,6 +31,14 @@ import GeoCheckInWidget from './attendance/GeoCheckInWidget.jsx'
 import AttendancePage from './attendance/AttendancePage.jsx'
 import PerformancePage from './hr/PerformancePage.jsx'
 import AiAssistantPage from './ai/AiAssistantPage.jsx'
+import { AnnouncementsWidget } from './widgets/AnnouncementsWidget.jsx'
+import { EmployeeDirectoryWidget } from './widgets/EmployeeDirectoryWidget.jsx'
+import { AttendanceWidget } from './widgets/AttendanceWidget.jsx'
+import { MyAttendanceWidget } from './widgets/MyAttendanceWidget.jsx'
+import { PerformanceTrackerWidget } from './widgets/PerformanceTrackerWidget.jsx'
+import { TasksWidget } from './widgets/TasksWidget.jsx'
+import { PayrollWidget } from './widgets/PayrollWidget.jsx'
+import { MyPayrollWidget } from './widgets/MyPayrollWidget.jsx'
 
 // Dummy profile image generation based on initials
 const getInitialsAvatar = (name) => {
@@ -220,7 +227,30 @@ export default function EmployeePortal({
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
-        return <DashboardView currentUser={currentUser} attendance={attendance} setAttendance={setAttendance} addToast={addToast} expenses={expenses} announcements={announcements} setActiveTab={setActiveTab} setShowPunchModal={setShowPunchModal} settings={settings} notes={notes} setNotes={setNotes} />
+        return (
+          <DashboardView 
+            currentUser={currentUser} 
+            attendance={attendance} 
+            setAttendance={setAttendance} 
+            addToast={addToast} 
+            announcements={announcements} 
+            setAnnouncements={setAnnouncements}
+            tasks={tasks} 
+            setActiveTab={setActiveTab} 
+            settings={settings}
+            payroll={payroll}
+            expenses={expenses}
+            roster={roster}
+            notes={notes}
+            setNotes={setNotes}
+            employees={employees}
+            events={events}
+            setEvents={setEvents}
+            shiftTemplates={shiftTemplates}
+            addLog={addLog}
+            addNotification={addNotification}
+          />
+        )
       case 'attendance':
       case 'schedule':
       case 'leave':
@@ -335,7 +365,30 @@ export default function EmployeePortal({
           </div>
         )
       default:
-        return <DashboardView currentUser={currentUser} attendance={attendance} setAttendance={setAttendance} addToast={addToast} expenses={expenses} announcements={announcements} tasks={tasks} events={events} setActiveTab={setActiveTab} setShowPunchModal={setShowPunchModal} settings={settings} notes={notes} setNotes={setNotes} />
+        return (
+          <DashboardView 
+            currentUser={currentUser} 
+            attendance={attendance} 
+            setAttendance={setAttendance} 
+            addToast={addToast} 
+            announcements={announcements} 
+            setAnnouncements={setAnnouncements}
+            tasks={tasks} 
+            setActiveTab={setActiveTab} 
+            settings={settings}
+            payroll={payroll}
+            expenses={expenses}
+            roster={roster}
+            notes={notes}
+            setNotes={setNotes}
+            employees={employees}
+            events={events}
+            setEvents={setEvents}
+            shiftTemplates={shiftTemplates}
+            addLog={addLog}
+            addNotification={addNotification}
+          />
+        )
       case 'team_attendance':
         return (
           <AttendancePage 
@@ -572,149 +625,231 @@ export default function EmployeePortal({
 
 // ----------------------------------------------------
 
-function DashboardView({ currentUser, attendance, setAttendance, addToast, expenses, announcements, tasks, events, setActiveTab, setShowPunchModal, settings, notes, setNotes }) {
-  const currentBalances = attendance?.balances?.[currentUser.id] || {
-    annual: { limit: 20, used: 0 },
-    sick: { limit: 14, used: 0 },
-    casual: { limit: 10, used: 0 }
-  }
-
-  const myExpenses = expenses?.list?.filter(e => e.employeeId === currentUser.id && e.status === 'Pending') || []
-  const totalPending = myExpenses.reduce((sum, e) => sum + e.amount, 0)
-  
-  const recentAnnouncements = (announcements || [])
-    .filter(a => a.audience === 'all' || a.audience === currentUser.department)
-    .sort((a, b) => new Date(b.date) - new Date(a.date))
-    .slice(0, 3)
-
+function DashboardView({ 
+  currentUser, 
+  attendance, 
+  setAttendance, 
+  addToast, 
+  announcements, 
+  setAnnouncements,
+  tasks, 
+  setActiveTab, 
+  settings, 
+  payroll, 
+  expenses = [],
+  roster, 
+  notes = [], 
+  setNotes,
+  employees = [],
+  events = [],
+  setEvents,
+  shiftTemplates = [],
+  addLog,
+  addNotification
+}) {
   const myActiveTasks = tasks?.filter(t => t.assigneeIds?.includes(currentUser.id) && t.status !== 'Done') || []
-  
-  const todayDate = new Date().toISOString().split('T')[0]
-  const upcomingEvents = events?.filter(e => e.date >= todayDate).sort((a,b) => a.date.localeCompare(b.date)) || []
-  const nextEvent = upcomingEvents.length > 0 ? upcomingEvents[0] : null
+  const urgentTasks = myActiveTasks.filter(t => t.priority === 'Urgent' || t.priority === 'High')
+
+  // Leave / Attendance metrics for today
+  const today = new Date().toISOString().split('T')[0]
+  const todayLog = attendance?.dailyLogs?.[today]?.[currentUser.id] || {}
+  const status = todayLog?.status || 'Off Duty'
+
+  // Current month pay slip status if available
+  const currentMonthPayslip = (payroll?.history || [])
+    .filter(p => p.employeeId === currentUser.id || p.employeeName === currentUser.name)
+    .sort((a, b) => new Date(b.date || b.period || 0) - new Date(a.date || a.period || 0))[0]
+
+  const hour = new Date().getHours()
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
+
+  // Calculate upcoming milestones for birthdays / anniversaries
+  const upcomingMilestones = useMemo(() => {
+    const nowDate = new Date()
+    const milestones = []
+
+    employees.forEach(emp => {
+      if (emp.dob) {
+        const dobDate = new Date(emp.dob)
+        const birthMonth = dobDate.getMonth()
+        const birthDay = dobDate.getDate()
+
+        let nextBirthday = new Date(nowDate.getFullYear(), birthMonth, birthDay)
+        if (nextBirthday < nowDate) {
+          nextBirthday = new Date(nowDate.getFullYear() + 1, birthMonth, birthDay)
+        }
+
+        const diffTime = nextBirthday - nowDate
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+
+        if (diffDays >= 0 && diffDays <= 30) {
+          milestones.push({
+            type: 'Birthday',
+            empName: emp.name,
+            avatar: emp.avatar,
+            date: nextBirthday,
+            daysRemaining: diffDays,
+            label: `Birthday in ${diffDays === 0 ? 'today' : `${diffDays} days`}`
+          })
+        }
+      }
+
+      if (emp.joiningDate) {
+        const joinDate = new Date(emp.joiningDate)
+        const joinMonth = joinDate.getMonth()
+        const joinDay = joinDate.getDate()
+
+        let nextAnniversary = new Date(nowDate.getFullYear(), joinMonth, joinDay)
+        if (nextAnniversary < nowDate) {
+          nextAnniversary = new Date(nowDate.getFullYear() + 1, joinMonth, joinDay)
+        }
+
+        const diffTime = nextAnniversary - nowDate
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+        const yearsCount = nextAnniversary.getFullYear() - joinDate.getFullYear()
+
+        if (diffDays >= 0 && diffDays <= 30 && yearsCount > 0) {
+          milestones.push({
+            type: 'Anniversary',
+            empName: emp.name,
+            avatar: emp.avatar,
+            date: nextAnniversary,
+            daysRemaining: diffDays,
+            label: `${yearsCount} Year Workversary in ${diffDays === 0 ? 'today' : `${diffDays} days`}`
+          })
+        }
+      }
+    })
+
+    return milestones.sort((a, b) => a.daysRemaining - b.daysRemaining)
+  }, [employees])
+
+  const upcomingEvents = useMemo(() => {
+    return events
+      ? [...events]
+          .filter(evt => new Date(evt.date) >= new Date())
+          .sort((a, b) => new Date(a.date) - new Date(b.date))
+          .slice(0, 3)
+      : []
+  }, [events])
+
+  const taskList = Array.isArray(tasks) ? tasks : []
+  const completedTasksCount = taskList.filter(t => t && t.status === 'Done').length
+  const taskCompletionRate = taskList.length > 0 ? Math.round((completedTasksCount / taskList.length) * 100) : 0
+  const pendingTasksCount = taskList.filter(t => t && t.status !== 'Done').length
+
+  const activeEmps = useMemo(() => employees.filter(e => e.status !== 'Terminated'), [employees])
+  const dayLogs = attendance?.dailyLogs?.[today] || {}
+  const arrivedCount = useMemo(() => {
+    let count = 0
+    activeEmps.forEach(emp => {
+      const log = dayLogs[emp.id]
+      if (!log) return
+      const s = String(log.status || '').trim()
+      if (s === 'In Office' || s === 'Remote' || s === 'On-Field') count++
+    })
+    return count
+  }, [activeEmps, dayLogs])
+  const attendanceRate = activeEmps.length > 0 ? Math.round((arrivedCount / activeEmps.length) * 100) : 0
+  const efficiencyScore = Math.min(100, Math.round(attendanceRate * 0.5 + taskCompletionRate * 0.5))
+
+  const currentPayrollMonth = payroll && typeof payroll === 'object' && Object.keys(payroll).length > 0
+    ? Object.keys(payroll).sort().reverse()[0]
+    : null
+  const rawCurrentData = (currentPayrollMonth && payroll) ? payroll[currentPayrollMonth] : null
+  const currentPayrollData = Array.isArray(rawCurrentData)
+    ? rawCurrentData
+    : (Array.isArray(rawCurrentData?.records) ? rawCurrentData.records : (Array.isArray(rawCurrentData?.entries) ? rawCurrentData.entries : []))
+  const paidCount = currentPayrollData.filter(p => p && p.status === 'Paid').length
+  const pendingCount = currentPayrollData.filter(p => p && p.status === 'Pending').length
+  const totalPayrollCost = currentPayrollData.reduce((acc, curr) => {
+    const net = Number(curr?.netSalary || curr?.net || (Number(curr?.grossSalary || 0) - Number(curr?.deductions || 0))) || 0
+    return acc + net
+  }, 0)
 
   return (
-    <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[1200px] mx-auto">
-      <Card className="bg-card border-border shadow-sm">
-        <CardContent className="p-6 sm:p-8 flex items-center gap-5 sm:gap-6">
-          <div className="size-16 sm:size-20 bg-background rounded-full shadow-sm flex items-center justify-center p-1">
-            {getInitialsAvatar(currentUser.name)}
-          </div>
-          <div className="flex flex-col gap-1 sm:gap-1.5">
-            <h1 className="text-fluid-xl font-extrabold tracking-tight m-0 text-foreground">Welcome back, {currentUser.name.split(' ')[0]}!</h1>
-            <p className="m-0 text-fluid font-medium text-muted-foreground">{currentUser.role} • {currentUser.department}</p>
-          </div>
-        </CardContent>
-      </Card>
+    <div className="space-y-6 pb-6">
+      {/* 12-Column Grid matching portal architecture */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 lg:gap-6 auto-rows-[minmax(148px,auto)] items-stretch pt-2">
 
-      <GeoCheckInWidget 
-        currentUser={currentUser} 
-        attendance={attendance} 
-        setAttendance={setAttendance} 
-        addToast={addToast} 
-        settings={settings}
-      />
+        {/* Column 1: Catch Up (Announcements, Notice & Events) — col-span-12 lg:col-span-4 */}
+        <AnnouncementsWidget
+          announcements={announcements}
+          setAnnouncements={setAnnouncements}
+          currentUser={currentUser}
+          employees={employees}
+          upcomingMilestones={upcomingMilestones}
+          upcomingEvents={upcomingEvents}
+          events={events}
+          setEvents={setEvents}
+          setCurrentView={setActiveTab}
+          addToast={addToast}
+          addLog={addLog}
+          addNotification={addNotification}
+          settings={settings}
+          cardClass="col-span-12 lg:col-span-4 h-full"
+        />
 
-      {/* ANNOUNCEMENTS - MOVED TO TOP */}
-      <div className="flex flex-col gap-4">
-        <div className="flex justify-between items-center px-1">
-          <h3 className="text-fluid-xl font-semibold text-foreground m-0">Catch Up</h3>
-          <button className="bg-transparent border-0 font-semibold cursor-pointer text-sm text-primary hover:text-primary/80 transition-colors" onClick={() => setActiveTab('announcements')}>View All</button>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {recentAnnouncements.length === 0 ? (
-            <Card className="col-span-full dashboard-widget">
-              <CardContent className="p-6 text-center text-muted-foreground">No new announcements</CardContent>
-            </Card>
-          ) : (
-            recentAnnouncements.map(ann => (
-              <Card key={ann.id} className={`cursor-pointer hover:bg-muted/50 transition-colors dashboard-widget ${ann.priority === 'Urgent' ? 'border-l-4 border-l-red-500' : ''}`} onClick={() => setActiveTab('announcements')}>
-                <CardContent className="p-4 flex flex-col h-full justify-between">
-                  <div>
-                    <div className="flex justify-between items-start mb-2 gap-2">
-                      <span className="font-semibold leading-tight ">{ann.title}</span>
-                      <span className="text-xs text-muted-foreground whitespace-nowrap shrink-0">{formatDateShort(ann.date)}</span>
-                    </div>
-                    <p className="text-fluid-sm text-muted-foreground m-0 break-words ">{ann.content}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))
+        {/* Column 2: Middle Stacked Column — Clock In (top), Personal Attendance (middle) & Performance Tracker (bottom) — col-span-12 lg:col-span-4 */}
+        <div className="col-span-12 lg:col-span-4 flex flex-col gap-4 sm:gap-5 lg:gap-6 justify-between">
+          {currentUser && (
+            <GeoCheckInWidget 
+              currentUser={currentUser} 
+              attendance={attendance} 
+              setAttendance={setAttendance} 
+              addToast={addToast} 
+              settings={settings}
+              notes={notes}
+              setNotes={setNotes}
+              cardClassName="!h-auto min-h-0 w-full"
+            />
           )}
+
+          <MyAttendanceWidget
+            currentUser={currentUser}
+            attendance={attendance}
+            roster={roster}
+            shiftTemplates={shiftTemplates}
+            settings={settings}
+            setCurrentView={setActiveTab}
+            cardClass="!h-auto min-h-0"
+          />
+
+          <PerformanceTrackerWidget
+            efficiencyScore={efficiencyScore}
+            taskCompletionRate={taskCompletionRate}
+            attendanceRate={attendanceRate}
+            setCurrentView={setActiveTab}
+            cardClass="!h-auto min-h-0"
+          />
         </div>
-      </div>
 
-      <div className="grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3">
-        <DailyChecklistWidget notes={notes} setNotes={setNotes} ownerId={currentUser?.id || currentUser?.uid || ''} />
-        
-        <Card className="hover:border-primary/50 transition-colors shadow-sm cursor-pointer dashboard-widget" onClick={() => setActiveTab('my-tasks')}>
-          <CardContent className="p-5 flex flex-col justify-center">
-            <div className="flex items-center gap-2 mb-2 text-primary">
-              <Icon name="check_box" size={18}/>
-              <h3 className="text-fluid-sm font-bold uppercase tracking-wider text-muted-foreground m-0">Active Tasks</h3>
-            </div>
-            <div className="text-fluid-xl font-black tabular-nums text-foreground">
-              {myActiveTasks.length} <span className="text-fluid-sm font-semibold text-muted-foreground ml-1">tasks</span>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="hover:border-primary/50 transition-colors shadow-sm cursor-pointer" onClick={() => setActiveTab('events')}>
-          <CardContent className="p-5 flex flex-col justify-center">
-            <div className="flex items-center gap-2 mb-2 text-emerald-500">
-              <Icon name="calendar_month" size={18}/>
-              <h3 className="text-fluid-sm font-bold uppercase tracking-wider text-muted-foreground m-0">Next Event</h3>
-            </div>
-            <div className="text-fluid-xl font-bold break-words text-foreground mb-1">
-              {nextEvent ? nextEvent.title : 'None Scheduled'}
-            </div>
-            <div className="text-fluid-sm font-medium text-muted-foreground">
-              {nextEvent ? formatDateShort(nextEvent.date) : 'Enjoy your time!'}
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="hover:border-primary/50 transition-colors shadow-sm cursor-pointer" onClick={() => setActiveTab('leave')}>
-          <CardContent className="p-5 flex flex-col justify-center">
-            <div className="flex items-center gap-2 mb-2 text-blue-500">
-              <Icon name="calendar_month" size={18}/>
-              <h3 className="text-fluid-sm font-bold uppercase tracking-wider text-muted-foreground m-0">Available Leave</h3>
-            </div>
-            <div className="text-fluid-xl font-black tabular-nums text-foreground">
-              {currentBalances.annual.limit - currentBalances.annual.used + currentBalances.sick.limit - currentBalances.sick.used} <span className="text-fluid-sm font-semibold text-muted-foreground ml-1">days total</span>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Column 3: Team Directory Widget — col-span-12 lg:col-span-4 */}
+        <EmployeeDirectoryWidget
+          employees={employees}
+          setCurrentView={setActiveTab}
+          cardClass="col-span-12 lg:col-span-4 h-full"
+        />
 
-        <Card className="hover:border-primary/50 transition-colors shadow-sm cursor-pointer" onClick={() => setActiveTab('my-assets')}>
-          <CardContent className="p-5 flex flex-col justify-center">
-            <div className="flex items-center gap-2 mb-2 text-amber-500">
-              <Icon name="monitor" size={18}/>
-              <h3 className="text-fluid-sm font-bold uppercase tracking-wider text-muted-foreground m-0">Reimbursements</h3>
-            </div>
-            <div className="text-fluid-xl font-black tabular-nums text-foreground">
-              ${totalPending.toFixed(2)} <span className="text-fluid-sm font-semibold text-muted-foreground ml-1">pending</span>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+        {/* Secondary Row: Tasks & Payroll widgets */}
+        <TasksWidget
+          tasks={tasks}
+          pendingTasksCount={pendingTasksCount}
+          taskCompletionRate={taskCompletionRate}
+          setCurrentView={setActiveTab}
+          cardClass="col-span-12 sm:col-span-6 lg:col-span-6"
+        />
 
-      <div className="mt-4 flex flex-col gap-4">
-        <h3 className="text-fluid-xl font-semibold m-0">Quick Actions</h3>
-        <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
-          <Card className="hover:border-primary/50 transition-colors shadow-sm cursor-pointer h-28 flex items-center justify-center group" onClick={() => setActiveTab('leave')}>
-            <CardContent className="p-0 flex flex-col gap-3 justify-center items-center">
-              <Icon name="calendar_month" className="text-blue-500 transition-transform group-hover:scale-110" size={28}/>
-              <span className="text-sm font-medium">Request Leave</span>
-            </CardContent>
-          </Card>
-          <Card className="hover:border-primary/50 transition-colors shadow-sm cursor-pointer h-28 flex items-center justify-center group" onClick={() => setActiveTab('payslips')}>
-            <CardContent className="p-0 flex flex-col gap-3 justify-center items-center">
-              <Icon name="download" className="text-green-500 transition-transform group-hover:scale-110" size={28}/>
-              <span className="text-sm font-medium">Download Payslip</span>
-            </CardContent>
-          </Card>
-        </div>
+        <MyPayrollWidget
+          currentUser={currentUser}
+          payroll={payroll}
+          expenses={expenses}
+          settings={settings}
+          setCurrentView={setActiveTab}
+          addToast={addToast}
+          cardClass="col-span-12 sm:col-span-6 lg:col-span-6"
+        />
+
       </div>
     </div>
   )

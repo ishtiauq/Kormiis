@@ -29,7 +29,6 @@ export default function Topbar({
   unreadCount, 
   showNotifications, 
   notifications = [], 
-  clearNotifications, 
   onProfileClick, 
   handleLogout, 
   showThemeToggle = true, 
@@ -534,28 +533,28 @@ export default function Topbar({
             <div className="flex items-center gap-1.5 p-1 bg-muted/40 dark:bg-white/[0.05] rounded-2xl border border-border/60 dark:border-white/[0.08] mb-3 shrink-0">
               <button 
                 onClick={() => setNotificationTab('all')}
-                className={`flex-1 h-7.5 text-xs font-bold rounded-xl transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
+                className={`flex-1 h-8 text-xs font-bold rounded-xl transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5 border border-transparent ${
                   notificationTab === 'all' 
-                    ? 'bg-white text-foreground shadow-xs border border-border/50 dark:bg-white/20 dark:border-white/10' 
-                    : 'text-muted-foreground hover:text-foreground bg-transparent'
+                    ? 'bg-neutral-900 text-white shadow-xs dark:bg-white dark:text-neutral-900' 
+                    : 'text-muted-foreground hover:text-foreground hover:bg-white/40 dark:hover:bg-white/10'
                 }`}
               >
                 <span>All</span>
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${notificationTab === 'all' ? 'bg-black/[0.06] dark:bg-white/20 text-foreground' : 'bg-black/[0.04] dark:bg-white/10 text-muted-foreground'}`}>
+                <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${notificationTab === 'all' ? 'bg-white/20 text-white dark:bg-black/20 dark:text-black' : 'bg-black/[0.04] dark:bg-white/10 text-muted-foreground'}`}>
                   {notifications.length + (hasIntegrityIssues ? 1 : 0)}
                 </span>
               </button>
               <button 
                 onClick={() => setNotificationTab('unread')}
-                className={`flex-1 h-7.5 text-xs font-bold rounded-xl transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
+                className={`flex-1 h-8 text-xs font-bold rounded-xl transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5 border border-transparent ${
                   notificationTab === 'unread' 
-                    ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 shadow-xs' 
-                    : 'text-muted-foreground hover:text-foreground bg-transparent'
+                    ? 'bg-neutral-900 text-white shadow-xs dark:bg-white dark:text-neutral-900' 
+                    : 'text-muted-foreground hover:text-foreground hover:bg-white/40 dark:hover:bg-white/10'
                 }`}
               >
                 <span>Unread</span>
                 {totalUnreadCount > 0 && (
-                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${notificationTab === 'unread' ? 'bg-white/20 text-white dark:bg-black/20 dark:text-black' : 'bg-destructive/15 text-destructive'}`}>
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${notificationTab === 'unread' ? 'bg-white/20 text-white dark:bg-black/20 dark:text-black' : 'bg-destructive/15 text-destructive'}`}>
                     {totalUnreadCount}
                   </span>
                 )}
@@ -578,108 +577,97 @@ export default function Topbar({
                 filteredNotifications.map(n => {
                   const meta = CATEGORY_META[n.category] || CATEGORY_META[n.view] || CATEGORY_META.notice || CATEGORY_META.system
                   const isUnread = !n.read
+                  const isLeaveReq = isManagerOrAdmin && (n.category === 'leave' || n.category === 'leaves') && (n.title?.toLowerCase().includes('request') || n.text?.toLowerCase().includes('request'))
+                  const isExpenseReq = isManagerOrAdmin && (n.category === 'expense' || n.category === 'expenses') && (n.title?.toLowerCase().includes('submitted') || n.text?.toLowerCase().includes('claim') || n.text?.toLowerCase().includes('submitted'))
+                  const isTaskNotif = (n.category === 'task' || n.category === 'tasks') && !n.text?.toLowerCase().includes('completed')
+                  const showActions = isLeaveReq || isExpenseReq || isTaskNotif || !!n.view
+                  const timeLabel = getRelativeTime(n.timestamp || n.time) || n.time || 'Just now'
 
                   return (
                     <div 
                       role="listitem" 
                       key={n.id} 
                       onClick={() => navigateToView(n.view, n.id)}
-                      className={`group p-3 sm:p-3.5 rounded-2xl transition-all duration-200 cursor-pointer border relative select-none flex items-start gap-3 active:scale-[0.99] ${
+                      className={`group p-3 rounded-2xl transition-all duration-200 cursor-pointer border relative select-none flex items-start gap-2.5 active:scale-[0.99] ${
                         isUnread 
-                          ? 'bg-primary/[0.07] dark:bg-primary/[0.14] hover:bg-primary/[0.11] dark:hover:bg-primary/[0.20] border-primary/25 shadow-xs' 
-                          : 'bg-white/60 dark:bg-white/[0.04] hover:bg-white/90 dark:hover:bg-white/[0.08] border-black/[0.06] dark:border-white/[0.08] shadow-[0_2px_8px_rgba(0,0,0,0.02)] dark:shadow-none'
+                          ? 'bg-transparent hover:bg-primary/[0.05] dark:hover:bg-primary/[0.08] border-primary/30' 
+                          : 'bg-transparent hover:bg-white/5 dark:hover:bg-white/[0.05] border-black/[0.08] dark:border-white/[0.10]'
                       }`}
                     >
-                      <Icon name={meta.icon} size={26} className="shrink-0 text-foreground transition-transform group-hover:scale-105 mt-0.5" />
+                      <Icon name={meta.icon} size={22} className="shrink-0 text-foreground transition-transform group-hover:scale-105 mt-0.5" />
 
                       <div className="min-w-0 flex-1 flex flex-col gap-0.5">
                         <div className="flex items-center justify-between gap-2">
-                          <span 
-                            className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md"
-                            style={{ background: `${meta.color}15`, color: meta.color }}
-                          >
-                            {meta.label || 'Notice'}
-                          </span>
-                          {isUnread && (
-                            <span className="flex items-center gap-1 text-[10px] font-bold text-primary">
-                              <span className="size-1.5 rounded-full bg-primary animate-pulse" />
-                              NEW
+                          <span className="flex items-center gap-1.5 min-w-0">
+                            <span 
+                              className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md shrink-0"
+                              style={{ background: `${meta.color}15`, color: meta.color }}
+                            >
+                              {meta.label || 'Notice'}
                             </span>
-                          )}
+                            {isUnread && (
+                              <span className="flex items-center gap-1 text-[10px] font-bold text-primary shrink-0">
+                                <span className="size-1.5 rounded-full bg-primary animate-pulse" />
+                                NEW
+                              </span>
+                            )}
+                          </span>
+                          <span className="flex items-center gap-1 text-[10px] font-medium text-muted-foreground whitespace-nowrap shrink-0">
+                            <Icon name="schedule" size={11} className="opacity-70" />
+                            {timeLabel}
+                          </span>
                         </div>
 
                         {n.title && n.title !== n.text && (
-                          <p className="text-fluid-sm font-bold m-0 mt-1 leading-snug text-foreground break-words">{n.title}</p>
+                          <p className="text-fluid-sm font-bold m-0 mt-0.5 leading-snug text-foreground break-words">{n.title}</p>
                         )}
 
                         <p className={`text-fluid-xs m-0 mt-0.5 leading-relaxed text-foreground/85 dark:text-foreground/90 break-words ${isUnread ? 'font-semibold' : 'font-medium text-muted-foreground'}`}>
                           {n.text}
                         </p>
 
-                        <div className="flex flex-wrap items-center justify-between gap-2 mt-2.5 pt-1.5 border-t border-black/[0.04] dark:border-white/[0.06]">
-                          <div className="flex items-center gap-1.5 text-[10px] font-medium text-muted-foreground">
-                            <Icon name="schedule" size={12} className="opacity-70" />
-                            <span>{getRelativeTime(n.timestamp || n.time) || n.time || 'Just now'}</span>
-                          </div>
-
-                          <div className="flex items-center gap-1.5 ml-auto">
-                            {isManagerOrAdmin && (n.category === 'leave' || n.category === 'leaves') && (n.title?.toLowerCase().includes('request') || n.text?.toLowerCase().includes('request')) && (
+                        {showActions && (
+                          <div className="flex flex-wrap items-center justify-end gap-1.5 mt-1.5 pt-1 border-t border-black/[0.04] dark:border-white/[0.06]">
+                            {isLeaveReq && (
                               <>
-                                <button type="button" onClick={(e) => handleQuickAction(e, n, 'approve_leave')} className="h-6.5 px-2.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-600 dark:text-emerald-400 text-[11px] font-bold border border-emerald-500/30 flex items-center gap-1 cursor-pointer transition-all active:scale-95 shadow-2xs">
+                                <button type="button" onClick={(e) => handleQuickAction(e, n, 'approve_leave')} className="h-6 px-2.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-600 dark:text-emerald-400 text-[11px] font-bold border border-emerald-500/30 flex items-center gap-1 cursor-pointer transition-all active:scale-95 shadow-2xs">
                                   <Icon name="check" size={12} /><span>Approve</span>
                                 </button>
-                                <button type="button" onClick={(e) => handleQuickAction(e, n, 'reject_leave')} className="h-6.5 px-2 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 text-rose-600 dark:text-rose-400 text-[11px] font-bold border border-rose-500/30 flex items-center gap-1 cursor-pointer transition-all active:scale-95 shadow-2xs">
+                                <button type="button" onClick={(e) => handleQuickAction(e, n, 'reject_leave')} className="h-6 px-2 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 text-rose-600 dark:text-rose-400 text-[11px] font-bold border border-rose-500/30 flex items-center gap-1 cursor-pointer transition-all active:scale-95 shadow-2xs">
                                   <Icon name="close" size={12} /><span>Reject</span>
                                 </button>
                               </>
                             )}
 
-                            {isManagerOrAdmin && (n.category === 'expense' || n.category === 'expenses') && (n.title?.toLowerCase().includes('submitted') || n.text?.toLowerCase().includes('claim') || n.text?.toLowerCase().includes('submitted')) && (
+                            {isExpenseReq && (
                               <>
-                                <button type="button" onClick={(e) => handleQuickAction(e, n, 'approve_expense')} className="h-6.5 px-2.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-600 dark:text-emerald-400 text-[11px] font-bold border border-emerald-500/30 flex items-center gap-1 cursor-pointer transition-all active:scale-95 shadow-2xs">
+                                <button type="button" onClick={(e) => handleQuickAction(e, n, 'approve_expense')} className="h-6 px-2.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-600 dark:text-emerald-400 text-[11px] font-bold border border-emerald-500/30 flex items-center gap-1 cursor-pointer transition-all active:scale-95 shadow-2xs">
                                   <Icon name="check" size={12} /><span>Approve</span>
                                 </button>
-                                <button type="button" onClick={(e) => handleQuickAction(e, n, 'reject_expense')} className="h-6.5 px-2 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 text-rose-600 dark:text-rose-400 text-[11px] font-bold border border-rose-500/30 flex items-center gap-1 cursor-pointer transition-all active:scale-95 shadow-2xs">
+                                <button type="button" onClick={(e) => handleQuickAction(e, n, 'reject_expense')} className="h-6 px-2 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 text-rose-600 dark:text-rose-400 text-[11px] font-bold border border-rose-500/30 flex items-center gap-1 cursor-pointer transition-all active:scale-95 shadow-2xs">
                                   <Icon name="close" size={12} /><span>Reject</span>
                                 </button>
                               </>
                             )}
 
-                            {(n.category === 'task' || n.category === 'tasks') && !n.text?.toLowerCase().includes('completed') && (
-                              <button type="button" onClick={(e) => handleQuickAction(e, n, 'complete_task')} className="h-6.5 px-2.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-600 dark:text-emerald-400 text-[11px] font-bold border border-emerald-500/30 flex items-center gap-1 cursor-pointer transition-all active:scale-95 shadow-2xs">
+                            {isTaskNotif && (
+                              <button type="button" onClick={(e) => handleQuickAction(e, n, 'complete_task')} className="h-6 px-2.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-600 dark:text-emerald-400 text-[11px] font-bold border border-emerald-500/30 flex items-center gap-1 cursor-pointer transition-all active:scale-95 shadow-2xs">
                                 <Icon name="check_circle" size={12} /><span>Mark Done</span>
                               </button>
                             )}
 
                             {n.view && (
-                              <button type="button" onClick={(e) => handleQuickAction(e, n, 'view')} className="h-6.5 px-2.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-[11px] font-bold border border-primary/25 flex items-center gap-1 cursor-pointer transition-all active:scale-95 shadow-2xs">
+                              <button type="button" onClick={(e) => handleQuickAction(e, n, 'view')} className="h-6 px-2.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-[11px] font-bold border border-primary/25 flex items-center gap-1 cursor-pointer transition-all active:scale-95 shadow-2xs">
                                 <span>Open</span><Icon name="arrow_forward" size={11} />
                               </button>
                             )}
                           </div>
-                        </div>
+                        )}
                       </div>
                     </div>
                   )
                 })
               )}
-            </div>
-
-            {/* Footer */}
-            <div className="flex flex-row items-center justify-between pt-3 mt-3 border-t border-border/80 dark:border-white/12 shrink-0">
-              <button
-                onClick={(e) => { e.stopPropagation(); if(clearNotifications) clearNotifications(); }}
-                className="text-xs font-semibold text-muted-foreground hover:text-destructive transition-colors cursor-pointer flex items-center gap-1.5 active:scale-95"
-              >
-                <Icon name="delete_sweep" size={16} />
-                <span>Clear All</span>
-              </button>
-              <button
-                onClick={(e) => { e.stopPropagation(); setShowNotifications(false); }}
-                className="liquid-glass-btn h-8 px-4.5 rounded-full text-xs font-bold cursor-pointer"
-              >
-                Close
-              </button>
             </div>
           </div>
         </div>

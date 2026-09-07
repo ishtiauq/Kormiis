@@ -728,9 +728,14 @@ export const MobileResponsiveBottomBar = memo(({
                           </p>
                         </div>
                       ) : (
-                        filteredNotifications.map((n) => {
+filteredNotifications.map((n) => {
                           const meta = CATEGORY_META[n.category] || CATEGORY_META[n.view] || CATEGORY_META.notice || CATEGORY_META.system
                           const isUnread = !n.read
+                          const isLeaveReq = isManagerOrAdmin && (n.category === 'leave' || n.category === 'leaves') && (n.title?.toLowerCase().includes('request') || (n.text || n.message)?.toLowerCase().includes('request'))
+                          const isExpenseReq = isManagerOrAdmin && (n.category === 'expense' || n.category === 'expenses') && ((n.title?.toLowerCase().includes('submitted') || (n.text || n.message)?.toLowerCase().includes('claim') || (n.text || n.message)?.toLowerCase().includes('submitted')))
+                          const isTaskNotif = (n.category === 'task' || n.category === 'tasks') && !(n.text || n.message)?.toLowerCase().includes('completed')
+                          const showActions = isLeaveReq || isExpenseReq || isTaskNotif || !!n.view
+                          const timeLabel = getRelativeTime(n.timestamp || n.time) || n.time || 'Just now'
 
                           return (
                             <div
@@ -752,22 +757,28 @@ export const MobileResponsiveBottomBar = memo(({
                               {/* Content Body */}
                               <div className="min-w-0 flex-1 flex flex-col gap-0.5">
                                 <div className="flex items-center justify-between gap-1.5">
-                                  <span 
-                                    className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md"
-                                    style={{ background: `${meta.color}15`, color: meta.color }}
-                                  >
-                                    {meta.label || 'Notice'}
-                                  </span>
-                                  {isUnread && (
-                                    <span className="flex items-center gap-1 text-[9.5px] font-bold text-primary">
-                                      <span className="size-1.5 rounded-full bg-primary animate-pulse" />
-                                      NEW
+                                  <span className="flex items-center gap-1.5 min-w-0">
+                                    <span 
+                                      className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md shrink-0"
+                                      style={{ background: `${meta.color}15`, color: meta.color }}
+                                    >
+                                      {meta.label || 'Notice'}
                                     </span>
-                                  )}
+                                    {isUnread && (
+                                      <span className="flex items-center gap-1 text-[9.5px] font-bold text-primary shrink-0">
+                                        <span className="size-1.5 rounded-full bg-primary animate-pulse" />
+                                        NEW
+                                      </span>
+                                    )}
+                                  </span>
+                                  <span className="flex items-center gap-1 text-[9.5px] font-medium text-muted-foreground whitespace-nowrap shrink-0">
+                                    <Icon name="schedule" size={11} className="opacity-70" />
+                                    {timeLabel}
+                                  </span>
                                 </div>
 
                                 {n.title && n.title !== (n.text || n.message) && (
-                                  <h4 className="text-[12px] font-bold m-0 mt-1 leading-snug text-foreground break-words">
+                                  <h4 className="text-[12px] font-bold m-0 mt-0.5 leading-snug text-foreground break-words">
                                     {n.title}
                                   </h4>
                                 )}
@@ -776,15 +787,9 @@ export const MobileResponsiveBottomBar = memo(({
                                   {n.text || n.message}
                                 </p>
 
-                                {/* Meta timestamp & Quick Action Buttons */}
-                                <div className="flex flex-wrap items-center justify-between gap-1.5 mt-2 pt-1.5 border-t border-black/[0.05] dark:border-white/[0.06]">
-                                  <div className="flex items-center gap-1 text-[9.5px] font-medium text-muted-foreground">
-                                    <Icon name="schedule" size={11} className="opacity-70" />
-                                    <span>{getRelativeTime(n.timestamp || n.time) || n.time || 'Just now'}</span>
-                                  </div>
-
-                                  <div className="flex items-center gap-1.5 ml-auto">
-                                    {isManagerOrAdmin && (n.category === 'leave' || n.category === 'leaves') && (n.title?.toLowerCase().includes('request') || (n.text || n.message)?.toLowerCase().includes('request')) && (
+                                {showActions && (
+                                  <div className="flex flex-wrap items-center justify-end gap-1.5 mt-1.5 pt-1 border-t border-black/[0.05] dark:border-white/[0.06]">
+                                    {isLeaveReq && (
                                       <>
                                         <button 
                                           type="button" 
@@ -803,7 +808,7 @@ export const MobileResponsiveBottomBar = memo(({
                                       </>
                                     )}
 
-                                    {isManagerOrAdmin && (n.category === 'expense' || n.category === 'expenses') && ((n.title?.toLowerCase().includes('submitted') || (n.text || n.message)?.toLowerCase().includes('claim') || (n.text || n.message)?.toLowerCase().includes('submitted'))) && (
+                                    {isExpenseReq && (
                                       <>
                                         <button 
                                           type="button" 
@@ -822,7 +827,7 @@ export const MobileResponsiveBottomBar = memo(({
                                       </>
                                     )}
 
-                                    {(n.category === 'task' || n.category === 'tasks') && !(n.text || n.message)?.toLowerCase().includes('completed') && (
+                                    {isTaskNotif && (
                                       <button 
                                         type="button" 
                                         onClick={(e) => handleQuickAction(e, n, 'complete_task')} 
@@ -842,7 +847,7 @@ export const MobileResponsiveBottomBar = memo(({
                                       </button>
                                     )}
                                   </div>
-                                </div>
+                                )}
                               </div>
                             </div>
                           )

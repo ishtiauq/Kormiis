@@ -815,7 +815,7 @@ a.bg-primary:active {
 .widget-card,
 [data-widget],
 .employee-card-transparent,
-.employee-portal-root .glass-kormiis,
+.employee-portal-root .glass-kormiis:not([data-notif-panel]):not(.notification-modal):not([data-ai-panel]):not([data-ai-modal]):not(.ai-panel):not([data-mobile-panel]):not([data-menu-drawer]):not(.menu-bar-dock):not(.glass-mobile-drawer):not(.liquid-glass-drawer):not(.mobile-bottom-dock):not([data-mobile-dock]):not(.bottom-bar):not(.topbar):not(header):not([data-topbar]),
 .employee-portal-root [data-slot="card"],
 .employee-portal-root .card,
 .employee-portal-root .dashboard-widget,

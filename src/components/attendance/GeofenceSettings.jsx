@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap, Circle } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
@@ -40,6 +40,7 @@ export default function GeofenceSettings({ settings, setSettings, addToast, addL
   const [isMapSearching, setIsMapSearching] = useState(false)
   const [isLocating, setIsLocating] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [mapLayer, setMapLayer] = useState('streets')
 
   useEffect(() => {
     if (settings?.officeLocation) {
@@ -47,26 +48,42 @@ export default function GeofenceSettings({ settings, setSettings, addToast, addL
     }
   }, [settings?.officeLocation])
 
-  const handleMapSearch = async (e) => {
-    if (e) e.preventDefault();
-    if (!mapSearchQuery.trim()) return;
-    setIsMapSearching(true);
+  const searchTimer = useRef(null)
+
+  const runSearch = useCallback(async (query) => {
+    const q = String(query || '').trim()
+    if (!q) return
+    setIsMapSearching(true)
     try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(mapSearchQuery)}`);
-      const data = await res.json();
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=5&addressdetails=1&q=${encodeURIComponent(q)}`)
+      const data = await res.json()
       if (data && data.length > 0) {
-        const lat = parseFloat(data[0].lat);
-        const lon = parseFloat(data[0].lon);
-        setOfficeLocation(prev => ({ ...prev, lat, lng: lon }));
-        if (addToast) addToast(`Found: ${data[0].display_name.split(',')[0]}`, 'success');
+        const lat = parseFloat(data[0].lat)
+        const lon = parseFloat(data[0].lon)
+        setOfficeLocation(prev => ({ ...prev, lat, lng: lon }))
+        if (addToast) addToast(`Found: ${data[0].display_name.split(',')[0]}`, 'success')
       } else {
-        if (addToast) addToast('Location not found. Try a different search term.', 'error');
+        if (addToast) addToast('Location not found. Try a different search term.', 'error')
       }
     } catch (err) {
-      if (addToast) addToast('Error searching for location.', 'error');
+      if (addToast) addToast('Error searching for location.', 'error')
     } finally {
-      setIsMapSearching(false);
+      setIsMapSearching(false)
     }
+  }, [addToast])
+
+  // Debounced auto-search while typing (Nominatim-friendly: pauses between keystrokes)
+  useEffect(() => {
+    const q = mapSearchQuery.trim()
+    if (q.length < 3) return
+    const t = setTimeout(() => runSearch(mapSearchQuery), 450)
+    return () => clearTimeout(t)
+  }, [mapSearchQuery, runSearch])
+
+  const handleMapSearch = (e) => {
+    if (e) e.preventDefault()
+    if (searchTimer.current) clearTimeout(searchTimer.current)
+    runSearch(mapSearchQuery)
   }
 
   const handleUseCurrentLocation = () => {
@@ -172,10 +189,18 @@ export default function GeofenceSettings({ settings, setSettings, addToast, addL
             scrollWheelZoom={true} 
             className="w-full h-full"
           >
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
+            {mapLayer === 'satellite' ? (
+              <TileLayer
+                attribution='&copy; <a href="https://www.esri.com">Esri</a>, &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+              />
+            ) : (
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>'
+                url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png"
+                subdomains="abcd"
+              />
+            )}
             <LocationMarker 
               position={{ lat: officeLocation.lat, lng: officeLocation.lng }} 
               setPosition={(pos) => setOfficeLocation(prev => ({ ...prev, ...pos }))} 
@@ -186,6 +211,14 @@ export default function GeofenceSettings({ settings, setSettings, addToast, addL
               pathOptions={{ color: '#2563eb', fillColor: '#3b82f6', fillOpacity: 0.2 }}
             />
           </MapContainer>
+          <div className="absolute top-3 right-3 z-[1000] flex items-center gap-1 p-1 bg-card/90 dark:bg-[#12131c]/90 backdrop-blur-md rounded-full border border-border/80 dark:border-white/12 shadow-lg">
+            <button type="button" onClick={() => setMapLayer('streets')} className={`h-7 px-3 rounded-full text-[11px] font-bold transition-all cursor-pointer ${mapLayer === 'streets' ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900' : 'text-muted-foreground hover:text-foreground'}`}>
+              Map
+            </button>
+            <button type="button" onClick={() => setMapLayer('satellite')} className={`h-7 px-3 rounded-full text-[11px] font-bold transition-all cursor-pointer ${mapLayer === 'satellite' ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900' : 'text-muted-foreground hover:text-foreground'}`}>
+              Satellite
+            </button>
+          </div>
           <div className="absolute bottom-3 left-3 bg-card/90 dark:bg-[#12131c]/90 backdrop-blur-md px-3.5 py-2 rounded-2xl text-xs font-semibold text-foreground border border-border/80 dark:border-white/12 shadow-lg pointer-events-none z-[1000] flex items-center gap-2">
             <Icon name="touch_app" size={16} className="text-primary"/>
             <span>Click anywhere on the map to pin exact office coords</span>
