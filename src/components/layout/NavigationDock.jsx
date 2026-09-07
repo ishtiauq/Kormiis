@@ -1,4 +1,4 @@
-﻿import React, { memo } from 'react'
+import React, { memo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import TooltipPopover from '../TooltipPopover.jsx'
 
@@ -14,7 +14,18 @@ export const NavigationDock = memo(({
   if (!visibleNavItems || visibleNavItems.length === 0) return null
 
   return (
-    <div className={`w-fit max-w-full h-10.5 sm:h-11 md:h-11.5 glass-kormiis rounded-full p-1 flex items-center justify-center border border-black/8 dark:border-white/10 menu-bar-dock shadow-none ${isFullWidthRow ? 'mx-auto' : ''} ${className}`}>
+    <div 
+      data-bottom-bar
+      data-mobile-dock
+      className={`w-fit max-w-full h-10.5 sm:h-11 md:h-11.5 glass-kormiis bottom-bar rounded-full p-1 flex items-center justify-center border border-black/8 dark:border-white/10 menu-bar-dock shadow-none ${isFullWidthRow ? 'mx-auto' : ''} ${className}`}
+      style={{
+        background: 'transparent',
+        backgroundColor: 'transparent',
+        backdropFilter: 'blur(32px) saturate(190%)',
+        WebkitBackdropFilter: 'blur(32px) saturate(190%)',
+        boxShadow: 'none'
+      }}
+    >
       <nav 
         aria-label="Main page navigation" 
         className="flex items-center gap-0.5 sm:gap-1 md:gap-1.5 overflow-x-auto no-scrollbar scrollbar-none select-none scroll-smooth h-full max-w-full menu-bar-dock px-0.5"

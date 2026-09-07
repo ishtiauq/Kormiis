@@ -307,9 +307,10 @@ export default function Topbar({
     <div ref={topbarRef} className="relative w-full flex flex-col items-center pointer-events-auto">
       {/* Row 1: Unified Top Navigation Header (Logo Left, Inline Menu on XL+ screens, Actions Right) */}
       <header 
+        data-topbar
         aria-label="Top navigation bar" 
-        className="relative z-10 pointer-events-auto w-full h-14 sm:h-16 md:h-18 lg:h-20 px-4 sm:px-6 md:px-8 flex items-center justify-between pt-2 sm:pt-3 md:pt-4 pb-1 sm:pb-1.5 md:pb-2 gap-2 sm:gap-4 text-foreground bg-transparent !bg-transparent border-none !border-none shadow-none backdrop-blur-[32px] backdrop-saturate-[190%]"
-        style={{ background: 'transparent', backgroundColor: 'transparent', border: 'none', boxShadow: 'none', backdropFilter: 'saturate(190%) blur(32px)', WebkitBackdropFilter: 'saturate(190%) blur(32px)' }}
+        className="topbar relative z-10 pointer-events-auto w-full h-14 sm:h-16 md:h-18 lg:h-20 px-4 sm:px-6 md:px-8 flex items-center justify-between pt-2 sm:pt-3 md:pt-4 pb-1 sm:pb-1.5 md:pb-2 gap-2 sm:gap-4 text-foreground bg-transparent !bg-transparent border-none !border-none shadow-none backdrop-blur-[32px] backdrop-saturate-[190%]"
+        style={{ background: 'transparent', backgroundColor: 'transparent', border: 'none', boxShadow: 'none', backdropFilter: 'blur(32px) saturate(190%)', WebkitBackdropFilter: 'blur(32px) saturate(190%)' }}
       >
         
         {/* 1. Leftmost: Desktop & Tablet Brand Logo & Data Integrity Alert */}
@@ -489,7 +490,14 @@ export default function Topbar({
       {showNotifications && (
         <div 
           data-notif-panel 
-          className="pointer-events-auto z-50 absolute top-[calc(100%+12px)] sm:top-[calc(100%+16px)] right-2 sm:right-4 md:right-6 w-[94vw] sm:w-[480px] max-w-lg glass-kormiis rounded-[28px] border border-black/8 dark:border-white/8 shadow-none animate-in slide-in-from-top-2 fade-in duration-200"
+          className="pointer-events-auto z-50 absolute top-[calc(100%+12px)] sm:top-[calc(100%+16px)] right-2 sm:right-4 md:right-6 w-[94vw] sm:w-[480px] max-w-lg glass-kormiis notification-modal rounded-[28px] border border-black/8 dark:border-white/8 shadow-none animate-in slide-in-from-top-2 fade-in duration-200"
+          style={{
+            background: 'transparent',
+            backgroundColor: 'transparent',
+            backdropFilter: 'blur(32px) saturate(190%)',
+            WebkitBackdropFilter: 'blur(32px) saturate(190%)',
+            boxShadow: 'none'
+          }}
         >
           {/* Topmost Right Close Button */}
           <button

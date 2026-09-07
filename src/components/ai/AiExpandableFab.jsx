@@ -192,7 +192,16 @@ export default function AiExpandableFab({
                   damping: 30,
                   mass: 0.8
                 }}
-                className="pointer-events-auto w-full max-w-2xl h-[min(88vh,720px)] glass-mobile-drawer glass-kormiis rounded-t-[28px] sm:rounded-t-3xl rounded-b-none border-t border-x border-white/30 dark:border-white/14 shadow-2xl overflow-hidden flex flex-col backdrop-blur-3xl relative"
+                data-ai-panel
+                data-mobile-panel
+                className="pointer-events-auto w-full max-w-2xl h-[min(88vh,720px)] glass-mobile-drawer glass-kormiis rounded-t-[28px] sm:rounded-t-3xl rounded-b-none border-t border-x border-white/30 dark:border-white/14 shadow-none overflow-hidden flex flex-col relative"
+                style={{
+                  background: 'transparent',
+                  backgroundColor: 'transparent',
+                  backdropFilter: 'blur(32px) saturate(190%)',
+                  WebkitBackdropFilter: 'blur(32px) saturate(190%)',
+                  boxShadow: 'none'
+                }}
               >
                 {/* Pull handle indicator matching Menu Drawer standard */}
                 <div className="w-10 h-1 rounded-full bg-foreground/25 mx-auto mt-2.5 mb-1 shrink-0" />
@@ -225,6 +234,7 @@ export default function AiExpandableFab({
               <motion.div
                 key="ai-expanded-modal-desktop"
                 data-ai-panel
+                data-ai-modal
                 initial={{
                   opacity: 0,
                   scale: 0.86,
@@ -250,8 +260,15 @@ export default function AiExpandableFab({
                   damping: 28,
                   mass: 0.7
                 }}
-                style={{ transformOrigin: 'bottom right' }}
-                className="pointer-events-auto w-[calc(100vw-2rem)] xs:w-[390px] sm:w-[450px] md:w-[470px] h-[min(82vh,620px)] sm:h-[min(76vh,640px)] glass-kormiis rounded-[28px] border border-white/45 dark:border-white/16 shadow-[0_28px_70px_-12px_rgba(0,0,0,0.45),inset_0_1px_1px_0_rgba(255,255,255,0.45)] overflow-hidden flex flex-col backdrop-blur-3xl relative"
+                style={{ 
+                  transformOrigin: 'bottom right',
+                  background: 'transparent',
+                  backgroundColor: 'transparent',
+                  backdropFilter: 'blur(32px) saturate(190%)',
+                  WebkitBackdropFilter: 'blur(32px) saturate(190%)',
+                  boxShadow: 'none'
+                }}
+                className="pointer-events-auto w-[calc(100vw-2rem)] xs:w-[390px] sm:w-[450px] md:w-[470px] h-[min(82vh,620px)] sm:h-[min(76vh,640px)] glass-kormiis rounded-[28px] border border-white/45 dark:border-white/16 shadow-none overflow-hidden flex flex-col relative"
               >
                 <AiCoPilotModal
                   isMorphMode={true}

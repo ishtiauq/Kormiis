@@ -53,9 +53,9 @@
 :root {
   --background: #f5f5f7;
   --foreground: #000000;
-  --card: rgba(255, 255, 255, 0.72);
+  --card: transparent;
   --card-foreground: #000000;
-  --popover: rgba(255, 255, 255, 0.82);
+  --popover: rgba(255, 255, 255, 0.85);
   --popover-foreground: #000000;
   --primary: #FE3501;
   --primary-foreground: #ffffff;
@@ -177,14 +177,14 @@ html.dark,
 .force-light-mode {
   --background: #f5f5f7 !important;
   --foreground: hsl(0 0% 0%) !important;
-  --card: rgba(255, 255, 255, 0.45) !important;
+  --card: transparent !important;
   --card-foreground: hsl(0 0% 0%) !important;
-  --popover: rgba(255, 255, 255, 0.65) !important;
+  --popover: rgba(255, 255, 255, 0.85) !important;
   --popover-foreground: hsl(0 0% 0%) !important;
-  --muted: rgba(240, 243, 250, 0.60) !important;
+  --muted: transparent !important;
   --muted-foreground: hsl(210 10% 45%) !important;
   --border: rgba(0, 0, 0, 0.08) !important;
-  --input: rgba(255, 255, 255, 0.8) !important;
+  --input: transparent !important;
 }
 
 * {
@@ -252,16 +252,22 @@ main,
 section,
 nav,
 aside,
-[data-notif-panel],
 .dashboard-content {
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: contain;
+  overscroll-behavior-y: auto;
   touch-action: pan-y pinch-zoom;
+}
+
+/* Modals and popovers stay self-contained */
+[data-notif-panel],
+[role="dialog"] {
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .overflow-x-auto {
   touch-action: pan-x pinch-zoom;
-  overscroll-behavior-x: contain;
+  overscroll-behavior-x: auto;
 }
 
 /* GPU Hardware Layering on mobile & tablet viewports for 120Hz/60Hz silkiness
@@ -347,66 +353,191 @@ html.dark,
   box-shadow: none !important;
 }
 
-.glass-kormiis,
-.glass-apple,
-.glass-card,
-.glass-kormiis-modal,
-.glass-tooltip,
-.bg-card {
+/* ==============================================================
+   1. TRANSPARENT PAGE ELEMENTS STANDARD (ZERO BLUR, ZERO SATURATION)
+   All cards, widgets, panels, lists, tables, inputs, and containers
+   across all pages of the application are 100% transparent with
+   ZERO blur and ZERO saturation.
+   ============================================================== */
+
+.glass-kormiis:not([role="dialog"]):not([role="alertdialog"]):not([data-notif-panel]):not(.notification-modal):not(.notification-dropdown):not([data-ai-panel]):not([data-ai-modal]):not(.ai-panel):not([data-bottom-bar]):not([data-mobile-dock]):not(.mobile-bottom-dock):not([data-mobile-panel]):not([data-menu-drawer]):not(.menu-bar-dock):not(.bottom-bar):not(.topbar):not(header):not([data-topbar]):not(.glass-mobile-drawer):not(.liquid-glass-drawer):not(.toast):not([role="menu"]):not([role="listbox"]):not([role="tooltip"]):not(.popover-content):not([data-radix-popper-content-wrapper]),
+.glass-apple:not([role="dialog"]):not([role="alertdialog"]):not([data-notif-panel]):not(.notification-modal):not(.notification-dropdown):not([data-ai-panel]):not([data-ai-modal]):not(.ai-panel):not([data-bottom-bar]):not([data-mobile-dock]):not(.mobile-bottom-dock):not([data-mobile-panel]):not([data-menu-drawer]):not(.menu-bar-dock):not(.bottom-bar):not(.topbar):not(header):not([data-topbar]):not(.glass-mobile-drawer):not(.liquid-glass-drawer):not(.toast):not([role="menu"]):not([role="listbox"]):not([role="tooltip"]):not(.popover-content):not([data-radix-popper-content-wrapper]),
+.glass-card:not([role="dialog"]):not([role="alertdialog"]):not([data-notif-panel]):not(.notification-modal):not(.notification-dropdown):not([data-ai-panel]):not([data-ai-modal]):not(.ai-panel):not([data-bottom-bar]):not([data-mobile-dock]):not(.mobile-bottom-dock):not([data-mobile-panel]):not([data-menu-drawer]):not(.menu-bar-dock):not(.bottom-bar):not(.topbar):not(header):not([data-topbar]):not(.glass-mobile-drawer):not(.liquid-glass-drawer):not(.toast):not([role="menu"]):not([role="listbox"]):not([role="tooltip"]):not(.popover-content):not([data-radix-popper-content-wrapper]),
+.bg-card:not([role="dialog"]):not([role="alertdialog"]):not([data-notif-panel]):not(.notification-modal):not(.notification-dropdown):not([data-ai-panel]):not([data-ai-modal]):not(.ai-panel):not([data-bottom-bar]):not([data-mobile-dock]):not(.mobile-bottom-dock):not([data-mobile-panel]):not([data-menu-drawer]):not(.menu-bar-dock):not(.bottom-bar):not(.topbar):not(header):not([data-topbar]):not(.glass-mobile-drawer):not(.liquid-glass-drawer):not(.toast):not([role="menu"]):not([role="listbox"]):not([role="tooltip"]):not(.popover-content):not([data-radix-popper-content-wrapper]),
+.dashboard-widget {
   background: transparent !important;
   background-color: transparent !important;
-  -webkit-backdrop-filter: saturate(190%) blur(32px) !important;
-  backdrop-filter: saturate(190%) blur(32px) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
   border: 1px solid var(--glass-border) !important;
   box-shadow: none !important;
   isolation: isolate !important;
 }
 
-/* Mobile Performance: Reduce blur radius to save GPU bandwidth */
-@media (max-width: 1023px) {
-  .glass-kormiis,
-  .glass-apple,
-  .glass-card,
-  .glass-kormiis-modal,
-  .glass-tooltip,
-  .bg-card,
-  .liquid-glass-drawer,
-  .liquid-glass-btn,
-  .apple-glass-btn,
-  .topbar,
-  .bottom-bar,
-  .landing-glass-header,
-  .landing-glass-bottom-bar,
-  .glass-mobile-drawer {
-    -webkit-backdrop-filter: saturate(160%) blur(16px) !important;
-    backdrop-filter: saturate(160%) blur(16px) !important;
-  }
+/* ==============================================================
+   WHITELISTED OVERLAYS & FLOATING SURFACES ONLY (Apple Liquid Glass Blur & Saturation)
+   Blur and saturation are strictly reserved ONLY for:
+   1. Topbar
+   2. Bottombar (Mobile 4-icon dock & Tablet full dock)
+   3. Notification Modal & Dropdown
+   4. Toasts
+   5. Pop up Modals (Dialogs, Alert Dialogs, Sheets, Drawers)
+   6. Dropdown Modals (Popovers, Select Menus, Tooltips)
+   7. AI Panel (Floating copilot, expanded drawer, chat modal)
+   8. Menu Drawer (Mobile expanded module grid)
+   ============================================================== */
+
+.topbar,
+header[aria-label="Top navigation bar"],
+.landing-glass-header,
+.bottom-bar,
+[data-bottom-bar],
+.mobile-bottom-dock,
+[data-mobile-dock],
+[data-mobile-panel],
+[data-menu-drawer],
+.menu-bar-dock,
+[data-ai-panel],
+[data-ai-modal],
+.ai-panel,
+[data-notif-panel],
+.notification-modal,
+.notification-dropdown,
+.toast,
+[data-sonner-toaster],
+[data-sonner-toast],
+ol[data-sonner-toaster],
+li[data-sonner-toast],
+[role="dialog"],
+[role="alertdialog"],
+[data-radix-dialog-content],
+[data-radix-alert-dialog-content],
+.dialog-content,
+.alert-dialog-content,
+.glass-kormiis-modal,
+.glass-mobile-drawer,
+.liquid-glass-drawer,
+[data-radix-dialog-overlay],
+[data-radix-alert-dialog-overlay],
+[role="menu"],
+[role="listbox"],
+[data-radix-popper-content-wrapper],
+[data-radix-select-content],
+[data-radix-dropdown-menu-content],
+[data-radix-popover-content],
+[data-radix-tooltip-content],
+.popover-content,
+[role="tooltip"] {
+  background: transparent !important;
+  background-color: transparent !important;
+  -webkit-backdrop-filter: blur(32px) saturate(190%) !important;
+  backdrop-filter: blur(32px) saturate(190%) !important;
+  border: 1px solid var(--glass-border) !important;
+  box-shadow: none !important;
 }
 
-/* Low-end device media query - further reduce effects */
+/* AI Panel, Notification Panel, Mobile Bottom Bar & Menu Drawer: Pure Refraction Standard */
+[data-ai-panel],
+[data-ai-modal],
+.ai-panel,
+[data-notif-panel],
+.notification-modal,
+.notification-dropdown,
+.bottom-bar,
+[data-bottom-bar],
+.mobile-bottom-dock,
+[data-mobile-dock],
+[data-mobile-panel],
+[data-menu-drawer],
+.menu-bar-dock,
+.glass-mobile-drawer,
+.liquid-glass-drawer,
+.glass-kormiis-modal,
+[role="dialog"],
+[role="alertdialog"],
+.popover-content,
+[role="menu"],
+[role="listbox"] {
+  background: transparent !important;
+  background-color: transparent !important;
+  -webkit-backdrop-filter: blur(32px) saturate(190%) !important;
+  backdrop-filter: blur(32px) saturate(190%) !important;
+  border: 1px solid var(--glass-border) !important;
+  box-shadow: none !important;
+}
+
+.dark [data-ai-panel],
+.dark [data-ai-modal],
+.dark .ai-panel,
+.dark [data-notif-panel],
+.dark .notification-modal,
+.dark .notification-dropdown,
+.dark .bottom-bar,
+.dark [data-bottom-bar],
+.dark .mobile-bottom-dock,
+.dark [data-mobile-dock],
+.dark [data-mobile-panel],
+.dark [data-menu-drawer],
+.dark .menu-bar-dock,
+.dark .glass-mobile-drawer,
+.dark .liquid-glass-drawer,
+.dark .glass-kormiis-modal,
+.dark [role="dialog"],
+.dark [role="alertdialog"],
+.dark .popover-content,
+.dark [role="menu"],
+.dark [role="listbox"],
+[data-theme="dark"] [data-ai-panel],
+[data-theme="dark"] [data-ai-modal],
+[data-theme="dark"] .ai-panel,
+[data-theme="dark"] [data-notif-panel],
+[data-theme="dark"] .notification-modal,
+[data-theme="dark"] .notification-dropdown,
+[data-theme="dark"] .bottom-bar,
+[data-theme="dark"] [data-bottom-bar],
+[data-theme="dark"] .mobile-bottom-dock,
+[data-theme="dark"] [data-mobile-dock],
+[data-theme="dark"] [data-mobile-panel],
+[data-theme="dark"] [data-menu-drawer],
+[data-theme="dark"] .menu-bar-dock,
+[data-theme="dark"] .glass-mobile-drawer,
+[data-theme="dark"] .liquid-glass-drawer,
+[data-theme="dark"] .glass-kormiis-modal,
+[data-theme="dark"] [role="dialog"],
+[data-theme="dark"] [role="alertdialog"],
+[data-theme="dark"] .popover-content,
+[data-theme="dark"] [role="menu"],
+[data-theme="dark"] [role="listbox"] {
+  background: transparent !important;
+  background-color: transparent !important;
+  -webkit-backdrop-filter: blur(32px) saturate(190%) !important;
+  backdrop-filter: blur(32px) saturate(190%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  box-shadow: none !important;
+}
+
+/* Low-end device reduction for Whitelisted Overlays */
 @media (max-width: 1023px) and (prefers-reduced-motion: reduce) {
-  .glass-kormiis,
-  .glass-apple,
-  .glass-card,
-  .glass-kormiis-modal,
-  .glass-tooltip,
-  .bg-card,
-  .liquid-glass-drawer,
-  .liquid-glass-btn,
-  .apple-glass-btn,
   .topbar,
+  header[aria-label="Top navigation bar"],
   .bottom-bar,
+  [data-bottom-bar],
+  .mobile-bottom-dock,
   .landing-glass-header,
   .landing-glass-bottom-bar,
-  .glass-mobile-drawer {
+  [data-notif-panel],
+  .toast,
+  [data-sonner-toast],
+  [role="dialog"],
+  [role="alertdialog"],
+  .glass-mobile-drawer,
+  .liquid-glass-drawer,
+  [role="menu"],
+  [role="listbox"],
+  [data-radix-popper-content-wrapper] {
     -webkit-backdrop-filter: saturate(140%) blur(8px) !important;
     backdrop-filter: saturate(140%) blur(8px) !important;
   }
-}
-
-.glass-tooltip {
-  border-radius: 1rem !important;
-  color: var(--foreground) !important;
 }
 
 .liquid-glass-drawer {
@@ -422,7 +553,6 @@ html.dark .liquid-glass-drawer,
   border-left: 1px solid rgba(255, 255, 255, 0.15) !important;
   box-shadow: none !important;
 }
-
 
 /* True Apple Liquid Glass Top Bar & Floating Pills (Zero Shadow Standard) */
 .landing-glass-header,
@@ -464,15 +594,15 @@ html.dark .liquid-glass-drawer,
 
 button.glass-kormiis,
 a.glass-kormiis,
-button.glass-kormiis,
-a.glass-kormiis,
 [role="button"].glass-kormiis,
 .liquid-glass-btn,
 .apple-glass-btn {
   border: 1px solid var(--glass-border);
   box-shadow: none !important;
-  -webkit-backdrop-filter: saturate(190%) blur(32px);
-  backdrop-filter: saturate(190%) blur(32px);
+  background: transparent !important;
+  background-color: transparent !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
   border-radius: 9999px;
   transition: 
     transform 450ms cubic-bezier(0.34, 1.56, 0.64, 1),
@@ -617,17 +747,19 @@ a.bg-primary:active {
 
 /* Glass Badges & Tags */
 .glass-badge {
-  background: rgba(255, 255, 255, 0.45);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
-  backdrop-filter: saturate(180%) blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  box-shadow: inset 0 1px 0.5px rgba(255, 255, 255, 0.8), 0 2px 6px rgba(0, 0, 0, 0.04);
+  background: transparent !important;
+  background-color: transparent !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: none !important;
 }
 .dark .glass-badge,
 [data-theme="dark"] .glass-badge {
-  background: rgba(255, 255, 255, 0.08) !important;
+  background: transparent !important;
+  background-color: transparent !important;
   border: 1px solid rgba(255, 255, 255, 0.16) !important;
-  box-shadow: inset 0 1px 0.5px rgba(255, 255, 255, 0.2), 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+  box-shadow: none !important;
 }
 /* Animated Live Pulse Dots (Monochrome Apple Standard) */
 .pulse-dot {
@@ -1300,13 +1432,17 @@ main[class*="dashboard-content"] {
   animation: ai-panel-slide-down 260ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
-/* 4. Glass Inputs & Smooth Focus Rings */
-input, select, textarea, .border-input {
-  background: rgba(255, 255, 255, 0.85);
-  -webkit-backdrop-filter: blur(12px) saturate(160%);
-  backdrop-filter: blur(12px) saturate(160%);
-  border: 1px solid rgba(0, 0, 0, 0.15) !important;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02) !important;
+/* 4. Clean Minimal Transparent Inputs */
+input:not([role="switch"]):not([type="checkbox"]):not([type="radio"]),
+select,
+textarea,
+.border-input {
+  background: transparent !important;
+  background-color: transparent !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: none !important;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
   border-radius: 0.875rem !important;
   padding-inline: 0.875rem;
@@ -1316,7 +1452,8 @@ input, select, textarea, .border-input {
 
 input:hover, select:hover, textarea:hover, .border-input:hover {
   border-color: rgba(0, 0, 0, 0.25) !important;
-  background: rgba(255, 255, 255, 0.95);
+  background: transparent !important;
+  background-color: transparent !important;
 }
 
 .glass-kormiis-modal input,
@@ -1325,39 +1462,47 @@ input:hover, select:hover, textarea:hover, .border-input:hover {
 [role="dialog"] input,
 [role="dialog"] select,
 [role="dialog"] textarea {
-  background: rgba(245, 247, 250, 0.85) !important;
-  border: 1px solid rgba(0, 0, 0, 0.16) !important;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: none !important;
 }
 
-.dark input, .dark select, .dark textarea, .dark .border-input,
-[data-theme="dark"] input, [data-theme="dark"] select, [data-theme="dark"] textarea, [data-theme="dark"] .border-input,
-.force-dark-mode input, .force-dark-mode select, .force-dark-mode textarea,
-.dark .glass-kormiis-modal input,
-.dark .glass-kormiis-modal select,
-.dark .glass-kormiis-modal textarea,
-[data-theme="dark"] [role="dialog"] input,
-[data-theme="dark"] [role="dialog"] select,
-[data-theme="dark"] [role="dialog"] textarea {
-  background: rgba(255, 255, 255, 0.08) !important;
-  -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
-  backdrop-filter: blur(16px) saturate(180%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.18) !important;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.45) !important;
+.dark input:not([role="switch"]):not([type="checkbox"]):not([type="radio"]),
+.dark select,
+.dark textarea,
+.dark .border-input,
+[data-theme="dark"] input:not([role="switch"]):not([type="checkbox"]):not([type="radio"]),
+[data-theme="dark"] select,
+[data-theme="dark"] textarea,
+[data-theme="dark"] .border-input,
+.force-dark-mode input,
+.force-dark-mode select,
+.force-dark-mode textarea {
+  background: transparent !important;
+  background-color: transparent !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  box-shadow: none !important;
   color: var(--foreground) !important;
 }
 
 .dark input:hover, .dark select:hover, .dark textarea:hover,
 [data-theme="dark"] input:hover, [data-theme="dark"] select:hover, [data-theme="dark"] textarea:hover {
   border-color: rgba(255, 255, 255, 0.32) !important;
-  background: rgba(255, 255, 255, 0.12) !important;
+  background: transparent !important;
+  background-color: transparent !important;
 }
 
 input:focus, select:focus, textarea:focus {
   outline: none !important;
-  box-shadow: 0 0 0 3px rgba(254, 53, 1, 0.25), inset 0 1px 1px rgba(0, 0, 0, 0.05) !important;
+  box-shadow: 0 0 0 2px rgba(254, 53, 1, 0.3) !important;
   border-color: var(--primary) !important;
-  background: #ffffff !important;
+  background: transparent !important;
+  background-color: transparent !important;
 }
 
 .dark input:focus, .dark select:focus, .dark textarea:focus,
@@ -1365,8 +1510,9 @@ input:focus, select:focus, textarea:focus {
 .force-dark-mode input:focus, .force-dark-mode select:focus, .force-dark-mode textarea:focus,
 .dark [role="dialog"] input:focus,
 [data-theme="dark"] [role="dialog"] input:focus {
-  background: rgba(255, 255, 255, 0.14) !important;
-  box-shadow: 0 0 0 3px rgba(254, 53, 1, 0.4), inset 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: 0 0 0 2px rgba(254, 53, 1, 0.3) !important;
   border-color: var(--primary) !important;
   color: #ffffff !important;
 }
@@ -1780,35 +1926,102 @@ button.nav-capsule-active svg {
   fill: currentColor !important;
 }
 
-.selected-day-capsule {
-  background-color: #000000 !important;
+/* Attendance Widget Day Selection Capsule: Brand Color Fill & Pure White Text in ALL Modes */
+.selected-day-capsule,
+.attendance-selected-day,
+.dark .selected-day-capsule,
+[data-theme="dark"] .selected-day-capsule,
+.dark .attendance-selected-day,
+[data-theme="dark"] .attendance-selected-day {
+  background-color: #FE3501 !important;
+  background: #FE3501 !important;
   color: #ffffff !important;
-}
-.selected-day-capsule span,
-.selected-day-capsule strong,
-.selected-day-capsule p {
-  color: #ffffff !important;
-}
-.selected-day-capsule .day-dot {
-  background-color: #ffffff !important;
 }
 
-.dark .selected-day-capsule,
-[data-theme="dark"] .selected-day-capsule {
-  background-color: #ffffff !important;
-  color: #000000 !important;
-}
+.selected-day-capsule span,
+.selected-day-capsule strong,
+.selected-day-capsule p,
+.attendance-selected-day span,
+.attendance-selected-day strong,
+.attendance-selected-day p,
 .dark .selected-day-capsule span,
 .dark .selected-day-capsule strong,
 .dark .selected-day-capsule p,
 [data-theme="dark"] .selected-day-capsule span,
 [data-theme="dark"] .selected-day-capsule strong,
-[data-theme="dark"] .selected-day-capsule p {
-  color: #000000 !important;
+[data-theme="dark"] .selected-day-capsule p,
+.dark .attendance-selected-day span,
+.dark .attendance-selected-day strong,
+.dark .attendance-selected-day p,
+[data-theme="dark"] .attendance-selected-day span,
+[data-theme="dark"] .attendance-selected-day strong,
+[data-theme="dark"] .attendance-selected-day p {
+  color: #ffffff !important;
 }
+
+.selected-day-capsule .day-dot,
+.attendance-selected-day .day-dot,
 .dark .selected-day-capsule .day-dot,
-[data-theme="dark"] .selected-day-capsule .day-dot {
-  background-color: #000000 !important;
+[data-theme="dark"] .selected-day-capsule .day-dot,
+.dark .attendance-selected-day .day-dot,
+[data-theme="dark"] .attendance-selected-day .day-dot {
+  background-color: #ffffff !important;
 }
+
+
+/* Poll Voting Option & Bar: Brand Color Fill & Pure White Text in ALL Modes */
+.poll-option-btn,
+.poll-option-btn *,
+.poll-option-btn span,
+.poll-option-btn strong,
+.poll-option-btn p,
+.poll-option-btn .msr,
+.poll-option-btn svg,
+.dark .poll-option-btn,
+.dark .poll-option-btn *,
+.dark .poll-option-btn span,
+.dark .poll-option-btn strong,
+.dark .poll-option-btn p,
+.dark .poll-option-btn .msr,
+.dark .poll-option-btn svg,
+[data-theme="dark"] .poll-option-btn,
+[data-theme="dark"] .poll-option-btn *,
+[data-theme="dark"] .poll-option-btn span,
+[data-theme="dark"] .poll-option-btn strong,
+[data-theme="dark"] .poll-option-btn p,
+[data-theme="dark"] .poll-option-btn .msr,
+[data-theme="dark"] .poll-option-btn svg {
+  color: #ffffff !important;
+  fill: currentColor !important;
+}
+
+.poll-fill-bar,
+.dark .poll-fill-bar,
+[data-theme="dark"] .poll-fill-bar {
+  background-color: #FE3501 !important;
+  background: #FE3501 !important;
+}
+
+/* ==============================================================
+   UNIVERSAL CLEAN ZERO-BLUR & ZERO-SATURATION ON ALL PAGE ELEMENTS
+   Strict standard: No element on any page may have blur or saturation.
+   Blur & saturation are strictly restricted to whitelisted floating
+   overlays: topbar, bottombar, notifications, toasts, modals, and dropdowns.
+   ============================================================== */
+
+body [class*="backdrop-blur-"]:not(header):not(.topbar):not(.landing-glass-header):not(.bottom-bar):not([data-bottom-bar]):not(.mobile-bottom-dock):not([data-mobile-dock]):not([data-mobile-panel]):not([data-menu-drawer]):not(.menu-bar-dock):not([data-ai-panel]):not([data-ai-modal]):not(.ai-panel):not([data-notif-panel]):not(.notification-modal):not(.notification-dropdown):not(.landing-glass-bottom-bar):not(.toast):not([data-sonner-toast]):not([data-sonner-toaster]):not([role="dialog"]):not([role="dialog"] *):not([role="alertdialog"]):not([role="alertdialog"] *):not([data-radix-dialog-content]):not([data-radix-dialog-content] *):not([data-radix-alert-dialog-content]):not([data-radix-alert-dialog-content] *):not(.dialog-content):not(.dialog-content *):not(.alert-dialog-content):not(.alert-dialog-content *):not(.glass-mobile-drawer):not(.glass-mobile-drawer *):not(.liquid-glass-drawer):not(.liquid-glass-drawer *):not([data-radix-dialog-overlay]):not([data-radix-alert-dialog-overlay]):not([role="menu"]):not([role="menu"] *):not([role="listbox"]):not([role="listbox"] *):not([data-radix-popper-content-wrapper]):not([data-radix-popper-content-wrapper] *):not([data-radix-select-content]):not([data-radix-select-content] *):not([data-radix-dropdown-menu-content]):not([data-radix-dropdown-menu-content] *):not([data-radix-popover-content]):not([data-radix-popover-content] *):not([data-radix-tooltip-content]):not([data-radix-tooltip-content] *):not(.popover-content):not(.popover-content *):not([role="tooltip"]):not([role="tooltip"] *):not([data-ai-panel] *):not([data-ai-modal] *):not(.ai-panel *):not([data-mobile-dock] *):not([data-mobile-panel] *):not([data-menu-drawer] *):not(.menu-bar-dock *):not([data-notif-panel] *):not(.notification-modal *):not(.notification-dropdown *) {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+body [class*="saturate-"]:not(header):not(.topbar):not(.landing-glass-header):not(.bottom-bar):not([data-bottom-bar]):not(.mobile-bottom-dock):not([data-mobile-dock]):not([data-mobile-panel]):not([data-menu-drawer]):not(.menu-bar-dock):not([data-ai-panel]):not([data-ai-modal]):not(.ai-panel):not([data-notif-panel]):not(.notification-modal):not(.notification-dropdown):not(.landing-glass-bottom-bar):not(.toast):not([data-sonner-toast]):not([data-sonner-toaster]):not([role="dialog"]):not([role="dialog"] *):not([role="alertdialog"]):not([role="alertdialog"] *):not([data-radix-dialog-content]):not([data-radix-dialog-content] *):not([data-radix-alert-dialog-content]):not([data-radix-alert-dialog-content] *):not(.dialog-content):not(.dialog-content *):not(.alert-dialog-content):not(.alert-dialog-content *):not(.glass-mobile-drawer):not(.glass-mobile-drawer *):not(.liquid-glass-drawer):not(.liquid-glass-drawer *):not([data-radix-dialog-overlay]):not([data-radix-alert-dialog-overlay]):not([role="menu"]):not([role="menu"] *):not([role="listbox"]):not([role="listbox"] *):not([data-radix-popper-content-wrapper]):not([data-radix-popper-content-wrapper] *):not([data-radix-select-content]):not([data-radix-select-content] *):not([data-radix-dropdown-menu-content]):not([data-radix-dropdown-menu-content] *):not([data-radix-popover-content]):not([data-radix-popover-content] *):not([data-radix-tooltip-content]):not([data-radix-tooltip-content] *):not(.popover-content):not(.popover-content *):not([role="tooltip"]):not([role="tooltip"] *):not([data-ai-panel] *):not([data-ai-modal] *):not(.ai-panel *):not([data-mobile-dock] *):not([data-mobile-panel] *):not([data-menu-drawer] *):not(.menu-bar-dock *):not([data-notif-panel] *):not(.notification-modal *):not(.notification-dropdown *) {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+
+
+
+
 
 

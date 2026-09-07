@@ -14,7 +14,7 @@ const DialogOverlay = React.forwardRef(({ className, ...props }, ref) => (
   <AriaModalOverlay
     ref={ref}
     className={cn(
-      "fixed inset-0 z-50 bg-transparent flex items-center justify-center p-4",
+      "fixed inset-0 z-50 bg-black/50 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200",
       className
     )}
     isDismissable={true}
@@ -28,7 +28,7 @@ const DialogContent = React.forwardRef(({ className, overlayClassName, dialogCla
     <AriaModal
       ref={ref}
       className={cn(
-        "w-full max-w-lg max-h-[95vh] flex flex-col overflow-hidden rounded-[28px] glass-kormiis text-foreground shadow-none p-0",
+        "w-full max-w-lg max-h-[95vh] flex flex-col overflow-hidden rounded-[28px] glass-kormiis-modal text-foreground shadow-none p-0",
         className
       )}
       {...props}

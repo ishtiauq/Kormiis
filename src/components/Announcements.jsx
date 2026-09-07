@@ -766,7 +766,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                     <div className="p-4 rounded-2xl border border-border/50 bg-muted/20">
                       <div className="flex items-center justify-between mb-3">
                         <h4 className="font-semibold text-sm sm:text-base flex items-center gap-2 text-foreground m-0">
-                          <Icon name="poll" size={17} className="text-foreground shrink-0" />
+                          <Icon name="poll" size={17} className="text-primary shrink-0" />
                           <span>{post.poll.question || post.content || post.title}</span>
                         </h4>
                         <span className="text-xs text-muted-foreground font-mono shrink-0 ml-2">
@@ -786,23 +786,21 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                               key={i}
                               type="button"
                               onClick={() => handleVote(post.id, i)}
-                              className={`relative w-full h-10 rounded-xl overflow-hidden border transition-all flex items-center justify-between px-3.5 cursor-pointer text-left select-none ${
+                              className={`poll-option-btn relative w-full h-10 rounded-xl overflow-hidden border transition-all flex items-center justify-between px-3.5 cursor-pointer text-left select-none bg-neutral-900 !text-white ${
                                 hasVotedThis
-                                  ? 'border-foreground/40 bg-foreground/10 shadow-xs'
-                                  : 'border-border/60 hover:border-foreground/30 bg-card/60'
+                                  ? 'border-[#FE3501] ring-2 ring-[#FE3501] ring-offset-1 ring-offset-background shadow-xs'
+                                  : 'border-neutral-800 hover:border-[#FE3501]/50'
                               }`}
                             >
                               <div
-                                className={`absolute top-0 left-0 h-full transition-all duration-500 ease-out ${
-                                  hasVotedThis ? 'bg-foreground/20' : 'bg-muted/60'
-                                }`}
-                                style={{ width: `${pct}%` }}
+                                className="poll-fill-bar absolute top-0 left-0 h-full bg-[#FE3501] transition-all duration-500 ease-out"
+                                style={{ width: `${pct}%`, backgroundColor: '#FE3501' }}
                               />
-                              <span className="relative z-10 text-sm font-medium text-foreground flex items-center gap-2 truncate">
-                                {hasVotedThis && <Icon name="check_circle" size={14} className="text-foreground shrink-0" />}
-                                <span className="truncate">{opt.text}</span>
+                              <span className="relative z-10 text-sm font-semibold !text-white flex items-center gap-2 truncate" style={{ color: '#ffffff' }}>
+                                {hasVotedThis && <Icon name="check_circle" size={14} className="!text-white shrink-0" style={{ color: '#ffffff' }} />}
+                                <span className="truncate !text-white" style={{ color: '#ffffff' }}>{opt.text}</span>
                               </span>
-                              <span className="relative z-10 text-xs font-bold text-muted-foreground tabular-nums ml-2 shrink-0">
+                              <span className="relative z-10 text-xs font-bold !text-white tabular-nums ml-2 shrink-0" style={{ color: '#ffffff' }}>
                                 {pct}% ({votes.length})
                               </span>
                             </button>

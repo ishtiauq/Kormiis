@@ -558,58 +558,44 @@ export const MobileResponsiveBottomBar = memo(({
           />
         )}
 
-        {/* Unified Accordion Card: Expands upwards on Menu, AI, or Notification click */}
-        <motion.div
-          layout
-          transition={{
-            layout: {
-              type: "spring",
-              stiffness: 440,
-              damping: 34,
-              mass: 0.6
-            },
-            borderRadius: { duration: 0.18, ease: [0.32, 0.72, 0, 1] }
-          }}
-          className={`relative z-40 w-full max-w-[345px] xs:max-w-[370px] glass-kormiis border border-black/10 dark:border-white/14 shadow-none flex flex-col overflow-hidden px-3.5 ${
-            isExpanded 
-              ? 'rounded-[28px] pt-3 pb-1' 
-              : 'rounded-full py-0'
-          }`}
-          style={{
-            background: 'transparent',
-            backgroundColor: 'transparent',
-            backdropFilter: 'saturate(190%) blur(32px)',
-            WebkitBackdropFilter: 'saturate(190%) blur(32px)',
-            boxShadow: 'none',
-            transformOrigin: 'bottom center'
-          }}
-        >
-          {/* ==================================================== */}
-          {/* EXPANDABLE ACCORDION SECTION (Top-to-Bottom Collapse / Bottom-to-Top Reveal) */}
-          {/* ==================================================== */}
-          <AnimatePresence initial={false} mode="wait">
-            {isExpanded && (
-              <motion.div
-                key={`accordion-panel-${expandedSection}`}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ 
-                  opacity: 1, 
-                  y: 0,
-                  transition: {
-                    opacity: { duration: 0.22, ease: [0.16, 1, 0.3, 1] },
-                    y: { duration: 0.22, ease: [0.16, 1, 0.3, 1] }
-                  }
-                }}
-                exit={{ 
-                  opacity: 0, 
-                  height: 0, 
-                  transition: {
-                    height: { duration: 0.18, ease: [0.32, 0.72, 0, 1] },
-                    opacity: { duration: 0.12, ease: 'easeOut' }
-                  }
-                }}
-                className="w-full flex flex-col overflow-hidden"
-              >
+        {/* Floating Panel: Reveals from top/above and stops with a sleek gap above the dock */}
+        <AnimatePresence>
+          {isExpanded && (
+            <motion.div
+              key={`mobile-panel-${expandedSection}`}
+              initial={{ opacity: 0, y: -24, scale: 0.96 }}
+              animate={{ 
+                opacity: 1, 
+                y: 0, 
+                scale: 1,
+                transition: {
+                  type: "spring",
+                  stiffness: 380,
+                  damping: 28,
+                  mass: 0.8
+                }
+              }}
+              exit={{ 
+                opacity: 0, 
+                y: -20, 
+                scale: 0.96,
+                transition: { duration: 0.16, ease: "easeOut" }
+              }}
+              data-mobile-panel
+              data-menu-drawer={isMenuExpanded ? "true" : undefined}
+              data-notif-panel={isNotifExpanded ? "true" : undefined}
+              data-ai-panel={isAiExpanded ? "true" : undefined}
+              className="relative z-40 w-full max-w-[345px] xs:max-w-[370px] mb-3 glass-mobile-drawer liquid-glass-drawer glass-kormiis border border-black/10 dark:border-white/14 rounded-[28px] p-4 flex flex-col overflow-hidden pointer-events-auto shadow-none"
+              style={{
+                background: 'transparent',
+                backgroundColor: 'transparent',
+                backdropFilter: 'blur(32px) saturate(190%)',
+                WebkitBackdropFilter: 'blur(32px) saturate(190%)',
+                boxShadow: 'none',
+                transformOrigin: 'top center'
+              }}
+            >
+              <div className="w-full flex flex-col overflow-hidden">
                 {/* 1. MENU MODE */}
                 {isMenuExpanded && (
                   <div className="w-full flex flex-col overflow-hidden pb-1">
@@ -1191,19 +1177,28 @@ export const MobileResponsiveBottomBar = memo(({
                     )}
                   </div>
                 )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-                {/* Separator Line right above the bottom 4 icons */}
-                <div className="w-full h-px bg-black/10 dark:bg-white/10 mt-1 mb-1 shrink-0" />
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* ==================================================== */}
-          {/* STATIC 4-ICON DOCK ROW (Always fixed 56px height, zero shift) */}
-          {/* ==================================================== */}
-          <div className="w-full h-14 flex items-center justify-between shrink-0 select-none">
-            {/* 1. Menu Icon Button */}
-            <motion.button
+        {/* ==================================================== */}
+        {/* STATIC 4-ICON DOCK PILL (Always fixed 56px height, rounded-full) */}
+        {/* ==================================================== */}
+        <div 
+          data-bottom-bar
+          data-mobile-dock
+          className="relative z-40 w-full max-w-[345px] xs:max-w-[370px] h-14 bottom-bar mobile-bottom-dock glass-kormiis border border-black/10 dark:border-white/14 rounded-full shadow-none px-3.5 flex items-center justify-between shrink-0 select-none pointer-events-auto"
+          style={{
+            background: 'transparent',
+            backgroundColor: 'transparent',
+            backdropFilter: 'blur(32px) saturate(190%)',
+            WebkitBackdropFilter: 'blur(32px) saturate(190%)',
+            boxShadow: 'none'
+          }}
+        >
+          {/* 1. Menu Icon Button */}
+          <motion.button
               type="button"
               aria-label={isMenuExpanded ? "Close menu" : "Open all modules"}
               onClick={handleToggleMenu}
@@ -1294,11 +1289,10 @@ export const MobileResponsiveBottomBar = memo(({
               )}
             </motion.button>
           </div>
-        </motion.div>
+        </div>
       </div>
-    </div>
-  )
-})
+    )
+  })
 
 MobileResponsiveBottomBar.displayName = 'MobileResponsiveBottomBar'
 export default MobileResponsiveBottomBar

@@ -476,7 +476,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
                           <span
                             className={`size-1.5 rounded-full mt-1.5 ${
                               isSelected
-                                ? ''
+                                ? 'day-dot'
                                 : perDayArrived[item.date] > 0
                                   ? 'bg-emerald-500/80'
                                   : 'bg-foreground/20'
@@ -546,11 +546,11 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
                   <button
                     type="button"
                     onClick={() => setAttDialog('noShow')}
-                    className="flex flex-col items-center justify-center p-2.5 sm:p-3 rounded-2xl transition-all cursor-pointer select-none text-center relative overflow-hidden bg-rose-500/[0.05] dark:bg-rose-500/[0.08] border border-rose-500/15 dark:border-rose-500/20 hover:bg-rose-500/[0.1] dark:hover:bg-rose-500/[0.14]"
+                    className="flex flex-col items-center justify-center p-2.5 sm:p-3 rounded-2xl transition-all cursor-pointer select-none text-center relative overflow-hidden bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/10 hover:bg-black/[0.06] dark:hover:bg-white/[0.08]"
                   >
                     <div className="flex items-center gap-1.5 mb-1">
-                      <Icon name="cancel" size={16} className="text-rose-500/90 shrink-0" />
-                      <span className="text-fluid-lg sm:text-fluid-xl font-black text-rose-600 dark:text-rose-400 tabular-nums">
+                      <Icon name="cancel" size={16} className="text-foreground/75 shrink-0" />
+                      <span className="text-fluid-lg sm:text-fluid-xl font-black text-foreground tabular-nums">
                         {noShowCount}
                       </span>
                     </div>

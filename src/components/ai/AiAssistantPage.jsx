@@ -473,10 +473,10 @@ export default function AiAssistantPage({
   return (
     <div className="w-full flex-1 flex flex-col items-center justify-start pb-20 sm:pb-8 pt-1 animate-in fade-in duration-200 max-w-[1000px] mx-auto">
       {/* FULL-PAGE AI CHAT WORKSPACE CONTAINER */}
-      <div className="w-full h-[calc(100dvh_-_130px)] sm:h-[calc(100dvh_-_140px)] md:h-[calc(100vh_-_140px)] flex flex-col rounded-[24px] sm:rounded-[32px] glass-kormiis border border-white/35 dark:border-white/16 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.30)] overflow-hidden backdrop-blur-3xl relative">
+      <div className="w-full h-[calc(100dvh_-_130px)] sm:h-[calc(100dvh_-_140px)] md:h-[calc(100vh_-_140px)] flex flex-col rounded-[24px] sm:rounded-[32px] glass-kormiis border border-white/35 dark:border-white/16 shadow-none overflow-hidden bg-transparent relative">
         
         {/* HEADER BAR */}
-        <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-border/80 dark:border-white/12 shrink-0 bg-white/40 dark:bg-white/[0.04] backdrop-blur-md">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-border/80 dark:border-white/12 shrink-0 bg-transparent">
           <div className="flex items-center gap-2">
             <Icon name={showHistoryView ? "history" : "auto_awesome"} size={24} className="text-foreground shrink-0" />
             <div>
@@ -551,7 +551,7 @@ export default function AiAssistantPage({
                   placeholder="Search past conversations..."
                   value={historySearch}
                   onChange={e => setHistorySearch(e.target.value)}
-                  className="w-full h-9 pl-9 pr-3 rounded-xl border border-black/10 dark:border-white/12 bg-white/50 dark:bg-white/[0.05] text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 backdrop-blur-md shadow-[inset_0_1px_1.5px_rgba(0,0,0,0.03)]"
+                  className="w-full h-9 pl-9 pr-3 rounded-xl border border-black/10 dark:border-white/12 bg-transparent text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 shadow-none"
                 />
               </div>
             </div>
@@ -571,10 +571,10 @@ export default function AiAssistantPage({
                     <div
                       key={session.id}
                       onClick={() => handleSelectSession(session.id)}
-                      className={`group relative p-3 rounded-2xl border transition-all cursor-pointer select-none flex items-start justify-between gap-3 shadow-xs backdrop-blur-md ${
+                      className={`group relative p-3 rounded-2xl border transition-all cursor-pointer select-none flex items-start justify-between gap-3 shadow-none ${
                         isActive
-                          ? 'bg-foreground/12 dark:bg-white/15 border-foreground/30 dark:border-white/25 text-foreground font-semibold shadow-xs'
-                          : 'border-white/40 dark:border-white/10 bg-white/35 hover:bg-white/60 dark:bg-white/[0.04] dark:hover:bg-white/[0.08] text-foreground'
+                          ? 'bg-foreground/10 dark:bg-white/10 border-foreground/30 dark:border-white/25 text-foreground font-semibold'
+                          : 'border-white/40 dark:border-white/10 bg-transparent hover:bg-black/5 dark:hover:bg-white/5 text-foreground'
                       }`}
                     >
                       <div className="flex-1 min-w-0 pr-1">
@@ -585,23 +585,19 @@ export default function AiAssistantPage({
                           </p>
                         </div>
                         {lastMsg && (
-                          <p className="m-0 mt-1 text-[11px] text-muted-foreground break-words leading-relaxed">
+                          <p className="m-0 text-[11px] text-muted-foreground truncate mt-1">
                             {lastMsg.text}
                           </p>
                         )}
-                        <span className="text-[9px] text-muted-foreground/80 mt-1.5 block font-medium">
-                          {new Date(session.updatedAt || session.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric' })}{' '}
-                          &middot;{' '}
-                          {new Date(session.updatedAt || session.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        <span className="text-[10px] text-muted-foreground/80 font-mono mt-1 block">
+                          {formatRelativeTime(session.updatedAt || session.createdAt)}
                         </span>
                       </div>
-
-                      {/* Delete Session Button on Hover */}
                       <button
-                        onClick={(e) => handleDeleteSession(e, session.id)}
-                        aria-label="Delete chat"
-                        className="size-7 rounded-xl opacity-0 group-hover:opacity-100 hover:bg-destructive/15 text-muted-foreground hover:text-destructive flex items-center justify-center cursor-pointer transition-all shrink-0"
-                        title="Delete this conversation"
+                        type="button"
+                        onClick={(e) => handleDeleteSession(session.id, e)}
+                        title="Delete conversation"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive cursor-pointer shrink-0"
                       >
                         <Icon name="delete" size={15} />
                       </button>
@@ -613,7 +609,7 @@ export default function AiAssistantPage({
 
             {/* Clear All History Footer */}
             {historySessions.length > 0 && (
-              <div className="p-3 border-t border-border/50 dark:border-white/10 bg-white/20 dark:bg-white/[0.02] backdrop-blur-md shrink-0">
+              <div className="p-3 border-t border-border/50 dark:border-white/10 bg-transparent shrink-0">
                 <button
                   onClick={handleClearAllHistory}
                   className="w-full h-8.5 rounded-xl border border-destructive/30 hover:bg-destructive/10 text-destructive text-[11px] font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-98"
@@ -656,12 +652,12 @@ export default function AiAssistantPage({
 
                   {/* Message Bubble */}
                   <div
-                    className={`max-w-[92%] sm:max-w-[80%] rounded-2xl p-3.5 sm:p-4 text-xs sm:text-sm leading-relaxed relative backdrop-blur-xl saturate-[1.4] ${
+                    className={`max-w-[92%] sm:max-w-[80%] rounded-2xl p-3.5 sm:p-4 text-xs sm:text-sm leading-relaxed relative shadow-none ${
                       msg.role === 'user'
-                        ? 'rounded-tr-xs bg-white/90 dark:bg-white/[0.14] border border-white/70 dark:border-white/18 text-foreground shadow-[0_4px_16px_-4px_rgba(0,0,0,0.08),inset_0_1px_1px_0_rgba(255,255,255,0.60)]'
+                        ? 'rounded-tr-xs bg-foreground/10 dark:bg-white/10 border border-foreground/20 dark:border-white/20 text-foreground'
                         : msg.isError
                         ? 'rounded-tl-xs bg-destructive/15 border border-destructive/30 text-destructive'
-                        : 'rounded-tl-xs bg-white/70 dark:bg-white/[0.07] border border-white/50 dark:border-white/12 text-foreground shadow-[0_2px_10px_-2px_rgba(0,0,0,0.04),inset_0_1px_1px_0_rgba(255,255,255,0.40)]'
+                        : 'rounded-tl-xs bg-transparent border border-border/70 dark:border-white/14 text-foreground'
                     }`}
                   >
                     {/* Attached File Preview inside Message */}
@@ -778,7 +774,7 @@ export default function AiAssistantPage({
                   type="button"
                   onClick={() => scrollToBottom(true)}
                   aria-label="Scroll to latest messages"
-                  className="apple-glass-btn h-8 px-3.5 rounded-full flex items-center gap-1.5 text-xs font-bold text-foreground border border-white/45 dark:border-white/20 shadow-[0_8px_20px_-4px_rgba(0,0,0,0.25)] backdrop-blur-xl bg-white/70 dark:bg-white/[0.10] hover:bg-white/90 dark:hover:bg-white/[0.18] active:scale-95 transition-all hover:scale-105 cursor-pointer select-none group"
+                  className="apple-glass-btn h-8 px-3.5 rounded-full flex items-center gap-1.5 text-xs font-bold text-foreground border border-white/45 dark:border-white/20 shadow-none bg-transparent hover:bg-black/5 dark:hover:bg-white/10 active:scale-95 transition-all hover:scale-105 cursor-pointer select-none group"
                   title="Jump to latest message"
                 >
                   <Icon name="arrow_downward" size={15} className="text-foreground transition-transform duration-200 group-hover:translate-y-0.5" />
@@ -788,7 +784,7 @@ export default function AiAssistantPage({
             )}
 
             {/* INPUT & ATTACHMENT DOCK */}
-            <div className="p-2.5 sm:p-3.5 border-t border-border/60 dark:border-white/10 bg-white/30 dark:bg-white/[0.04] shrink-0 space-y-2">
+            <div className="p-2.5 sm:p-3.5 border-t border-border/60 dark:border-white/10 bg-transparent shrink-0 space-y-2">
               {/* File Attachment Chip */}
               {attachedFile && (
                 <div className="flex items-center justify-between p-1.5 px-2.5 rounded-xl bg-foreground/10 border border-foreground/20 text-xs text-foreground">

@@ -66,38 +66,70 @@ export const EmployeeDirectoryWidget = memo(({ employees = [], setCurrentView, .
             )}
           </div>
         ) : (
-          filtered.map((emp) => (
-            <div key={emp.id} className="flex items-start gap-3 py-3 first:pt-2 last:pb-1">
-              <Avatar className="size-9 shrink-0 rounded-xl ring-1 ring-border/60 dark:ring-white/10">
-                {emp.avatar ? <AvatarImage src={emp.avatar} alt={emp.name} className="object-cover" /> : null}
-                <AvatarFallback className="bg-primary/10 text-primary rounded-xl text-[11px] font-bold">
-                  {(emp.name || '?').slice(0, 2).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
+          filtered.map((emp) => {
+            const phone = emp.phone || emp.mobileNumber || ''
+            const email = emp.email || ''
+            const subtitle = emp.designation || emp.role || emp.department || 'Team Member'
 
-              <div className="flex-1 min-w-0 flex flex-col gap-1">
-                <span className="text-xs font-bold text-foreground break-words">{emp.name}</span>
-                <div className="flex flex-wrap items-center gap-x-3.5 gap-y-0.5 text-[11px] text-muted-foreground min-w-0">
-                  <span className="flex items-center gap-1.5 min-w-0">
-                    <Icon name="call" size={12} className="shrink-0 opacity-80" />
-                    {emp.phone || emp.mobileNumber ? (
-                      <span className="break-all">{emp.phone || emp.mobileNumber}</span>
-                    ) : (
-                      <span className="italic text-muted-foreground/70">No phone added yet</span>
-                    )}
-                  </span>
-                  <span className="flex items-center gap-1.5 min-w-0">
-                    <Icon name="mail" size={12} className="shrink-0 opacity-80" />
-                    {emp.email ? (
-                      <span className="break-all">{emp.email}</span>
-                    ) : (
-                      <span className="italic text-muted-foreground/70">No email added yet</span>
-                    )}
-                  </span>
+            return (
+              <div key={emp.id} className="flex items-center justify-between gap-3 py-2.5 px-1 first:pt-1.5 last:pb-1 group hover:bg-black/[0.02] dark:hover:bg-white/[0.03] rounded-2xl transition-colors">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <Avatar className="size-9 shrink-0 rounded-2xl ring-1 ring-border/60 dark:ring-white/10">
+                    {emp.avatar ? <AvatarImage src={emp.avatar} alt={emp.name} className="object-cover" /> : null}
+                    <AvatarFallback className="bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 rounded-2xl text-[11px] font-bold">
+                      {(emp.name || '?').slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-xs font-bold text-foreground break-words leading-tight">{emp.name}</span>
+                    <span className="text-[11px] font-medium text-muted-foreground break-words leading-tight mt-0.5">
+                      {subtitle}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Right Quick Action Buttons: Direct Call & Mail with Tooltip */}
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {phone ? (
+                    <a
+                      href={`tel:${phone}`}
+                      title={`Call ${emp.name}: ${phone}`}
+                      aria-label={`Call ${emp.name}`}
+                      className="size-8 rounded-full flex items-center justify-center apple-glass-btn bg-black/[0.04] dark:bg-white/[0.06] hover:bg-emerald-500/15 hover:text-emerald-600 dark:hover:text-emerald-400 text-foreground/75 transition-all cursor-pointer shadow-none active:scale-90"
+                    >
+                      <Icon name="call" size={15} />
+                    </a>
+                  ) : (
+                    <span
+                      title="No phone number added"
+                      className="size-8 rounded-full flex items-center justify-center text-muted-foreground/30 border border-black/5 dark:border-white/5 cursor-not-allowed select-none"
+                    >
+                      <Icon name="call" size={15} />
+                    </span>
+                  )}
+
+                  {email ? (
+                    <a
+                      href={`mailto:${email}`}
+                      title={`Email ${emp.name}: ${email}`}
+                      aria-label={`Email ${emp.name}`}
+                      className="size-8 rounded-full flex items-center justify-center apple-glass-btn bg-black/[0.04] dark:bg-white/[0.06] hover:bg-sky-500/15 hover:text-sky-600 dark:hover:text-sky-400 text-foreground/75 transition-all cursor-pointer shadow-none active:scale-90"
+                    >
+                      <Icon name="mail" size={15} />
+                    </a>
+                  ) : (
+                    <span
+                      title="No email address added"
+                      className="size-8 rounded-full flex items-center justify-center text-muted-foreground/30 border border-black/5 dark:border-white/5 cursor-not-allowed select-none"
+                    >
+                      <Icon name="mail" size={15} />
+                    </span>
+                  )}
                 </div>
               </div>
-            </div>
-          ))
+            )
+          })
         )}
       </div>
     </DashboardWidget>

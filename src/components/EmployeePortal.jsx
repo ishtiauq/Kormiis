@@ -363,17 +363,17 @@ export default function EmployeePortal({
   }
 
   const navItems = [
-    { id: 'dashboard', icon: <Icon name="dashboard" size={18}/>, label: 'Dashboard' },
-    { id: 'attendance', icon: <Icon name="schedule" size={18}/>, label: 'Attendance' },
-    { id: 'my-tasks', icon: <Icon name="check_box" size={18}/>, label: 'Tasks' },
-    { id: 'announcements', icon: <Icon name="rss_feed" size={18}/>, label: 'Announcements' },
-    { id: 'payslips', icon: <Icon name="account_balance" size={18}/>, label: 'Payroll' },
-    { id: 'documents', icon: <Icon name="folder_open" size={18}/>, label: 'Documents' },
-    { id: 'my-assets', icon: <Icon name="devices_other" size={18}/>, label: 'Assets' },
-    { id: 'gigs', icon: <Icon name="handshake" size={18}/>, label: 'Help Hub' },
-    { id: 'performance', icon: <Icon name="insights" size={18}/>, label: 'Performance' },
-    ...(currentUser?.permissions?.includes('manage_attendance') ? [{ id: 'team_attendance', icon: <Icon name="check_circle" size={18}/>, label: 'Team Attendance' }] : []),
-    { id: 'profile', icon: <Icon name="person" size={18}/>, label: 'Profile' }
+    { id: 'dashboard', icon: <Icon name="dashboard" size={20}/>, label: 'Dashboard' },
+    { id: 'attendance', icon: <Icon name="schedule" size={20}/>, label: 'Attendance' },
+    { id: 'my-tasks', icon: <Icon name="check_box" size={20}/>, label: 'Tasks' },
+    { id: 'announcements', icon: <Icon name="rss_feed" size={20}/>, label: 'Announcements' },
+    { id: 'payslips', icon: <Icon name="account_balance" size={20}/>, label: 'Payroll' },
+    { id: 'documents', icon: <Icon name="folder_open" size={20}/>, label: 'Documents' },
+    { id: 'my-assets', icon: <Icon name="devices_other" size={20}/>, label: 'Assets' },
+    { id: 'gigs', icon: <Icon name="handshake" size={20}/>, label: 'Help Hub' },
+    { id: 'performance', icon: <Icon name="insights" size={20}/>, label: 'Performance' },
+    ...(currentUser?.permissions?.includes('manage_attendance') ? [{ id: 'team_attendance', icon: <Icon name="check_circle" size={20}/>, label: 'Team Attendance' }] : []),
+    { id: 'profile', icon: <Icon name="person" size={20}/>, label: 'Profile' }
   ]
 
   const resolvedIsDark = isDarkMode ?? (themeMode === 'dark')

@@ -597,10 +597,23 @@ export default function AiCoPilotModal({
   const modalInner = (
     <div 
       ref={modalRef}
+      data-ai-panel
+      data-ai-modal
       className={
         isMorphMode
           ? "w-full h-full flex flex-col overflow-hidden relative animate-in fade-in duration-200"
-          : "pointer-events-auto w-full sm:w-[85%] sm:max-w-3xl mx-auto h-[min(82vh,620px)] sm:h-[min(72vh,560px)] flex flex-col rounded-t-[32px] sm:rounded-[28px] rounded-b-none sm:rounded-b-[28px] glass-mobile-drawer sm:glass-kormiis border-t sm:border border-white/35 dark:border-white/16 shadow-[0_-12px_40px_rgba(0,0,0,0.40)] sm:shadow-[0_24px_50px_-12px_rgba(0,0,0,0.50),0_0_20px_0_rgba(0,0,0,0.20)] overflow-hidden backdrop-blur-3xl relative animate-in slide-in-from-bottom sm:slide-in-from-top-3 duration-300 sm:duration-200"
+          : "pointer-events-auto w-full sm:w-[85%] sm:max-w-3xl mx-auto h-[min(82vh,620px)] sm:h-[min(72vh,560px)] flex flex-col rounded-t-[32px] sm:rounded-[28px] rounded-b-none sm:rounded-b-[28px] glass-mobile-drawer sm:glass-kormiis border-t sm:border border-white/35 dark:border-white/16 shadow-none overflow-hidden relative animate-in slide-in-from-bottom sm:slide-in-from-top-3 duration-300 sm:duration-200"
+      }
+      style={
+        isMorphMode
+          ? undefined
+          : {
+              background: 'transparent',
+              backgroundColor: 'transparent',
+              backdropFilter: 'blur(32px) saturate(190%)',
+              WebkitBackdropFilter: 'blur(32px) saturate(190%)',
+              boxShadow: 'none'
+            }
       }
     >
       {/* Mobile Drawer Pull Indicator Handle */}

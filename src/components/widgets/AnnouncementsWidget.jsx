@@ -546,7 +546,7 @@ export const AnnouncementsWidget = memo(({
                       <div className="p-3 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] flex flex-col gap-2.5">
                         <div className="flex items-center justify-between text-xs font-semibold text-foreground">
                           <span className="flex items-center gap-1.5 truncate">
-                            <Icon name="poll" size={15} className="text-foreground shrink-0" />
+                            <Icon name="poll" size={15} className="text-primary shrink-0" />
                             <span className="truncate font-semibold">{post.poll.question || post.content || post.title}</span>
                           </span>
                           <span className="text-[10px] text-muted-foreground font-mono shrink-0 ml-2">
@@ -566,29 +566,27 @@ export const AnnouncementsWidget = memo(({
                                 key={optIdx}
                                 type="button"
                                 onClick={() => handleVote(post.id, optIdx)}
-                                className={`relative w-full h-8 rounded-lg overflow-hidden border transition-all flex items-center justify-between px-3 cursor-pointer text-left select-none ${
+                                className={`poll-option-btn relative w-full h-8 rounded-lg overflow-hidden border transition-all flex items-center justify-between px-3 cursor-pointer text-left select-none bg-neutral-900 !text-white ${
                                   hasVotedThis
-                                    ? 'border-foreground/30 bg-foreground/10 shadow-xs'
-                                    : 'border-black/10 dark:border-white/10 hover:border-black/20 dark:hover:border-white/20 bg-background/60 dark:bg-black/20'
+                                    ? 'border-[#FE3501] ring-2 ring-[#FE3501] ring-offset-1 ring-offset-background shadow-xs'
+                                    : 'border-neutral-800 hover:border-[#FE3501]/50'
                                 }`}
                               >
                                 {/* Progress Bar fill */}
                                 <div
-                                  className={`absolute top-0 left-0 h-full transition-all duration-500 ease-out ${
-                                    hasVotedThis ? 'bg-foreground/20' : 'bg-foreground/10'
-                                  }`}
-                                  style={{ width: `${pct}%` }}
+                                  className="poll-fill-bar absolute top-0 left-0 h-full bg-[#FE3501] transition-all duration-500 ease-out"
+                                  style={{ width: `${pct}%`, backgroundColor: '#FE3501' }}
                                 />
 
-                                <span className="relative z-10 text-xs font-medium text-foreground truncate flex items-center gap-1.5">
+                                <span className="relative z-10 text-xs font-semibold !text-white truncate flex items-center gap-1.5" style={{ color: '#ffffff' }}>
                                   {hasVotedThis && (
-                                    <Icon name="check_circle" size={13} className="text-foreground shrink-0" />
+                                    <Icon name="check_circle" size={13} className="!text-white shrink-0" style={{ color: '#ffffff' }} />
                                   )}
-                                  <span className="truncate">{opt.text}</span>
+                                  <span className="truncate !text-white" style={{ color: '#ffffff' }}>{opt.text}</span>
                                 </span>
 
-                                <span className="relative z-10 text-[11px] font-bold text-muted-foreground tabular-nums shrink-0 ml-2">
-                                  {pct}% <span className="text-[9px] font-normal opacity-70">({voteCount})</span>
+                                <span className="relative z-10 text-[11px] font-bold !text-white tabular-nums shrink-0 ml-2" style={{ color: '#ffffff' }}>
+                                  {pct}% <span className="text-[9px] font-normal !text-white/90" style={{ color: '#ffffff' }}>({voteCount})</span>
                                 </span>
                               </button>
                             )
