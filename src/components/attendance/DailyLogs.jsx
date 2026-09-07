@@ -50,7 +50,7 @@ export default function DailyLogs({ employees, attendance, setAttendance, addToa
             </span>
             {showDatePicker && (
               <div onClick={e => e.stopPropagation()}
-                className="absolute top-full left-0 z-50 w-[280px] p-4 mt-2 rounded-2xl border-none glass-kormiis text-popover-foreground shadow-2xl">
+                className="absolute top-full left-0 z-50 w-[280px] p-4 mt-2 rounded-2xl glass-kormiis glass-popover text-popover-foreground shadow-none">
                 <div className="flex justify-between items-center mb-3">
                   <Button variant="ghost" size="icon" className="size-8" onClick={() => { if (calMonth === 0) { setCalMonth(11); setCalYear(y => y - 1) } else setCalMonth(m => m - 1) }} aria-label="Previous month">
                     <Icon name="chevron_left" size={16}/>
@@ -149,7 +149,7 @@ export default function DailyLogs({ employees, attendance, setAttendance, addToa
                       </button>
                       {openStatusEmp === emp.id && (
                         <div onClick={e => e.stopPropagation()}
-                          className="absolute right-0 top-[calc(100%+8px)] z-50 min-w-[140px] p-2 rounded-2xl border border-border glass-kormiis shadow-xl animate-in fade-in zoom-in duration-200">
+                          className="absolute right-0 top-[calc(100%+8px)] z-50 min-w-[140px] p-2 rounded-2xl border border-border glass-kormiis glass-popover shadow-none animate-in fade-in zoom-in duration-200">
                           {ATTENDANCE_STATUSES.map((statusKey) => {
                             const statusPill = PILL_STYLES[statusKey]
                             const isSelected = normStatus === statusKey

@@ -560,7 +560,7 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
                       {showAssigneesDropdown && dropdownPos && createPortal(
                         <div
                           id="assignees-portal-dropdown"
-                          className="fixed z-[9999] glass-kormiis border border-border rounded-md shadow-md text-popover-foreground"
+                          className="fixed z-[9999] glass-kormiis glass-popover border border-border rounded-md shadow-none text-popover-foreground"
                           style={{ top: dropdownPos.top, left: dropdownPos.left, width: dropdownPos.width }}
                         >
                           <div className="px-3 py-2 text-sm font-semibold bg-muted/40 border-b border-border">Select Team Members</div>
@@ -712,7 +712,7 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
                     {showAssigneesDropdown && dropdownPos && createPortal(
                       <div
                         id="assignees-portal-dropdown"
-                        className="fixed z-[9999] glass-kormiis border border-border rounded-md shadow-md text-popover-foreground"
+                        className="fixed z-[9999] glass-kormiis glass-popover border border-border rounded-md shadow-none text-popover-foreground"
                         style={{ top: dropdownPos.top, left: dropdownPos.left, width: dropdownPos.width }}
                       >
                         <div className="px-3 py-2 text-sm font-semibold bg-muted/40 border-b border-border">Select Team Members</div>

@@ -137,7 +137,7 @@ export default function LeavePoliciesEditor({ settings, setSettings, addToast, a
 
       {/* Add Leave Modal */}
       <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
-        <DialogContent className="sm:max-w-md bg-card dark:bg-[#12131c]/95 rounded-3xl p-6 border border-border/80 dark:border-white/12 shadow-2xl backdrop-blur-3xl">
+        <DialogContent className="sm:max-w-md rounded-3xl p-6">
           <DialogHeader>
             <DialogTitle className="text-fluid-lg font-bold">Add New Leave Policy</DialogTitle>
           </DialogHeader>
@@ -173,7 +173,7 @@ export default function LeavePoliciesEditor({ settings, setSettings, addToast, a
 
       {/* Delete Confirmation Modal */}
       <AlertDialog open={!!leaveToDelete} onOpenChange={(open) => !open && setLeaveToDelete(null)}>
-        <AlertDialogContent className="rounded-3xl p-6 bg-card dark:bg-[#12131c]/95 border border-border/80 dark:border-white/12 shadow-2xl backdrop-blur-3xl">
+        <AlertDialogContent className="rounded-3xl p-6">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-fluid-lg font-bold">Delete Leave Policy?</AlertDialogTitle>
             <AlertDialogDescription className="text-fluid-xs text-muted-foreground">

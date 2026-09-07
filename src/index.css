@@ -55,7 +55,7 @@
   --foreground: #000000;
   --card: transparent;
   --card-foreground: #000000;
-  --popover: rgba(255, 255, 255, 0.85);
+  --popover: transparent;
   --popover-foreground: #000000;
   --primary: #FE3501;
   --primary-foreground: #ffffff;
@@ -179,7 +179,7 @@ html.dark,
   --foreground: hsl(0 0% 0%) !important;
   --card: transparent !important;
   --card-foreground: hsl(0 0% 0%) !important;
-  --popover: rgba(255, 255, 255, 0.85) !important;
+  --popover: transparent !important;
   --popover-foreground: hsl(0 0% 0%) !important;
   --muted: transparent !important;
   --muted-foreground: hsl(210 10% 45%) !important;
@@ -360,10 +360,10 @@ html.dark,
    ZERO blur and ZERO saturation.
    ============================================================== */
 
-.glass-kormiis:not([role="dialog"]):not([role="alertdialog"]):not([data-notif-panel]):not(.notification-modal):not(.notification-dropdown):not([data-ai-panel]):not([data-ai-modal]):not(.ai-panel):not([data-bottom-bar]):not([data-mobile-dock]):not(.mobile-bottom-dock):not([data-mobile-panel]):not([data-menu-drawer]):not(.menu-bar-dock):not(.bottom-bar):not(.topbar):not(header):not([data-topbar]):not(.glass-mobile-drawer):not(.liquid-glass-drawer):not(.toast):not([role="menu"]):not([role="listbox"]):not([role="tooltip"]):not(.popover-content):not([data-radix-popper-content-wrapper]),
-.glass-apple:not([role="dialog"]):not([role="alertdialog"]):not([data-notif-panel]):not(.notification-modal):not(.notification-dropdown):not([data-ai-panel]):not([data-ai-modal]):not(.ai-panel):not([data-bottom-bar]):not([data-mobile-dock]):not(.mobile-bottom-dock):not([data-mobile-panel]):not([data-menu-drawer]):not(.menu-bar-dock):not(.bottom-bar):not(.topbar):not(header):not([data-topbar]):not(.glass-mobile-drawer):not(.liquid-glass-drawer):not(.toast):not([role="menu"]):not([role="listbox"]):not([role="tooltip"]):not(.popover-content):not([data-radix-popper-content-wrapper]),
-.glass-card:not([role="dialog"]):not([role="alertdialog"]):not([data-notif-panel]):not(.notification-modal):not(.notification-dropdown):not([data-ai-panel]):not([data-ai-modal]):not(.ai-panel):not([data-bottom-bar]):not([data-mobile-dock]):not(.mobile-bottom-dock):not([data-mobile-panel]):not([data-menu-drawer]):not(.menu-bar-dock):not(.bottom-bar):not(.topbar):not(header):not([data-topbar]):not(.glass-mobile-drawer):not(.liquid-glass-drawer):not(.toast):not([role="menu"]):not([role="listbox"]):not([role="tooltip"]):not(.popover-content):not([data-radix-popper-content-wrapper]),
-.bg-card:not([role="dialog"]):not([role="alertdialog"]):not([data-notif-panel]):not(.notification-modal):not(.notification-dropdown):not([data-ai-panel]):not([data-ai-modal]):not(.ai-panel):not([data-bottom-bar]):not([data-mobile-dock]):not(.mobile-bottom-dock):not([data-mobile-panel]):not([data-menu-drawer]):not(.menu-bar-dock):not(.bottom-bar):not(.topbar):not(header):not([data-topbar]):not(.glass-mobile-drawer):not(.liquid-glass-drawer):not(.toast):not([role="menu"]):not([role="listbox"]):not([role="tooltip"]):not(.popover-content):not([data-radix-popper-content-wrapper]),
+.glass-kormiis:not([role="dialog"]):not([role="alertdialog"]):not([data-notif-panel]):not(.notification-modal):not(.notification-dropdown):not([data-ai-panel]):not([data-ai-modal]):not(.ai-panel):not([data-bottom-bar]):not([data-mobile-dock]):not(.mobile-bottom-dock):not([data-mobile-panel]):not([data-menu-drawer]):not(.menu-bar-dock):not(.bottom-bar):not(.topbar):not(header):not([data-topbar]):not(.glass-mobile-drawer):not(.liquid-glass-drawer):not(.toast):not([role="menu"]):not([role="listbox"]):not([role="tooltip"]):not(.glass-tooltip):not(.glass-popover):not(.glass-toast):not(.popover-content):not([data-radix-popper-content-wrapper]),
+.glass-apple:not([role="dialog"]):not([role="alertdialog"]):not([data-notif-panel]):not(.notification-modal):not(.notification-dropdown):not([data-ai-panel]):not([data-ai-modal]):not(.ai-panel):not([data-bottom-bar]):not([data-mobile-dock]):not(.mobile-bottom-dock):not([data-mobile-panel]):not([data-menu-drawer]):not(.menu-bar-dock):not(.bottom-bar):not(.topbar):not(header):not([data-topbar]):not(.glass-mobile-drawer):not(.liquid-glass-drawer):not(.toast):not([role="menu"]):not([role="listbox"]):not([role="tooltip"]):not(.glass-tooltip):not(.glass-popover):not(.glass-toast):not(.popover-content):not([data-radix-popper-content-wrapper]),
+.glass-card:not([role="dialog"]):not([role="alertdialog"]):not([data-notif-panel]):not(.notification-modal):not(.notification-dropdown):not([data-ai-panel]):not([data-ai-modal]):not(.ai-panel):not([data-bottom-bar]):not([data-mobile-dock]):not(.mobile-bottom-dock):not([data-mobile-panel]):not([data-menu-drawer]):not(.menu-bar-dock):not(.bottom-bar):not(.topbar):not(header):not([data-topbar]):not(.glass-mobile-drawer):not(.liquid-glass-drawer):not(.toast):not([role="menu"]):not([role="listbox"]):not([role="tooltip"]):not(.glass-tooltip):not(.glass-popover):not(.glass-toast):not(.popover-content):not([data-radix-popper-content-wrapper]),
+.bg-card:not([role="dialog"]):not([role="alertdialog"]):not([data-notif-panel]):not(.notification-modal):not(.notification-dropdown):not([data-ai-panel]):not([data-ai-modal]):not(.ai-panel):not([data-bottom-bar]):not([data-mobile-dock]):not(.mobile-bottom-dock):not([data-mobile-panel]):not([data-menu-drawer]):not(.menu-bar-dock):not(.bottom-bar):not(.topbar):not(header):not([data-topbar]):not(.glass-mobile-drawer):not(.liquid-glass-drawer):not(.toast):not([role="menu"]):not([role="listbox"]):not([role="tooltip"]):not(.glass-tooltip):not(.glass-popover):not(.glass-toast):not(.popover-content):not([data-radix-popper-content-wrapper]),
 .dashboard-widget {
   background: transparent !important;
   background-color: transparent !important;
@@ -516,6 +516,18 @@ li[data-sonner-toast],
   box-shadow: none !important;
 }
 
+/* Floating Popover / Tooltip / Toast Surfaces: Pure MonoGlass (Zero fill, blur 32px / saturate 190%) */
+.glass-popover,
+.glass-tooltip,
+.glass-toast {
+  background: transparent !important;
+  background-color: transparent !important;
+  -webkit-backdrop-filter: blur(32px) saturate(190%) !important;
+  backdrop-filter: blur(32px) saturate(190%) !important;
+  border: 1px solid var(--glass-border) !important;
+  box-shadow: none !important;
+}
+
 /* Low-end device reduction for Whitelisted Overlays */
 @media (max-width: 1023px) and (prefers-reduced-motion: reduce) {
   .topbar,
@@ -558,8 +570,8 @@ html.dark .liquid-glass-drawer,
 .landing-glass-header,
 .landing-glass-bottom-bar {
   background: var(--glass-bg) !important;
-  -webkit-backdrop-filter: blur(32px) saturate(190%) brightness(105%) !important;
-  backdrop-filter: blur(32px) saturate(190%) brightness(105%) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(190%) !important;
+  backdrop-filter: blur(32px) saturate(190%) !important;
   border: 1px solid var(--glass-border) !important;
   box-shadow: none !important;
   border-radius: 9999px !important;
@@ -569,8 +581,8 @@ html.dark .liquid-glass-drawer,
 /* Mobile Bottom Sheet Drawer (Zero Shadow Standard) */
 .glass-mobile-drawer {
   background: var(--glass-bg) !important;
-  -webkit-backdrop-filter: saturate(190%) blur(36px) brightness(104%) !important;
-  backdrop-filter: saturate(190%) blur(36px) brightness(104%) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(190%) !important;
+  backdrop-filter: blur(32px) saturate(190%) !important;
   border-top: 1px solid var(--glass-border) !important;
   border-left: none !important;
   border-right: none !important;
@@ -900,8 +912,7 @@ a.bg-primary:active {
 }
 
 @layer components {
-  /* Floating pill-shaped top and bottom bars (Ultra-Liquid Glass Zero Shadow Standard) */
-  .topbar,
+  /* Floating pill-shaped bottom bar (Ultra-Liquid Glass Zero Shadow Standard) */
   .bottom-bar.bottom-bar-pill {
     border-radius: 9999px !important;
     background: var(--glass-bg) !important;
@@ -911,17 +922,25 @@ a.bg-primary:active {
     box-shadow: none !important;
   }
 
-  /* Full-width mobile screen Topbar (Edge-to-Edge Glass Zero Shadow Standard) */
+  /* Full-width edge-to-edge Topbar (ZERO border, merges with screen left/right edges) */
+  .topbar,
   .topbar.topbar-mobile-bar {
     border-radius: 0 !important;
+    border: none !important;
+    border-width: 0 !important;
     border-top: none !important;
     border-left: none !important;
     border-right: none !important;
-    border-bottom: 1px solid var(--glass-border) !important;
+    border-bottom: none !important;
+    background: var(--glass-bg) !important;
+    -webkit-backdrop-filter: saturate(190%) blur(32px) !important;
+    backdrop-filter: saturate(190%) blur(32px) !important;
     box-shadow: none !important;
   }
 
+  .dark .topbar,
   .dark .topbar.topbar-mobile-bar {
+    border: none !important;
     box-shadow: none !important;
   }
 
@@ -1609,18 +1628,20 @@ button[role="tab"][aria-selected="true"] .msr {
 .toast {
   border-radius: 1.25rem !important;
   border: 1px solid var(--glass-border) !important;
-  box-shadow: var(--glass-shadow) !important;
-  background: var(--glass-bg) !important;
-  -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
-  backdrop-filter: blur(28px) saturate(190%) !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  -webkit-backdrop-filter: blur(32px) saturate(190%) !important;
+  backdrop-filter: blur(32px) saturate(190%) !important;
   color: var(--foreground) !important;
   padding: 1rem 1.25rem !important;
 }
 
 .dark .toast,
 [data-theme="dark"] .toast {
-  background: linear-gradient(135deg, rgba(32, 32, 42, 0.88) 0%, rgba(16, 16, 24, 0.82) 100%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
 }
 
 /* ==============================================================

@@ -28,7 +28,7 @@ export const NavigationDock = memo(({
     >
       <nav 
         aria-label="Main page navigation" 
-        className="flex items-center gap-0.5 sm:gap-1 md:gap-1.5 overflow-x-auto no-scrollbar scrollbar-none select-none scroll-smooth h-full max-w-full menu-bar-dock px-0.5"
+        className="flex items-center gap-0.5 sm:gap-1 md:gap-1.5 overflow-x-auto no-scrollbar scrollbar-none select-none scroll-smooth h-full max-w-full px-0.5"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
       >
         {visibleNavItems.filter(item => item.id !== 'profile').map(item => {

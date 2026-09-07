@@ -70,7 +70,7 @@ export default function ToastContainer({ toasts = [], removeToast }) {
         return (
           <div
             key={toast.id}
-            className={`glass-kormiis pointer-events-auto w-full rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 border ${badgeBorder} !bg-transparent flex items-start sm:items-center justify-between gap-3 animate-in fade-in slide-in-from-top-4 duration-300 select-none shadow-none isolate`}
+            className={`glass-kormiis glass-toast pointer-events-auto w-full rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 border ${badgeBorder} !bg-transparent flex items-start sm:items-center justify-between gap-3 animate-in fade-in slide-in-from-top-4 duration-300 select-none shadow-none isolate`}
             style={{
               background: 'transparent !important',
               backgroundColor: 'transparent !important',
