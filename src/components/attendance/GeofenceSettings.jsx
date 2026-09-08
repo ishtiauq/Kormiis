@@ -19,7 +19,7 @@ function LocationMarker({ position, setPosition }) {
   
   useEffect(() => {
     if (position && position.lat && position.lng) {
-      map.flyTo(position, map.getZoom());
+      map.flyTo(position, Math.max(map.getZoom(), 19));
     }
   }, [position.lat, position.lng, map]);
 
@@ -185,7 +185,7 @@ export default function GeofenceSettings({ settings, setSettings, addToast, addL
         <div className="w-full h-[360px] sm:h-[420px] rounded-3xl overflow-hidden border border-border/80 dark:border-white/12 relative shadow-inner z-0">
           <MapContainer 
             center={[officeLocation.lat, officeLocation.lng]} 
-            zoom={16} 
+            zoom={19} 
             scrollWheelZoom={true} 
             className="w-full h-full"
           >
@@ -196,9 +196,12 @@ export default function GeofenceSettings({ settings, setSettings, addToast, addL
               />
             ) : (
               <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>'
-                url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png"
-                subdomains="abcd"
+                attribution='&copy; Google Maps'
+                url="https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
+                maxZoom={20}
+                subdomains={['mt0', 'mt1', 'mt2', 'mt3']}
+                keepBuffer={8}
+                updateWhenIdle={false}
               />
             )}
             <LocationMarker 

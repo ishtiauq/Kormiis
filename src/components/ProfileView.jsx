@@ -8,6 +8,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { formatDate } from '../services/date.js'
 import { changeEmployeePassword, deleteCurrentUserAccount, scheduleWorkspaceDeletion, cancelWorkspaceDeletion } from '../services/auth.js'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
+import { getGoogleCalendarConnection, connectGoogleCalendar, disconnectGoogleCalendar } from '../services/googleCalendarService.js'
 
 export default function ProfileView({ 
   currentUser, 
@@ -892,6 +893,74 @@ export default function ProfileView({
                   </Button>
                 </div>
               </form>
+            </CardContent>
+          </Card>
+
+          {/* Google Calendar Integration & Mirror Sync */}
+          <Card className="glass-kormiis rounded-3xl border border-white/25 dark:border-white/10 shadow-sm overflow-hidden mt-6">
+            <CardHeader className="p-6 sm:p-8 pb-4 border-b border-border/80 dark:border-white/10">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="size-10 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0">
+                    <Icon name="calendar_month" size={20} />
+                  </div>
+                  <div>
+                    <CardTitle className="text-fluid-lg font-bold text-foreground">Google Calendar Integration</CardTitle>
+                    <CardDescription className="text-fluid-xs text-muted-foreground mt-0.5">
+                      Sync your leaves and mirror schedule directly with your Google Calendar
+                    </CardDescription>
+                  </div>
+                </div>
+                {getGoogleCalendarConnection().isConnected && (
+                  <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-bold px-2.5 py-0.5">
+                    Connected
+                  </Badge>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent className="p-6 sm:p-8 pt-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4.5 rounded-2xl bg-white/40 dark:bg-white/[0.04] border border-white/40 dark:border-white/10">
+                <div className="space-y-1">
+                  <h4 className="text-fluid-sm font-bold text-foreground m-0">Google Account Sync</h4>
+                  <p className="text-fluid-xs text-muted-foreground m-0">
+                    {getGoogleCalendarConnection().isConnected ? (
+                      <>Synced with <span className="font-semibold text-foreground">{getGoogleCalendarConnection().email || 'Google User'}</span>. Approved leaves are automatically added to your calendar.</>
+                    ) : (
+                      'Connect your Google account to automatically receive approved leave events and view calendar mirrors.'
+                    )}
+                  </p>
+                </div>
+                {getGoogleCalendarConnection().isConnected ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      disconnectGoogleCalendar()
+                      addToast?.('Google Calendar disconnected', 'info')
+                    }}
+                    className="h-11 px-5 rounded-2xl font-bold shrink-0 border-border text-muted-foreground hover:text-destructive flex items-center gap-2 cursor-pointer"
+                  >
+                    <Icon name="link_off" size={17} />
+                    <span>Disconnect</span>
+                  </Button>
+                ) : (
+                  <Button
+                    type="button"
+                    onClick={async () => {
+                      try {
+                        const res = await connectGoogleCalendar(currentUser?.email)
+                        addToast?.(`Google Calendar connected (${res.email})!`, 'success')
+                      } catch (err) {
+                        addToast?.(`Failed to connect: ${err.message}`, 'error')
+                      }
+                    }}
+                    className="h-11 px-5 rounded-2xl font-bold shrink-0 shadow-sm bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2 cursor-pointer"
+                  >
+                    <Icon name="cloud_sync" size={17} />
+                    <span>Connect Google Calendar</span>
+                  </Button>
+                )}
+              </div>
             </CardContent>
           </Card>
 

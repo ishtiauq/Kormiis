@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { useModal } from '../services/useModal.js'
 import Icon from "@/components/ui/Icon.jsx"
@@ -10,12 +10,24 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog"
 import { DatePicker } from "@/components/ui/date-picker"
+import {
+  connectGoogleCalendar,
+  disconnectGoogleCalendar,
+  getGoogleCalendarConnection,
+  fetchGoogleCalendarEvents,
+  fetchCountryGovtHolidays,
+  COUNTRY_HOLIDAY_CALENDARS,
+  generateGoogleCalendarUrl,
+  createGoogleCalendarEvent
+} from '../services/googleCalendarService.js'
 
 const EVENT_TYPES = [
   { id: 'meeting', label: 'Meeting', icon: <Icon name="group" size={14}/>, color: '#3b82f6' },
   { id: 'holiday', label: 'Holiday', icon: <Icon name="calendar_month" size={14}/>, color: '#10b981' },
   { id: 'birthday', label: 'Birthday', icon: <Icon name="redeem" size={14}/>, color: '#f59e0b' },
   { id: 'deadline', label: 'Deadline', icon: <Icon name="warning" size={14}/>, color: '#ef4444' },
+  { id: 'govt_holiday', label: 'Govt Holiday', icon: <Icon name="flag" size={14}/>, color: '#059669' },
+  { id: 'google_mirror', label: 'Google Mirror', icon: <Icon name="event" size={14}/>, color: '#4285f4' },
   { id: 'other', label: 'Other', icon: <Icon name="description" size={14}/>, color: '#8b5cf6' },
 ]
 
@@ -32,17 +44,110 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
   const [editingEvent, setEditingEvent] = useState(null)
   const [viewMode, setViewMode] = useState('month')
 
+  // Google Calendar Integration & Mirror States
+  const [googleConn, setGoogleConn] = useState(() => getGoogleCalendarConnection())
+  const [isConnectingGoogle, setIsConnectingGoogle] = useState(false)
+  const [isSyncingGoogle, setIsSyncingGoogle] = useState(false)
+  const [googleMirrorEvents, setGoogleMirrorEvents] = useState([])
+  const [showGoogleMirror, setShowGoogleMirror] = useState(true)
+
+  // Country-wise Govt Holidays States
+  const [selectedCountry, setSelectedCountry] = useState(() => {
+    return localStorage.getItem('kormiis_holiday_country') || 'bd'
+  })
+  const [govtHolidays, setGovtHolidays] = useState([])
+  const [isLoadingHolidays, setIsLoadingHolidays] = useState(false)
+  const [showGovtHolidays, setShowGovtHolidays] = useState(true)
+
   const [formTitle, setFormTitle] = useState('')
   const [formDate, setFormDate] = useState('')
   const [formTime, setFormTime] = useState('')
   const [formType, setFormType] = useState('meeting')
   const [formDescription, setFormDescription] = useState('')
+  const [syncToGoogleOnSave, setSyncToGoogleOnSave] = useState(false)
   useModal(() => { setShowEventModal(false); resetForm() })
 
   const { confirm, ConfirmDialog } = useConfirm()
 
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate()
   const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay()
+
+  // Load Govt Holidays whenever selectedCountry or currentYear changes
+  useEffect(() => {
+    let isCancelled = false
+    const loadHolidays = async () => {
+      setIsLoadingHolidays(true)
+      try {
+        const holidays = await fetchCountryGovtHolidays(selectedCountry, currentYear)
+        if (!isCancelled) {
+          setGovtHolidays(holidays)
+        }
+      } catch (err) {
+        console.warn('Failed to load govt holidays:', err)
+      } finally {
+        if (!isCancelled) setIsLoadingHolidays(false)
+      }
+    }
+    loadHolidays()
+    return () => { isCancelled = true }
+  }, [selectedCountry, currentYear])
+
+  // Load Google Calendar Mirror Events if connected
+  useEffect(() => {
+    let isCancelled = false
+    const loadMirrorEvents = async () => {
+      if (!googleConn.isConnected) {
+        setGoogleMirrorEvents([])
+        return
+      }
+      setIsSyncingGoogle(true)
+      try {
+        const startOfMonth = new Date(currentYear, currentMonth, 1).toISOString()
+        const endOfMonth = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59).toISOString()
+        const gEvents = await fetchGoogleCalendarEvents({ timeMin: startOfMonth, timeMax: endOfMonth })
+        if (!isCancelled) {
+          setGoogleMirrorEvents(gEvents)
+        }
+      } catch (err) {
+        console.warn('Failed to fetch Google Calendar mirror events:', err)
+      } finally {
+        if (!isCancelled) setIsSyncingGoogle(false)
+      }
+    }
+    loadMirrorEvents()
+    return () => { isCancelled = true }
+  }, [googleConn.isConnected, currentMonth, currentYear])
+
+  const handleCountryChange = (newCode) => {
+    setSelectedCountry(newCode)
+    localStorage.setItem('kormiis_holiday_country', newCode)
+    const cObj = COUNTRY_HOLIDAY_CALENDARS.find(c => c.code === newCode)
+    if (addToast) addToast(`Loaded ${cObj?.name || 'Govt'} Holidays`, 'info')
+  }
+
+  const handleConnectGoogle = async () => {
+    setIsConnectingGoogle(true)
+    try {
+      const res = await connectGoogleCalendar(currentUser?.email)
+      const conn = getGoogleCalendarConnection()
+      setGoogleConn(conn)
+      if (addToast) addToast(`Google Calendar connected (${res.email || 'Success'})!`, 'success')
+      if (addLog) addLog('Google Calendar Connected', `Account: ${res.email}`)
+    } catch (err) {
+      if (addToast) addToast(`Connection failed: ${err.message}`, 'error')
+    } finally {
+      setIsConnectingGoogle(false)
+    }
+  }
+
+  const handleDisconnectGoogle = async () => {
+    const ok = await confirm('Disconnect your Google Calendar from Kormiis?', 'Disconnect Calendar?')
+    if (!ok) return
+    disconnectGoogleCalendar()
+    setGoogleConn(getGoogleCalendarConnection())
+    setGoogleMirrorEvents([])
+    if (addToast) addToast('Google Calendar disconnected', 'info')
+  }
 
   const prevMonth = () => {
     if (currentMonth === 0) { setCurrentMonth(11); setCurrentYear(y => y - 1) }
@@ -60,6 +165,7 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
     setFormTime('')
     setFormType('meeting')
     setFormDescription('')
+    setSyncToGoogleOnSave(false)
     setEditingEvent(null)
   }
 
@@ -77,10 +183,11 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
     setFormTime(event.time || '')
     setFormType(event.type)
     setFormDescription(event.description || '')
+    setSyncToGoogleOnSave(false)
     setShowEventModal(true)
   }
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault()
     if (!formTitle || !formDate) return addToast('Title and date are required', 'warning')
 
@@ -108,6 +215,22 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
       addToast('Event created', 'success')
       addLog('Event Created', `${formTitle} on ${formDate}`)
       if (addNotification) addNotification(`New company event scheduled: "${formTitle}" on ${formDate}`, 'calendar', { title: 'New Event', category: 'event' })
+
+      // Sync to Google Calendar if requested
+      if (syncToGoogleOnSave && googleConn.isConnected) {
+        try {
+          await createGoogleCalendarEvent({
+            title: formTitle,
+            description: formDescription,
+            startDate: formTime ? `${formDate}T${formTime}:00` : formDate,
+            endDate: formTime ? `${formDate}T${formTime}:00` : formDate,
+            allDay: !formTime
+          })
+          if (addToast) addToast('Event synced to Google Calendar!', 'success')
+        } catch (err) {
+          console.warn('Sync to Google failed:', err)
+        }
+      }
     }
 
     setShowEventModal(false)
@@ -137,7 +260,13 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
       }
     })
 
-  const allEvents = [...events, ...birthdayEvents]
+  // Combine Internal Events + Birthdays + Country Govt Holidays + Mirrored Google Events
+  const allEvents = [
+    ...events,
+    ...birthdayEvents,
+    ...(showGovtHolidays ? govtHolidays : []),
+    ...(showGoogleMirror ? googleMirrorEvents : [])
+  ]
 
   const getEventsForDate = (day) => {
     const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
@@ -161,6 +290,93 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
   const renderCalendarGrid = () => (
     <Card>
       <CardContent className="p-5 sm:p-6">
+        {/* Google Calendar Mirror & Country Govt Holiday Toolbar */}
+        <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-border/40 mb-4">
+          {/* Left: Google Calendar Connection Status */}
+          <div className="flex items-center gap-2 flex-wrap">
+            {googleConn.isConnected ? (
+              <div className="flex items-center gap-2">
+                <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 gap-1.5 py-1 px-3">
+                  <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <Icon name="cloud_done" size={14} />
+                  <span>Google Mirror Synced ({googleConn.email || 'Connected'})</span>
+                </Badge>
+
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleDisconnectGoogle} 
+                  className="h-8 px-2.5 text-xs text-muted-foreground hover:text-destructive border-border/60"
+                  title="Disconnect Google Calendar"
+                >
+                  <Icon name="link_off" size={14} className="mr-1" /> Disconnect
+                </Button>
+              </div>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleConnectGoogle}
+                disabled={isConnectingGoogle}
+                className="h-8 px-3 text-xs gap-1.5 rounded-xl border-primary/40 text-primary hover:bg-primary/10"
+              >
+                {isConnectingGoogle ? (
+                  <Icon name="progress_activity" size={14} className="animate-spin" />
+                ) : (
+                  <Icon name="cloud_sync" size={14} />
+                )}
+                <span>Connect Google Calendar (Mirror)</span>
+              </Button>
+            )}
+
+            {/* Toggle Google Mirror Events */}
+            {googleConn.isConnected && (
+              <Button
+                variant={showGoogleMirror ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setShowGoogleMirror(v => !v)}
+                className={`h-8 px-2.5 text-xs rounded-xl gap-1 ${!showGoogleMirror ? 'text-muted-foreground' : ''}`}
+                title="Toggle Google Calendar Mirrored Events"
+              >
+                <Icon name="sync" size={13} className={isSyncingGoogle ? 'animate-spin' : ''} />
+                <span>Google Events ({googleMirrorEvents.length})</span>
+              </Button>
+            )}
+          </div>
+
+          {/* Right: Country-wise Public Holiday Selector */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-1 text-xs text-muted-foreground font-semibold">
+              <Icon name="public" size={15} className="text-primary" />
+              <span>Govt. Holidays:</span>
+            </div>
+
+            <select
+              value={selectedCountry}
+              onChange={(e) => handleCountryChange(e.target.value)}
+              className="h-8 text-xs font-semibold px-2.5 py-1 rounded-xl bg-background border border-border/60 text-foreground cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary"
+              aria-label="Select Country for Govt Holidays"
+            >
+              {COUNTRY_HOLIDAY_CALENDARS.map(c => (
+                <option key={c.code} value={c.code}>
+                  {c.flag} {c.name}
+                </option>
+              ))}
+            </select>
+
+            <Button
+              variant={showGovtHolidays ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setShowGovtHolidays(v => !v)}
+              className={`h-8 px-2.5 text-xs rounded-xl gap-1 ${!showGovtHolidays ? 'text-muted-foreground' : ''}`}
+              title="Toggle Government Public Holidays"
+            >
+              <Icon name="flag" size={13} className={isLoadingHolidays ? 'animate-spin' : ''} />
+              <span>Holidays ({govtHolidays.length})</span>
+            </Button>
+          </div>
+        </div>
+
         <div className="flex flex-col sm:flex-row justify-between items-center mb-5 gap-4">
           <div className="flex items-center gap-2 sm:gap-3">
             <Button variant="outline" size="icon" className="size-8 sm:size-10" onClick={prevMonth} aria-label="Previous month">
@@ -329,6 +545,33 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
                           </Button>
                         </div>
                       )}
+                      {ev.isGoogleMirror && ev.htmlLink && (
+                        <a 
+                          href={ev.htmlLink} 
+                          target="_blank" 
+                          rel="noreferrer" 
+                          className="size-8 rounded-xl flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                          title="Open in Google Calendar"
+                        >
+                          <Icon name="open_in_new" size={15}/>
+                        </a>
+                      )}
+                      {!ev.isGoogleMirror && (
+                        <a 
+                          href={generateGoogleCalendarUrl({
+                            title: ev.title,
+                            description: ev.description || '',
+                            startDate: ev.date,
+                            endDate: ev.date,
+                          })}
+                          target="_blank" 
+                          rel="noreferrer" 
+                          className="size-8 rounded-xl flex items-center justify-center text-muted-foreground hover:text-emerald-600 hover:bg-emerald-500/10 transition-colors"
+                          title="Add / Sync this event to your Google Calendar"
+                        >
+                          <Icon name="calendar_add_on" size={15}/>
+                        </a>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -397,6 +640,21 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
               <textarea value={formDescription} onChange={e => setFormDescription(e.target.value)} rows={3} placeholder="Event description (optional)" aria-label="Event description"
                 className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-y" />
             </div>
+
+            {/* Sync to Google Calendar option */}
+            {googleConn.isConnected && !editingEvent && (
+              <label className="flex items-center gap-2 text-xs font-semibold text-foreground cursor-pointer pt-1">
+                <input 
+                  type="checkbox" 
+                  checked={syncToGoogleOnSave} 
+                  onChange={e => setSyncToGoogleOnSave(e.target.checked)}
+                  className="rounded border-border size-4 text-primary focus:ring-primary"
+                />
+                <Icon name="cloud_upload" size={16} className="text-emerald-500" />
+                <span>Also sync this event directly to my Google Calendar</span>
+              </label>
+            )}
+
             <DialogFooter className="flex gap-3 mt-2">
               <Button type="button" variant="outline" onClick={() => { setShowEventModal(false); resetForm() }}>
                 Cancel

@@ -388,6 +388,8 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
           settings={settings}
           notes={notes}
           setNotes={setNotes}
+          roster={roster}
+          setCurrentView={setCurrentView}
         />
       )}
 

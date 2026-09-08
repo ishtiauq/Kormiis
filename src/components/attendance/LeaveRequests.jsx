@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog"
 import { generateLeaveStatusMessage, queueWhatsAppMessages, openWhatsAppDirect } from '../../services/whatsappService.js'
+import { createGoogleCalendarEvent, getGoogleCalendarConnection } from '../../services/googleCalendarService.js'
 
 export default function LeaveRequests({ employees, attendance, setAttendance, addToast, addNotification, settings }) {
   const { pendingLeaves, approveLeave, rejectLeave, pendingCount } = useLeaves(attendance, setAttendance, addToast, addNotification)
@@ -20,6 +21,23 @@ export default function LeaveRequests({ employees, attendance, setAttendance, ad
 
       if (pendingAction.action === 'approve') {
         approveLeave(pendingAction.id)
+
+        // Auto-create Google Calendar event if Google Calendar is connected
+        const gConn = getGoogleCalendarConnection()
+        if (gConn.isConnected && targetLeave) {
+          createGoogleCalendarEvent({
+            title: `[Leave] ${emp?.name || 'Employee'} - ${targetLeave.leaveType || 'Leave'}`,
+            description: `Approved ${targetLeave.leaveType} leave for ${emp?.name || 'Employee'}.\nDates: ${targetLeave.startDate} to ${targetLeave.endDate}\nReason: ${targetLeave.reason || 'N/A'}`,
+            startDate: targetLeave.startDate,
+            endDate: targetLeave.endDate,
+            allDay: true,
+            attendees: emp?.email ? [emp.email] : []
+          }).then(() => {
+            if (addToast) addToast(`Leave event synced to Google Calendar!`, 'success')
+          }).catch(err => {
+            console.warn('Google Calendar auto-sync warning:', err)
+          })
+        }
       } else {
         rejectLeave(pendingAction.id)
       }

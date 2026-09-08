@@ -85,6 +85,10 @@
   --duration-standard: 400ms;
   --duration-modal: 600ms;
 
+  /* Kormiis Shadow — Official Global Design Token (Crisp, balanced-intensity, short-distance drop shadow) */
+  --kormiis-shadow: 0 2px 4px rgba(0, 0, 0, 0.22), 0 1px 2px rgba(0, 0, 0, 0.30);
+  --kormiis-filter-shadow: drop-shadow(0 1.5px 2px rgba(0, 0, 0, 0.18));
+
   /* Apple Ultra-Liquid Glass Tokens (Zero Background Color / Pure Refraction Standard) */
   --glass-bg: transparent;
   --glass-border: rgba(0, 0, 0, 0.08);
@@ -187,15 +191,34 @@ html.dark,
   --input: transparent !important;
 }
 
-* {
+*,
+*::before,
+*::after {
   border-color: var(--border);
+  font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Inter is the one and only font in this entire app: map font-mono to Inter as well */
+.font-mono,
+code,
+kbd,
+samp,
+pre {
+  font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-feature-settings: "tnum" 1, "zero" 1;
+}
+
+/* Retain Material Symbols ligature font strictly for icon rendering */
+.msr,
+.msr * {
+  font-family: "Material Symbols Rounded", "Material Symbols Rounded Variable" !important;
 }
 
 body {
   background-color: #f5f5f7;
   background-image: none;
   color: var(--foreground);
-  font-family: var(--font-sans);
+  font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-feature-settings: "rlig" 1, "calt" 1;
@@ -427,6 +450,7 @@ li[data-sonner-toast],
 [data-radix-popover-content],
 [data-radix-tooltip-content],
 .popover-content,
+.map-floating-glass,
 [role="tooltip"] {
   background: transparent !important;
   background-color: transparent !important;
@@ -434,6 +458,35 @@ li[data-sonner-toast],
   backdrop-filter: blur(32px) saturate(190%) !important;
   border: 1px solid var(--glass-border) !important;
   box-shadow: none !important;
+}
+
+/* Force pure solid black text, labels, numbers and icons for GeoCheckInWidget map controls in both light and dark mode */
+.geo-map-floating-text,
+.geo-map-floating-text *,
+[data-geo-map-control],
+[data-geo-map-control] * {
+  color: #000000 !important;
+  -webkit-text-fill-color: #000000 !important;
+}
+
+/* Kormiis Shadow — Official Design System Utility Class (Crisp, balanced-intensity, short-distance drop shadow) */
+.kormiis-shadow,
+.shadow-kormiis,
+.map-floating-btn-shadow {
+  box-shadow: var(--kormiis-shadow, 0 2px 4px rgba(0, 0, 0, 0.22), 0 1px 2px rgba(0, 0, 0, 0.30)) !important;
+  filter: var(--kormiis-filter-shadow, drop-shadow(0 1.5px 2px rgba(0, 0, 0, 0.18)));
+}
+
+/* Progressive Blur for Attendance Widget Header over Map (Apple Ultra-Liquid Glass blend) */
+.map-header-progressive-blur {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  -webkit-backdrop-filter: blur(20px) saturate(190%);
+  backdrop-filter: blur(20px) saturate(190%);
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.85) 55%, rgba(0, 0, 0, 0) 100%);
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.85) 55%, rgba(0, 0, 0, 0) 100%);
 }
 
 /* AI Panel, Notification Panel, Mobile Bottom Bar & Menu Drawer: Pure Refraction Standard */
@@ -2039,6 +2092,8 @@ body [class*="saturate-"]:not(header):not(.topbar):not(.landing-glass-header):no
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
 }
+
+
 
 
 

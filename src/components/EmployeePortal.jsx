@@ -772,7 +772,34 @@ function DashboardView({
       {/* 12-Column Grid matching portal architecture */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 lg:gap-6 auto-rows-[minmax(148px,auto)] items-stretch pt-2">
 
-        {/* Column 1: Catch Up (Announcements, Notice & Events) — col-span-12 lg:col-span-4 */}
+        {/* Column 1: Left Stacked Column — Clock In (top), Personal Attendance (middle) & Performance Tracker (bottom) — col-span-12 lg:col-span-4 */}
+        <div className="col-span-12 lg:col-span-4 flex flex-col gap-4 sm:gap-5 lg:gap-6 justify-between">
+          {currentUser && (
+            <GeoCheckInWidget 
+              currentUser={currentUser} 
+              attendance={attendance} 
+              setAttendance={setAttendance} 
+              addToast={addToast} 
+              settings={settings}
+              notes={notes}
+              setNotes={setNotes}
+              roster={roster}
+              shiftTemplates={shiftTemplates}
+              setCurrentView={setActiveTab}
+              cardClassName="!h-auto min-h-0 w-full"
+            />
+          )}
+
+          <PerformanceTrackerWidget
+            efficiencyScore={efficiencyScore}
+            taskCompletionRate={taskCompletionRate}
+            attendanceRate={attendanceRate}
+            setCurrentView={setActiveTab}
+            cardClass="!h-auto min-h-0"
+          />
+        </div>
+
+        {/* Column 2: Catch Up (Announcements, Notice & Events) in Middle — col-span-12 lg:col-span-4 */}
         <AnnouncementsWidget
           announcements={announcements}
           setAnnouncements={setAnnouncements}
@@ -789,40 +816,6 @@ function DashboardView({
           settings={settings}
           cardClass="col-span-12 lg:col-span-4 h-full"
         />
-
-        {/* Column 2: Middle Stacked Column — Clock In (top), Personal Attendance (middle) & Performance Tracker (bottom) — col-span-12 lg:col-span-4 */}
-        <div className="col-span-12 lg:col-span-4 flex flex-col gap-4 sm:gap-5 lg:gap-6 justify-between">
-          {currentUser && (
-            <GeoCheckInWidget 
-              currentUser={currentUser} 
-              attendance={attendance} 
-              setAttendance={setAttendance} 
-              addToast={addToast} 
-              settings={settings}
-              notes={notes}
-              setNotes={setNotes}
-              cardClassName="!h-auto min-h-0 w-full"
-            />
-          )}
-
-          <MyAttendanceWidget
-            currentUser={currentUser}
-            attendance={attendance}
-            roster={roster}
-            shiftTemplates={shiftTemplates}
-            settings={settings}
-            setCurrentView={setActiveTab}
-            cardClass="!h-auto min-h-0"
-          />
-
-          <PerformanceTrackerWidget
-            efficiencyScore={efficiencyScore}
-            taskCompletionRate={taskCompletionRate}
-            attendanceRate={attendanceRate}
-            setCurrentView={setActiveTab}
-            cardClass="!h-auto min-h-0"
-          />
-        </div>
 
         {/* Column 3: Team Directory Widget — col-span-12 lg:col-span-4 */}
         <EmployeeDirectoryWidget

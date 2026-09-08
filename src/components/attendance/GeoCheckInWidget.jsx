@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { MapContainer, TileLayer, Marker, Circle, useMap, Popup } from 'react-leaflet'
+import { useState, useEffect, useMemo } from 'react'
+import { MapContainer, TileLayer, Marker, Circle, Polyline, useMap, Popup } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 import Icon from "@/components/ui/Icon.jsx"
@@ -30,22 +30,22 @@ const userPinIcon = L.divIcon({
   popupAnchor: [0, -13],
 });
 
-// Auto fit map bounds to show both office and user
-function MapBoundsUpdater({ officeCoords, userCoords, radius }) {
+// Auto-fit bounds between office and user location so distance is always visually shown
+function MapBoundsUpdater({ officeCoords, userCoords }) {
   const map = useMap()
   useEffect(() => {
     if (!map) return
-    if (userCoords?.lat && userCoords?.lng) {
+    if (userCoords?.lat && userCoords?.lng && officeCoords?.lat && officeCoords?.lng) {
       const bounds = L.latLngBounds([
         [officeCoords.lat, officeCoords.lng],
         [userCoords.lat, userCoords.lng]
       ])
-      // Pad bounds so circle is comfortably visible
-      map.fitBounds(bounds, { padding: [24, 24], maxZoom: 17 })
+      // Fit both locations with visual padding
+      map.fitBounds(bounds, { padding: [50, 50], maxZoom: 18, animate: true })
     } else if (officeCoords?.lat && officeCoords?.lng) {
       map.setView([officeCoords.lat, officeCoords.lng], 16)
     }
-  }, [map, officeCoords?.lat, officeCoords?.lng, userCoords?.lat, userCoords?.lng, radius])
+  }, [map, userCoords?.lat, userCoords?.lng, officeCoords?.lat, officeCoords?.lng])
   return null
 }
 
@@ -66,7 +66,19 @@ function deg2rad(deg) {
   return deg * (Math.PI/180)
 }
 
-export default function GeoCheckInWidget({ currentUser, attendance, setAttendance, addToast, settings, notes = [], setNotes, cardClassName = '' }) {
+export default function GeoCheckInWidget({ 
+  currentUser, 
+  attendance, 
+  setAttendance, 
+  addToast, 
+  settings, 
+  notes = [], 
+  setNotes, 
+  cardClassName = '',
+  roster = [],
+  shiftTemplates = [],
+  setCurrentView
+}) {
   const today = toLocal(new Date())
   const [currentTime, setCurrentTime] = useState(new Date())
   
@@ -79,11 +91,14 @@ export default function GeoCheckInWidget({ currentUser, attendance, setAttendanc
   const [distance, setDistance] = useState(null)
   const [locError, setLocError] = useState(null)
   const [isLoadingLoc, setIsLoadingLoc] = useState(false)
+  const [gpsPhase, setGpsPhase] = useState('idle') // 'idle' | 'acquiring' | 'verifying' | 'outside'
   
   // Success Message State
   const [successMsg, setSuccessMsg] = useState(null)
   // Out of Geofence Warning Modal State
   const [outOfBoundsModal, setOutOfBoundsModal] = useState({ open: false, dist: 0, max: maxDistance })
+  // Device GPS Off / Location Permission Required Modal State
+  const [gpsDisabledModal, setGpsDisabledModal] = useState(false)
   
   // Ensure current user is valid
   const empId = currentUser?.employeeId || currentUser?.id
@@ -93,27 +108,47 @@ export default function GeoCheckInWidget({ currentUser, attendance, setAttendanc
     return () => clearInterval(timer)
   }, [])
 
-  // Auto-detect location on load so the map shows user immediately
+  // Auto-detect and watch location continuously so distance updates in real-time
   useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const lat = position.coords.latitude
-          const lng = position.coords.longitude
-          setUserLocation({ lat, lng })
-          const dist = getDistanceFromLatLonInMeters(lat, lng, officeLat, officeLng)
-          setDistance(dist)
-        },
-        () => {
-          // silently handle initial lookup error; user can still interact
-        },
-        { enableHighAccuracy: true, timeout: 8000, maximumAge: 30000 }
-      )
+    if (!navigator.geolocation) return
+
+    const updateCoords = (position) => {
+      const lat = position.coords.latitude
+      const lng = position.coords.longitude
+      setUserLocation({ lat, lng })
+      const dist = getDistanceFromLatLonInMeters(lat, lng, officeLat, officeLng)
+      setDistance(dist)
+    }
+
+    // Initial fetch
+    navigator.geolocation.getCurrentPosition(
+      updateCoords,
+      () => {},
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 5000 }
+    )
+
+    // Continuous real-time location watcher
+    const watchId = navigator.geolocation.watchPosition(
+      updateCoords,
+      () => {},
+      { enableHighAccuracy: true, maximumAge: 5000 }
+    )
+
+    return () => {
+      if (watchId) navigator.geolocation.clearWatch(watchId)
     }
   }, [officeLat, officeLng])
 
   const logs = attendance?.dailyLogs?.[today] || {}
   const empLog = logs[empId] || { status: 'Off Duty', checkIn: '--', checkOut: '--', hours: '0.0' }
+
+  // Check today's roster schedule for Off Day
+  const todayShift = useMemo(() => {
+    if (!Array.isArray(roster) || !empId) return null
+    return roster.find(r => r.employeeId === empId && r.date === today)
+  }, [roster, empId, today])
+
+  const isOffDay = todayShift?.templateId === 'Off' || empLog?.status === 'Day Off' || empLog?.status === 'Off'
 
   const timeStr = currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })
   
@@ -127,19 +162,122 @@ export default function GeoCheckInWidget({ currentUser, attendance, setAttendanc
     return d
   }
 
-  const cooldownPassed = empLog.checkOut !== '--' && minutesSince(empLog.checkOut) !== null && minutesSince(empLog.checkOut) >= 30
+  const STANDARD_COOLDOWN_MINS = 15 // Standard limited cooldown time in minutes after clock out
+
+  const cooldownPassed = empLog.checkOut !== '--' && minutesSince(empLog.checkOut) !== null && minutesSince(empLog.checkOut) >= STANDARD_COOLDOWN_MINS
 
   const canCheckIn = empId && (empLog.checkIn === '--' || cooldownPassed)
   const canCheckOut = empId && empLog.checkIn !== '--' && empLog.checkOut === '--'
 
-  const elapsed = (() => {
-    if (empLog.checkIn === '--' || empLog.checkOut !== '--') return null
-    const d = minutesSince(empLog.checkIn)
-    if (d === null) return null
-    return `${Math.floor(d / 60)}h ${String(d % 60).padStart(2, '0')}m`
-  })()
+  // Format time with 0 instead of '--'
+  const displayCheckIn = empLog.checkIn && empLog.checkIn !== '--' ? empLog.checkIn : '0'
+  const displayCheckOut = empLog.checkOut && empLog.checkOut !== '--' ? empLog.checkOut : '0'
 
-  const cooldownRemaining = empLog.checkOut !== '--' && !cooldownPassed ? Math.max(0, 30 - (minutesSince(empLog.checkOut) ?? 0)) : 0
+  // Real-time worked timer calculation (shows 0h 00m instead of '--')
+  const workedDurationStr = useMemo(() => {
+    if (!empLog || !empLog.checkIn || empLog.checkIn === '--' || empLog.checkIn === '0') {
+      return '0h 00m'
+    }
+
+    const startMins = parseMin(empLog.checkIn)
+    if (startMins === null) return '0h 00m'
+
+    // If already clocked out, show the finalized worked duration from checkIn to checkOut
+    if (empLog.checkOut && empLog.checkOut !== '--' && empLog.checkOut !== '0') {
+      const endMins = parseMin(empLog.checkOut)
+      if (endMins !== null) {
+        let diff = endMins - startMins
+        if (diff < 0) diff += 1440
+        const h = Math.floor(diff / 60)
+        const m = diff % 60
+        return `${h}h ${String(m).padStart(2, '0')}m`
+      }
+      if (empLog.hours && empLog.hours !== '0.0') {
+        return `${empLog.hours} hrs`
+      }
+      return '0h 00m'
+    }
+
+    // Active working session: timer updates dynamically in real-time
+    const currentMins = currentTime.getHours() * 60 + currentTime.getMinutes()
+    let elapsedMins = currentMins - startMins
+    if (elapsedMins < 0) elapsedMins += 1440
+    const h = Math.floor(elapsedMins / 60)
+    const m = elapsedMins % 60
+    return `${h}h ${String(m).padStart(2, '0')}m`
+  }, [empLog, currentTime])
+
+  // Monthly stats calculation (current calendar month)
+  const currentMonthPrefix = today.slice(0, 7) // "YYYY-MM"
+  const monthlyStats = useMemo(() => {
+    let presentDays = 0
+    let lateDays = 0
+    let noShowDays = 0
+    let totalWorkHours = 0
+    const dailyLogs = attendance?.dailyLogs || {}
+
+    Object.entries(dailyLogs).forEach(([dateStr, dayObj]) => {
+      if (!dateStr.startsWith(currentMonthPrefix)) return
+      const log = dayObj?.[empId]
+      if (!log) return
+
+      const rawStatus = String(log.status || '').trim()
+      const isPresent = rawStatus === 'In Office' || rawStatus === 'Remote' || rawStatus === 'On-Field' || rawStatus === 'Present'
+      const isLate = rawStatus === 'Late' || log.isLate === true
+      const isNoShow = rawStatus === 'No-Show' || rawStatus === 'No Show'
+
+      if (isPresent || isLate) {
+        presentDays++
+      }
+      if (isLate) {
+        lateDays++
+      }
+      if (isNoShow) {
+        noShowDays++
+      }
+      const hrs = parseFloat(log.hours || 0)
+      if (!isNaN(hrs) && hrs > 0) {
+        totalWorkHours += hrs
+      }
+    })
+
+    // Leaves taken in this month
+    const leaves = Array.isArray(attendance?.leaves) ? attendance.leaves : []
+    const approvedMyLeaves = leaves.filter(l => 
+      l && l.employeeId === empId && l.status === 'Approved' &&
+      (l.startDate?.startsWith(currentMonthPrefix) || l.endDate?.startsWith(currentMonthPrefix))
+    )
+    const leavesCount = approvedMyLeaves.reduce((sum, l) => sum + (Number(l.days) || 1), 0)
+
+    return {
+      presentDays,
+      lateDays,
+      noShowDays,
+      leavesCount,
+      totalWorkHours: totalWorkHours.toFixed(1)
+    }
+  }, [attendance, empId, currentMonthPrefix])
+
+  // Leave policies & balances (remaining vs total quota)
+  const defaultPolicies = settings?.leavePolicies || { Annual: 14, Sick: 7, Casual: 3 }
+  const myBalance = attendance?.leaveBalances?.[empId] || defaultPolicies
+
+  const leaveItems = useMemo(() => {
+    return Object.keys(defaultPolicies).map(type => {
+      const quota = defaultPolicies[type] ?? 0
+      const remaining = myBalance[type] ?? quota
+      const taken = Math.max(0, quota - remaining)
+      return {
+        type,
+        quota,
+        remaining,
+        taken
+      }
+    })
+  }, [defaultPolicies, myBalance])
+
+  const isWorking = empLog.checkIn !== '--' && empLog.checkOut === '--'
+  const cooldownRemaining = empLog.checkOut !== '--' && !cooldownPassed ? Math.max(0, STANDARD_COOLDOWN_MINS - (minutesSince(empLog.checkOut) ?? 0)) : 0
 
   const showSuccessOverlay = (type, time, hoursWorked = null) => {
     setSuccessMsg({ type, time, hoursWorked })
@@ -180,12 +318,13 @@ export default function GeoCheckInWidget({ currentUser, attendance, setAttendanc
   const executeActionWithLocation = (actionCallback) => {
     if (!navigator.geolocation) {
       setLocError('Geolocation is not supported by your browser')
-      addToast?.('Geolocation is not supported by your browser', 'error')
+      setGpsDisabledModal(true)
       return
     }
 
     setIsLoadingLoc(true)
     setLocError(null)
+    setGpsPhase('acquiring')
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -194,19 +333,25 @@ export default function GeoCheckInWidget({ currentUser, attendance, setAttendanc
         setUserLocation({ lat, lng })
         const dist = getDistanceFromLatLonInMeters(lat, lng, officeLat, officeLng)
         setDistance(dist)
-        setIsLoadingLoc(false)
-        
-        if (dist <= maxDistance) {
-          actionCallback();
-        } else {
-          setLocError(`Outside office geofence (${dist}m away, max ${maxDistance}m)`)
-          setOutOfBoundsModal({ open: true, dist, max: maxDistance })
-        }
+
+        // Phase 2: Verifying GPS geofence match
+        setGpsPhase('verifying')
+        setTimeout(() => {
+          setIsLoadingLoc(false)
+          setGpsPhase('idle')
+          if (dist <= maxDistance) {
+            actionCallback()
+          } else {
+            setOutOfBoundsModal({ open: true, dist, max: maxDistance })
+          }
+        }, 700)
       },
       (err) => {
-        setLocError('Location access denied or unavailable.')
-        addToast?.('Location access denied or unavailable.', 'error')
         setIsLoadingLoc(false)
+        setGpsPhase('idle')
+        // PERMISSION_DENIED (1) or POSITION_UNAVAILABLE (2)
+        setLocError('Location is turned off or access is denied.')
+        setGpsDisabledModal(true)
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     )
@@ -279,64 +424,159 @@ export default function GeoCheckInWidget({ currentUser, attendance, setAttendanc
 
   return (
     <>
-      {/* Out of Office Zone Warning Modal */}
+      {/* Out of Office Zone Warning Modal (Ultra-Liquid Glass, No Background Overlay) */}
       <Dialog open={outOfBoundsModal.open} onOpenChange={(open) => setOutOfBoundsModal(prev => ({ ...prev, open }))}>
-        <DialogContent className="max-w-[420px] border-destructive/20 glass-kormiis shadow-none flex flex-col items-center justify-center p-6 sm:p-8 gap-4 rounded-[1.5rem] outline-none">
-          <div className="size-16 rounded-full bg-destructive/10 border border-destructive/20 flex items-center justify-center text-destructive">
-            <Icon name="wrong_location" size={36} className="text-destructive animate-pulse" />
-          </div>
-          
-          <div className="text-center space-y-1.5">
-            <DialogTitle className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
+        <DialogContent 
+          overlayClassName="!bg-transparent !backdrop-blur-none"
+          dialogClassName="!p-6 sm:!p-8 !border-none !outline-none !shadow-none !bg-transparent"
+          style={{ 
+            background: 'transparent',
+            backdropFilter: 'saturate(190%) blur(32px)', 
+            WebkitBackdropFilter: 'saturate(190%) blur(32px)', 
+          }}
+          className="max-w-[420px] border border-black/15 dark:border-white/20 shadow-none flex flex-col items-center justify-center gap-4 rounded-[28px] outline-none text-center"
+        >
+          {/* Centered Group: Red Filled Icon and Red Text on the exact same line */}
+          <div className="flex items-center justify-center gap-3 w-full">
+            <Icon 
+              name="wrong_location" 
+              size={32} 
+              style={{ color: '#ef4444', fontVariationSettings: "'FILL' 1" }}
+              className="shrink-0 animate-pulse text-red-500" 
+            />
+            <DialogTitle 
+              style={{ color: '#ef4444' }}
+              className="text-xl sm:text-2xl font-black tracking-tight !text-red-500 m-0 leading-none"
+            >
               Outside Office Zone
             </DialogTitle>
-            <DialogDescription className="text-xs sm:text-sm text-muted-foreground">
-              You are currently outside the designated office geofence. Clock-in is restricted to verified office premises.
-            </DialogDescription>
+          </div>
+          
+          {/* Subheading with breathing room */}
+          <DialogDescription className="text-sm text-muted-foreground leading-relaxed pt-1 px-2">
+            You are currently outside the designated office geofence. Clock-in is restricted to verified office premises.
+          </DialogDescription>
+
+          {/* Clean Distance Line with breathing gap, zero inner box */}
+          <div className="py-2.5 flex items-center justify-center gap-2 text-xs font-semibold text-muted-foreground">
+            <span>Current Distance:</span>
+            <span className="font-bold font-mono text-destructive text-sm tabular-nums">
+              {outOfBoundsModal.dist}m
+            </span>
+            <span className="opacity-40">·</span>
+            <span>Allowed:</span>
+            <span className="font-semibold font-mono text-foreground text-sm tabular-nums">
+              {outOfBoundsModal.max}m
+            </span>
           </div>
 
-          <div className="w-full bg-muted/40 dark:bg-white/[0.04] rounded-xl p-3.5 border border-border/50 space-y-2">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-muted-foreground flex items-center gap-1.5">
-                <Icon name="navigation" size={14} className="text-destructive"/> Your Current Distance
-              </span>
-              <span className="font-bold font-mono text-destructive text-sm tabular-nums">
-                {outOfBoundsModal.dist} meters
-              </span>
-            </div>
-            <div className="flex items-center justify-between text-xs border-t border-border/40 pt-2">
-              <span className="text-muted-foreground flex items-center gap-1.5">
-                <Icon name="radio_button_checked" size={14} className="text-emerald-500"/> Allowed Office Radius
-              </span>
-              <span className="font-semibold font-mono text-foreground text-sm tabular-nums">
-                {outOfBoundsModal.max} meters
-              </span>
-            </div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-2 w-full mt-2">
-            <Button 
-              variant="outline"
+          <div className="flex flex-col sm:flex-row gap-3 w-full mt-3">
+            <button 
+              type="button"
               onClick={() => {
                 setOutOfBoundsModal(prev => ({ ...prev, open: false }))
                 refreshLocation()
               }}
-              className="flex-1 h-11 rounded-xl text-xs font-semibold gap-1.5"
+              style={{ 
+                background: 'transparent',
+                backdropFilter: 'saturate(190%) blur(32px)', 
+                WebkitBackdropFilter: 'saturate(190%) blur(32px)',
+              }}
+              className="flex-1 h-12 min-h-[48px] px-5 rounded-2xl text-sm font-extrabold flex items-center justify-center gap-2 border border-black/15 dark:border-white/20 text-foreground hover:bg-black/5 dark:hover:bg-white/10 transition-all active:scale-[0.98] cursor-pointer"
             >
-              <Icon name="refresh" size={15}/>
+              <Icon name="refresh" size={18}/>
               Retry Location
-            </Button>
-            <Button 
+            </button>
+            <button 
+              type="button"
               onClick={() => setOutOfBoundsModal(prev => ({ ...prev, open: false }))}
-              className="flex-1 h-11 rounded-xl bg-destructive hover:bg-destructive/90 text-destructive-foreground text-xs font-semibold shadow-none"
+              style={{ 
+                background: 'transparent',
+                backdropFilter: 'saturate(190%) blur(32px)', 
+                WebkitBackdropFilter: 'saturate(190%) blur(32px)',
+              }}
+              className="flex-1 h-12 min-h-[48px] px-5 rounded-2xl text-sm font-extrabold flex items-center justify-center border-2 border-destructive/60 text-destructive hover:bg-destructive/10 transition-all active:scale-[0.98] cursor-pointer"
             >
               Understood
-            </Button>
+            </button>
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* Success Modal */}
+      {/* Device GPS Off / Location Required Dialog (MonoGlass Ultra-Liquid Glass) */}
+      <Dialog open={gpsDisabledModal} onOpenChange={setGpsDisabledModal}>
+        <DialogContent 
+          overlayClassName="!bg-transparent !backdrop-blur-none"
+          dialogClassName="!p-6 sm:!p-8 !border-none !outline-none !shadow-none !bg-transparent"
+          style={{ 
+            background: 'transparent',
+            backdropFilter: 'saturate(190%) blur(32px)', 
+            WebkitBackdropFilter: 'saturate(190%) blur(32px)',
+          }}
+          className="max-w-[420px] border border-black/15 dark:border-white/20 shadow-none flex flex-col items-center justify-center gap-4 rounded-[28px] outline-none text-center"
+        >
+          <div className="size-16 rounded-full border border-amber-500/30 flex items-center justify-center bg-amber-500/10 text-amber-500 mb-1">
+            <Icon name="location_off" size={32} className="animate-pulse"/>
+          </div>
+
+          <div className="space-y-1.5">
+            <DialogTitle className="text-xl sm:text-2xl font-black text-foreground tracking-tight">
+              Location is Turned Off
+            </DialogTitle>
+            <DialogDescription className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+              Clock In requires your device GPS. Please pull down your phone notification bar and turn on <strong>Location / GPS</strong>, then tap Retry.
+            </DialogDescription>
+          </div>
+
+          <div 
+            style={{ 
+              background: 'transparent',
+              backdropFilter: 'saturate(190%) blur(32px)', 
+              WebkitBackdropFilter: 'saturate(190%) blur(32px)',
+            }}
+            className="w-full rounded-2xl p-3 border border-black/10 dark:border-white/10 flex items-center gap-3 text-left my-1"
+          >
+            <div className="size-8 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
+              <Icon name="pin_drop" size={17}/>
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-bold text-foreground">Turn On Location</p>
+              <p className="text-[11px] text-muted-foreground">Swipe down Settings ➔ Location ➔ Turn On</p>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3 w-full mt-3">
+            <button
+              type="button"
+              onClick={() => {
+                setGpsDisabledModal(false)
+                refreshLocation()
+              }}
+              style={{ 
+                background: 'transparent',
+                backdropFilter: 'saturate(190%) blur(32px)', 
+                WebkitBackdropFilter: 'saturate(190%) blur(32px)',
+              }}
+              className="flex-1 h-12 min-h-[48px] px-5 rounded-2xl text-sm font-extrabold flex items-center justify-center gap-2 border-2 border-emerald-500/60 text-emerald-600 dark:text-emerald-300 hover:bg-emerald-500/10 transition-all active:scale-[0.98] cursor-pointer"
+            >
+              <Icon name="refresh" size={18}/>
+              Retry GPS
+            </button>
+            <button
+              type="button"
+              onClick={() => setGpsDisabledModal(false)}
+              style={{ 
+                background: 'transparent',
+                backdropFilter: 'saturate(190%) blur(32px)', 
+                WebkitBackdropFilter: 'saturate(190%) blur(32px)',
+              }}
+              className="flex-1 h-12 min-h-[48px] px-5 rounded-2xl text-sm font-extrabold flex items-center justify-center border border-black/15 dark:border-white/20 text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/10 transition-all active:scale-[0.98] cursor-pointer"
+            >
+              Dismiss
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
       <Dialog open={!!successMsg} onOpenChange={(open) => { if (!open) setSuccessMsg(null) }}>
         <DialogContent className="max-w-[400px] border-border/50 glass-kormiis shadow-none flex flex-col items-center justify-center p-5 sm:p-8 gap-4 rounded-[1rem] outline-none">
           <DialogTitle className="sr-only">Check In Successful</DialogTitle>
@@ -363,61 +603,49 @@ export default function GeoCheckInWidget({ currentUser, attendance, setAttendanc
         </DialogContent>
       </Dialog>
 
-      <Card className={`overflow-hidden dashboard-widget ${cardClassName ? cardClassName : 'col-span-full xl:col-span-12 border-primary/20 shadow-sm'}`}>
-        <CardHeader className="px-3.5 sm:px-4 pt-3.5 pb-2.5 space-y-0 gap-3 border-b border-border/40">
-          <div className="flex items-center justify-between gap-2.5 min-w-0">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div className="shrink-0 flex items-center justify-center [&_.msr]:!text-foreground">
-                <Icon name="nest_clock_farsight_analog" className="text-primary shrink-0" size={20}/>
-              </div>
-              <CardTitle className="text-fluid-sm sm:text-fluid font-bold tracking-tight text-foreground m-0 leading-snug truncate">Time & Attendance</CardTitle>
+      <Card className={`overflow-hidden dashboard-widget relative rounded-3xl border border-border/60 dark:border-white/10 ${cardClassName ? cardClassName : 'col-span-full xl:col-span-12'} min-h-0 flex flex-col p-0 isolate`}>
+        {/* Top Header over Map with Progressive Blur (Seamless, zero separator bar) */}
+        <CardHeader className="relative flex-row items-center justify-between px-3.5 sm:px-4 pt-3.5 pb-2.5 space-y-0 gap-3 z-20 border-none">
+          {/* Progressive blur backdrop melting map into header */}
+          <div className="map-header-progressive-blur" aria-hidden="true" />
+
+          <div className="relative z-10 flex items-center gap-2.5 min-w-0">
+            <div className="shrink-0 flex items-center justify-center [&_.msr]:!text-black">
+              <Icon name="schedule" className="!text-black shrink-0" size={20} />
             </div>
-            {elapsed && (
-              <span className="text-[11px] font-mono font-semibold px-2.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 shrink-0">
-                {elapsed}
-              </span>
-            )}
+            <CardTitle className="text-fluid font-bold tracking-tight !text-black m-0 leading-snug break-words">
+              Attendance
+            </CardTitle>
+          </div>
+          <div className="relative z-10 flex items-center gap-1.5 sm:gap-2">
+            <button
+              onClick={() => setCurrentView && setCurrentView('attendance')}
+              className="apple-glass-btn text-xs font-semibold px-3.5 h-7 rounded-full cursor-pointer shrink-0 !text-black border-black/20"
+            >
+              My Logs
+            </button>
           </div>
         </CardHeader>
-      
-      <CardContent className="p-3 sm:p-4 flex flex-col justify-between gap-3 h-[calc(100%-49px)]">
-        {/* Compact Clock & Status */}
-        <div className="flex items-baseline justify-between gap-2">
-          <div>
-            <div className="text-2xl sm:text-3xl font-black tabular-nums tracking-tight font-mono text-foreground leading-none" aria-live="polite">
-              {timeStr}
-            </div>
-            <div className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider mt-1">
-              {new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
-            </div>
-          </div>
 
-          <div className="text-right shrink-0">
-            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${
-              empLog.status === 'In Office' || empLog.status === 'Remote' 
-                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
-                : 'bg-muted text-muted-foreground border border-border/40'
-            }`}>
-              <span className={`size-1.5 rounded-full ${empLog.status === 'In Office' || empLog.status === 'Remote' ? 'bg-emerald-500 animate-pulse' : 'bg-muted-foreground'}`} />
-              {empLog.status || 'Off Duty'}
-            </span>
-          </div>
-        </div>
-
-        {/* Live Interactive Map with Office Geofence & User Location */}
-        <div className="space-y-1.5">
-          <div className="h-32 sm:h-36 w-full rounded-xl overflow-hidden border border-border/40 relative isolate z-0">
+        {/* Map View Section (Zero separator bar) */}
+        <div className="relative w-full h-[260px] sm:h-[290px] -mt-[57px] pt-[57px] overflow-hidden border-none flex flex-col justify-between">
+          {/* Full Box Interactive Map View */}
+          <div className="absolute inset-0 w-full h-full z-0">
             <MapContainer
               center={[officeLat, officeLng]}
-              zoom={16}
+              zoom={19}
               scrollWheelZoom={false}
               zoomControl={false}
               attributionControl={false}
               className="w-full h-full"
             >
               <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                maxZoom={19}
+                url="https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
+                maxZoom={20}
+                subdomains={['mt0', 'mt1', 'mt2', 'mt3']}
+                keepBuffer={8}
+                updateWhenIdle={false}
+                updateWhenZooming={true}
               />
               {/* Office Geofence Circle */}
               <Circle
@@ -455,6 +683,22 @@ export default function GeoCheckInWidget({ currentUser, attendance, setAttendanc
                 </Marker>
               )}
 
+              {/* Connecting visual distance line between office and user location */}
+              {userLocation?.lat && userLocation?.lng && (
+                <Polyline
+                  positions={[
+                    [officeLat, officeLng],
+                    [userLocation.lat, userLocation.lng]
+                  ]}
+                  pathOptions={{
+                    color: distance !== null && distance <= maxDistance ? '#10b981' : '#3b82f6',
+                    weight: 3,
+                    dashArray: '6, 8',
+                    opacity: 0.85
+                  }}
+                />
+              )}
+
               {/* Auto Bounds View Component */}
               <MapBoundsUpdater 
                 officeCoords={{ lat: officeLat, lng: officeLng }} 
@@ -462,110 +706,271 @@ export default function GeoCheckInWidget({ currentUser, attendance, setAttendanc
                 radius={maxDistance} 
               />
             </MapContainer>
+          </div>
 
-            {/* Map corner status overlay */}
-            <div className="absolute top-2 left-2 z-[400] flex items-center gap-1.5 px-2 py-1 rounded-md glass-kormiis bg-background/80 backdrop-blur-md text-[11px] font-medium border border-border/40">
-              <span className="flex items-center gap-1">
-                <span className="size-2 rounded-full bg-blue-500" />
-                <span>Office ({maxDistance}m)</span>
-              </span>
-              {userLocation && (
-                <>
-                  <span className="text-muted-foreground">·</span>
-                  <span className="flex items-center gap-1">
-                    <span className="size-2 rounded-full bg-emerald-500" />
-                    <span>You</span>
+          {/* Floating Top Controls: Live Distance & Action Tools */}
+          <div className="relative z-10 p-3 sm:p-4 flex items-center justify-between gap-2.5 pointer-events-none">
+            {/* Glass Distance Pill: Realtime Distance from Office (always black text in both light & dark mode) */}
+            <div 
+              data-geo-map-control
+              style={{ 
+                backdropFilter: 'saturate(190%) blur(32px)', 
+                WebkitBackdropFilter: 'saturate(190%) blur(32px)', 
+                background: 'transparent'
+              }}
+              className="pointer-events-auto h-10 px-3.5 rounded-2xl border border-black/25 map-floating-glass geo-map-floating-text kormiis-shadow flex items-center gap-2"
+            >
+              <Icon 
+                name={distance !== null && distance <= maxDistance ? "near_me" : "distance"} 
+                size={17} 
+                className={distance !== null && distance <= maxDistance ? "!text-emerald-700 shrink-0 animate-pulse" : "!text-black shrink-0"}
+              />
+              <div className="flex items-center gap-1.5 leading-none">
+                <span className="text-sm sm:text-base font-black tabular-nums tracking-tight font-mono !text-black" aria-live="polite">
+                  {distance !== null ? `${distance}m` : 'Detecting...'}
+                </span>
+                <span className="text-[11px] font-bold !text-black/80">
+                  {distance !== null && distance <= maxDistance ? 'from office (in zone)' : 'from office'}
+                </span>
+              </div>
+            </div>
+
+            {/* Top-Right Tools: GPS Refresh Button matching same height & alignment */}
+            <div className="pointer-events-auto flex items-center">
+              <button
+                data-geo-map-control
+                type="button"
+                onClick={refreshLocation}
+                title="Refresh GPS"
+                disabled={isLoadingLoc}
+                style={{ 
+                  backdropFilter: 'saturate(190%) blur(32px)', 
+                  WebkitBackdropFilter: 'saturate(190%) blur(32px)', 
+                  background: 'transparent'
+                }}
+                className="size-10 rounded-2xl border border-black/25 hover:bg-black/10 flex items-center justify-center !text-black transition-all active:scale-95 disabled:opacity-50 cursor-pointer map-floating-glass geo-map-floating-text kormiis-shadow"
+              >
+                <Icon name="my_location" size={17} className={isLoadingLoc ? "animate-spin !text-black" : "!text-black"}/>
+              </button>
+            </div>
+          </div>
+
+          {/* Floating Bottom Section: Dynamic Compact Primary Action Button */}
+          <div className="relative z-10 mt-auto p-3 sm:p-4 flex flex-col gap-2 pointer-events-none">
+            {/* Primary Floating Action Button with Ultra-Liquid Glass Style */}
+            <div className="pointer-events-auto w-full">
+              {canCheckIn || canCheckOut ? (
+                <button
+                  data-geo-map-control
+                  type="button"
+                  onClick={canCheckIn ? handleCheckIn : handleCheckOut}
+                  disabled={(!canCheckIn && !canCheckOut) || isLoadingLoc}
+                  style={{ 
+                    backdropFilter: 'saturate(190%) blur(32px)', 
+                    WebkitBackdropFilter: 'saturate(190%) blur(32px)', 
+                    background: 'transparent'
+                  }}
+                  className={`w-full h-12 rounded-2xl text-sm font-bold flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] cursor-pointer map-floating-glass geo-map-floating-text kormiis-shadow ${
+                    canCheckIn 
+                      ? '!text-black border-2 border-emerald-600/80 hover:bg-emerald-500/20' 
+                      : '!text-black border-2 border-red-600/80 hover:bg-red-500/20'
+                  }`}
+                >
+                  {isLoadingLoc ? (
+                    <Icon name="progress_activity" className="animate-spin shrink-0 !text-black" size={16}/>
+                  ) : (
+                    <Icon name={canCheckIn ? "login" : "logout"} className={canCheckIn ? "shrink-0 !text-emerald-800" : "shrink-0 !text-red-700"} size={16}/>
+                  )}
+                  
+                  <span className="text-sm font-extrabold tracking-wide flex items-center gap-1.5 !text-black">
+                    {gpsPhase === 'acquiring' ? (
+                      'Acquiring Live GPS...'
+                    ) : gpsPhase === 'verifying' ? (
+                      'Verifying GPS...'
+                    ) : (
+                      canCheckIn ? 'Clock In' : 'Clock Out'
+                    )}
                   </span>
-                </>
+                </button>
+              ) : (
+                <div 
+                  data-geo-map-control
+                  style={{ 
+                    backdropFilter: 'saturate(190%) blur(32px)', 
+                    WebkitBackdropFilter: 'saturate(190%) blur(32px)', 
+                    background: 'transparent'
+                  }}
+                  className="w-full h-12 flex items-center justify-between px-4 rounded-2xl border border-black/25 text-xs map-floating-glass geo-map-floating-text kormiis-shadow"
+                >
+                  <span className="flex items-center gap-2 font-bold !text-black">
+                    <Icon name="check_circle" className="shrink-0 !text-emerald-600" size={17}/>
+                    Clocked Out
+                  </span>
+                  <span className="text-[11px] font-mono font-bold !text-black/80 flex items-center gap-1">
+                    <Icon name="history_toggle_off" size={13} className="!text-black shrink-0"/>
+                    Clock In available in {cooldownRemaining}m
+                  </span>
+                </div>
               )}
             </div>
-
-            {/* Refresh GPS Button on Map */}
-            <button
-              type="button"
-              onClick={refreshLocation}
-              title="Refresh GPS"
-              disabled={isLoadingLoc}
-              className="absolute top-2 right-2 z-[400] size-7 rounded-md glass-kormiis bg-background/80 backdrop-blur-md hover:bg-background border border-border/40 flex items-center justify-center text-foreground transition-colors disabled:opacity-50"
-            >
-              <Icon name="my_location" size={14} className={isLoadingLoc ? "animate-spin text-primary" : "text-muted-foreground"}/>
-            </button>
           </div>
+        </div>
 
-          {/* Location status badge below map */}
-          <div className="min-w-0 bg-muted/20 dark:bg-white/[0.03] rounded-lg px-2.5 py-1.5 border border-border/30 text-xs flex items-center justify-between gap-2">
-            {isLoadingLoc ? (
-              <div className="flex items-center gap-1.5 text-muted-foreground">
-                <Icon name="progress_activity" className="animate-spin text-primary" size={14}/>
-                <span className="truncate">Acquiring live GPS position...</span>
-              </div>
-            ) : locError ? (
-              <div className="flex items-center gap-1.5 text-destructive font-medium">
-                <Icon name="gpp_maybe" size={14} className="shrink-0"/>
-                <span className="truncate">{locError}</span>
-              </div>
-            ) : distance !== null ? (
-              <>
-                <div className="flex items-center gap-1.5 min-w-0">
-                  {distance <= maxDistance ? (
-                    <Icon name="verified_user" className="text-emerald-500 shrink-0" size={14}/>
-                  ) : (
-                    <Icon name="gpp_maybe" className="text-destructive shrink-0" size={14}/>
-                  )}
-                  <span className={`font-semibold truncate ${distance <= maxDistance ? 'text-emerald-600 dark:text-emerald-400' : 'text-destructive'}`}>
-                    {distance <= maxDistance ? 'Inside Office Zone' : 'Outside Office Zone'}
+        {/* Unified Attendance Content Section */}
+        <CardContent className="flex flex-col gap-3 p-3 sm:p-3.5">
+          {/* 1. Today's Punch & Realtime Worked Duration Banner */}
+          <div className="flex items-center justify-between p-3 sm:p-3.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/8 dark:border-white/10">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <Icon 
+                name={isWorking ? 'login' : empLog.checkOut && empLog.checkOut !== '--' && empLog.checkOut !== '0' ? 'task_alt' : isOffDay ? 'weekend' : 'schedule'} 
+                size={16} 
+                className={`shrink-0 ${
+                  isWorking 
+                    ? 'text-emerald-600 dark:text-emerald-400' 
+                    : empLog.checkOut && empLog.checkOut !== '--' && empLog.checkOut !== '0'
+                    ? 'text-blue-600 dark:text-blue-400'
+                    : isOffDay
+                    ? 'text-amber-600 dark:text-amber-400'
+                    : 'text-muted-foreground'
+                }`}
+              />
+
+              <div className="flex flex-col min-w-0">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+                  <span className="text-sm sm:text-base font-bold text-foreground">
+                    Clock In: <span className="font-mono text-muted-foreground font-semibold">{displayCheckIn}</span>
+                  </span>
+                  <span className="text-muted-foreground text-sm font-bold">•</span>
+                  <span className="text-sm sm:text-base font-bold text-foreground">
+                    Clock Out: <span className="font-mono text-muted-foreground font-semibold">{displayCheckOut}</span>
                   </span>
                 </div>
-                <span className="text-muted-foreground shrink-0 tabular-nums font-mono text-[11px]">
-                  {distance}m / {maxDistance}m
-                </span>
-              </>
-            ) : (
-              <div className="flex items-center justify-between w-full">
-                <div className="flex items-center gap-1.5 text-muted-foreground">
-                  <Icon name="pin_drop" size={14} className="shrink-0 text-muted-foreground/80"/>
-                  <span className="truncate">Office Geofence ({maxDistance}m radius)</span>
-                </div>
-                <button 
-                  onClick={refreshLocation}
-                  className="text-primary hover:underline text-[11px] font-medium shrink-0"
-                >
-                  Locate Me
-                </button>
+                {isOffDay && (
+                  <span className="text-xs font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-1 mt-0.5">
+                    <Icon name="event_available" size={14} />
+                    Off Day (Scheduled in Roster)
+                  </span>
+                )}
               </div>
-            )}
-          </div>
-        </div>
+            </div>
 
-        {/* Action Button */}
-        <div className="w-full mt-auto pt-1">
-          {canCheckIn || canCheckOut ? (
-            <Button
-              onClick={canCheckIn ? handleCheckIn : handleCheckOut}
-              disabled={(!canCheckIn && !canCheckOut) || isLoadingLoc}
-              className={`w-full h-10 sm:h-11 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all ${
-                canCheckIn 
-                  ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-none' 
-                  : 'bg-destructive/10 text-destructive hover:bg-destructive/20 border border-destructive/30 shadow-none'
-              }`}
-            >
-              <Icon name={canCheckIn ? "login" : "logout"} className="shrink-0" size={17}/>
-              {isLoadingLoc ? 'Verifying GPS...' : canCheckIn ? 'Clock In Now' : 'Clock Out Now'}
-            </Button>
-          ) : (
-            <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1.5 font-medium text-emerald-600 dark:text-emerald-400">
-                <Icon name="check_circle" className="shrink-0" size={15}/>
-                Shift completed today
-              </span>
-              <span className="text-[11px] opacity-80">
-                {cooldownRemaining > 0 ? `Ready in ${cooldownRemaining}m` : 'Done'}
+            <div className="flex items-center gap-1.5 shrink-0 pl-2">
+              <Icon 
+                name="timer" 
+                size={18} 
+                className={isWorking ? "text-emerald-500 animate-pulse" : "text-primary"} 
+              />
+              <span className="text-base sm:text-lg font-black text-foreground font-mono tabular-nums">
+                {workedDurationStr}
               </span>
             </div>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+          </div>
+
+          {/* 2. Monthly 5-Metric Grid (Present, Late, No-Show, Leave, Hours) */}
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-2.5">
+            {/* Present Days */}
+            <div className="flex flex-col items-center justify-center p-2 sm:p-2.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/10 text-center">
+              <div className="flex items-center gap-1.5 mb-0.5">
+                <Icon name="check_circle" size={15} className="text-emerald-500 shrink-0" />
+                <span className="text-fluid font-black text-foreground tabular-nums">
+                  {monthlyStats.presentDays}
+                </span>
+              </div>
+              <span className="text-[11px] font-bold text-foreground">Present</span>
+              <span className="text-[9px] text-muted-foreground font-semibold">This Month</span>
+            </div>
+
+            {/* Late Count */}
+            <div className="flex flex-col items-center justify-center p-2 sm:p-2.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/10 text-center">
+              <div className="flex items-center gap-1.5 mb-0.5">
+                <Icon name="history_toggle_off" size={15} className="text-amber-500 shrink-0" />
+                <span className="text-fluid font-black text-foreground tabular-nums">
+                  {monthlyStats.lateDays}
+                </span>
+              </div>
+              <span className="text-[11px] font-bold text-foreground">Late</span>
+              <span className="text-[9px] text-muted-foreground font-semibold">Arrivals</span>
+            </div>
+
+            {/* No Show Count */}
+            <div className="flex flex-col items-center justify-center p-2 sm:p-2.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/10 text-center">
+              <div className="flex items-center gap-1.5 mb-0.5">
+                <Icon name="cancel" size={15} className="text-rose-500 shrink-0" />
+                <span className="text-fluid font-black text-foreground tabular-nums">
+                  {monthlyStats.noShowDays}
+                </span>
+              </div>
+              <span className="text-[11px] font-bold text-foreground">No Show</span>
+              <span className="text-[9px] text-muted-foreground font-semibold">Absences</span>
+            </div>
+
+            {/* Leaves Taken */}
+            <div className="flex flex-col items-center justify-center p-2 sm:p-2.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/10 text-center">
+              <div className="flex items-center gap-1.5 mb-0.5">
+                <Icon name="event_busy" size={15} className="text-blue-500 shrink-0" />
+                <span className="text-fluid font-black text-foreground tabular-nums">
+                  {monthlyStats.leavesCount}
+                </span>
+              </div>
+              <span className="text-[11px] font-bold text-foreground">Leave</span>
+              <span className="text-[9px] text-muted-foreground font-semibold">Days Taken</span>
+            </div>
+
+            {/* Total Worked Hours */}
+            <div className="flex flex-col items-center justify-center p-2 sm:p-2.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/10 text-center col-span-2 sm:col-span-1">
+              <div className="flex items-center gap-1.5 mb-0.5">
+                <Icon name="timer" size={15} className="text-primary shrink-0" />
+                <span className="text-fluid font-black text-foreground tabular-nums font-mono">
+                  {monthlyStats.totalWorkHours}
+                </span>
+              </div>
+              <span className="text-[11px] font-bold text-foreground">Hours</span>
+              <span className="text-[9px] text-muted-foreground font-semibold">Total Work</span>
+            </div>
+          </div>
+
+          {/* 3. Leave Balance Cards (matching the top metric box style, zero separator bar) */}
+          <div className="flex flex-col gap-2 pt-1.5 border-none">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                Leave Balances (Remaining / Total)
+              </span>
+              <button
+                type="button"
+                onClick={() => setCurrentView && setCurrentView('leave')}
+                className="apple-glass-btn text-xs font-semibold px-2.5 py-1 rounded-xl text-primary hover:text-primary/90 flex items-center gap-1 shrink-0 cursor-pointer"
+              >
+                <Icon name="add" size={13} />
+                <span>Apply</span>
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5">
+              {leaveItems.map((item) => (
+                <div
+                  key={item.type}
+                  className="flex flex-col items-center justify-center p-2 sm:p-2.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/10 text-center"
+                >
+                  <div className="flex items-baseline gap-1 mb-0.5 font-mono">
+                    <span className="text-fluid font-black text-foreground tabular-nums">
+                      {item.remaining}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground font-bold">
+                      / {item.quota}d
+                    </span>
+                  </div>
+                  <span className="text-[11px] font-bold text-foreground truncate max-w-full">
+                    {item.type}
+                  </span>
+                  <span className="text-[9px] text-muted-foreground font-semibold">
+                    {item.remaining > 0 ? `${item.remaining} remaining` : 'Exhausted'}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </>
   )
 }

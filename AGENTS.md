@@ -26,9 +26,14 @@ Whenever creating new components, pages, widgets, or modifying existing ones in 
 - **Borders & Continuous Curvature**:
   - Border: 1px solid `rgba(0, 0, 0, 0.08)` in Light Mode, `rgba(255, 255, 255, 0.09)` in Dark Mode (`var(--glass-border)`).
   - Corner Radii: Continuous squircle corners — `rounded-2xl` to `rounded-3xl` (20px–32px) for cards/panels, `rounded-2xl` or `rounded-full` (16px–24px) for buttons/pills.
-- **Universal Zero-Shadow Standard**:
-  - **Strictly NO depth shadows, drop shadows, ambient shadows, or cast shadows** anywhere in the application (`box-shadow: none !important;`).
-  - Containers, modals, dialogs, drawers, cards, buttons, and popovers rely purely on optical translucency, continuous curvature, and crisp contrast borders with zero shadow artifacts.
+- **Universal Zero-Shadow Standard & Kormiis Shadow**:
+  - **Zero-Shadow Default**: Containers, modals, dialogs, drawers, cards, and popovers rely purely on optical translucency, continuous curvature, and crisp contrast borders (`box-shadow: none !important;`).
+  - **Kormiis Shadow (`--kormiis-shadow`, `.kormiis-shadow`, `.shadow-kormiis`)**:
+    The official designated drop shadow for floating action buttons and controls (such as map floating controls and interactive floating pills):
+    - Values: `box-shadow: 0 2px 4px rgba(0, 0, 0, 0.22), 0 1px 2px rgba(0, 0, 0, 0.30);`
+    - Filter: `filter: drop-shadow(0 1.5px 2px rgba(0, 0, 0, 0.18));`
+    - Profile: Short distance (1px–2px), balanced crisp intensity (22%–30% opacity) for high legibility over complex canvas/map backdrops without glare or blur spread.
+    - Whenever the user asks for "Kormiis Shadow", apply this exact token/utility class.
 
 ---
 
