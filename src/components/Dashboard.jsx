@@ -412,19 +412,19 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
             addNotification={addNotification}
             settings={settings}
             hasPermission={hasPermission}
-            cardClass="col-span-12 lg:col-span-4 h-full"
+            cardClass="col-span-12 lg:col-span-4 h-[680px] w-full"
             {...wProps}
           />
         )}
 
         {/* Column 2: Middle Stacked Column — Attendance (top) & Performance Tracker (bottom) */}
-        <div className="col-span-12 lg:col-span-4 flex flex-col gap-4 sm:gap-5 lg:gap-6 justify-between">
+        <div className="col-span-12 lg:col-span-4 h-[680px] w-full flex flex-col gap-4 justify-between">
           {canViewAttendance && (
             <DashboardWidget
               id="w2"
               title="Attendance"
               icon={<Icon name="group" className="text-foreground shrink-0" size={22}/>}
-              cardClass="!h-auto min-h-0"
+              cardClass="h-[440px] w-full min-h-0"
               action={
                 <div className="flex items-center gap-1.5 sm:gap-2">
                   <button
@@ -630,7 +630,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
             taskCompletionRate={taskCompletionRate}
             attendanceRate={attendanceRate}
             setCurrentView={setCurrentView}
-            cardClass="!h-auto min-h-0"
+            cardClass="h-[224px] w-full min-h-0"
             {...wProps}
           />
         </div>
@@ -640,14 +640,14 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
           <EmployeeDirectoryWidget
             employees={employees}
             setCurrentView={setCurrentView}
-            cardClass="col-span-12 lg:col-span-4 h-full"
+            cardClass="col-span-12 lg:col-span-4 h-[680px] w-full"
             {...wProps}
           />
         )}
 
-        <DailyChecklistWidget notes={notes} setNotes={setNotes} ownerId={currentUser?.id || currentUser?.uid || ''} setCurrentView={setCurrentView} cardClass="col-span-12 sm:col-span-6 lg:col-span-4" />
+        <DailyChecklistWidget notes={notes} setNotes={setNotes} ownerId={currentUser?.id || currentUser?.uid || ''} setCurrentView={setCurrentView} cardClass="col-span-12 sm:col-span-6 lg:col-span-4 h-[290px] w-full" />
 
-        <HrOverview adminUid={currentUser?.uid} currentUser={currentUser} setCurrentView={setCurrentView} addToast={addToast} cardClass="col-span-12 lg:col-span-4" />
+        <HrOverview adminUid={currentUser?.uid} currentUser={currentUser} setCurrentView={setCurrentView} addToast={addToast} cardClass="col-span-12 lg:col-span-4 h-[290px] w-full" />
 
         {/* Tasks Widget */}
         {canViewTasks && (
@@ -656,7 +656,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
             pendingTasksCount={pendingTasksCount}
             taskCompletionRate={taskCompletionRate}
             setCurrentView={setCurrentView}
-            cardClass="col-span-12 sm:col-span-6 lg:col-span-4"
+            cardClass="col-span-12 sm:col-span-6 lg:col-span-4 h-[290px] w-full"
             {...wProps}
           />
         )}
@@ -666,7 +666,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
           <DocumentsWidget
             recentDocuments={recentDocuments}
             setCurrentView={setCurrentView}
-            cardClass="col-span-12 sm:col-span-6 lg:col-span-4"
+            cardClass="col-span-12 sm:col-span-6 lg:col-span-4 h-[290px] w-full"
             {...wProps}
           />
         )}
@@ -681,7 +681,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
             settings={settings}
             currentPayrollData={currentPayrollData}
             setCurrentView={setCurrentView}
-            cardClass="col-span-12 lg:col-span-4"
+            cardClass="col-span-12 sm:col-span-6 lg:col-span-4 h-[290px] w-full"
             {...wProps}
           />
         )}
@@ -692,7 +692,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
             assets={assets}
             availableAssetsCount={availableAssetsCount}
             setCurrentView={setCurrentView}
-            cardClass="col-span-12 sm:col-span-6 lg:col-span-4"
+            cardClass="col-span-12 sm:col-span-6 lg:col-span-4 h-[290px] w-full"
             {...wProps}
           />
         )}

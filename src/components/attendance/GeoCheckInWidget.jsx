@@ -1,9 +1,17 @@
-import { useState, useEffect, useMemo } from 'react'
-import { MapContainer, TileLayer, Marker, Circle, Polyline, useMap, Popup } from 'react-leaflet'
+import { useState, useEffect, useMemo, useRef } from 'react'
+import { MapContainer, TileLayer, Marker, Circle, Polyline, useMap, Popup, Tooltip } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 import Icon from "@/components/ui/Icon.jsx"
 import { toLocal, parseMin, fmtH } from '../../services/attendance.js'
+import {
+  getCurrentPositionRobust,
+  watchPositionRobust,
+  getDistanceFromLatLonInMeters,
+  getGeoMessage,
+  GEO_REASON,
+} from '../../services/geolocation.js'
+import { getStreetBasemap } from '../../services/mapTiles.js'
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog"
@@ -30,40 +38,98 @@ const userPinIcon = L.divIcon({
   popupAnchor: [0, -13],
 });
 
-// Auto-fit bounds between office and user location so distance is always visually shown
+// Always frame the office and the user together (auto zoom + center) so the
+// distance line stays centered in view. Refits are throttled so continuous GPS
+// updates stay smooth instead of animating on every noisy tick.
+const REFIT_THROTTLE_MS = 600
+const MIN_REFIT_MOVE_METERS = 2
+
+// Desktop/laptop browsers locate themselves via network (Wi-Fi/IP) positioning
+// which can be off by hundreds of metres. We accept a check-in when the
+// reported distance falls inside the device's own accuracy circle, capped so a
+// wildly inaccurate IP-only fix cannot bypass the geofence entirely.
+const ACCURACY_TOLERANCE_CAP = 500
+
 function MapBoundsUpdater({ officeCoords, userCoords }) {
   const map = useMap()
+  const lastFitRef = useRef(null)
+  const lastFitAtRef = useRef(0)
+  const pendingFitRef = useRef(null)
+
   useEffect(() => {
     if (!map) return
-    if (userCoords?.lat && userCoords?.lng && officeCoords?.lat && officeCoords?.lng) {
-      const bounds = L.latLngBounds([
-        [officeCoords.lat, officeCoords.lng],
-        [userCoords.lat, userCoords.lng]
-      ])
-      // Fit both locations with visual padding
-      map.fitBounds(bounds, { padding: [50, 50], maxZoom: 18, animate: true })
-    } else if (officeCoords?.lat && officeCoords?.lng) {
-      map.setView([officeCoords.lat, officeCoords.lng], 16)
+    // Cancel any pending trailing fit from a previous coordinate update.
+    if (pendingFitRef.current) {
+      clearTimeout(pendingFitRef.current)
+      pendingFitRef.current = null
+    }
+    const hasUser = userCoords && Number.isFinite(userCoords.lat) && Number.isFinite(userCoords.lng)
+    const hasOffice = officeCoords && Number.isFinite(officeCoords.lat) && Number.isFinite(officeCoords.lng)
+
+    if (!hasOffice) return
+
+    // Keep both points centered inside the visible map area (clearing the top
+    // header and the bottom action button overlays).
+    const fit = (user, animate) => {
+      if (user) {
+        const bounds = L.latLngBounds([
+          [officeCoords.lat, officeCoords.lng],
+          [user.lat, user.lng]
+        ])
+        map.fitBounds(bounds, {
+          paddingTopLeft: [48, 84],
+          paddingBottomRight: [48, 112],
+          maxZoom: 18,
+          animate
+        })
+      } else {
+        map.setView([officeCoords.lat, officeCoords.lng], 16, { animate })
+      }
+      lastFitRef.current = {
+        officeLat: officeCoords.lat,
+        officeLng: officeCoords.lng,
+        userLat: user ? user.lat : null,
+        userLng: user ? user.lng : null,
+      }
+      lastFitAtRef.current = Date.now()
+    }
+
+    const last = lastFitRef.current
+    const officeChanged = !last
+      || last.officeLat !== officeCoords.lat
+      || last.officeLng !== officeCoords.lng
+
+    if (officeChanged) {
+      fit(hasUser ? userCoords : null, true)
+      return
+    }
+
+    if (!hasUser) return
+
+    const movedEnough = last.userLat == null || last.userLng == null
+      || getDistanceFromLatLonInMeters(last.userLat, last.userLng, userCoords.lat, userCoords.lng) >= MIN_REFIT_MOVE_METERS
+
+    if (!movedEnough) return
+
+    const elapsed = Date.now() - lastFitAtRef.current
+    if (elapsed >= REFIT_THROTTLE_MS) {
+      fit(userCoords, false)
+    } else {
+      // Trailing refit guarantees the latest position is framed even if GPS
+      // updates arrive faster than the throttle window.
+      if (pendingFitRef.current) clearTimeout(pendingFitRef.current)
+      pendingFitRef.current = setTimeout(() => {
+        pendingFitRef.current = null
+        fit(userCoords, false)
+      }, REFIT_THROTTLE_MS - elapsed)
     }
   }, [map, userCoords?.lat, userCoords?.lng, officeCoords?.lat, officeCoords?.lng])
+
+  useEffect(() => () => {
+    if (pendingFitRef.current) clearTimeout(pendingFitRef.current)
+  }, [])
+
   return null
-}
-
-// Haversine formula to calculate distance between two coordinates in meters
-function getDistanceFromLatLonInMeters(lat1, lon1, lat2, lon2) {
-  const R = 6371e3; // Radius of the earth in m
-  const dLat = deg2rad(lat2 - lat1);
-  const dLon = deg2rad(lon2 - lon1); 
-  const a = 
-    Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
-    Math.sin(dLon/2) * Math.sin(dLon/2); 
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
-  return Math.round(R * c); 
-}
-
-function deg2rad(deg) {
-  return deg * (Math.PI/180)
 }
 
 export default function GeoCheckInWidget({ 
@@ -80,6 +146,8 @@ export default function GeoCheckInWidget({
   setCurrentView
 }) {
   const today = toLocal(new Date())
+  const basemap = getStreetBasemap()
+  const mapRef = useRef(null)
   const [currentTime, setCurrentTime] = useState(new Date())
   
   // Use settings or fallback to default
@@ -98,45 +166,45 @@ export default function GeoCheckInWidget({
   // Out of Geofence Warning Modal State
   const [outOfBoundsModal, setOutOfBoundsModal] = useState({ open: false, dist: 0, max: maxDistance })
   // Device GPS Off / Location Permission Required Modal State
-  const [gpsDisabledModal, setGpsDisabledModal] = useState(false)
+  const [gpsDisabledModal, setGpsDisabledModal] = useState({ open: false, reason: null })
   
-  // Ensure current user is valid
-  const empId = currentUser?.employeeId || currentUser?.id
+  // Ensure current user is valid (defaults to 'emp-101' for demo mode)
+  const empId = currentUser?.employeeId || currentUser?.id || 'emp-101'
+
+  // Latest fix from the live watcher, kept in a ref so actions can reuse it
+  // instantly without forcing a slow brand-new reading.
+  const lastFixRef = useRef(null)
+  const LIVE_FIX_FRESH_MS = 120000
+
+  const storeFix = (lat, lng, accuracy) => {
+    lastFixRef.current = { lat, lng, accuracy, at: Date.now() }
+  }
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000)
     return () => clearInterval(timer)
   }, [])
 
-  // Auto-detect and watch location continuously so distance updates in real-time
+  // Auto-detect and watch location continuously so distance updates in
+  // real-time. The robust watcher transparently downgrades from GPS to network
+  // positioning on devices (desktops/laptops) without a GPS chip.
   useEffect(() => {
-    if (!navigator.geolocation) return
-
-    const updateCoords = (position) => {
+    const applyPosition = (position) => {
       const lat = position.coords.latitude
       const lng = position.coords.longitude
+      const acc = Number.isFinite(position.coords.accuracy) ? Math.round(position.coords.accuracy) : null
       setUserLocation({ lat, lng })
-      const dist = getDistanceFromLatLonInMeters(lat, lng, officeLat, officeLng)
-      setDistance(dist)
+      setDistance(getDistanceFromLatLonInMeters(lat, lng, officeLat, officeLng))
+      storeFix(lat, lng, acc)
     }
 
-    // Initial fetch
-    navigator.geolocation.getCurrentPosition(
-      updateCoords,
-      () => {},
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 5000 }
+    const stop = watchPositionRobust(
+      applyPosition,
+      ({ reason }) => setLocError(getGeoMessage(reason).title),
+      { highAccuracy: true, timeout: 20000, maximumAge: 10000 }
     )
 
-    // Continuous real-time location watcher
-    const watchId = navigator.geolocation.watchPosition(
-      updateCoords,
-      () => {},
-      { enableHighAccuracy: true, maximumAge: 5000 }
-    )
-
-    return () => {
-      if (watchId) navigator.geolocation.clearWatch(watchId)
-    }
+    return stop
   }, [officeLat, officeLng])
 
   const logs = attendance?.dailyLogs?.[today] || {}
@@ -258,24 +326,6 @@ export default function GeoCheckInWidget({
     }
   }, [attendance, empId, currentMonthPrefix])
 
-  // Leave policies & balances (remaining vs total quota)
-  const defaultPolicies = settings?.leavePolicies || { Annual: 14, Sick: 7, Casual: 3 }
-  const myBalance = attendance?.leaveBalances?.[empId] || defaultPolicies
-
-  const leaveItems = useMemo(() => {
-    return Object.keys(defaultPolicies).map(type => {
-      const quota = defaultPolicies[type] ?? 0
-      const remaining = myBalance[type] ?? quota
-      const taken = Math.max(0, quota - remaining)
-      return {
-        type,
-        quota,
-        remaining,
-        taken
-      }
-    })
-  }, [defaultPolicies, myBalance])
-
   const isWorking = empLog.checkIn !== '--' && empLog.checkOut === '--'
   const cooldownRemaining = empLog.checkOut !== '--' && !cooldownPassed ? Math.max(0, STANDARD_COOLDOWN_MINS - (minutesSince(empLog.checkOut) ?? 0)) : 0
 
@@ -288,79 +338,106 @@ export default function GeoCheckInWidget({
     }
   }
 
-  const refreshLocation = () => {
-    if (!navigator.geolocation) {
-      setLocError('Geolocation is not supported by your browser')
-      addToast?.('Geolocation is not supported by your browser', 'error')
-      return
-    }
+  const nowStamp = () => new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })
 
-    setIsLoadingLoc(true)
-    setLocError(null)
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const lat = position.coords.latitude
-        const lng = position.coords.longitude
-        setUserLocation({ lat, lng })
-        const dist = getDistanceFromLatLonInMeters(lat, lng, officeLat, officeLng)
-        setDistance(dist)
-        setIsLoadingLoc(false)
-      },
-      (err) => {
-        setLocError('Location access denied or unavailable.')
-        setIsLoadingLoc(false)
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-    )
+  // Applies a fix to the UI, caches it and returns the distance to the office.
+  const applyFix = (lat, lng, acc) => {
+    const rounded = Number.isFinite(acc) ? Math.round(acc) : null
+    setUserLocation({ lat, lng })
+    const dist = getDistanceFromLatLonInMeters(lat, lng, officeLat, officeLng)
+    setDistance(dist)
+    storeFix(lat, lng, rounded)
+    return dist
   }
 
-  const executeActionWithLocation = (actionCallback) => {
-    if (!navigator.geolocation) {
-      setLocError('Geolocation is not supported by your browser')
-      setGpsDisabledModal(true)
-      return
+  // Prefer the live watcher's recent fix (instant + reliable on every device).
+  // Only when it is missing or stale do we request a fresh reading.
+  const resolveFix = async () => {
+    const live = lastFixRef.current
+    if (live && Date.now() - live.at <= LIVE_FIX_FRESH_MS) {
+      return { lat: live.lat, lng: live.lng, accuracy: live.accuracy }
     }
+    const position = await getCurrentPositionRobust({ highAccuracy: true, timeout: 10000, maximumAge: 0 })
+    return {
+      lat: position.coords.latitude,
+      lng: position.coords.longitude,
+      accuracy: position.coords.accuracy,
+    }
+  }
 
+  const refreshLocation = async () => {
+    setIsLoadingLoc(true)
+    setLocError(null)
+    try {
+      const position = await getCurrentPositionRobust({ highAccuracy: true, timeout: 10000, maximumAge: 0 })
+      applyFix(position.coords.latitude, position.coords.longitude, position.coords.accuracy)
+    } catch (err) {
+      const live = lastFixRef.current
+      if (live) {
+        applyFix(live.lat, live.lng, live.accuracy)
+        addToast?.('Using your last known location.', 'info')
+      } else {
+        const reason = err?.reason || GEO_REASON.UNKNOWN
+        const msg = getGeoMessage(reason)
+        setLocError(msg.title)
+        addToast?.(msg.description, 'error')
+      }
+    } finally {
+      setIsLoadingLoc(false)
+    }
+  }
+
+  const executeActionWithLocation = async (actionCallback) => {
     setIsLoadingLoc(true)
     setLocError(null)
     setGpsPhase('acquiring')
 
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const lat = position.coords.latitude
-        const lng = position.coords.longitude
-        setUserLocation({ lat, lng })
-        const dist = getDistanceFromLatLonInMeters(lat, lng, officeLat, officeLng)
-        setDistance(dist)
-
-        // Phase 2: Verifying GPS geofence match
-        setGpsPhase('verifying')
-        setTimeout(() => {
-          setIsLoadingLoc(false)
-          setGpsPhase('idle')
-          if (dist <= maxDistance) {
-            actionCallback()
-          } else {
-            setOutOfBoundsModal({ open: true, dist, max: maxDistance })
-          }
-        }, 700)
-      },
-      (err) => {
+    let fix = null
+    try {
+      fix = await resolveFix()
+    } catch (err) {
+      // Last resort: use the most recent live fix even if slightly old.
+      const stale = lastFixRef.current
+      if (stale) {
+        fix = { lat: stale.lat, lng: stale.lng, accuracy: stale.accuracy }
+      } else {
         setIsLoadingLoc(false)
         setGpsPhase('idle')
-        // PERMISSION_DENIED (1) or POSITION_UNAVAILABLE (2)
-        setLocError('Location is turned off or access is denied.')
-        setGpsDisabledModal(true)
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-    )
+        const reason = err?.reason || GEO_REASON.UNKNOWN
+        setLocError(getGeoMessage(reason).title)
+        setGpsDisabledModal({ open: true, reason })
+        return
+      }
+    }
+
+    const dist = applyFix(fix.lat, fix.lng, fix.accuracy)
+    const acc = Number.isFinite(fix.accuracy) ? Math.round(fix.accuracy) : null
+    // Statistically the office could be anywhere within the accuracy radius of
+    // the reported point, so allow distance up to radius + (capped) accuracy.
+    const tolerance = acc != null ? Math.min(acc, ACCURACY_TOLERANCE_CAP) : 0
+    const allowed = maxDistance + tolerance
+
+    // Phase 2: Verifying GPS geofence match
+    setGpsPhase('verifying')
+    setTimeout(() => {
+      setIsLoadingLoc(false)
+      setGpsPhase('idle')
+      if (dist <= allowed) {
+        const strict = dist <= maxDistance
+        if (!strict) {
+          addToast?.(`Location accepted using ±${tolerance}m device accuracy.`, 'info')
+        }
+        actionCallback({ distance: dist, accuracy: acc, tolerance: strict ? 0 : tolerance, strict })
+      } else {
+        setOutOfBoundsModal({ open: true, dist, max: maxDistance, accuracy: acc, tolerance })
+      }
+    }, 700)
   }
 
   const handleCheckIn = () => {
     if (!empId) return
-    executeActionWithLocation(() => {
-      const now = currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })
+    executeActionWithLocation((geo) => {
+      const now = nowStamp()
       setAttendance(prev => ({
         ...prev,
         dailyLogs: {
@@ -371,7 +448,8 @@ export default function GeoCheckInWidget({
               status: 'In Office',
               checkIn: now,
               checkOut: '--',
-              hours: '0.0'
+              hours: '0.0',
+              checkInLocation: geo ? { distance: geo.distance, accuracy: geo.accuracy, tolerance: geo.tolerance, strict: geo.strict } : undefined
             }
           }
         }
@@ -382,8 +460,8 @@ export default function GeoCheckInWidget({
 
   const handleCheckOut = () => {
     if (!empId || empLog.checkIn === '--') return
-    executeActionWithLocation(() => {
-      const now = currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })
+    executeActionWithLocation((geo) => {
+      const now = nowStamp()
       const ci = parseMin(empLog.checkIn)
       const co = parseMin(now)
       let h = '0.0'
@@ -397,7 +475,12 @@ export default function GeoCheckInWidget({
           ...prev.dailyLogs,
           [today]: {
             ...(prev.dailyLogs?.[today] || {}),
-            [empId]: { ...empLog, checkOut: now, hours: h }
+            [empId]: {
+              ...empLog,
+              checkOut: now,
+              hours: h,
+              checkOutLocation: geo ? { distance: geo.distance, accuracy: geo.accuracy, tolerance: geo.tolerance, strict: geo.strict } : undefined
+            }
           }
         }
       }))
@@ -421,6 +504,8 @@ export default function GeoCheckInWidget({
   }
 
   if (!empId) return null
+
+  const gpsModalMsg = getGeoMessage(gpsDisabledModal.reason)
 
   return (
     <>
@@ -458,7 +543,7 @@ export default function GeoCheckInWidget({
           </DialogDescription>
 
           {/* Clean Distance Line with breathing gap, zero inner box */}
-          <div className="py-2.5 flex items-center justify-center gap-2 text-xs font-semibold text-muted-foreground">
+          <div className="py-2.5 flex flex-wrap items-center justify-center gap-2 text-xs font-semibold text-muted-foreground">
             <span>Current Distance:</span>
             <span className="font-bold font-mono text-destructive text-sm tabular-nums">
               {outOfBoundsModal.dist}m
@@ -468,7 +553,20 @@ export default function GeoCheckInWidget({
             <span className="font-semibold font-mono text-foreground text-sm tabular-nums">
               {outOfBoundsModal.max}m
             </span>
+            {outOfBoundsModal.tolerance > 0 && (
+              <>
+                <span className="opacity-40">+</span>
+                <span className="font-semibold font-mono text-foreground text-sm tabular-nums">
+                  ±{outOfBoundsModal.tolerance}m
+                </span>
+              </>
+            )}
           </div>
+          {outOfBoundsModal.accuracy != null && (
+            <p className="-mt-2 text-[11px] text-muted-foreground/80">
+              Device location accuracy: ±{outOfBoundsModal.accuracy}m
+            </p>
+          )}
 
           <div className="flex flex-col sm:flex-row gap-3 w-full mt-3">
             <button 
@@ -504,7 +602,7 @@ export default function GeoCheckInWidget({
       </Dialog>
 
       {/* Device GPS Off / Location Required Dialog (MonoGlass Ultra-Liquid Glass) */}
-      <Dialog open={gpsDisabledModal} onOpenChange={setGpsDisabledModal}>
+      <Dialog open={gpsDisabledModal.open} onOpenChange={(open) => setGpsDisabledModal(prev => ({ ...prev, open }))}>
         <DialogContent 
           overlayClassName="!bg-transparent !backdrop-blur-none"
           dialogClassName="!p-6 sm:!p-8 !border-none !outline-none !shadow-none !bg-transparent"
@@ -521,10 +619,10 @@ export default function GeoCheckInWidget({
 
           <div className="space-y-1.5">
             <DialogTitle className="text-xl sm:text-2xl font-black text-foreground tracking-tight">
-              Location is Turned Off
+              {gpsModalMsg.title}
             </DialogTitle>
             <DialogDescription className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-              Clock In requires your device GPS. Please pull down your phone notification bar and turn on <strong>Location / GPS</strong>, then tap Retry.
+              {gpsModalMsg.description}
             </DialogDescription>
           </div>
 
@@ -540,8 +638,12 @@ export default function GeoCheckInWidget({
               <Icon name="pin_drop" size={17}/>
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-bold text-foreground">Turn On Location</p>
-              <p className="text-[11px] text-muted-foreground">Swipe down Settings ➔ Location ➔ Turn On</p>
+              <p className="text-xs font-bold text-foreground">{gpsModalMsg.instructions}</p>
+              <p className="text-[11px] text-muted-foreground">
+                {gpsDisabledModal.reason === GEO_REASON.PERMISSION_DENIED
+                  ? 'Tap the lock icon in the address bar ➔ Site settings ➔ Location ➔ Allow'
+                  : 'Phone: swipe down ➔ Location ➔ On  ·  Laptop: enable location services in system settings'}
+              </p>
             </div>
           </div>
 
@@ -549,7 +651,7 @@ export default function GeoCheckInWidget({
             <button
               type="button"
               onClick={() => {
-                setGpsDisabledModal(false)
+                setGpsDisabledModal({ open: false, reason: null })
                 refreshLocation()
               }}
               style={{ 
@@ -560,11 +662,11 @@ export default function GeoCheckInWidget({
               className="flex-1 h-12 min-h-[48px] px-5 rounded-2xl text-sm font-extrabold flex items-center justify-center gap-2 border-2 border-emerald-500/60 text-emerald-600 dark:text-emerald-300 hover:bg-emerald-500/10 transition-all active:scale-[0.98] cursor-pointer"
             >
               <Icon name="refresh" size={18}/>
-              Retry GPS
+              Retry Location
             </button>
             <button
               type="button"
-              onClick={() => setGpsDisabledModal(false)}
+              onClick={() => setGpsDisabledModal({ open: false, reason: null })}
               style={{ 
                 background: 'transparent',
                 backdropFilter: 'saturate(190%) blur(32px)', 
@@ -604,12 +706,12 @@ export default function GeoCheckInWidget({
       </Dialog>
 
       <Card className={`overflow-hidden dashboard-widget relative rounded-3xl border border-border/60 dark:border-white/10 ${cardClassName ? cardClassName : 'col-span-full xl:col-span-12'} min-h-0 flex flex-col p-0 isolate`}>
-        {/* Top Header over Map with Progressive Blur (Seamless, zero separator bar) */}
-        <CardHeader className="relative flex-row items-center justify-between px-3.5 sm:px-4 pt-3.5 pb-2.5 space-y-0 gap-3 z-20 border-none">
-          {/* Progressive blur backdrop melting map into header */}
-          <div className="map-header-progressive-blur" aria-hidden="true" />
+        {/* Progressive blur backdrop on top of map, under header buttons */}
+        <div className="map-header-progressive-blur" aria-hidden="true" />
 
-          <div className="relative z-10 flex items-center gap-2.5 min-w-0">
+        {/* Floating Top Header over Map (Above progressive blur) */}
+        <CardHeader className="absolute top-0 left-0 right-0 flex-row items-center justify-between px-3.5 sm:px-4 pt-3.5 pb-2.5 space-y-0 gap-3 z-20 border-none pointer-events-none">
+          <div className="pointer-events-auto flex items-center gap-2.5 min-w-0">
             <div className="shrink-0 flex items-center justify-center [&_.msr]:!text-black">
               <Icon name="schedule" className="!text-black shrink-0" size={20} />
             </div>
@@ -617,21 +719,22 @@ export default function GeoCheckInWidget({
               Attendance
             </CardTitle>
           </div>
-          <div className="relative z-10 flex items-center gap-1.5 sm:gap-2">
+          <div className="pointer-events-auto flex items-center gap-1.5 sm:gap-2">
             <button
               onClick={() => setCurrentView && setCurrentView('attendance')}
-              className="apple-glass-btn text-xs font-semibold px-3.5 h-7 rounded-full cursor-pointer shrink-0 !text-black border-black/20"
+              className="apple-glass-btn text-xs font-semibold px-3.5 h-7 rounded-full cursor-pointer shrink-0 !text-black !border-black"
             >
               My Logs
             </button>
           </div>
         </CardHeader>
 
-        {/* Map View Section (Zero separator bar) */}
-        <div className="relative w-full h-[260px] sm:h-[290px] -mt-[57px] pt-[57px] overflow-hidden border-none flex flex-col justify-between">
+        {/* Map View Section: expands responsively and pushes lower content down */}
+        <div className="relative w-full flex-[1_1_340px] min-h-[300px] pt-14 overflow-hidden border-none flex flex-col justify-between">
           {/* Full Box Interactive Map View */}
           <div className="absolute inset-0 w-full h-full z-0">
             <MapContainer
+              ref={mapRef}
               center={[officeLat, officeLng]}
               zoom={19}
               scrollWheelZoom={false}
@@ -640,12 +743,14 @@ export default function GeoCheckInWidget({
               className="w-full h-full"
             >
               <TileLayer
-                url="https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
-                maxZoom={20}
-                subdomains={['mt0', 'mt1', 'mt2', 'mt3']}
-                keepBuffer={8}
-                updateWhenIdle={false}
-                updateWhenZooming={true}
+                url={basemap.url}
+                attribution={false}
+                subdomains={basemap.subdomains}
+                maxZoom={basemap.maxZoom}
+                className={basemap.className}
+                keepBuffer={4}
+                updateWhenIdle={true}
+                updateWhenZooming={false}
               />
               {/* Office Geofence Circle */}
               <Circle
@@ -669,9 +774,31 @@ export default function GeoCheckInWidget({
                 </Popup>
               </Marker>
 
-              {/* User Location Marker */}
+              {/* User Location Marker with floating distance card right above the pin */}
               {userLocation?.lat && userLocation?.lng && (
                 <Marker position={[userLocation.lat, userLocation.lng]} icon={userPinIcon}>
+                  <Tooltip
+                    permanent
+                    direction="top"
+                    offset={[0, -18]}
+                    className="geo-distance-tooltip"
+                  >
+                    <div 
+                      style={{ 
+                        backdropFilter: 'saturate(190%) blur(24px)', 
+                        WebkitBackdropFilter: 'saturate(190%) blur(24px)',
+                        background: 'transparent'
+                      }}
+                      className="px-3 py-1.5 rounded-xl border border-black/25 dark:border-black/25 !text-black font-semibold text-xs leading-none whitespace-nowrap flex items-center gap-1.5 shadow-sm select-none map-floating-glass geo-map-floating-text"
+                    >
+                      <span className="font-mono font-bold tabular-nums text-[13px] !text-black">
+                        {distance !== null ? `${distance}m` : 'Detecting...'}
+                      </span>
+                      <span className="text-[11px] font-medium !text-black/80">
+                        {distance !== null && distance <= maxDistance ? 'from office (in zone)' : 'from office'}
+                      </span>
+                    </div>
+                  </Tooltip>
                   <Popup>
                     <div className="text-xs font-sans">
                       <p className="font-bold text-blue-600">Your Location</p>
@@ -708,40 +835,46 @@ export default function GeoCheckInWidget({
             </MapContainer>
           </div>
 
-          {/* Floating Top Controls: Live Distance & Action Tools */}
-          <div className="relative z-10 p-3 sm:p-4 flex items-center justify-between gap-2.5 pointer-events-none">
-            {/* Glass Distance Pill: Realtime Distance from Office (always black text in both light & dark mode) */}
-            <div 
-              data-geo-map-control
-              style={{ 
-                backdropFilter: 'saturate(190%) blur(32px)', 
-                WebkitBackdropFilter: 'saturate(190%) blur(32px)', 
-                background: 'transparent'
-              }}
-              className="pointer-events-auto h-10 px-3.5 rounded-2xl border border-black/25 map-floating-glass geo-map-floating-text kormiis-shadow flex items-center gap-2"
-            >
-              <Icon 
-                name={distance !== null && distance <= maxDistance ? "near_me" : "distance"} 
-                size={17} 
-                className={distance !== null && distance <= maxDistance ? "!text-emerald-700 shrink-0 animate-pulse" : "!text-black shrink-0"}
-              />
-              <div className="flex items-center gap-1.5 leading-none">
-                <span className="text-sm sm:text-base font-black tabular-nums tracking-tight font-mono !text-black" aria-live="polite">
-                  {distance !== null ? `${distance}m` : 'Detecting...'}
-                </span>
-                <span className="text-[11px] font-bold !text-black/80">
-                  {distance !== null && distance <= maxDistance ? 'from office (in zone)' : 'from office'}
-                </span>
-              </div>
-            </div>
-
-            {/* Top-Right Tools: GPS Refresh Button matching same height & alignment */}
-            <div className="pointer-events-auto flex items-center">
+          {/* Floating Top Controls: Right-aligned Zoom Controls & GPS Refresh (Distance is now pinned directly above user's location) */}
+          <div className="relative z-10 p-3 sm:p-4 flex items-start justify-end gap-2.5 pointer-events-none">
+            {/* Top-Right Tools: Zoom Controls & GPS Refresh */}
+            <div className="pointer-events-auto flex flex-col items-center gap-2">
+              <button
+                data-geo-map-control
+                type="button"
+                onClick={() => mapRef.current?.zoomIn()}
+                title="Zoom in"
+                aria-label="Zoom in"
+                style={{ 
+                  backdropFilter: 'saturate(190%) blur(32px)', 
+                  WebkitBackdropFilter: 'saturate(190%) blur(32px)', 
+                  background: 'transparent'
+                }}
+                className="size-10 rounded-2xl border border-black/25 hover:bg-black/10 flex items-center justify-center !text-black transition-all active:scale-95 cursor-pointer map-floating-glass geo-map-floating-text kormiis-shadow"
+              >
+                <Icon name="add" size={19} className="!text-black"/>
+              </button>
+              <button
+                data-geo-map-control
+                type="button"
+                onClick={() => mapRef.current?.zoomOut()}
+                title="Zoom out"
+                aria-label="Zoom out"
+                style={{ 
+                  backdropFilter: 'saturate(190%) blur(32px)', 
+                  WebkitBackdropFilter: 'saturate(190%) blur(32px)', 
+                  background: 'transparent'
+                }}
+                className="size-10 rounded-2xl border border-black/25 hover:bg-black/10 flex items-center justify-center !text-black transition-all active:scale-95 cursor-pointer map-floating-glass geo-map-floating-text kormiis-shadow"
+              >
+                <Icon name="remove" size={19} className="!text-black"/>
+              </button>
               <button
                 data-geo-map-control
                 type="button"
                 onClick={refreshLocation}
                 title="Refresh GPS"
+                aria-label="Refresh GPS"
                 disabled={isLoadingLoc}
                 style={{ 
                   backdropFilter: 'saturate(190%) blur(32px)', 
@@ -757,6 +890,7 @@ export default function GeoCheckInWidget({
 
           {/* Floating Bottom Section: Dynamic Compact Primary Action Button */}
           <div className="relative z-10 mt-auto p-3 sm:p-4 flex flex-col gap-2 pointer-events-none">
+
             {/* Primary Floating Action Button with Ultra-Liquid Glass Style */}
             <div className="pointer-events-auto w-full">
               {canCheckIn || canCheckOut ? (
@@ -817,7 +951,7 @@ export default function GeoCheckInWidget({
         </div>
 
         {/* Unified Attendance Content Section */}
-        <CardContent className="flex flex-col gap-3 p-3 sm:p-3.5">
+        <CardContent className="flex flex-col gap-3.5 p-3.5 sm:p-4 mt-auto">
           {/* 1. Today's Punch & Realtime Worked Duration Banner */}
           <div className="flex items-center justify-between p-3 sm:p-3.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/8 dark:border-white/10">
             <div className="flex items-center gap-2.5 min-w-0">
@@ -866,108 +1000,113 @@ export default function GeoCheckInWidget({
             </div>
           </div>
 
-          {/* 2. Monthly 5-Metric Grid (Present, Late, No-Show, Leave, Hours) */}
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-2.5">
-            {/* Present Days */}
-            <div className="flex flex-col items-center justify-center p-2 sm:p-2.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/10 text-center">
-              <div className="flex items-center gap-1.5 mb-0.5">
-                <Icon name="check_circle" size={15} className="text-emerald-500 shrink-0" />
-                <span className="text-fluid font-black text-foreground tabular-nums">
-                  {monthlyStats.presentDays}
-                </span>
-              </div>
-              <span className="text-[11px] font-bold text-foreground">Present</span>
-              <span className="text-[9px] text-muted-foreground font-semibold">This Month</span>
-            </div>
-
-            {/* Late Count */}
-            <div className="flex flex-col items-center justify-center p-2 sm:p-2.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/10 text-center">
-              <div className="flex items-center gap-1.5 mb-0.5">
-                <Icon name="history_toggle_off" size={15} className="text-amber-500 shrink-0" />
-                <span className="text-fluid font-black text-foreground tabular-nums">
-                  {monthlyStats.lateDays}
-                </span>
-              </div>
-              <span className="text-[11px] font-bold text-foreground">Late</span>
-              <span className="text-[9px] text-muted-foreground font-semibold">Arrivals</span>
-            </div>
-
-            {/* No Show Count */}
-            <div className="flex flex-col items-center justify-center p-2 sm:p-2.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/10 text-center">
-              <div className="flex items-center gap-1.5 mb-0.5">
-                <Icon name="cancel" size={15} className="text-rose-500 shrink-0" />
-                <span className="text-fluid font-black text-foreground tabular-nums">
-                  {monthlyStats.noShowDays}
-                </span>
-              </div>
-              <span className="text-[11px] font-bold text-foreground">No Show</span>
-              <span className="text-[9px] text-muted-foreground font-semibold">Absences</span>
-            </div>
-
-            {/* Leaves Taken */}
-            <div className="flex flex-col items-center justify-center p-2 sm:p-2.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/10 text-center">
-              <div className="flex items-center gap-1.5 mb-0.5">
-                <Icon name="event_busy" size={15} className="text-blue-500 shrink-0" />
-                <span className="text-fluid font-black text-foreground tabular-nums">
-                  {monthlyStats.leavesCount}
-                </span>
-              </div>
-              <span className="text-[11px] font-bold text-foreground">Leave</span>
-              <span className="text-[9px] text-muted-foreground font-semibold">Days Taken</span>
-            </div>
-
-            {/* Total Worked Hours */}
-            <div className="flex flex-col items-center justify-center p-2 sm:p-2.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/10 text-center col-span-2 sm:col-span-1">
-              <div className="flex items-center gap-1.5 mb-0.5">
-                <Icon name="timer" size={15} className="text-primary shrink-0" />
-                <span className="text-fluid font-black text-foreground tabular-nums font-mono">
-                  {monthlyStats.totalWorkHours}
-                </span>
-              </div>
-              <span className="text-[11px] font-bold text-foreground">Hours</span>
-              <span className="text-[9px] text-muted-foreground font-semibold">Total Work</span>
-            </div>
-          </div>
-
-          {/* 3. Leave Balance Cards (matching the top metric box style, zero separator bar) */}
-          <div className="flex flex-col gap-2 pt-1.5 border-none">
+          {/* 2. Monthly Attendance Progress Bar Style Representation */}
+          <div className="flex flex-col gap-2.5 p-3 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/8 dark:border-white/10">
+            {/* Header with Title and Total Hours */}
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-                Leave Balances (Remaining / Total)
+                Monthly Attendance Breakdown
               </span>
-              <button
-                type="button"
-                onClick={() => setCurrentView && setCurrentView('leave')}
-                className="apple-glass-btn text-xs font-semibold px-2.5 py-1 rounded-xl text-primary hover:text-primary/90 flex items-center gap-1 shrink-0 cursor-pointer"
-              >
-                <Icon name="add" size={13} />
-                <span>Apply</span>
-              </button>
+              <div className="flex items-center gap-1 font-mono text-xs font-bold text-foreground">
+                <Icon name="timer" size={13} className="text-primary shrink-0" />
+                <span>{monthlyStats.totalWorkHours}h total worked</span>
+              </div>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5">
-              {leaveItems.map((item) => (
-                <div
-                  key={item.type}
-                  className="flex flex-col items-center justify-center p-2 sm:p-2.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/10 text-center"
-                >
-                  <div className="flex items-baseline gap-1 mb-0.5 font-mono">
-                    <span className="text-fluid font-black text-foreground tabular-nums">
-                      {item.remaining}
-                    </span>
-                    <span className="text-[10px] text-muted-foreground font-bold">
-                      / {item.quota}d
-                    </span>
+            {/* Segmented Multi-Color Progress Bar */}
+            {(() => {
+              const totalRecorded = (monthlyStats.presentDays - monthlyStats.lateDays) + monthlyStats.lateDays + monthlyStats.noShowDays + monthlyStats.leavesCount
+              const onTime = Math.max(0, monthlyStats.presentDays - monthlyStats.lateDays)
+              const late = monthlyStats.lateDays
+              const noShow = monthlyStats.noShowDays
+              const leaves = monthlyStats.leavesCount
+
+              // Proportional flex-grow segments share the full width exactly, so
+              // the colours merge seamlessly with no sub-pixel gaps or rounding.
+              const seg = (count, colorClass, label) => (
+                count > 0 ? (
+                  <div
+                    key={label}
+                    style={{ flexGrow: count, flexBasis: 0 }}
+                    className={`h-full min-w-0 ${colorClass} transition-all duration-500`}
+                    title={`${label}: ${count} days`}
+                  />
+                ) : null
+              )
+
+              return (
+                <div className="space-y-2">
+                  {/* Visual Bar Track */}
+                  <div className="w-full h-3 rounded-full bg-black/10 dark:bg-white/10 overflow-hidden flex">
+                    {totalRecorded === 0 ? (
+                      <div className="w-full h-full bg-muted-foreground/20" />
+                    ) : (
+                      <>
+                        {seg(onTime, 'attendance-color-emerald', 'Present (On-Time)')}
+                        {seg(late, 'attendance-color-amber', 'Late')}
+                        {seg(noShow, 'attendance-color-rose', 'No Show')}
+                        {seg(leaves, 'attendance-color-blue', 'Leave')}
+                      </>
+                    )}
                   </div>
-                  <span className="text-[11px] font-bold text-foreground truncate max-w-full">
-                    {item.type}
-                  </span>
-                  <span className="text-[9px] text-muted-foreground font-semibold">
-                    {item.remaining > 0 ? `${item.remaining} remaining` : 'Exhausted'}
-                  </span>
+
+                  {/* Bar Legend & Numerical Counts */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+                    {/* Present / On-Time */}
+                    <div className="flex items-center gap-2">
+                      <div className="size-2 rounded-full attendance-color-emerald shrink-0" />
+                      <div className="flex items-baseline gap-1.5 min-w-0">
+                        <span className="text-xs font-black text-foreground tabular-nums font-mono">
+                          {monthlyStats.presentDays}
+                        </span>
+                        <span className="text-[11px] font-semibold text-muted-foreground truncate">
+                          Present
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Late */}
+                    <div className="flex items-center gap-2">
+                      <div className="size-2 rounded-full attendance-color-amber shrink-0" />
+                      <div className="flex items-baseline gap-1.5 min-w-0">
+                        <span className="text-xs font-black text-foreground tabular-nums font-mono">
+                          {monthlyStats.lateDays}
+                        </span>
+                        <span className="text-[11px] font-semibold text-muted-foreground truncate">
+                          Late
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* No Show */}
+                    <div className="flex items-center gap-2">
+                      <div className="size-2 rounded-full attendance-color-rose shrink-0" />
+                      <div className="flex items-baseline gap-1.5 min-w-0">
+                        <span className="text-xs font-black text-foreground tabular-nums font-mono">
+                          {monthlyStats.noShowDays}
+                        </span>
+                        <span className="text-[11px] font-semibold text-muted-foreground truncate">
+                          No Show
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Leave */}
+                    <div className="flex items-center gap-2">
+                      <div className="size-2 rounded-full attendance-color-blue shrink-0" />
+                      <div className="flex items-baseline gap-1.5 min-w-0">
+                        <span className="text-xs font-black text-foreground tabular-nums font-mono">
+                          {monthlyStats.leavesCount}
+                        </span>
+                        <span className="text-[11px] font-semibold text-muted-foreground truncate">
+                          Leave
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              ))}
-            </div>
+              )
+            })()}
           </div>
         </CardContent>
       </Card>

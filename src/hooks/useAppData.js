@@ -50,7 +50,13 @@ export default function useAppData({ user, addToast }) {
     return []
   })
   const [payroll, setPayrollRaw] = useState(() => loadSaved('kormiis_payroll') || {})
-  const [attendance, setAttendanceRaw] = useState(() => loadSaved('kormiis_attendance') || { leaves: [], dailyLogs: {}, balances: {} })
+  const [attendance, setAttendanceRaw] = useState(() => {
+    const saved = loadSaved('kormiis_attendance')
+    if (saved && saved.dailyLogs && Object.keys(saved.dailyLogs).length > 0) {
+      return saved
+    }
+    return DEMO_ATTENDANCE
+  })
   const [expenses, setExpensesRaw] = useState(() => loadSaved('kormiis_expenses') || [])
   const [events, setEvents] = useState(() => loadSaved('kormiis_events') || [])
   const [documents, setDocuments] = useState(() => loadSaved('kormiis_documents') || [])
@@ -175,7 +181,7 @@ export default function useAppData({ user, addToast }) {
     
     // For Teammates, base permissions + custom permissions
     if (currentRole === 'Teammate') {
-      const basePerms = ['dashboard', 'attendance', 'leaves', 'expenses', 'calendar', 'tasks', 'profile', 'notes', 'performance']
+      const basePerms = ['dashboard', 'attendance', 'leaves', 'expenses', 'calendar', 'tasks', 'profile', 'settings', 'notes', 'performance']
       const customPerms = user?.permissions || []
       return basePerms.includes(resource) || customPerms.includes(resource)
     }

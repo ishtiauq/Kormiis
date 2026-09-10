@@ -26,7 +26,7 @@ import Notes from './Notes.jsx'
 import Sidebar from './layout/Sidebar.jsx'
 import Topbar from './layout/Topbar.jsx'
 import MobileTabButton from './layout/MobileTabButton.jsx'
-import ProfileView from './ProfileView.jsx'
+import EmployeeSettings from './EmployeeSettings.jsx'
 import GeoCheckInWidget from './attendance/GeoCheckInWidget.jsx'
 import AttendancePage from './attendance/AttendancePage.jsx'
 import PerformancePage from './hr/PerformancePage.jsx'
@@ -39,6 +39,7 @@ import { PerformanceTrackerWidget } from './widgets/PerformanceTrackerWidget.jsx
 import { TasksWidget } from './widgets/TasksWidget.jsx'
 import { PayrollWidget } from './widgets/PayrollWidget.jsx'
 import { MyPayrollWidget } from './widgets/MyPayrollWidget.jsx'
+import { LeaveWidget } from './widgets/LeaveWidget.jsx'
 
 // Dummy profile image generation based on initials
 const getInitialsAvatar = (name) => {
@@ -303,8 +304,9 @@ export default function EmployeePortal({
                  addNotification={addNotification}
                  initialSubTab={activeTab === 'expenses' ? 'expenses' : 'payslips'}
                />
+      case 'settings':
       case 'profile':
-        return <ProfileView 
+        return <EmployeeSettings 
           currentUser={currentUser} 
           pendingProfileEdits={pendingProfileEdits} 
           setPendingProfileEdits={setPendingProfileEdits} 
@@ -318,6 +320,9 @@ export default function EmployeePortal({
           announcements={announcements}
           setAnnouncements={setAnnouncements}
           addNotification={addNotification}
+          themeMode={themeMode}
+          isDarkMode={isDarkMode}
+          toggleTheme={toggleTheme}
         />
       case 'assets':
       case 'my-assets':
@@ -422,7 +427,7 @@ export default function EmployeePortal({
     { id: 'my-assets', icon: <Icon name="devices_other" size={20}/>, label: 'Assets' },
     { id: 'performance', icon: <Icon name="insights" size={20}/>, label: 'Performance' },
     ...(currentUser?.permissions?.includes('manage_attendance') ? [{ id: 'team_attendance', icon: <Icon name="check_circle" size={20}/>, label: 'Team Attendance' }] : []),
-    { id: 'profile', icon: <Icon name="person" size={20}/>, label: 'Profile' }
+    { id: 'settings', icon: <Icon name="settings" size={20}/>, label: 'Settings' }
   ]
 
   const resolvedIsDark = isDarkMode ?? (themeMode === 'dark')
@@ -455,7 +460,7 @@ export default function EmployeePortal({
                 showNotifications={showNotifications}
                 notifications={notifications}
                 clearNotifications={clearNotifications}
-                onProfileClick={() => setActiveTab('profile')}
+                onProfileClick={() => setActiveTab('settings')}
                 handleLogout={handleLogout}
                 currentView={activeTab}
                 setCurrentView={setActiveTab}
@@ -563,7 +568,7 @@ export default function EmployeePortal({
           unreadCount={notifications ? notifications.filter(n => !n.read).length : 0}
           onProfileClick={() => {
             if (showAiModal) setShowAiModal(false)
-            setActiveTab('profile')
+            setActiveTab('settings')
           }}
           user={currentUser}
           employees={employees}
@@ -772,8 +777,8 @@ function DashboardView({
       {/* 12-Column Grid matching portal architecture */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 lg:gap-6 auto-rows-[minmax(148px,auto)] items-stretch pt-2">
 
-        {/* Column 1: Left Stacked Column — Clock In (top), Personal Attendance (middle) & Performance Tracker (bottom) — col-span-12 lg:col-span-4 */}
-        <div className="col-span-12 lg:col-span-4 flex flex-col gap-4 sm:gap-5 lg:gap-6 justify-between">
+        {/* Column 1: Attendance / Geo Check-In Column — col-span-12 lg:col-span-4 */}
+        <div className="col-span-12 lg:col-span-4 h-[680px] w-full flex flex-col">
           {currentUser && (
             <GeoCheckInWidget 
               currentUser={currentUser} 
@@ -786,17 +791,9 @@ function DashboardView({
               roster={roster}
               shiftTemplates={shiftTemplates}
               setCurrentView={setActiveTab}
-              cardClassName="!h-auto min-h-0 w-full"
+              cardClassName="h-full w-full min-h-0"
             />
           )}
-
-          <PerformanceTrackerWidget
-            efficiencyScore={efficiencyScore}
-            taskCompletionRate={taskCompletionRate}
-            attendanceRate={attendanceRate}
-            setCurrentView={setActiveTab}
-            cardClass="!h-auto min-h-0"
-          />
         </div>
 
         {/* Column 2: Catch Up (Announcements, Notice & Events) in Middle — col-span-12 lg:col-span-4 */}
@@ -814,23 +811,23 @@ function DashboardView({
           addLog={addLog}
           addNotification={addNotification}
           settings={settings}
-          cardClass="col-span-12 lg:col-span-4 h-full"
+          cardClass="col-span-12 lg:col-span-4 h-[680px] w-full"
         />
 
         {/* Column 3: Team Directory Widget — col-span-12 lg:col-span-4 */}
         <EmployeeDirectoryWidget
           employees={employees}
           setCurrentView={setActiveTab}
-          cardClass="col-span-12 lg:col-span-4 h-full"
+          cardClass="col-span-12 lg:col-span-4 h-[680px] w-full"
         />
 
-        {/* Secondary Row: Tasks & Payroll widgets */}
+        {/* Secondary Row: Tasks, Payroll & Leaves widgets */}
         <TasksWidget
           tasks={tasks}
           pendingTasksCount={pendingTasksCount}
           taskCompletionRate={taskCompletionRate}
           setCurrentView={setActiveTab}
-          cardClass="col-span-12 sm:col-span-6 lg:col-span-6"
+          cardClass="col-span-12 sm:col-span-6 lg:col-span-4 min-h-[360px] w-full"
         />
 
         <MyPayrollWidget
@@ -840,7 +837,15 @@ function DashboardView({
           settings={settings}
           setCurrentView={setActiveTab}
           addToast={addToast}
-          cardClass="col-span-12 sm:col-span-6 lg:col-span-6"
+          cardClass="col-span-12 sm:col-span-6 lg:col-span-4 min-h-[360px] w-full"
+        />
+
+        <LeaveWidget
+          currentUser={currentUser}
+          attendance={attendance}
+          settings={settings}
+          setCurrentView={setActiveTab}
+          cardClass="col-span-12 sm:col-span-12 lg:col-span-4 min-h-[360px] w-full"
         />
 
       </div>

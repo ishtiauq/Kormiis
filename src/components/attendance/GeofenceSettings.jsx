@@ -6,6 +6,8 @@ import Icon from "@/components/ui/Icon.jsx"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { getCurrentPositionRobust, getGeoMessage, GEO_REASON } from '../../services/geolocation.js'
+import { getStreetBasemap, getSatelliteBasemap } from '../../services/mapTiles.js'
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -17,11 +19,14 @@ L.Icon.Default.mergeOptions({
 function LocationMarker({ position, setPosition }) {
   const map = useMap();
   
+  const posLat = position?.lat
+  const posLng = position?.lng
+
   useEffect(() => {
-    if (position && position.lat && position.lng) {
-      map.flyTo(position, Math.max(map.getZoom(), 19));
+    if (Number.isFinite(posLat) && Number.isFinite(posLng)) {
+      map.flyTo([posLat, posLng], Math.max(map.getZoom(), 19));
     }
-  }, [position.lat, position.lng, map]);
+  }, [posLat, posLng, map]);
 
   useMapEvents({
     click(e) {
@@ -34,6 +39,8 @@ function LocationMarker({ position, setPosition }) {
 }
 
 export default function GeofenceSettings({ settings, setSettings, addToast, addLog }) {
+  const streetBasemap = getStreetBasemap()
+  const satelliteBasemap = getSatelliteBasemap()
   const defaultLoc = { lat: 23.8103, lng: 90.4125, radius: 100 }
   const [officeLocation, setOfficeLocation] = useState(settings?.officeLocation || defaultLoc)
   const [mapSearchQuery, setMapSearchQuery] = useState('')
@@ -86,28 +93,22 @@ export default function GeofenceSettings({ settings, setSettings, addToast, addL
     runSearch(mapSearchQuery)
   }
 
-  const handleUseCurrentLocation = () => {
-    if (!navigator.geolocation) {
-      if (addToast) addToast('Geolocation is not supported by your browser.', 'error')
-      return
-    }
+  const handleUseCurrentLocation = async () => {
     setIsLocating(true)
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setOfficeLocation(prev => ({
-          ...prev,
-          lat: pos.coords.latitude,
-          lng: pos.coords.longitude
-        }))
-        setIsLocating(false)
-        if (addToast) addToast('Updated to your current GPS coordinates!', 'success')
-      },
-      (err) => {
-        setIsLocating(false)
-        if (addToast) addToast(`GPS Error: ${err.message}`, 'error')
-      },
-      { enableHighAccuracy: true, timeout: 10000 }
-    )
+    try {
+      const pos = await getCurrentPositionRobust({ highAccuracy: true, timeout: 10000, maximumAge: 0 })
+      setOfficeLocation(prev => ({
+        ...prev,
+        lat: pos.coords.latitude,
+        lng: pos.coords.longitude
+      }))
+      if (addToast) addToast('Updated to your current GPS coordinates!', 'success')
+    } catch (err) {
+      const msg = getGeoMessage(err?.reason || GEO_REASON.UNKNOWN)
+      if (addToast) addToast(msg.description, 'error')
+    } finally {
+      setIsLocating(false)
+    }
   }
 
   const handleSaveLocation = () => {
@@ -191,15 +192,17 @@ export default function GeofenceSettings({ settings, setSettings, addToast, addL
           >
             {mapLayer === 'satellite' ? (
               <TileLayer
-                attribution='&copy; <a href="https://www.esri.com">Esri</a>, &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                url={satelliteBasemap.url}
+                attribution={satelliteBasemap.attribution}
+                maxZoom={satelliteBasemap.maxZoom}
               />
             ) : (
               <TileLayer
-                attribution='&copy; Google Maps'
-                url="https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
-                maxZoom={20}
-                subdomains={['mt0', 'mt1', 'mt2', 'mt3']}
+                url={streetBasemap.url}
+                attribution={streetBasemap.attribution}
+                subdomains={streetBasemap.subdomains}
+                maxZoom={streetBasemap.maxZoom}
+                className={streetBasemap.className}
                 keepBuffer={8}
                 updateWhenIdle={false}
               />

@@ -85,9 +85,9 @@
   --duration-standard: 400ms;
   --duration-modal: 600ms;
 
-  /* Kormiis Shadow — Official Global Design Token (Crisp, balanced-intensity, short-distance drop shadow) */
-  --kormiis-shadow: 0 2px 4px rgba(0, 0, 0, 0.22), 0 1px 2px rgba(0, 0, 0, 0.30);
-  --kormiis-filter-shadow: drop-shadow(0 1.5px 2px rgba(0, 0, 0, 0.18));
+  /* Kormiis Shadow — Official Global Design Token (Increased distance/depth, softer reduced intensity) */
+  --kormiis-shadow: 0 4px 12px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08);
+  --kormiis-filter-shadow: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.10));
 
   /* Apple Ultra-Liquid Glass Tokens (Zero Background Color / Pure Refraction Standard) */
   --glass-bg: transparent;
@@ -469,26 +469,27 @@ li[data-sonner-toast],
   -webkit-text-fill-color: #000000 !important;
 }
 
-/* Kormiis Shadow — Official Design System Utility Class (Crisp, balanced-intensity, short-distance drop shadow) */
+/* Kormiis Shadow — Official Design System Utility Class (Increased distance/depth, softer reduced intensity) */
 .kormiis-shadow,
 .shadow-kormiis,
 .map-floating-btn-shadow {
-  box-shadow: var(--kormiis-shadow, 0 2px 4px rgba(0, 0, 0, 0.22), 0 1px 2px rgba(0, 0, 0, 0.30)) !important;
-  filter: var(--kormiis-filter-shadow, drop-shadow(0 1.5px 2px rgba(0, 0, 0, 0.18)));
+  box-shadow: var(--kormiis-shadow, 0 4px 12px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08)) !important;
+  filter: var(--kormiis-filter-shadow, drop-shadow(0 4px 8px rgba(0, 0, 0, 0.10)));
 }
-
 /* Progressive Blur for Attendance Widget Header over Map (Apple Ultra-Liquid Glass blend) */
 .map-header-progressive-blur {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 68px;
   pointer-events: none;
-  z-index: 1;
+  z-index: 10;
   -webkit-backdrop-filter: blur(20px) saturate(190%);
   backdrop-filter: blur(20px) saturate(190%);
   -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.85) 55%, rgba(0, 0, 0, 0) 100%);
   mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.85) 55%, rgba(0, 0, 0, 0) 100%);
 }
-
 /* AI Panel, Notification Panel, Mobile Bottom Bar & Menu Drawer: Pure Refraction Standard */
 [data-ai-panel],
 [data-ai-modal],
@@ -1242,7 +1243,6 @@ textarea:hover::-webkit-scrollbar-thumb {
   box-shadow: none !important;
 }
 
-/* Universal Global Scrollbar Rule for AI Chat Modal (Rule 9 Standard) */
 .chat-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: transparent transparent;
@@ -1945,6 +1945,14 @@ div[class*="text-rose-"]:not([class*="bg-"]):not([class*="size-"]):not([class*="
   border-color: rgba(255, 255, 255, 0.16) !important;
 }
 
+/* Data-visualization color fills — exempt from the monochrome badge/tag rule
+   above (progress bars, charts, legend dots). Class names intentionally avoid
+   the `bg-*` pattern so the monochrome selector never matches them. */
+.attendance-color-emerald { background-color: #10b981 !important; }
+.attendance-color-amber   { background-color: #f59e0b !important; }
+.attendance-color-rose    { background-color: #f43f5e !important; }
+.attendance-color-blue    { background-color: #3b82f6 !important; }
+
 /* Navigation Bar Active Capsule: Kormiis Brand Color Standard (Zero Border & Zero Shadow) */
 .nav-capsule-active,
 button.nav-capsule-active {
@@ -2043,14 +2051,39 @@ button.nav-capsule-active svg {
 }
 
 
-/* Poll Voting Option & Bar: Brand Color Fill & Pure White Text in ALL Modes */
+/* Poll Voting Option & Bar: theme-aware fill & text.
+   Light mode -> white fill bar + black text.
+   Dark mode  -> dark fill bar + white text. */
+.poll-option-btn {
+  border: 1px solid rgba(0, 0, 0, 0.15) !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+.dark .poll-option-btn,
+[data-theme="dark"] .poll-option-btn {
+  border: 1px solid rgba(255, 255, 255, 0.22) !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+/* Light mode text: black */
 .poll-option-btn,
 .poll-option-btn *,
 .poll-option-btn span,
 .poll-option-btn strong,
 .poll-option-btn p,
 .poll-option-btn .msr,
-.poll-option-btn svg,
+.poll-option-btn svg {
+  color: #000000 !important;
+  fill: currentColor !important;
+}
+
+/* Dark mode text: white */
 .dark .poll-option-btn,
 .dark .poll-option-btn *,
 .dark .poll-option-btn span,
@@ -2069,11 +2102,19 @@ button.nav-capsule-active svg {
   fill: currentColor !important;
 }
 
-.poll-fill-bar,
+/* Light mode fill: white */
+.poll-fill-bar {
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  border: none !important;
+}
+
+/* Dark mode fill: dark */
 .dark .poll-fill-bar,
 [data-theme="dark"] .poll-fill-bar {
-  background-color: #FE3501 !important;
-  background: #FE3501 !important;
+  background-color: #1c1c1e !important;
+  background: #1c1c1e !important;
+  border: none !important;
 }
 
 /* ==============================================================
@@ -2091,6 +2132,31 @@ body [class*="backdrop-blur-"]:not(header):not(.topbar):not(.landing-glass-heade
 body [class*="saturate-"]:not(header):not(.topbar):not(.landing-glass-header):not(.bottom-bar):not([data-bottom-bar]):not(.mobile-bottom-dock):not([data-mobile-dock]):not([data-mobile-panel]):not([data-menu-drawer]):not(.menu-bar-dock):not([data-ai-panel]):not([data-ai-modal]):not(.ai-panel):not([data-notif-panel]):not(.notification-modal):not(.notification-dropdown):not(.landing-glass-bottom-bar):not(.toast):not([data-sonner-toast]):not([data-sonner-toaster]):not([role="dialog"]):not([role="dialog"] *):not([role="alertdialog"]):not([role="alertdialog"] *):not([data-radix-dialog-content]):not([data-radix-dialog-content] *):not([data-radix-alert-dialog-content]):not([data-radix-alert-dialog-content] *):not(.dialog-content):not(.dialog-content *):not(.alert-dialog-content):not(.alert-dialog-content *):not(.glass-mobile-drawer):not(.glass-mobile-drawer *):not(.liquid-glass-drawer):not(.liquid-glass-drawer *):not([data-radix-dialog-overlay]):not([data-radix-alert-dialog-overlay]):not([role="menu"]):not([role="menu"] *):not([role="listbox"]):not([role="listbox"] *):not([data-radix-popper-content-wrapper]):not([data-radix-popper-content-wrapper] *):not([data-radix-select-content]):not([data-radix-select-content] *):not([data-radix-dropdown-menu-content]):not([data-radix-dropdown-menu-content] *):not([data-radix-popover-content]):not([data-radix-popover-content] *):not([data-radix-tooltip-content]):not([data-radix-tooltip-content] *):not(.popover-content):not(.popover-content *):not([role="tooltip"]):not([role="tooltip"] *):not([data-ai-panel] *):not([data-ai-modal] *):not(.ai-panel *):not([data-mobile-dock] *):not([data-mobile-panel] *):not([data-menu-drawer] *):not(.menu-bar-dock *):not([data-notif-panel] *):not(.notification-modal *):not(.notification-dropdown *) {
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
+}
+
+/* Leaflet Map Optimizations & Attribution Removal */
+.leaflet-control-attribution {
+  display: none !important;
+}
+
+/* Custom Floating Distance Card pinned above User Location */
+.leaflet-tooltip.geo-distance-tooltip {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+.leaflet-tooltip.geo-distance-tooltip,
+.leaflet-tooltip.geo-distance-tooltip *,
+.dark .leaflet-tooltip.geo-distance-tooltip,
+.dark .leaflet-tooltip.geo-distance-tooltip *,
+[data-theme="dark"] .leaflet-tooltip.geo-distance-tooltip,
+[data-theme="dark"] .leaflet-tooltip.geo-distance-tooltip * {
+  color: #000000 !important;
+}
+.leaflet-tooltip.geo-distance-tooltip::before,
+.leaflet-tooltip.geo-distance-tooltip::after {
+  display: none !important;
 }
 
 

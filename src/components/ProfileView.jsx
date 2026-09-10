@@ -23,9 +23,12 @@ export default function ProfileView({
   handleLogout,
   announcements = [],
   setAnnouncements,
-  addNotification
+  addNotification,
+  initialSection = 'personal',
+  hideNav = false,
+  hideHero = false
 }) {
-  const [activeTab, setActiveTab] = useState('personal') // 'personal' | 'work' | 'security'
+  const [activeTab, setActiveTab] = useState(initialSection) // 'personal' | 'security'
   const [editMode, setEditMode] = useState(false)
   
   // Password change state
@@ -45,6 +48,8 @@ export default function ProfileView({
 
   // Edit form state
   const [formData, setFormData] = useState({
+    name: currentUser?.name || '',
+    email: currentUser?.email || currentUser?.workEmail || '',
     personalEmail: currentUser?.personalEmail || '',
     phone: currentUser?.phone || '',
     address: currentUser?.address || '',
@@ -66,6 +71,8 @@ export default function ProfileView({
 
   const handleStartEdit = () => {
     setFormData({
+      name: currentUser?.name || '',
+      email: currentUser?.email || currentUser?.workEmail || '',
       personalEmail: currentUser?.personalEmail || '',
       phone: currentUser?.phone || '',
       address: currentUser?.address || '',
@@ -78,6 +85,8 @@ export default function ProfileView({
   const handleCancelEdit = () => {
     setEditMode(false)
     setFormData({
+      name: currentUser?.name || '',
+      email: currentUser?.email || currentUser?.workEmail || '',
       personalEmail: currentUser?.personalEmail || '',
       phone: currentUser?.phone || '',
       address: currentUser?.address || '',
@@ -103,6 +112,8 @@ export default function ProfileView({
       employeeId: empId,
       timestamp: new Date().toISOString(),
       changes: {
+        name: formData.name.trim(),
+        email: formData.email.trim(),
         personalEmail: formData.personalEmail.trim(),
         phone: formData.phone.trim(),
         address: formData.address.trim(),
@@ -160,7 +171,6 @@ export default function ProfileView({
 
   const empId = currentUser?.id || currentUser?.employeeId || currentUser?.uid || 'N/A'
   const workEmail = currentUser?.email || currentUser?.workEmail || currentUser?.personalEmail || 'N/A'
-  const companyId = currentUser?.companyUid || currentUser?.adminUid || currentUser?.uid || currentUser?.id
 
   // Determine admin roles
   const isCurrentAdmin = currentUser?.role === 'Admin' || currentUser?.isWorkspaceOwner || (currentUser?.companyUid && currentUser?.companyUid === currentUser?.uid)
@@ -324,6 +334,8 @@ export default function ProfileView({
 
   return (
     <div className="flex flex-col gap-6 max-w-[920px] mx-auto pb-12 w-full animate-in fade-in duration-300">
+      {!hideHero && (
+        <>
       {/* Action Toolbar */}
       {!editMode && (
         <div className="flex items-center justify-end gap-2.5">
@@ -465,45 +477,37 @@ export default function ProfileView({
           </div>
         </div>
       </div>
+        </>
+      )}
 
       {/* Segmented Section Navigation */}
-      <div className="flex items-center gap-1.5 p-1.5 rounded-2xl glass-kormiis border border-white/30 dark:border-white/10 w-fit max-w-full overflow-x-auto shadow-xs">
-        <button
-          onClick={() => { setActiveTab('personal'); setEditMode(false); }}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all cursor-pointer ${
-            activeTab === 'personal'
-              ? 'bg-background dark:bg-white/15 text-foreground shadow-xs font-semibold'
-              : 'text-muted-foreground hover:text-foreground hover:bg-white/30 dark:hover:bg-white/5'
-          }`}
-        >
-          <Icon name="contact_mail" size={16} />
-          <span>Contact & Personal</span>
-        </button>
+      {!hideNav && (
+        <div className="flex items-center gap-1.5 p-1.5 rounded-2xl glass-kormiis border border-white/30 dark:border-white/10 w-fit max-w-full overflow-x-auto shadow-xs">
+          <button
+            onClick={() => { setActiveTab('personal'); setEditMode(false); }}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all cursor-pointer ${
+              activeTab === 'personal'
+                ? 'bg-background dark:bg-white/15 text-foreground shadow-xs font-semibold'
+                : 'text-muted-foreground hover:text-foreground hover:bg-white/30 dark:hover:bg-white/5'
+            }`}
+          >
+            <Icon name="contact_mail" size={16} />
+            <span>Contact & Personal</span>
+          </button>
 
-        <button
-          onClick={() => { setActiveTab('work'); setEditMode(false); }}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all cursor-pointer ${
-            activeTab === 'work'
-              ? 'bg-background dark:bg-white/15 text-foreground shadow-xs font-semibold'
-              : 'text-muted-foreground hover:text-foreground hover:bg-white/30 dark:hover:bg-white/5'
-          }`}
-        >
-          <Icon name="domain" size={16} />
-          <span>Work Details</span>
-        </button>
-
-        <button
-          onClick={() => { setActiveTab('security'); setEditMode(false); }}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all cursor-pointer ${
-            activeTab === 'security'
-              ? 'bg-background dark:bg-white/15 text-foreground shadow-xs font-semibold'
-              : 'text-muted-foreground hover:text-foreground hover:bg-white/30 dark:hover:bg-white/5'
-          }`}
-        >
-          <Icon name="shield" size={16} />
-          <span>Security & Login</span>
-        </button>
-      </div>
+          <button
+            onClick={() => { setActiveTab('security'); setEditMode(false); }}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all cursor-pointer ${
+              activeTab === 'security'
+                ? 'bg-background dark:bg-white/15 text-foreground shadow-xs font-semibold'
+                : 'text-muted-foreground hover:text-foreground hover:bg-white/30 dark:hover:bg-white/5'
+            }`}
+          >
+            <Icon name="shield" size={16} />
+            <span>Security & Login</span>
+          </button>
+        </div>
+      )}
 
       {/* TAB 1: Personal & Contact Information */}
       {activeTab === 'personal' && (
@@ -536,6 +540,38 @@ export default function ProfileView({
             {editMode ? (
               <form onSubmit={handleSubmitProfileEdit} className="space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Full Name
+                    </label>
+                    <div className="relative">
+                      <Icon name="badge" size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                      <Input
+                        type="text"
+                        placeholder="Your full name"
+                        value={formData.name}
+                        onChange={e => setFormData(p => ({ ...p, name: e.target.value }))}
+                        className="h-11 !pl-11 rounded-2xl bg-white/70 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:ring-2 focus:ring-primary/20"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Work Email
+                    </label>
+                    <div className="relative">
+                      <Icon name="mail" size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                      <Input
+                        type="email"
+                        placeholder="name@company.com"
+                        value={formData.email}
+                        onChange={e => setFormData(p => ({ ...p, email: e.target.value }))}
+                        className="h-11 !pl-11 rounded-2xl bg-white/70 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:ring-2 focus:ring-primary/20"
+                      />
+                    </div>
+                  </div>
+
                   <div className="space-y-2">
                     <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                       Personal Email
@@ -623,6 +659,26 @@ export default function ProfileView({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="p-4.5 rounded-2xl bg-white/40 dark:bg-white/5 border border-white/30 dark:border-white/10 space-y-1.5 shadow-xs">
                   <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    <Icon name="badge" size={15} className="text-primary" />
+                    Full Name
+                  </div>
+                  <div className="font-semibold text-foreground text-sm">
+                    {currentUser?.name || <span className="text-muted-foreground italic">Not provided</span>}
+                  </div>
+                </div>
+
+                <div className="p-4.5 rounded-2xl bg-white/40 dark:bg-white/5 border border-white/30 dark:border-white/10 space-y-1.5 shadow-xs">
+                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    <Icon name="mail" size={15} className="text-primary" />
+                    Work Email
+                  </div>
+                  <div className="font-medium text-foreground text-sm break-all">
+                    {currentUser?.email || currentUser?.workEmail || <span className="text-muted-foreground italic">Not provided</span>}
+                  </div>
+                </div>
+
+                <div className="p-4.5 rounded-2xl bg-white/40 dark:bg-white/5 border border-white/30 dark:border-white/10 space-y-1.5 shadow-xs">
+                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     <Icon name="mail" size={15} className="text-primary" />
                     Personal Email
                   </div>
@@ -666,118 +722,7 @@ export default function ProfileView({
         </Card>
       )}
 
-      {/* TAB 2: Work & Workplace Details */}
-      {activeTab === 'work' && (
-        <Card className="glass-kormiis rounded-3xl border border-white/30 dark:border-white/10 shadow-sm overflow-hidden">
-          <CardHeader className="p-6 sm:p-8 pb-4 border-b border-border/40 dark:border-white/5">
-            <CardTitle className="text-fluid-lg font-bold flex items-center gap-2">
-              <Icon name="domain" size={20} className="text-primary" />
-              Work & Organization Details
-            </CardTitle>
-            <CardDescription className="text-fluid-xs text-muted-foreground mt-1">
-              Official company role, departmental assignment, and workspace metadata.
-            </CardDescription>
-          </CardHeader>
-
-          <CardContent className="p-6 sm:p-8 pt-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div className="p-4.5 rounded-2xl bg-white/40 dark:bg-white/5 border border-white/30 dark:border-white/10 space-y-1.5 shadow-xs">
-                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  <Icon name="badge" size={15} className="text-primary" />
-                  Full Name
-                </div>
-                <div className="font-semibold text-foreground text-sm">
-                  {currentUser?.name || 'N/A'}
-                </div>
-              </div>
-
-              <div className="p-4.5 rounded-2xl bg-white/40 dark:bg-white/5 border border-white/30 dark:border-white/10 space-y-1.5 shadow-xs">
-                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  <Icon name="fingerprint" size={15} className="text-purple-500" />
-                  Employee ID
-                </div>
-                <div className="font-mono font-medium text-foreground text-sm flex items-center justify-between">
-                  <span>{empId}</span>
-                  <button
-                    onClick={() => copyToClipboard(empId, 'Employee ID')}
-                    className="text-muted-foreground hover:text-foreground text-xs p-1 cursor-pointer"
-                    title="Copy ID"
-                  >
-                    <Icon name="content_copy" size={14} />
-                  </button>
-                </div>
-              </div>
-
-              <div className="p-4.5 rounded-2xl bg-white/40 dark:bg-white/5 border border-white/30 dark:border-white/10 space-y-1.5 shadow-xs">
-                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  <Icon name="apartment" size={15} className="text-blue-500" />
-                  Department
-                </div>
-                <div className="font-semibold text-foreground text-sm">
-                  {currentUser?.department || 'General'}
-                </div>
-              </div>
-
-              <div className="p-4.5 rounded-2xl bg-white/40 dark:bg-white/5 border border-white/30 dark:border-white/10 space-y-1.5 shadow-xs">
-                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  <Icon name="shield" size={15} className="text-emerald-500" />
-                  Role & Permissions
-                </div>
-                <div className="font-semibold text-foreground text-sm">
-                  {currentUser?.role || 'Teammate'}
-                </div>
-              </div>
-
-              <div className="p-4.5 rounded-2xl bg-white/40 dark:bg-white/5 border border-white/30 dark:border-white/10 space-y-1.5 shadow-xs">
-                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  <Icon name="work_outline" size={15} className="text-amber-500" />
-                  Job Designation
-                </div>
-                <div className="font-medium text-foreground text-sm">
-                  {currentUser?.designation || currentUser?.role || 'Employee'}
-                </div>
-              </div>
-
-              <div className="p-4.5 rounded-2xl bg-white/40 dark:bg-white/5 border border-white/30 dark:border-white/10 space-y-1.5 shadow-xs">
-                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  <Icon name="mail" size={15} className="text-primary" />
-                  Sign-In / Work Email
-                </div>
-                <div className="font-medium text-foreground text-sm break-all">
-                  {workEmail}
-                </div>
-              </div>
-
-              {/* Workspace Identifier */}
-              <div className="p-4.5 rounded-2xl bg-white/40 dark:bg-white/5 border border-white/30 dark:border-white/10 space-y-2 shadow-xs sm:col-span-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    <Icon name="corporate_fare" size={15} className="text-primary" />
-                    Company Workspace ID
-                  </div>
-                  <button 
-                    onClick={() => copyToClipboard(companyId, 'Workspace ID')}
-                    className="text-xs text-primary hover:underline flex items-center gap-1 font-medium cursor-pointer"
-                  >
-                    <Icon name="content_copy" size={13} />
-                    Copy ID
-                  </button>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="font-mono text-xs px-2.5 py-1 rounded-lg bg-black/5 dark:bg-white/10 text-foreground font-semibold">
-                    {companyId || 'N/A'}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    Organization reference ID for device authorization and workspace syncing.
-                  </span>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* TAB 3: Account Security & Password Change */}
+      {/* Account Security & Password Change */}
       {activeTab === 'security' && (
         <>
           <Card className="glass-kormiis rounded-3xl border border-white/30 dark:border-white/10 shadow-sm overflow-hidden">

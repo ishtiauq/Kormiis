@@ -31,14 +31,8 @@ const WHATSAPP_STATUS_META = {
 }
 
 export default function Settings({ settings, setSettings, addLog, addToast, auditLogs, themeMode, toggleTheme, employees, setEmployees, currentUser, onLoadDemoData, onClearDemoData }) {
-  // Accordion open states
-  const [openSections, setOpenSections] = useState(() => {
-    const saved = localStorage.getItem('kormiis_settings_open_sections')
-    if (saved) {
-      try { return JSON.parse(saved) } catch (e) {}
-    }
-    return { company: true, payroll: false, expenses: false, notifications: false, ai: false, security: false, audit: false }
-  })
+  // Accordion open states: by default, all sections are closed until explicitly opened
+  const [openSections, setOpenSections] = useState({})
 
   const toggleSection = (id) => {
     setOpenSections(prev => {

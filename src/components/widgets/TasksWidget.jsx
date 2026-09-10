@@ -15,8 +15,8 @@ export const TasksWidget = memo(({ tasks, pendingTasksCount, taskCompletionRate,
       </button>
     }
   >
-    <div className="flex flex-col h-full justify-between gap-3 pt-1">
-      <div className="flex items-center justify-between">
+    <div className="flex flex-col h-full justify-between gap-2.5 pt-1 min-h-0">
+      <div className="flex items-center justify-between shrink-0">
         <div>
           <span className="text-fluid-xl font-black text-foreground tabular-nums">{pendingTasksCount}</span>
           <span className="text-xs font-medium text-muted-foreground ml-2">Pending Tasks</span>
@@ -26,16 +26,16 @@ export const TasksWidget = memo(({ tasks, pendingTasksCount, taskCompletionRate,
         </Badge>
       </div>
       
-      <div className="flex flex-col gap-2">
-        {tasks.filter(t => t.status !== 'Done').slice(0, 2).map((t, i) => (
-          <div key={i} className="flex items-center gap-3 p-2.5 px-3 rounded-2xl liquid-widget-item cursor-pointer">
+      <div className="flex flex-col gap-2 overflow-y-auto min-h-0 flex-1 pr-0.5">
+        {tasks.filter(t => t.status !== 'Done').slice(0, 3).map((t, i) => (
+          <div key={i} className="flex items-center gap-3 p-2.5 px-3 rounded-2xl liquid-widget-item cursor-pointer shrink-0">
             <div className="size-2 rounded-full bg-foreground shrink-0" />
             <p className="text-fluid-sm font-medium text-foreground break-words flex-1 m-0">{t.title}</p>
             <Badge variant="outline" className="text-[10px] shrink-0 rounded-full px-2 py-0.5 border-black/10 dark:border-white/10">{t.status}</Badge>
           </div>
         ))}
         {pendingTasksCount === 0 && (
-          <div className="text-center py-4 flex flex-col items-center justify-center">
+          <div className="text-center py-4 flex flex-col items-center justify-center my-auto">
             <Icon name="verified" className="text-foreground/80 mb-2 shrink-0" size={44}/>
             <p className="text-fluid-xs text-muted-foreground m-0 font-medium">No pending tasks! All caught up.</p>
           </div>

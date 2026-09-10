@@ -469,7 +469,7 @@ export default function Topbar({
                   onClick={onProfileClick || (() => setCurrentView && setCurrentView('profile'))}
                   aria-label="Open Profile"
                   className={`size-9 sm:size-10 bg-transparent border-none shadow-none outline-none shrink-0 flex items-center justify-center cursor-pointer active:scale-90 transition-all p-0 ${
-                    currentView === 'profile' ? 'text-primary ring-2 ring-primary/40 rounded-full' : 'text-foreground/75 hover:text-foreground'
+                    (currentView === 'profile' || currentView === 'settings') ? 'text-primary ring-2 ring-primary/40 rounded-full' : 'text-foreground/75 hover:text-foreground'
                   }`}
                   style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}
                 >

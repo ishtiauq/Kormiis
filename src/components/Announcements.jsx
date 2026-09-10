@@ -786,21 +786,17 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                               key={i}
                               type="button"
                               onClick={() => handleVote(post.id, i)}
-                              className={`poll-option-btn relative w-full h-10 rounded-xl overflow-hidden border transition-all flex items-center justify-between px-3.5 cursor-pointer text-left select-none bg-neutral-900 !text-white ${
-                                hasVotedThis
-                                  ? 'border-[#FE3501] ring-2 ring-[#FE3501] ring-offset-1 ring-offset-background shadow-xs'
-                                  : 'border-neutral-800 hover:border-[#FE3501]/50'
-                              }`}
+                              className="poll-option-btn relative w-full h-10 rounded-xl overflow-hidden border-0 transition-all flex items-center justify-between px-3.5 cursor-pointer text-left select-none"
                             >
                               <div
-                                className="poll-fill-bar absolute top-0 left-0 h-full bg-[#FE3501] transition-all duration-500 ease-out"
-                                style={{ width: `${pct}%`, backgroundColor: '#FE3501' }}
+                                className="poll-fill-bar absolute top-0 left-0 h-full transition-all duration-500 ease-out"
+                                style={{ width: `${pct}%` }}
                               />
-                              <span className="relative z-10 text-sm font-semibold !text-white flex items-center gap-2 truncate" style={{ color: '#ffffff' }}>
-                                {hasVotedThis && <Icon name="check_circle" size={14} className="!text-white shrink-0" style={{ color: '#ffffff' }} />}
-                                <span className="truncate !text-white" style={{ color: '#ffffff' }}>{opt.text}</span>
+                              <span className="relative z-10 text-sm font-semibold flex items-center gap-2 truncate">
+                                {hasVotedThis && <Icon name="check_circle" size={14} className="shrink-0" />}
+                                <span className="truncate">{opt.text}</span>
                               </span>
-                              <span className="relative z-10 text-xs font-bold !text-white tabular-nums ml-2 shrink-0" style={{ color: '#ffffff' }}>
+                              <span className="relative z-10 text-xs font-bold tabular-nums ml-2 shrink-0">
                                 {pct}% ({votes.length})
                               </span>
                             </button>

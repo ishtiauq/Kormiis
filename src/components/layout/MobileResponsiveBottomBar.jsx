@@ -1278,7 +1278,7 @@ filteredNotifications.map((n) => {
               whileTap={{ scale: 0.90 }}
               transition={{ scale: { duration: 0.12 } }}
               className={`relative size-11 rounded-full flex items-center justify-center cursor-pointer ${
-                currentView === 'profile'
+                (currentView === 'profile' || currentView === 'settings')
                   ? 'ring-2 ring-primary text-primary'
                   : 'text-foreground/80 hover:text-foreground hover:bg-black/5 dark:hover:bg-white/8'
               }`}
@@ -1287,7 +1287,7 @@ filteredNotifications.map((n) => {
                 <img 
                   src={user.avatar} 
                   alt={user.name || "User"} 
-                  className={`size-8 rounded-full object-cover select-none ${currentView === 'profile' ? 'ring-2 ring-primary' : ''}`} 
+                  className={`size-8 rounded-full object-cover select-none ${(currentView === 'profile' || currentView === 'settings') ? 'ring-2 ring-primary' : ''}`} 
                 />
               ) : (
                 <Icon name="person" size={23} />

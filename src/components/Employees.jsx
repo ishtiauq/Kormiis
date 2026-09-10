@@ -597,6 +597,8 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
       if (emp.id === editReq.employeeId) {
         return {
           ...emp,
+          name: editReq.changes.name || emp.name,
+          email: editReq.changes.email || emp.email,
           personalEmail: editReq.changes.personalEmail || emp.personalEmail,
           phone: editReq.changes.phone || emp.phone,
           address: editReq.changes.address || emp.address,

@@ -146,30 +146,93 @@ const getFutureDateStr = (daysAhead) => {
   return d.toISOString().split('T')[0]
 }
 
-export const DEMO_ATTENDANCE = {
-  dailyLogs: {
-    [getTodayStr()]: {
-      'emp-101': { status: 'In Office', checkIn: '08:55', checkOut: '17:45', hours: 8.8, geoVerified: true },
-      'emp-102': { status: 'In Office', checkIn: '09:05', checkOut: '18:10', hours: 8.5, geoVerified: true },
-      'emp-103': { status: 'Remote', checkIn: '08:50', checkOut: '17:30', hours: 8.6, geoVerified: false },
-      'emp-104': { status: 'In Office', checkIn: '09:15', checkOut: '18:30', hours: 8.2, geoVerified: true, isLate: true },
-      'emp-105': { status: 'On Leave', type: 'Annual Leave' },
-      'emp-106': { status: 'On-Field', checkIn: '09:00', checkOut: '18:00', hours: 8.0, geoVerified: true },
-      'emp-107': { status: 'In Office', checkIn: '08:58', checkOut: '17:50', hours: 8.8, geoVerified: true },
-      'emp-108': { status: 'In Office', checkIn: '09:10', checkOut: '18:15', hours: 8.0, geoVerified: true }
-    },
-    [getPastDateStr(1)]: {
-      'emp-101': { status: 'In Office', checkIn: '09:00', checkOut: '18:00', hours: 8.0 },
-      'emp-102': { status: 'In Office', checkIn: '09:12', checkOut: '18:20', hours: 8.0 },
-      'emp-103': { status: 'Remote', checkIn: '08:50', checkOut: '17:40', hours: 8.5 },
-      'emp-104': { status: 'In Office', checkIn: '09:00', checkOut: '18:00', hours: 8.0 },
-      'emp-105': { status: 'On Leave', type: 'Annual Leave' },
-      'emp-106': { status: 'On-Field', checkIn: '08:55', checkOut: '18:05', hours: 8.1 },
-      'emp-107': { status: 'In Office', checkIn: '09:02', checkOut: '18:00', hours: 8.0 },
-      'emp-108': { status: 'In Office', checkIn: '09:00', checkOut: '18:00', hours: 8.0 }
+const generateMonthAttendanceLogs = () => {
+  const logs = {}
+  const empIds = ['emp-101', 'emp-102', 'emp-103', 'emp-104', 'emp-105', 'emp-106', 'emp-107', 'emp-108']
+  const now = new Date()
+
+  for (let i = 0; i < 30; i++) {
+    const d = new Date()
+    d.setDate(now.getDate() - i)
+    const dateStr = d.toISOString().split('T')[0]
+    const dayOfWeek = d.getDay() // 0 = Sun, 5 = Fri, 6 = Sat
+
+    // Weekend (Friday & Saturday in Bangladesh corporate roster)
+    if (dayOfWeek === 5 || dayOfWeek === 6) {
+      logs[dateStr] = {}
+      empIds.forEach(id => {
+        logs[dateStr][id] = { status: 'Off Duty', checkIn: '--', checkOut: '--', hours: '0.0' }
+      })
+      continue
     }
-  },
+
+    logs[dateStr] = {}
+    empIds.forEach((id, idx) => {
+      // Deterministic realistic variance for the month
+      const seed = (i * 7 + idx * 13) % 20
+
+      if (seed === 0) {
+        // No show / Absent
+        logs[dateStr][id] = { status: 'No Show', checkIn: '--', checkOut: '--', hours: '0.0' }
+      } else if (seed === 1 && (id === 'emp-105' || id === 'emp-102')) {
+        // Approved Leave day
+        logs[dateStr][id] = { status: 'On Leave', type: id === 'emp-105' ? 'Annual Leave' : 'Casual Leave', hours: '0.0' }
+      } else if (seed === 2 || seed === 8) {
+        // Late arrival
+        const lateMin = 10 + ((i + idx) % 25)
+        logs[dateStr][id] = {
+          status: 'Late',
+          isLate: true,
+          checkIn: `09:${String(lateMin).padStart(2, '0')}`,
+          checkOut: '18:15',
+          hours: 8.1,
+          geoVerified: true
+        }
+      } else if (seed === 5 && (id === 'emp-103' || id === 'emp-106')) {
+        // Remote / On-Field work
+        logs[dateStr][id] = {
+          status: id === 'emp-103' ? 'Remote' : 'On-Field',
+          checkIn: '08:50',
+          checkOut: '17:35',
+          hours: 8.7,
+          geoVerified: id === 'emp-106'
+        }
+      } else {
+        // Normal On-Time In-Office
+        const inMin = 45 + ((i + idx) % 15)
+        const inHour = inMin >= 60 ? '09' : '08'
+        const inMinStr = String(inMin % 60).padStart(2, '0')
+        logs[dateStr][id] = {
+          status: 'In Office',
+          checkIn: `${inHour}:${inMinStr}`,
+          checkOut: '17:50',
+          hours: 8.8,
+          geoVerified: true
+        }
+      }
+    })
+  }
+  return logs
+}
+
+export const DEMO_ATTENDANCE = {
+  dailyLogs: generateMonthAttendanceLogs(),
   leaves: [
+    {
+      id: 'leave-200',
+      employeeId: 'emp-101',
+      employeeName: 'Sarah Rahman',
+      department: 'Engineering',
+      avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=256&q=80',
+      type: 'Casual Leave',
+      startDate: getPastDateStr(4),
+      endDate: getPastDateStr(3),
+      days: 2,
+      reason: 'Personal family matters',
+      status: 'Approved',
+      appliedOn: getPastDateStr(7),
+      approvedBy: 'HR Admin'
+    },
     {
       id: 'leave-201',
       employeeId: 'emp-105',
