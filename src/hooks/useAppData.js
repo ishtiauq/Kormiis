@@ -564,6 +564,34 @@ export default function useAppData({ user, addToast }) {
         }
         setEmployeesRaw(empData || [])
 
+        // Ensure the workspace owner is also an employee so their clock-in,
+        // roster, leave balance, payroll and headcount all work like a team member.
+        if (!user?.isEmployee && user?.uid && user?.companyUid === user?.uid) {
+          const empArr = Array.isArray(empData) ? empData : []
+          const hasOwner = empArr.some(e => e && (e.id === ownerId || e.employeeId === ownerId))
+          if (!hasOwner) {
+            empData = [
+              ...empArr,
+              {
+                id: ownerId,
+                employeeId: ownerId,
+                name: user.name || 'Workspace Owner',
+                email: user.email || '',
+                role: 'Admin',
+                systemRole: 'Admin',
+                designation: 'Owner',
+                department: user.department || 'Management',
+                status: 'Active',
+                isOwner: true,
+                joinedDate: new Date().toISOString().slice(0, 10),
+                avatar: user.avatar || ''
+              }
+            ]
+            setEmployeesRaw(empData)
+            await writeToTable(ownerId, 'employees', empData).catch(e => console.error('Owner employee write error:', e))
+          }
+        }
+
         let payrollData = await loadTable('payroll', 'kormiis_payroll')
         if (!payrollData) payrollData = {}
         if (Array.isArray(payrollData)) payrollData = { '2026-07': payrollData }
@@ -600,6 +628,26 @@ export default function useAppData({ user, addToast }) {
           if (leavesData == null) leavesData = []
           if (balancesData == null) balancesData = {}
           if (logsData == null) logsData = {}
+        }
+        // Owner leave balance (seeded from leave policies) + migrate orphaned
+        // 'emp-101' punches to the owner's record when no such employee exists.
+        if (!user?.isEmployee && user?.uid && user?.companyUid === user?.uid) {
+          const policies = settingsData?.leavePolicies
+          if (policies && balancesData && !balancesData[ownerId]) {
+            balancesData[ownerId] = Object.fromEntries(
+              Object.entries(policies).map(([k, v]) => [k, v && typeof v === 'object' ? (v.quota ?? v.max ?? 0) : v])
+            )
+          }
+          const hasEmp101 = Array.isArray(empData) && empData.some(e => e && e.id === 'emp-101')
+          if (!hasEmp101 && logsData) {
+            Object.keys(logsData).forEach(dateStr => {
+              const day = logsData[dateStr]
+              if (day && day['emp-101'] && !day[ownerId]) {
+                day[ownerId] = day['emp-101']
+                delete day['emp-101']
+              }
+            })
+          }
         }
         setAttendanceRaw({ leaves: leavesData, balances: balancesData, dailyLogs: logsData })
 

@@ -4,9 +4,9 @@ export function useLeaves(attendance, setAttendance, addToast, addNotification) 
   const pendingLeaves = leaves.filter(l => l.status === 'Pending')
   const historyLeaves = leaves.filter(l => l.status !== 'Pending')
 
-  const approveLeave = (id) => {
+  const approveLeave = (id, approver) => {
     const targetLeave = (attendance.leaves || []).find(l => l.id === id)
-    setAttendance(prev => ({ ...prev, leaves: (prev.leaves || []).map(l => l.id === id ? { ...l, status: 'Approved' } : l) }))
+    setAttendance(prev => ({ ...prev, leaves: (prev.leaves || []).map(l => l.id === id ? { ...l, status: 'Approved', approvedBy: approver?.name || 'Admin', approvedById: approver?.employeeId || approver?.id || '', approvedAt: new Date().toISOString(), autoApproved: approver?.autoApproved === true } : l) }))
     addToast('Leave request approved.', 'success')
     if (addNotification && targetLeave) {
       addNotification(`Your leave request (${targetLeave.leaveType || 'Leave'}) was approved`, 'leaves', { 
@@ -17,9 +17,9 @@ export function useLeaves(attendance, setAttendance, addToast, addNotification) 
     }
   }
 
-  const rejectLeave = (id) => {
+  const rejectLeave = (id, approver) => {
     const targetLeave = (attendance.leaves || []).find(l => l.id === id)
-    setAttendance(prev => ({ ...prev, leaves: (prev.leaves || []).map(l => l.id === id ? { ...l, status: 'Rejected' } : l) }))
+    setAttendance(prev => ({ ...prev, leaves: (prev.leaves || []).map(l => l.id === id ? { ...l, status: 'Rejected', rejectedBy: approver?.name || 'Admin', rejectedAt: new Date().toISOString() } : l) }))
     addToast('Leave request rejected.', 'info')
     if (addNotification && targetLeave) {
       addNotification(`Your leave request (${targetLeave.leaveType || 'Leave'}) was rejected`, 'leaves', { 

@@ -9,7 +9,7 @@ import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, A
 import { generateLeaveStatusMessage, queueWhatsAppMessages, openWhatsAppDirect } from '../../services/whatsappService.js'
 import { createGoogleCalendarEvent, getGoogleCalendarConnection } from '../../services/googleCalendarService.js'
 
-export default function LeaveRequests({ employees, attendance, setAttendance, addToast, addNotification, settings }) {
+export default function LeaveRequests({ currentUser, addLog, employees, attendance, setAttendance, addToast, addNotification, settings }) {
   const { pendingLeaves, approveLeave, rejectLeave, pendingCount } = useLeaves(attendance, setAttendance, addToast, addNotification)
 
   const [pendingAction, setPendingAction] = useState(null) // { id, action: 'approve' | 'reject', empName }
@@ -19,12 +19,35 @@ export default function LeaveRequests({ employees, attendance, setAttendance, ad
       const targetLeave = (attendance?.leaves || []).find(l => l.id === pendingAction.id)
       const emp = employees.find(e => e.id === targetLeave?.employeeId)
 
-      if (pendingAction.action === 'approve') {
-        approveLeave(pendingAction.id)
+      const approver = currentUser
+      const approverId = approver?.employeeId || approver?.id
+      const isSelf = targetLeave && approverId && targetLeave.employeeId === approverId
 
-        // Auto-create Google Calendar event if Google Calendar is connected
+      if (pendingAction.action === 'approve' && isSelf) {
+        // An admin must not approve their own leave while another admin exists.
+        const otherAdmins = (employees || []).filter(e =>
+          (e.role === 'Admin' || e.systemRole === 'Admin') &&
+          e.id !== targetLeave.employeeId &&
+          e.status !== 'Terminated'
+        )
+        if (otherAdmins.length > 0) {
+          addToast?.('You cannot approve your own leave request while another admin can review it.', 'warning')
+          setPendingAction(null)
+          return
+        }
+        // Sole admin: allow, but flag it as auto-approved for audit.
+        approveLeave(targetLeave.id, { ...approver, autoApproved: true })
+        addLog?.('Leave Auto-Approved', `${approver?.name || 'Owner'} approved their own leave request (sole admin).`, 'info')
+      } else if (pendingAction.action === 'approve') {
+        approveLeave(pendingAction.id, approver)
+      } else {
+        rejectLeave(pendingAction.id, approver)
+      }
+
+      // Auto-create Google Calendar event if Google Calendar is connected
+      if (pendingAction.action === 'approve' && targetLeave) {
         const gConn = getGoogleCalendarConnection()
-        if (gConn.isConnected && targetLeave) {
+        if (gConn.isConnected) {
           createGoogleCalendarEvent({
             title: `[Leave] ${emp?.name || 'Employee'} - ${targetLeave.leaveType || 'Leave'}`,
             description: `Approved ${targetLeave.leaveType} leave for ${emp?.name || 'Employee'}.\nDates: ${targetLeave.startDate} to ${targetLeave.endDate}\nReason: ${targetLeave.reason || 'N/A'}`,
@@ -38,8 +61,6 @@ export default function LeaveRequests({ employees, attendance, setAttendance, ad
             console.warn('Google Calendar auto-sync warning:', err)
           })
         }
-      } else {
-        rejectLeave(pendingAction.id)
       }
 
       // Auto-queue WhatsApp update if enabled (free 24h-window mode)

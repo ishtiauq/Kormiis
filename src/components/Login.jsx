@@ -354,6 +354,8 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
   const completeAdminLogin = (user, companyName) => {
     const adminObj = {
       uid: user.uid,
+      id: user.uid,
+      employeeId: user.uid,
       email: user.email,
       name: user.displayName || user.email?.split('@')[0] || 'Workspace Owner',
       companyName: companyName || 'My Workspace',

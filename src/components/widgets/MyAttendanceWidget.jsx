@@ -131,7 +131,7 @@ export const MyAttendanceWidget = memo(({
 
   // Leave policies & balances (remaining vs total quota)
   const defaultPolicies = settings?.leavePolicies || { Annual: 14, Sick: 7, Casual: 3 }
-  const myBalance = attendance?.leaveBalances?.[empId] || defaultPolicies
+  const myBalance = attendance?.balances?.[empId] || defaultPolicies
 
   const leaveItems = useMemo(() => {
     return Object.keys(defaultPolicies).map(type => {

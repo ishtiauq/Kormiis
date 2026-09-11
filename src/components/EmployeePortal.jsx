@@ -397,6 +397,7 @@ export default function EmployeePortal({
       case 'team_attendance':
         return (
           <AttendancePage 
+            currentUser={currentUser}
             employees={employees} 
             attendance={attendance} 
             setAttendance={setAttendance} 
@@ -1450,7 +1451,7 @@ function LeaveView({ currentUser, attendance, setAttendance, addToast, addLog, s
   const myLeaves = (attendance?.leaves || []).filter(l => l.employeeId === currentUser.id)
   
   const defaultPolicies = settings?.leavePolicies || { Annual: 14, Sick: 7, Casual: 3, Unpaid: 0 }
-  const myBalance = attendance?.leaveBalances?.[currentUser.id] || defaultPolicies
+  const myBalance = attendance?.balances?.[currentUser.id] || defaultPolicies
   const leaveTypes = Object.keys(defaultPolicies)
   
   const [type, setType] = useState(leaveTypes[0] || 'Annual')

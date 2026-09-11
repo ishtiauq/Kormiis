@@ -15,6 +15,7 @@ export default function AttendancePage({
   employees, 
   attendance, 
   setAttendance, 
+  currentUser, 
   roster, 
   setRoster, 
   shiftSwaps, 
@@ -79,6 +80,7 @@ export default function AttendancePage({
       {tab === 'leave' && (
         <div className="grid gap-6">
           <LeaveRequests 
+            currentUser={currentUser}
             attendance={attendance}
             leaves={attendance.leaves} 
             employees={employees} 
@@ -88,7 +90,7 @@ export default function AttendancePage({
             addNotification={addNotification}
             settings={settings}
           />
-          <LeaveBalanceCard employees={employees} balances={attendance.leaveBalances || {}} leaves={attendance.leaves || []} settings={settings} />
+          <LeaveBalanceCard employees={employees} balances={attendance?.balances || {}} leaves={attendance?.leaves || []} settings={settings} />
           <LeavePoliciesEditor settings={settings} setSettings={setSettings} addToast={addToast} addLog={addLog} />
         </div>
       )}

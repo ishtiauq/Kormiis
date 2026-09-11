@@ -305,6 +305,10 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
     }
 
     if (editingEmployee) {
+      if (editingEmployee.isOwner && newStatus !== 'Active') {
+        addToast('The workspace owner must remain Active. Transfer ownership before changing status.', 'warning')
+        return
+      }
       if (newEmail && newEmail !== editingEmployee.email) {
         addToast('Email updated in the directory. The sign-in email is unchanged — reset it in the Firebase console if needed.', 'warning')
       }
@@ -446,6 +450,10 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
 
   const handleDeleteEmployee = async (id, name) => {
     const emp = employees.find(e => e.id === id)
+    if (emp?.isOwner) {
+      addToast('The workspace owner cannot be deleted. Transfer ownership first.', 'warning')
+      return
+    }
     setEmployees(prev => prev.filter(e => e.id !== id))
     addLog('Deleted employee record', `Removed ${name} (${id})`)
     if (addAuditLog) addAuditLog('DELETE', 'Employee', `Deleted employee profile for ${name} (${id})`)
@@ -462,6 +470,11 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
 
   const toggleSelect = (id, e) => {
     e.stopPropagation()
+    const emp = employees.find(x => x.id === id)
+    if (emp?.isOwner) {
+      addToast('The workspace owner cannot be selected for deletion.', 'warning')
+      return
+    }
     setSelectedIds(prev => {
       const next = new Set(prev)
       if (next.has(id)) next.delete(id)
@@ -486,6 +499,11 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
     if (count === 0) return
     setConfirmDelete(() => () => {
       const selectedEmps = employees.filter(emp => selectedIds.has(emp.id))
+      if (selectedEmps.some(emp => emp?.isOwner)) {
+        addToast('The workspace owner cannot be deleted. Remove them from the selection.', 'warning')
+        setConfirmDelete(null)
+        return
+      }
       const deletedIds = selectedEmps.map(emp => emp.id)
       const deletedEmails = selectedEmps.map(emp => emp.email).filter(Boolean)
       const deletedNames = selectedEmps.map(emp => emp.name).join(', ')
