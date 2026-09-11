@@ -133,7 +133,7 @@ const TOOL_DECLARATIONS = [
     parameters: {
       type: 'OBJECT',
       properties: {
-        view: { type: 'STRING', description: 'Target view: "dashboard", "employees", "payroll", "attendance", "leaves", "expenses", "announcements", "tasks", "documents", "calendar", "assets", "settings", "profile"' }
+        view: { type: 'STRING', description: 'Target view: "dashboard", "employees", "payroll", "attendance", "my-attendance", "leaves", "expenses", "announcements", "tasks", "documents", "calendar", "assets", "settings", "profile"' }
       },
       required: ['view']
     }
@@ -414,7 +414,7 @@ export function parseLocalHrAction(prompt, context = {}) {
 
   // 7. Navigation
   if (lower.includes('go to') || lower.includes('open') || lower.includes('navigate to') || lower.includes('show me')) {
-    const views = ['dashboard', 'employees', 'payroll', 'attendance', 'leaves', 'expenses', 'announcements', 'tasks', 'documents', 'calendar', 'assets', 'settings', 'profile']
+    const views = ['dashboard', 'employees', 'payroll', 'attendance', 'my-attendance', 'leaves', 'expenses', 'announcements', 'tasks', 'documents', 'calendar', 'assets', 'settings', 'profile']
     const foundView = views.find(v => lower.includes(v))
     if (foundView) {
       return {

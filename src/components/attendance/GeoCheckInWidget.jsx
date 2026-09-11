@@ -143,7 +143,8 @@ export default function GeoCheckInWidget({
   cardClassName = '',
   roster = [],
   shiftTemplates = [],
-  setCurrentView
+  setCurrentView,
+  myLogsTarget = 'attendance'
 }) {
   const today = toLocal(new Date())
   const basemap = getStreetBasemap()
@@ -721,7 +722,7 @@ export default function GeoCheckInWidget({
           </div>
           <div className="pointer-events-auto flex items-center gap-1.5 sm:gap-2">
             <button
-              onClick={() => setCurrentView && setCurrentView('attendance')}
+              onClick={() => setCurrentView && setCurrentView(myLogsTarget)}
               className="apple-glass-btn text-xs font-semibold px-3.5 h-7 rounded-full cursor-pointer shrink-0 !text-black !border-black"
             >
               My Logs

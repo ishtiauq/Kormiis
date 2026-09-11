@@ -390,6 +390,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
           setNotes={setNotes}
           roster={roster}
           setCurrentView={setCurrentView}
+          myLogsTarget="my-attendance"
         />
       )}
 

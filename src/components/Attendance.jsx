@@ -2,6 +2,7 @@ import Icon from "@/components/ui/Icon.jsx"
 import AttendancePage from './attendance/AttendancePage.jsx'
 
 const attendanceTabs = [
+  { id: 'my', label: 'My Attendance', icon: <Icon name="person" size={15}/> },
   { id: 'daily', label: 'Daily Logs', icon: <Icon name="schedule" size={15}/> },
   { id: 'leave', label: 'Leaves', icon: <Icon name="event_busy" size={15}/> },
   { id: 'roster', label: 'Roster', icon: <Icon name="swap_vert" size={15}/> },
