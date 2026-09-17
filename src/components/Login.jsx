@@ -950,7 +950,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
       <Dialog open={authModalOpen} onOpenChange={setAuthModalOpen}>
         <DialogContent 
           overlayClassName="bg-transparent"
-          className="relative max-w-md w-full dark force-dark-mode glass-kormiis rounded-[28px] p-6 sm:p-8 text-white"
+          className="relative max-w-md w-full dark force-dark-mode text-white"
         >
           <DialogHeader className="sr-only">
             <DialogTitle>Workspace Access</DialogTitle>
@@ -1290,7 +1290,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
       <Dialog open={showAlreadyInSpace} onOpenChange={(open) => { if (!open) setShowAlreadyInSpace(false) }}>
         <DialogContent 
           overlayClassName="bg-transparent"
-          className="max-w-[420px] dark force-dark-mode glass-kormiis rounded-[28px] p-6 text-white"
+          className="max-w-[420px] dark force-dark-mode text-white"
         >
           <DialogHeader>
             <DialogTitle className="text-base font-bold text-white">Already Part of a Business Space</DialogTitle>
@@ -1317,7 +1317,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
       <Dialog open={!!legalModal} onOpenChange={(open) => { if (!open) setLegalModal(null) }}>
         <DialogContent 
           overlayClassName="bg-transparent"
-          className="relative max-w-[540px] dark force-dark-mode glass-kormiis rounded-[28px] p-6 sm:p-7 text-white max-h-[85vh] overflow-y-auto"
+          className="relative max-w-[540px] dark force-dark-mode text-white max-h-[85vh]"
         >
           {/* Top Right Tactile MonoGlass Close Button */}
           <button

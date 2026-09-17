@@ -676,16 +676,16 @@ export const MobileResponsiveBottomBar = memo(({
                       <button
                         type="button"
                         onClick={() => setNotificationTab('all')}
-                        className={`flex-1 h-8 text-xs font-bold rounded-xl transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer select-none ${
+                        className={`flex-1 h-8 text-xs font-bold rounded-xl transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer select-none border border-transparent ${
                           notificationTab === 'all'
-                            ? 'bg-white text-neutral-900 dark:bg-white/20 dark:text-white shadow-xs border border-black/10 dark:border-white/15'
-                            : 'bg-transparent text-muted-foreground hover:text-foreground border border-transparent'
+                            ? 'bg-primary text-white shadow-xs dark:bg-primary dark:text-white'
+                            : 'bg-transparent text-muted-foreground hover:text-foreground'
                         }`}
                       >
                         <span>All</span>
                         <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
                           notificationTab === 'all'
-                            ? 'bg-black/10 dark:bg-white/20 text-neutral-900 dark:text-white'
+                            ? 'bg-white/25 text-white'
                             : 'bg-black/5 dark:bg-white/10 text-muted-foreground'
                         }`}>
                           {notifications.length}
@@ -695,17 +695,17 @@ export const MobileResponsiveBottomBar = memo(({
                       <button
                         type="button"
                         onClick={() => setNotificationTab('unread')}
-                        className={`flex-1 h-8 text-xs font-bold rounded-xl transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer select-none ${
+                        className={`flex-1 h-8 text-xs font-bold rounded-xl transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer select-none border border-transparent ${
                           notificationTab === 'unread'
-                            ? 'bg-white text-neutral-900 dark:bg-white/20 dark:text-white shadow-xs border border-black/10 dark:border-white/15'
-                            : 'bg-transparent text-muted-foreground hover:text-foreground border border-transparent'
+                            ? 'bg-primary text-white shadow-xs dark:bg-primary dark:text-white'
+                            : 'bg-transparent text-muted-foreground hover:text-foreground'
                         }`}
                       >
                         <span>Unread</span>
                         {actualUnreadCount > 0 && (
                           <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
                             notificationTab === 'unread'
-                              ? 'bg-destructive text-white'
+                              ? 'bg-white/25 text-white'
                               : 'bg-destructive/15 text-destructive'
                           }`}>
                             {actualUnreadCount}
@@ -728,125 +728,56 @@ export const MobileResponsiveBottomBar = memo(({
                           </p>
                         </div>
                       ) : (
-filteredNotifications.map((n) => {
+                        filteredNotifications.map((n) => {
                           const meta = CATEGORY_META[n.category] || CATEGORY_META[n.view] || CATEGORY_META.notice || CATEGORY_META.system
                           const isUnread = !n.read
-                          const isLeaveReq = isManagerOrAdmin && (n.category === 'leave' || n.category === 'leaves') && (n.title?.toLowerCase().includes('request') || (n.text || n.message)?.toLowerCase().includes('request'))
-                          const isExpenseReq = isManagerOrAdmin && (n.category === 'expense' || n.category === 'expenses') && ((n.title?.toLowerCase().includes('submitted') || (n.text || n.message)?.toLowerCase().includes('claim') || (n.text || n.message)?.toLowerCase().includes('submitted')))
-                          const isTaskNotif = (n.category === 'task' || n.category === 'tasks') && !(n.text || n.message)?.toLowerCase().includes('completed')
-                          const showActions = isLeaveReq || isExpenseReq || isTaskNotif || !!n.view
                           const timeLabel = getRelativeTime(n.timestamp || n.time) || n.time || 'Just now'
 
+                          const headline = n.title || n.text || n.message
+                          const body = (n.message || n.text) && (n.message || n.text) !== headline ? (n.message || n.text) : (n.title && n.text && n.title !== n.text ? n.text : '')
+
                           return (
-                            <div
-                              key={n.id}
-                              onClick={() => navigateToView(n.view, n.id)}
+                            <div 
+                              role="listitem" 
+                              key={n.id} 
+                              onClick={() => handleNavigate(n.view, n.id)}
                               className={`p-3 rounded-2xl transition-all duration-200 cursor-pointer border relative select-none flex items-start gap-2.5 active:scale-[0.99] ${
                                 isUnread 
-                                  ? 'bg-primary/[0.07] dark:bg-primary/[0.14] border-primary/25 shadow-xs' 
-                                  : 'bg-black/2 dark:bg-white/4 border-black/5 dark:border-white/6 hover:bg-black/4 dark:hover:bg-white/8'
+                                  ? 'bg-transparent hover:bg-primary/[0.05] dark:hover:bg-primary/[0.08] border-primary/30' 
+                                  : 'bg-transparent hover:bg-white/5 dark:hover:bg-white/[0.05] border-black/[0.08] dark:border-white/[0.10]'
                               }`}
                             >
                               {/* Category Icon */}
                               <Icon 
                                 name={meta.icon} 
-                                size={22} 
+                                size={20} 
                                 className="shrink-0 text-foreground/80 mt-0.5" 
                               />
 
                               {/* Content Body */}
-                              <div className="min-w-0 flex-1 flex flex-col gap-0.5">
-                                <div className="flex items-center justify-between gap-1.5">
-                                  <span className="flex items-center gap-1.5 min-w-0">
-                                    <span 
-                                      className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md shrink-0"
-                                      style={{ background: `${meta.color}15`, color: meta.color }}
-                                    >
-                                      {meta.label || 'Notice'}
-                                    </span>
+                              <div className="min-w-0 flex-1 flex flex-col gap-1">
+                                <div className="flex items-start justify-between gap-1.5">
+                                  <h4 className="text-[12px] font-bold leading-snug text-foreground break-words">
+                                    {headline}
+                                  </h4>
+                                  <div className="flex items-center gap-1.5 shrink-0 pt-0.5">
                                     {isUnread && (
                                       <span className="flex items-center gap-1 text-[9.5px] font-bold text-primary shrink-0">
                                         <span className="size-1.5 rounded-full bg-primary animate-pulse" />
                                         NEW
                                       </span>
                                     )}
-                                  </span>
-                                  <span className="flex items-center gap-1 text-[9.5px] font-medium text-muted-foreground whitespace-nowrap shrink-0">
-                                    <Icon name="schedule" size={11} className="opacity-70" />
-                                    {timeLabel}
-                                  </span>
+                                    <span className="flex items-center gap-1 text-[9.5px] font-medium text-muted-foreground whitespace-nowrap">
+                                      <Icon name="schedule" size={11} className="opacity-70" />
+                                      {timeLabel}
+                                    </span>
+                                  </div>
                                 </div>
 
-                                {n.title && n.title !== (n.text || n.message) && (
-                                  <h4 className="text-[12px] font-bold m-0 mt-0.5 leading-snug text-foreground break-words">
-                                    {n.title}
-                                  </h4>
-                                )}
-
-                                <p className={`text-[11px] m-0 mt-0.5 leading-relaxed text-foreground/85 dark:text-foreground/90 break-words ${isUnread ? 'font-semibold' : 'font-medium text-muted-foreground'}`}>
-                                  {n.text || n.message}
-                                </p>
-
-                                {showActions && (
-                                  <div className="flex flex-wrap items-center justify-end gap-1.5 mt-1.5 pt-1 border-t border-black/[0.05] dark:border-white/[0.06]">
-                                    {isLeaveReq && (
-                                      <>
-                                        <button 
-                                          type="button" 
-                                          onClick={(e) => handleQuickAction(e, n, 'approve_leave')} 
-                                          className="h-6 px-2 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold border border-emerald-500/30 flex items-center gap-1 cursor-pointer transition-all active:scale-95 shadow-2xs"
-                                        >
-                                          <Icon name="check" size={11} /><span>Approve</span>
-                                        </button>
-                                        <button 
-                                          type="button" 
-                                          onClick={(e) => handleQuickAction(e, n, 'reject_leave')} 
-                                          className="h-6 px-1.5 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 text-rose-600 dark:text-rose-400 text-[10px] font-bold border border-rose-500/30 flex items-center gap-1 cursor-pointer transition-all active:scale-95 shadow-2xs"
-                                        >
-                                          <Icon name="close" size={11} /><span>Reject</span>
-                                        </button>
-                                      </>
-                                    )}
-
-                                    {isExpenseReq && (
-                                      <>
-                                        <button 
-                                          type="button" 
-                                          onClick={(e) => handleQuickAction(e, n, 'approve_expense')} 
-                                          className="h-6 px-2 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold border border-emerald-500/30 flex items-center gap-1 cursor-pointer transition-all active:scale-95 shadow-2xs"
-                                        >
-                                          <Icon name="check" size={11} /><span>Approve</span>
-                                        </button>
-                                        <button 
-                                          type="button" 
-                                          onClick={(e) => handleQuickAction(e, n, 'reject_expense')} 
-                                          className="h-6 px-1.5 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 text-rose-600 dark:text-rose-400 text-[10px] font-bold border border-rose-500/30 flex items-center gap-1 cursor-pointer transition-all active:scale-95 shadow-2xs"
-                                        >
-                                          <Icon name="close" size={11} /><span>Reject</span>
-                                        </button>
-                                      </>
-                                    )}
-
-                                    {isTaskNotif && (
-                                      <button 
-                                        type="button" 
-                                        onClick={(e) => handleQuickAction(e, n, 'complete_task')} 
-                                        className="h-6 px-2 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold border border-emerald-500/30 flex items-center gap-1 cursor-pointer transition-all active:scale-95 shadow-2xs"
-                                      >
-                                        <Icon name="check_circle" size={11} /><span>Done</span>
-                                      </button>
-                                    )}
-
-                                    {n.view && (
-                                      <button 
-                                        type="button" 
-                                        onClick={(e) => handleQuickAction(e, n, 'view')} 
-                                        className="h-6 px-2 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-[10px] font-bold border border-primary/25 flex items-center gap-1 cursor-pointer transition-all active:scale-95 shadow-2xs"
-                                      >
-                                        <span>Open</span><Icon name="arrow_forward" size={10} />
-                                      </button>
-                                    )}
-                                  </div>
+                                {body && (
+                                  <p className={`text-[11px] m-0 leading-relaxed text-foreground/85 dark:text-foreground/90 break-words ${isUnread ? 'font-medium' : 'font-normal text-muted-foreground'}`}>
+                                    {body}
+                                  </p>
                                 )}
                               </div>
                             </div>

@@ -9,7 +9,6 @@ import { formatDateShort } from '../services/date.js'
 import { normalizeAttendanceStatus, addDays } from '../services/attendance.js'
 import GeoCheckInWidget from './attendance/GeoCheckInWidget.jsx'
 import DailyChecklistWidget from './DailyChecklistWidget.jsx'
-import HrOverview from './hr/HrOverview.jsx'
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, BarChart, Bar, XAxis, YAxis } from 'recharts'
 
 // Eagerly imported widgets for instant, zero-delay rendering
@@ -379,24 +378,28 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
 
   return (
     <div className="space-y-6">
-      {currentUser && (
-        <GeoCheckInWidget 
-          currentUser={currentUser} 
-          attendance={attendance} 
-          setAttendance={setAttendance} 
-          addToast={addToast} 
-          settings={settings}
-          notes={notes}
-          setNotes={setNotes}
-          roster={roster}
-          setCurrentView={setCurrentView}
-          myLogsTarget="my-attendance"
-        />
-      )}
-
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 lg:gap-6 auto-rows-[minmax(148px,auto)] items-stretch pt-2">
 
-        {/* Column 1: Catch Up (Announcements, Notice & Events) */}
+        {/* Column 1: Clock in / Geo Check-In Widget */}
+        {currentUser && (
+          <div className="col-span-12 lg:col-span-4 h-[680px] w-full flex flex-col">
+            <GeoCheckInWidget 
+              currentUser={currentUser} 
+              attendance={attendance} 
+              setAttendance={setAttendance} 
+              addToast={addToast} 
+              settings={settings}
+              notes={notes}
+              setNotes={setNotes}
+              roster={roster}
+              setCurrentView={setCurrentView}
+              myLogsTarget="my-attendance"
+              cardClassName="h-full w-full min-h-0"
+            />
+          </div>
+        )}
+
+        {/* Column 2: Catch Up (Announcements, Notice & Events) */}
         {canViewAnnouncements && (
           <AnnouncementsWidget
             announcements={announcements}
@@ -418,14 +421,24 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
           />
         )}
 
-        {/* Column 2: Middle Stacked Column — Attendance (top) & Performance Tracker (bottom) */}
-        <div className="col-span-12 lg:col-span-4 h-[680px] w-full flex flex-col gap-4 justify-between">
+        {/* Column 3: Team Directory Widget */}
+        {canViewEmployees && (
+          <EmployeeDirectoryWidget
+            employees={employees}
+            setCurrentView={setCurrentView}
+            cardClass="col-span-12 lg:col-span-4 h-[680px] w-full"
+            {...wProps}
+          />
+        )}
+
+        {/* Attendance widget moved down */}
+        <div className="col-span-12 lg:col-span-8 min-h-[460px] h-[460px] w-full flex flex-col">
           {canViewAttendance && (
             <DashboardWidget
               id="w2"
               title="Attendance"
               icon={<Icon name="group" className="text-foreground shrink-0" size={22}/>}
-              cardClass="h-[440px] w-full min-h-0"
+              cardClass="h-full w-full min-h-0"
               action={
                 <div className="flex items-center gap-1.5 sm:gap-2">
                   <button
@@ -436,7 +449,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
                   </button>
                 </div>
               }
-              contentClass="flex flex-col justify-between pt-1 min-h-0"
+              contentClass="flex flex-col justify-between pt-1 min-h-0 overflow-y-auto"
               {...wProps}
             >
               {/* ================= 7-DAY TREND + TODAY BREAKDOWN ================= */}
@@ -624,31 +637,28 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
               </div>
             </DashboardWidget>
           )}
+        </div>
 
-          {/* Performance Tracker (stacked beneath Attendance) */}
-          <PerformanceTrackerWidget
-            efficiencyScore={efficiencyScore}
-            taskCompletionRate={taskCompletionRate}
-            attendanceRate={attendanceRate}
-            setCurrentView={setCurrentView}
-            cardClass="h-[224px] w-full min-h-0"
-            {...wProps}
+        {/* Column beside Attendance: Daily Checklist */}
+        <div className="col-span-12 lg:col-span-4 min-h-[460px] h-[460px] w-full flex flex-col">
+          <DailyChecklistWidget 
+            notes={notes} 
+            setNotes={setNotes} 
+            ownerId={currentUser?.id || currentUser?.uid || ''} 
+            setCurrentView={setCurrentView} 
+            cardClass="h-full w-full min-h-0" 
           />
         </div>
 
-        {/* Column 3: Team Directory Widget */}
-        {canViewEmployees && (
-          <EmployeeDirectoryWidget
-            employees={employees}
-            setCurrentView={setCurrentView}
-            cardClass="col-span-12 lg:col-span-4 h-[680px] w-full"
-            {...wProps}
-          />
-        )}
-
-        <DailyChecklistWidget notes={notes} setNotes={setNotes} ownerId={currentUser?.id || currentUser?.uid || ''} setCurrentView={setCurrentView} cardClass="col-span-12 sm:col-span-6 lg:col-span-4 h-[290px] w-full" />
-
-        <HrOverview adminUid={currentUser?.uid} currentUser={currentUser} setCurrentView={setCurrentView} addToast={addToast} cardClass="col-span-12 lg:col-span-4 h-[290px] w-full" />
+        {/* Performance Tracker (moved to former People Insights spot) */}
+        <PerformanceTrackerWidget
+          efficiencyScore={efficiencyScore}
+          taskCompletionRate={taskCompletionRate}
+          attendanceRate={attendanceRate}
+          setCurrentView={setCurrentView}
+          cardClass="col-span-12 sm:col-span-6 lg:col-span-4 min-h-[320px] h-[320px] w-full"
+          {...wProps}
+        />
 
         {/* Tasks Widget */}
         {canViewTasks && (
@@ -657,7 +667,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
             pendingTasksCount={pendingTasksCount}
             taskCompletionRate={taskCompletionRate}
             setCurrentView={setCurrentView}
-            cardClass="col-span-12 sm:col-span-6 lg:col-span-4 h-[290px] w-full"
+            cardClass="col-span-12 sm:col-span-6 lg:col-span-4 min-h-[320px] h-[320px] w-full"
             {...wProps}
           />
         )}
@@ -667,7 +677,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
           <DocumentsWidget
             recentDocuments={recentDocuments}
             setCurrentView={setCurrentView}
-            cardClass="col-span-12 sm:col-span-6 lg:col-span-4 h-[290px] w-full"
+            cardClass="col-span-12 sm:col-span-6 lg:col-span-4 min-h-[320px] h-[320px] w-full"
             {...wProps}
           />
         )}
@@ -682,7 +692,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
             settings={settings}
             currentPayrollData={currentPayrollData}
             setCurrentView={setCurrentView}
-            cardClass="col-span-12 sm:col-span-6 lg:col-span-4 h-[290px] w-full"
+            cardClass="col-span-12 sm:col-span-6 lg:col-span-4 min-h-[320px] h-[320px] w-full"
             {...wProps}
           />
         )}
@@ -693,7 +703,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
             assets={assets}
             availableAssetsCount={availableAssetsCount}
             setCurrentView={setCurrentView}
-            cardClass="col-span-12 sm:col-span-6 lg:col-span-4 h-[290px] w-full"
+            cardClass="col-span-12 sm:col-span-6 lg:col-span-4 min-h-[320px] h-[320px] w-full"
             {...wProps}
           />
         )}

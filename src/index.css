@@ -460,6 +460,18 @@ li[data-sonner-toast],
   box-shadow: none !important;
 }
 
+/* Ensure inner aria dialog inside modal container does not create a redundant double border or duplicate backdrop blur container */
+.glass-kormiis-modal [role="dialog"],
+.glass-kormiis-modal [role="alertdialog"],
+.glass-kormiis-modal [data-dialog-inner] {
+  background: transparent !important;
+  background-color: transparent !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
 /* Force pure solid black text, labels, numbers and icons for GeoCheckInWidget map controls in both light and dark mode */
 .geo-map-floating-text,
 .geo-map-floating-text *,
@@ -567,6 +579,20 @@ li[data-sonner-toast],
   -webkit-backdrop-filter: blur(32px) saturate(190%) !important;
   backdrop-filter: blur(32px) saturate(190%) !important;
   border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  box-shadow: none !important;
+}
+
+.dark .glass-kormiis-modal [role="dialog"],
+.dark .glass-kormiis-modal [role="alertdialog"],
+.dark .glass-kormiis-modal [data-dialog-inner],
+[data-theme="dark"] .glass-kormiis-modal [role="dialog"],
+[data-theme="dark"] .glass-kormiis-modal [role="alertdialog"],
+[data-theme="dark"] .glass-kormiis-modal [data-dialog-inner] {
+  background: transparent !important;
+  background-color: transparent !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  border: none !important;
   box-shadow: none !important;
 }
 

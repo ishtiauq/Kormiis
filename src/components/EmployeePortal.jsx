@@ -827,7 +827,7 @@ function DashboardView({
           pendingTasksCount={pendingTasksCount}
           taskCompletionRate={taskCompletionRate}
           setCurrentView={setActiveTab}
-          cardClass="col-span-12 sm:col-span-6 lg:col-span-4 min-h-[360px] w-full"
+          cardClass="col-span-12 sm:col-span-6 lg:col-span-4 min-h-[360px] h-[360px] w-full"
         />
 
         <MyPayrollWidget
@@ -837,7 +837,7 @@ function DashboardView({
           settings={settings}
           setCurrentView={setActiveTab}
           addToast={addToast}
-          cardClass="col-span-12 sm:col-span-6 lg:col-span-4 min-h-[360px] w-full"
+          cardClass="col-span-12 sm:col-span-6 lg:col-span-4 min-h-[360px] h-[360px] w-full"
         />
 
         <LeaveWidget
@@ -845,7 +845,7 @@ function DashboardView({
           attendance={attendance}
           settings={settings}
           setCurrentView={setActiveTab}
-          cardClass="col-span-12 sm:col-span-12 lg:col-span-4 min-h-[360px] w-full"
+          cardClass="col-span-12 sm:col-span-12 lg:col-span-4 min-h-[360px] h-[360px] w-full"
         />
 
       </div>

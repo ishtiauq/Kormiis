@@ -35,7 +35,7 @@ const AlertDialogContent = React.forwardRef(({ className, children, ...props }, 
     >
       {/* Top Animated Gradient Bar */}
       <div className="w-full h-1.5 bg-gradient-to-r from-orange-500 via-rose-500 to-blue-500 animate-pulse z-30 shrink-0" />
-      <AriaDialog className="outline-none focus:outline-none flex flex-col w-full h-full p-6 sm:p-7 gap-4 overflow-y-auto">
+      <AriaDialog className="outline-none focus:outline-none flex flex-col w-full h-full p-6 sm:p-7 gap-4 overflow-y-auto border-0 bg-transparent shadow-none">
         {children}
       </AriaDialog>
     </AriaModal>
