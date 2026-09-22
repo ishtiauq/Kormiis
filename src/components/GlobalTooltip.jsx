@@ -2,15 +2,32 @@ import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 
 const DELAY = 110
-const OFFSET_X = 10
-const OFFSET_Y = 16
+const HIDE_MS = 140
+const OFFSET_X = 12
+const OFFSET_Y = 18
 
 export default function GlobalTooltip() {
   const [tooltip, setTooltip] = useState(null)
+  const [visible, setVisible] = useState(false)
   const timerRef = useRef(null)
+  const hideTimerRef = useRef(null)
+  const rafRef = useRef(null)
   const currentTargetRef = useRef(null)
 
   useEffect(() => {
+    const place = (x, y) => {
+      const tooltipW = 200
+      let left = x + OFFSET_X
+      let top = y + OFFSET_Y
+      if (left + tooltipW > window.innerWidth - 16) {
+        left = Math.max(16, x - tooltipW - 8)
+      }
+      if (top + 48 > window.innerHeight - 16) {
+        top = Math.max(12, y - 48)
+      }
+      return { left, top }
+    }
+
     const handleMouseOver = (e) => {
       const target = e.target.closest?.('[title], [data-tooltip]')
       if (!target) return
@@ -29,78 +46,57 @@ export default function GlobalTooltip() {
       if (!text || !text.trim()) return
 
       currentTargetRef.current = target
-
       clearTimeout(timerRef.current)
+      clearTimeout(hideTimerRef.current)
+
+      const { left, top } = place(e.clientX, e.clientY)
       timerRef.current = setTimeout(() => {
         if (!currentTargetRef.current) return
-        const x = e.clientX
-        const y = e.clientY
-        const tooltipW = 200
-        let left = x + OFFSET_X
-        let top = y + OFFSET_Y
-
-        if (left + tooltipW > window.innerWidth - 16) {
-          left = Math.max(16, x - tooltipW - 8)
-        }
-        if (top + 45 > window.innerHeight - 16) {
-          top = Math.max(12, y - 46)
-        }
-
-        setTooltip({
-          text,
-          left,
-          top
-        })
+        setTooltip({ text, left, top })
+        requestAnimationFrame(() => setVisible(true))
       }, DELAY)
     }
 
     const handleMouseMove = (e) => {
-      if (!currentTargetRef.current) return
-      const x = e.clientX
-      const y = e.clientY
-      const tooltipW = 200
-      let left = x + OFFSET_X
-      let top = y + OFFSET_Y
+      if (!currentTargetRef.current || rafRef.current) return
+      const { clientX, clientY } = e
+      rafRef.current = requestAnimationFrame(() => {
+        rafRef.current = null
+        const { left, top } = place(clientX, clientY)
+        setTooltip(prev => (prev ? { ...prev, left, top } : null))
+      })
+    }
 
-      if (left + tooltipW > window.innerWidth - 16) {
-        left = Math.max(16, x - tooltipW - 8)
-      }
-      if (top + 45 > window.innerHeight - 16) {
-        top = Math.max(12, y - 46)
-      }
-
-      setTooltip(prev => (prev ? { ...prev, left, top } : null))
+    const hide = () => {
+      clearTimeout(timerRef.current)
+      currentTargetRef.current = null
+      setVisible(false)
+      clearTimeout(hideTimerRef.current)
+      hideTimerRef.current = setTimeout(() => setTooltip(null), HIDE_MS)
     }
 
     const handleMouseOut = (e) => {
       const target = e.target.closest?.('[data-tooltip]')
-      if (target && target === currentTargetRef.current) {
-        clearTimeout(timerRef.current)
-        currentTargetRef.current = null
-        setTooltip(null)
-      }
-    }
-
-    const handleHide = () => {
-      clearTimeout(timerRef.current)
-      currentTargetRef.current = null
-      setTooltip(null)
+      if (target && target === currentTargetRef.current) hide()
     }
 
     document.addEventListener('mouseover', handleMouseOver, true)
     document.addEventListener('mousemove', handleMouseMove, { passive: true })
     document.addEventListener('mouseout', handleMouseOut, true)
-    document.addEventListener('mousedown', handleHide, true)
-    document.addEventListener('scroll', handleHide, true)
-    window.addEventListener('blur', handleHide)
+    document.addEventListener('mousedown', hide, true)
+    document.addEventListener('scroll', hide, true)
+    window.addEventListener('blur', hide)
 
     return () => {
+      clearTimeout(timerRef.current)
+      clearTimeout(hideTimerRef.current)
+      if (rafRef.current) cancelAnimationFrame(rafRef.current)
       document.removeEventListener('mouseover', handleMouseOver, true)
       document.removeEventListener('mousemove', handleMouseMove)
       document.removeEventListener('mouseout', handleMouseOut, true)
-      document.removeEventListener('mousedown', handleHide, true)
-      document.removeEventListener('scroll', handleHide, true)
-      window.removeEventListener('blur', handleHide)
+      document.removeEventListener('mousedown', hide, true)
+      document.removeEventListener('scroll', hide, true)
+      window.removeEventListener('blur', hide)
     }
   }, [])
 
@@ -108,15 +104,13 @@ export default function GlobalTooltip() {
 
   return createPortal(
     <div
-      role="tooltip"
-      className="fixed z-[99999] pointer-events-none select-none"
-      style={{
-        left: `${tooltip.left}px`,
-        top: `${tooltip.top}px`,
-        animation: 'tooltip-bloom 0.16s cubic-bezier(0.2, 0.8, 0.2, 1) forwards'
-      }}
+      className={`global-tooltip fixed top-0 left-0 z-[99999] pointer-events-none select-none ${visible ? 'is-visible' : ''}`}
+      style={{ transform: `translate3d(${tooltip.left}px, ${tooltip.top}px, 0)` }}
     >
-      <div className="glass-kormiis glass-tooltip px-4 py-2 whitespace-nowrap text-fluid-sm font-semibold tracking-tight text-foreground select-none pointer-events-none">
+      <div
+        role="tooltip"
+        className="glass-tooltip rounded-[14px] px-3.5 py-2 whitespace-nowrap text-fluid-sm font-semibold tracking-tight text-foreground select-none pointer-events-none"
+      >
         {tooltip.text}
       </div>
     </div>,

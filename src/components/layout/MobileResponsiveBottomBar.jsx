@@ -1124,7 +1124,7 @@ export const MobileResponsiveBottomBar = memo(({
         <div 
           data-bottom-bar
           data-mobile-dock
-          className="relative z-40 w-full max-w-[345px] xs:max-w-[370px] h-14 bottom-bar mobile-bottom-dock glass-kormiis border border-black/10 dark:border-white/14 rounded-full shadow-none px-3.5 flex items-center justify-between shrink-0 select-none pointer-events-auto"
+          className="relative z-40 w-full max-w-[238px] xs:max-w-[250px] h-14 bottom-bar mobile-bottom-dock glass-kormiis border border-black/10 dark:border-white/14 rounded-full shadow-none px-3.5 flex items-center justify-between shrink-0 select-none pointer-events-auto"
           style={{
             background: 'transparent',
             backgroundColor: 'transparent',
