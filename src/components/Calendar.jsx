@@ -5,6 +5,7 @@ import Icon from "@/components/ui/Icon.jsx"
 import { useConfirm } from '../hooks/useConfirm'
 import AdSlot from './AdSlot'
 import { formatDate } from '../services/date.js'
+import { can } from '../utils/permissions.js'
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
@@ -389,7 +390,7 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
               <Icon name="chevron_right" size={18}/>
             </Button>
           </div>
-          {(currentUser?.role === 'Admin' || currentUser?.permissions?.includes('approve_leaves')) && (
+          {can(currentUser, 'approve_leaves') && (
             <Button className="w-full sm:w-auto" onClick={() => openCreateModal(`${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`)}>
               <Icon name="add" className="mr-1.5" size={16}/> Add Event
             </Button>
@@ -535,7 +536,7 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
                           <p className="text-fluid-xs m-0 mt-1.5 text-muted-foreground">{ev.description}</p>
                         )}
                       </div>
-                      {!ev.isAuto && (currentUser?.role === 'Admin' || currentUser?.permissions?.includes('approve_leaves')) && (
+                      {!ev.isAuto && can(currentUser, 'approve_leaves') && (
                         <div className="flex items-center gap-1 shrink-0 -mr-1">
                           <Button variant="ghost" size="icon" className="size-8" onClick={() => openEditModal(ev)} aria-label="Edit event">
                             <Icon name="edit" size={14}/>

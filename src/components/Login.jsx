@@ -381,6 +381,8 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
       employeeId: linkage.employeeId,
       role: linkage.role || 'Teammate',
       department: linkage.department || 'General',
+      designation: linkage.designation || '',
+      permissions: linkage.permissions || [],
       avatar: linkage.avatar || user.photoURL || '',
     }
     setIsLoading(false)

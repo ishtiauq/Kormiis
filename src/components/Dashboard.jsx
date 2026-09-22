@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { formatDateShort } from '../services/date.js'
 import { normalizeAttendanceStatus, addDays } from '../services/attendance.js'
+import { scopeEmployees } from '../utils/scoping.js'
 import GeoCheckInWidget from './attendance/GeoCheckInWidget.jsx'
 import DailyChecklistWidget from './DailyChecklistWidget.jsx'
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, BarChart, Bar, XAxis, YAxis } from 'recharts'
@@ -118,7 +119,10 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
   const firstName = (currentUser?.name || '').split(' ')[0]
 
-  const activeEmps = useMemo(() => employees.filter(e => e.status !== 'Terminated'), [employees])
+  const activeEmps = useMemo(
+    () => scopeEmployees(employees, currentUser).filter(e => e.status !== 'Terminated'),
+    [employees, currentUser]
+  )
 
   const weekDays = useMemo(() => {
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
@@ -255,11 +259,13 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
   }
 
   const pendingLeaves = useMemo(() => {
+    const scopedEmployees = scopeEmployees(employees, currentUser)
+    const scopedIds = new Set(scopedEmployees.map(e => e.id))
     const leaves = Array.isArray(attendance?.leaves) ? attendance.leaves : []
     return leaves
-      .filter(l => l && l.status === 'Pending')
+      .filter(l => l && l.status === 'Pending' && scopedIds.has(l.employeeId))
       .map(l => {
-        const emp = employees.find(e => e.id === l.employeeId)
+        const emp = scopedEmployees.find(e => e.id === l.employeeId)
         return {
           ...l,
           type: l.type || l.leaveType || 'Leave',
@@ -267,7 +273,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
         }
       })
       .sort((a, b) => new Date(a.startDate || a.appliedOn || 0) - new Date(b.startDate || b.appliedOn || 0))
-  }, [attendance, employees])
+  }, [attendance, employees, currentUser])
 
   const pendingPreview = pendingLeaves.slice(0, 2).map(l => `${l.name} — ${l.type}`).join(' • ')
 

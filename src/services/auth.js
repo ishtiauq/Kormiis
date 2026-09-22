@@ -73,6 +73,29 @@ export const formatAuthError = (err) => {
  * Reads users/{uid}; workspace owners have companyUid === uid, teammates
  * have it set at provisioning time. Returns null when no user doc exists.
  */
+/**
+ * Reads the employee roster record for a member of a company. The roster is
+ * the source of truth for granular `permissions`, `department` and
+ * `designation`. Never used to derive the auth role.
+ */
+export const getEmployeeProfile = async (companyUid, { employeeId, email } = {}) => {
+  if (!companyUid) return null;
+  const { db, doc, getDoc } = await getFirebase();
+  if (!db) return null;
+  try {
+    const snap = await getDoc(doc(db, 'companies', companyUid, 'snapshots', 'employees'));
+    const list = snap.exists() && Array.isArray(snap.data().data) ? snap.data().data : [];
+    const key = (email || '').trim().toLowerCase();
+    return list.find(e => e && (
+      (employeeId && (e.id === employeeId || e.employeeId === employeeId)) ||
+      (key && (e.email || '').trim().toLowerCase() === key)
+    )) || null;
+  } catch (error) {
+    console.error('Failed to read employee profile:', error);
+    return null;
+  }
+};
+
 export const getCompanyForUser = async (uid) => {
   if (!uid) return null;
   const { db, doc, getDocFromServer } = await getFirebase();
@@ -82,14 +105,26 @@ export const getCompanyForUser = async (uid) => {
     const snap = await getDocFromServer(userRef);
     if (!snap.exists()) return null;
     const data = snap.data();
+    const companyUid = data.companyUid || null;
+    const employeeId = data.employeeId || null;
+
+    // Merge the roster record so the session carries permissions, department
+    // and designation. The auth `role` is authoritative and never taken from
+    // the roster.
+    const profile = companyUid && companyUid !== uid
+      ? await getEmployeeProfile(companyUid, { employeeId, email: data.email })
+      : null;
+
     return {
-      companyUid: data.companyUid || null,
-      employeeId: data.employeeId || null,
+      companyUid,
+      employeeId: employeeId || profile?.id || null,
       role: data.role || null,
       fullName: data.fullName || data.name || null,
       companyName: data.companyName || null,
-      department: data.department || null,
-      avatar: data.avatar || null,
+      department: data.department || profile?.department || null,
+      designation: profile?.designation || null,
+      permissions: Array.isArray(profile?.permissions) ? profile.permissions : [],
+      avatar: data.avatar || profile?.avatar || null,
     };
   } catch (error) {
     console.error('Failed to read user doc:', error);
@@ -439,6 +474,39 @@ export const transferAdminship = async (companyUid, targetTeammate) => {
     }
   }
 
+  return true;
+};
+
+/**
+ * Updates a teammate's system role and/or granular permissions across the
+ * membership registry and their user doc. The roster record itself is
+ * updated separately by the Employees UI.
+ */
+export const updateMemberAccess = async (companyUid, targetUid, { role, permissions } = {}) => {
+  if (!companyUid || !targetUid) return false;
+  const { db, doc, setDoc } = await getFirebase();
+  if (!db) return false;
+
+  const memberPatch = {};
+  const userPatch = {};
+  if (role) { memberPatch.role = role; memberPatch.systemRole = role; userPatch.role = role; }
+  if (Array.isArray(permissions)) memberPatch.permissions = permissions;
+
+  if (Object.keys(memberPatch).length) {
+    try {
+      await setDoc(doc(db, 'companies', companyUid, 'members', targetUid), memberPatch, { merge: true });
+    } catch (e) {
+      console.warn('Failed to update member access:', e);
+      return false;
+    }
+  }
+  if (Object.keys(userPatch).length) {
+    try {
+      await setDoc(doc(db, 'users', targetUid), { ...userPatch, companyUid }, { merge: true });
+    } catch (e) {
+      console.warn('Failed to update user role:', e);
+    }
+  }
   return true;
 };
 

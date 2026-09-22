@@ -11,6 +11,8 @@ import OvertimeClaims from './OvertimeClaims.jsx'
 import GeofenceSettings from './GeofenceSettings.jsx'
 import LeavePoliciesEditor from './LeavePoliciesEditor.jsx'
 import MyAttendanceView from './MyAttendanceView.jsx'
+import { normalizeRole, can } from '../../utils/permissions.js'
+import { scopeEmployees } from '../../utils/scoping.js'
 
 export default function AttendancePage({ 
   employees, 
@@ -45,6 +47,19 @@ export default function AttendancePage({
   const tabs = propTabs || allTabs
   const [tab, setTab] = useState(defaultTab)
 
+  // Manager / granted approver: only self-service + team attendance & leaves.
+  // Roster, overtime and geofence remain Admin/HR configuration surfaces.
+  const role = normalizeRole(currentUser?.role)
+  const isAdminHR = role === 'Admin' || role === 'HR'
+  const isScopedManager = !isAdminHR && can(currentUser, 'manage_attendance')
+  const allowedTabIds = isAdminHR
+    ? allTabs.map(t => t.id)
+    : isScopedManager
+      ? ['my', 'daily', 'leave']
+      : ['my']
+  const visibleTabs = tabs.filter(t => allowedTabIds.includes(t.id))
+  const scopedEmployees = isAdminHR ? employees : scopeEmployees(employees, currentUser)
+
   const shiftTemplates = settings?.shiftTemplates || []
   const overtimeRules = settings?.overtimeRules || { multiplierWeekday: 1.5, multiplierWeekend: 2.0 }
 
@@ -62,7 +77,7 @@ export default function AttendancePage({
 
       <div className="bg-card p-2 rounded-xl border border-border/50 shadow-sm w-full max-w-full">
         <div role="tablist" aria-label="Attendance sections" className="menu-bar">
-          {tabs.map(t => (
+          {visibleTabs.map(t => (
             <Button
                 key={t.id}
                 role="tab"
@@ -96,21 +111,21 @@ export default function AttendancePage({
           addNotification={addNotification}
         />
       )}
-      {tab === 'daily' && <DailyLogs employees={employees} attendance={attendance} setAttendance={setAttendance} addToast={addToast} settings={settings} />}
+      {tab === 'daily' && <DailyLogs employees={scopedEmployees} attendance={attendance} setAttendance={setAttendance} addToast={addToast} settings={settings} />}
       {tab === 'leave' && (
         <div className="grid gap-6">
           <LeaveRequests 
             currentUser={currentUser}
             attendance={attendance}
             leaves={attendance.leaves} 
-            employees={employees} 
+            employees={scopedEmployees} 
             setAttendance={setAttendance}
             addLog={addLog}
             addToast={addToast}
             addNotification={addNotification}
             settings={settings}
           />
-          <LeaveBalanceCard employees={employees} balances={attendance?.balances || {}} leaves={attendance?.leaves || []} settings={settings} />
+          <LeaveBalanceCard employees={scopedEmployees} balances={attendance?.balances || {}} leaves={attendance?.leaves || []} settings={settings} />
           <LeavePoliciesEditor settings={settings} setSettings={setSettings} addToast={addToast} addLog={addLog} />
         </div>
       )}

@@ -8,9 +8,15 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog"
 import { generateLeaveStatusMessage, queueWhatsAppMessages, openWhatsAppDirect } from '../../services/whatsappService.js'
 import { createGoogleCalendarEvent, getGoogleCalendarConnection } from '../../services/googleCalendarService.js'
+import { scopeEmployees } from '../../utils/scoping.js'
 
 export default function LeaveRequests({ currentUser, addLog, employees, attendance, setAttendance, addToast, addNotification, settings }) {
-  const { pendingLeaves, approveLeave, rejectLeave, pendingCount } = useLeaves(attendance, setAttendance, addToast, addNotification)
+  const { pendingLeaves, approveLeave, rejectLeave } = useLeaves(attendance, setAttendance, addToast, addNotification)
+
+  // Managers (and granted approvers) only see requests from their department.
+  const scopedIds = new Set(scopeEmployees(employees, currentUser).map(e => e.id))
+  const visibleLeaves = pendingLeaves.filter(l => scopedIds.has(l.employeeId))
+  const visibleCount = visibleLeaves.length
 
   const [pendingAction, setPendingAction] = useState(null) // { id, action: 'approve' | 'reject', empName }
 
@@ -113,9 +119,9 @@ export default function LeaveRequests({ currentUser, addLog, employees, attendan
     <Card>
       <CardContent className="p-5 sm:p-6 flex flex-col gap-6">
         <h3 className="text-base font-bold m-0 text-foreground">
-          Pending Requests {pendingCount > 0 && <span className="font-normal text-muted-foreground">({pendingCount})</span>}
+          Pending Requests {visibleCount > 0 && <span className="font-normal text-muted-foreground">({visibleCount})</span>}
         </h3>
-        {pendingLeaves.length === 0 ? (
+        {visibleLeaves.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
             <Icon name="calendar_month" className="opacity-30 mx-auto mb-3" size={32}/>
             <p className="m-0">No pending leave requests.</p>
@@ -134,7 +140,7 @@ export default function LeaveRequests({ currentUser, addLog, employees, attendan
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {pendingLeaves.map(l => {
+                {visibleLeaves.map(l => {
                   const emp = employees.find(e => e.id === l.employeeId)
                   return (
                     <TableRow key={l.id}>

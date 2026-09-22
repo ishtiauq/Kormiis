@@ -9,6 +9,8 @@ import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, A
 import { Select, SelectItem } from "@/components/ui/select"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { generateTaskAssignedMessage, queueWhatsAppMessages } from '../services/whatsappService.js'
+import { isTeamScoped } from '../utils/permissions.js'
+import { scopeEmployees } from '../utils/scoping.js'
 import Notes from './Notes.jsx'
 
 export default function Tasks({ tasks = [], setTasks, employees = [], currentUser, addToast, addLog, addNotification, notes = [], setNotes, defaultTab = 'tasks', settings }) {
@@ -95,7 +97,14 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
     }
   }
 
+  const isTeamScopedUser = isTeamScoped(currentUser)
+  const scopedTaskIds = new Set(scopeEmployees(employees, currentUser).map(e => e.id))
   const filteredTasks = tasks.filter(t => {
+    if (isTeamScopedUser) {
+      const assignees = t.assigneeIds || []
+      const inScope = assignees.some(id => scopedTaskIds.has(id)) || scopedTaskIds.has(t.createdBy)
+      if (!inScope) return false
+    }
     if (currentUser?.role === 'Teammate' && currentUser) {
       const isAssignee = t.assigneeIds && t.assigneeIds.includes(currentUser.id);
       const isCreator = t.createdBy === currentUser.id;

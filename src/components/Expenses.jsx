@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
 import { Select, SelectItem } from "@/components/ui/select"
 import AdSlot from './AdSlot'
+import { can } from '../utils/permissions.js'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 
 export default function Expenses({ employees, expenses, setExpenses, settings, addLog, addToast, addAuditLog, currentUser, addNotification }) {
@@ -192,8 +193,8 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
   const pendingQueue = expenses.filter(e => e.status === 'Pending')
   const approvedQueue = expenses.filter(e => e.status === 'Approved')
   // Expense Approvers or Admins can see all expenses in the queue. Regular Teammates see only their own.
-  const canApprove = currentUser?.role === 'Admin' || currentUser?.permissions?.includes('approve_expenses')
-  const canReimburse = currentUser?.role === 'Admin' || currentUser?.permissions?.includes('approve_expenses')
+  const canApprove = can(currentUser, 'approve_expenses')
+  const canReimburse = can(currentUser, 'approve_expenses')
   
   const myClaimsQueue = canApprove ? expenses : expenses.filter(e => e.employeeId === (currentUser?.employeeId || currentUser?.id || 'SYS-ADMIN'))
   const historyQueue = expenses.filter(e => e.status !== 'Pending')

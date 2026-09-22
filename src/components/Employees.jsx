@@ -3,7 +3,7 @@ import Icon from "@/components/ui/Icon.jsx"
 import { useModal } from '../services/useModal.js'
 import AdSlot from './AdSlot.jsx'
 import { formatDate } from '../services/date.js'
-import { provisionEmployeeAccount, revokeInvite } from '../services/auth.js'
+import { provisionEmployeeAccount, revokeInvite, updateMemberAccess } from '../services/auth.js'
 import { cascadeDeleteEmployees } from '../services/cascadeDeleteEmployee.js'
 import { sendEmployeeInviteEmail } from '../services/emailService.js'
 
@@ -40,6 +40,7 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
   const [newRole, setNewRole] = useState('Teammate')
   const [newDesignation, setNewDesignation] = useState('')
   const [newPermissions, setNewPermissions] = useState([])
+  const [newReportsTo, setNewReportsTo] = useState('')
   const [newDept, setNewDept] = useState('Engineering')
   const [newEmail, setNewEmail] = useState('')
   const [newPhone, setNewPhone] = useState('')
@@ -321,6 +322,7 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
         role: newRole,
         designation: newDesignation,
         permissions: newPermissions,
+        reportsTo: newReportsTo || '',
         department: finalDept,
         status: newStatus,
         email: newEmail,
@@ -333,6 +335,17 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
       
       addLog('Updated employee profile', `Saved edits for ${newName} (${newEmpId})`)
       if (addAuditLog) addAuditLog('UPDATE', 'Employee', `Updated employee profile for ${newName} (${newEmpId})`)
+
+      // Keep the membership registry and user doc in sync with the roster so
+      // role/permission edits actually take effect at sign-in. The workspace
+      // owner is never demoted here.
+      const targetUid = editingEmployee.uid || editingEmployee.id
+      if (!editingEmployee.isOwner && targetUid && (adminUid || currentUser?.uid)) {
+        await updateMemberAccess(adminUid || currentUser.uid, targetUid, {
+          role: newRole,
+          permissions: newPermissions,
+        }).catch(() => {})
+      }
     } else {
       const authIdentifier = newEmail.trim() || newPhone.trim()
 
@@ -365,6 +378,7 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
         role: newRole,
         designation: newDesignation,
         permissions: newPermissions,
+        reportsTo: newReportsTo || '',
         department: finalDept,
         status: newStatus,
         email: newEmail,
@@ -414,6 +428,7 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
     setNewRole('Teammate')
     setNewDesignation('')
     setNewPermissions([])
+    setNewReportsTo('')
     setNewDept('Engineering')
     setNewEmail('')
     setNewPhone('')
@@ -435,6 +450,7 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
     setNewRole(emp.role || 'Teammate')
     setNewDesignation(emp.designation || emp.role || '')
     setNewPermissions(emp.permissions || [])
+    setNewReportsTo(emp.reportsTo || emp.managerId || '')
     setNewDept(emp.department || 'Engineering')
     setNewEmail(emp.email || '')
     setNewPhone(emp.phone || '')
@@ -536,6 +552,7 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
         'Department': emp.department || '',
         'Role / Designation': emp.role || emp.designation || '',
         'System Role': emp.systemRole || 'Teammate',
+        'Reports To': emp.reportsTo || '',
         'Status': emp.status || 'Active',
         'Phone': emp.phone || '',
         'Date of Birth': emp.dob || '',
@@ -547,8 +564,8 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
       const ws = XLSX.utils.json_to_sheet(exportData)
       ws['!cols'] = [
         { wch: 18 }, { wch: 26 }, { wch: 28 }, { wch: 20 },
-        { wch: 24 }, { wch: 16 }, { wch: 14 }, { wch: 18 },
-        { wch: 16 }, { wch: 16 }, { wch: 16 }, { wch: 26 }
+        { wch: 24 }, { wch: 16 }, { wch: 18 }, { wch: 14 },
+        { wch: 18 }, { wch: 16 }, { wch: 16 }, { wch: 16 }, { wch: 26 }
       ]
       XLSX.utils.book_append_sheet(wb, ws, "Selected Employees")
       XLSX.writeFile(wb, `Selected_Employees_${new Date().toISOString().slice(0, 10)}.xlsx`)
@@ -663,7 +680,8 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
           "Work Email (Required)": "rafiqul@kormiis.com",
           "Department": "Engineering",
           "Role / Designation": "Full Stack Developer",
-          "System Role": "Teammate",
+          "System Role": "Manager",
+          "Reports To (Employee ID)": "",
           "Employment Status": "Active",
           "Phone Number": "+880 1712 345678",
           "Date of Birth (YYYY-MM-DD)": "1995-03-12",
@@ -678,6 +696,7 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
           "Department": "Design",
           "Role / Designation": "UI/UX Designer",
           "System Role": "Teammate",
+          "Reports To (Employee ID)": "EMP-101",
           "Employment Status": "Active",
           "Phone Number": "+880 1812 987654",
           "Date of Birth (YYYY-MM-DD)": "1997-07-24",
@@ -692,6 +711,7 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
           "Department": "Human Resources",
           "Role / Designation": "HR Executive",
           "System Role": "HR Officer",
+          "Reports To (Employee ID)": "",
           "Employment Status": "Active",
           "Phone Number": "+880 1912 112233",
           "Date of Birth (YYYY-MM-DD)": "1992-11-05",
@@ -706,6 +726,7 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
           "Department": "Marketing",
           "Role / Designation": "Content Strategist",
           "System Role": "Teammate",
+          "Reports To (Employee ID)": "EMP-101",
           "Employment Status": "On Leave",
           "Phone Number": "+880 1612 445566",
           "Date of Birth (YYYY-MM-DD)": "1996-04-18",
@@ -722,6 +743,7 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
         { "Column Name": "Department", "Mandatory": "NO", "Valid Format / Example": "Engineering / HR / Design / Marketing", "Notes / Instructions": "Department to organize the employee into groups." },
         { "Column Name": "Role / Designation", "Mandatory": "NO", "Valid Format / Example": "Senior Developer, UI Designer", "Notes / Instructions": "Designation displayed on employee profile cards." },
         { "Column Name": "System Role", "Mandatory": "NO", "Valid Format / Example": "Teammate | HR Officer | Manager", "Notes / Instructions": "Access permission level in the app (default: Teammate)." },
+        { "Column Name": "Reports To (Employee ID)", "Mandatory": "NO", "Valid Format / Example": "EMP-101 (manager's Employee ID)", "Notes / Instructions": "Explicit reporting line. Scopes a Manager's team (falls back to Department when blank)." },
         { "Column Name": "Employment Status", "Mandatory": "NO", "Valid Format / Example": "Active | On Leave | Inactive", "Notes / Instructions": "Current status (default: Active)." },
         { "Column Name": "Phone Number", "Mandatory": "NO", "Valid Format / Example": "+880 1712 345678", "Notes / Instructions": "Contact phone number." },
         { "Column Name": "Date of Birth (YYYY-MM-DD)", "Mandatory": "NO", "Valid Format / Example": "1995-03-12", "Notes / Instructions": "Birth date (format: YYYY-MM-DD)." },
@@ -741,6 +763,7 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
         { wch: 20 }, // Department
         { wch: 24 }, // Role
         { wch: 16 }, // System Role
+        { wch: 22 }, // Reports To
         { wch: 18 }, // Status
         { wch: 20 }, // Phone
         { wch: 26 }, // DOB
@@ -909,6 +932,7 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
                     const department = getVal(rawRow, 'department', 'dept') || 'General'
                     const role = getVal(rawRow, 'roledesignation', 'role', 'designation', 'jobtitle') || 'Teammate'
                     const systemRole = getVal(rawRow, 'systemrole', 'accessrole') || 'Teammate'
+                    const reportsTo = getVal(rawRow, 'reportsto', 'manager', 'managerid', 'reportsto(employeeid)')
                     const status = getVal(rawRow, 'employmentstatus', 'status') || 'Active'
                     const phone = getVal(rawRow, 'phonenumber', 'phone', 'mobile', 'contact')
                     const dob = getVal(rawRow, 'dateofbirth', 'dob', 'dateofbirth(yyyymmdd)')
@@ -923,6 +947,7 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
                       department: sanitizeCell(department),
                       role: sanitizeCell(role),
                       systemRole: sanitizeCell(systemRole),
+                      reportsTo: sanitizeCell(reportsTo),
                       status: ['Active', 'On Leave', 'Inactive'].includes(status) ? status : 'Active',
                       phone: sanitizeCell(phone),
                       dob: sanitizeCell(dob),
@@ -1263,6 +1288,7 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
                   setNewRole(viewingEmployee.role || 'Teammate');
                   setNewDesignation(viewingEmployee.designation || viewingEmployee.role || '');
                   setNewPermissions(viewingEmployee.permissions || []);
+                  setNewReportsTo(viewingEmployee.reportsTo || viewingEmployee.managerId || '');
                   setNewDept(viewingEmployee.department);
                   setNewEmail(viewingEmployee.email || '');
                   setNewPhone(viewingEmployee.phone || '');
@@ -1398,11 +1424,13 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
                 <label className="text-sm font-medium">System Access Role</label>
                 <Select value={newRole} onChange={(val) => { setNewRole(val); if(val === 'Admin') setNewPermissions([]); }}>
                   <SelectItem id="Teammate">Teammate</SelectItem>
+                  <SelectItem id="Manager">Manager</SelectItem>
+                  <SelectItem id="HR">HR</SelectItem>
                   <SelectItem id="Admin">Admin</SelectItem>
                 </Select>
               </div>
 
-              {newRole === 'Teammate' && (
+              {newRole !== 'Admin' && (
                 <div className="flex flex-col gap-2 md:col-span-2 mt-2 bg-muted/30 p-4 rounded-xl border border-border">
                   <label className="text-sm font-bold text-foreground">Special Access Permissions</label>
                   <p className="text-fluid-xs text-muted-foreground mb-3">Teammates can only see basic modules (Dashboard, Tasks, Calendar, Expenses). Select below to give them extra access to Admin modules.</p>
@@ -1494,6 +1522,17 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
                 {isCustomDept && (
                   <Input required placeholder="New dept name..." value={customDept} onChange={(e) => setCustomDept(e.target.value)} className="mt-1" />
                 )}
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium">Reports To</label>
+                <Select value={newReportsTo} onChange={(val) => setNewReportsTo(val)}>
+                  <SelectItem id="">No manager (top level)</SelectItem>
+                  {employees
+                    .filter(e => e && e.id !== newEmpId && e.status !== 'Terminated')
+                    .map(e => <SelectItem key={e.id} id={e.id}>{e.name} ({e.id})</SelectItem>)}
+                </Select>
+                <p className="text-fluid-xs text-muted-foreground m-0">Sets the explicit reporting line used to scope a Manager's team.</p>
               </div>
 
               <div className="flex flex-col gap-2">

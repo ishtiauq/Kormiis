@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { validateDatabase } from '../services/validator.js'
 import { encryptJson, decryptJson } from '../services/crypto.js'
 import { EMPLOYEES_STORAGE_KEY, timestampArrayChanges, getDeviceInfo } from '../utils/helpers.js'
+import { hasPermission as hasRolePermission } from '../utils/permissions.js'
 import { writeToTable, fetchTableFromFirestore } from '../services/bridge.js'
 import { initPushSync, broadcast, updateBadge, notifyOnHidden, showSystemNotification, registerPushSubscription } from '../services/pushNotifications.js'
 import {
@@ -175,18 +176,7 @@ export default function useAppData({ user, addToast }) {
     setAuditLogs(prev => [newLog, ...prev])
   }
 
-  const hasPermission = (resource) => {
-    const currentRole = user?.role || 'Teammate'
-    if (currentRole === 'Admin') return true
-    
-    // For Teammates, base permissions + custom permissions
-    if (currentRole === 'Teammate') {
-      const basePerms = ['dashboard', 'attendance', 'leaves', 'expenses', 'calendar', 'tasks', 'profile', 'settings', 'notes', 'performance']
-      const customPerms = user?.permissions || []
-      return basePerms.includes(resource) || customPerms.includes(resource)
-    }
-    return false
-  }
+  const hasPermission = (resource) => hasRolePermission(user, resource)
 
   const addNotification = (text, view = null, opts = {}) => {
     const currentActorId = opts.actorId || user?.id || user?.employeeId || user?.uid || user?.email || 'system'
