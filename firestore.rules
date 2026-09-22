@@ -45,6 +45,11 @@ service cloud.firestore {
       return isAdmin(adminUid) || (isMember(adminUid) && isPrivileged());
     }
 
+    // Role assignment is restricted to the workspace owner or Admin members.
+    function isAdminRole(adminUid) {
+      return isAdmin(adminUid) || (isMember(adminUid) && callerRole() == 'Admin');
+    }
+
     // Roles a user may self-assign on first registration (never Admin).
     function selfRoleAllowed() {
       return request.resource.data.get('role', 'Teammate') != 'Admin';
@@ -95,34 +100,42 @@ service cloud.firestore {
       allow write: if isAdmin(adminUid);
     }
 
-    // Company membership registry — employees register themselves on login,
-    // but a member may never change their own role (no self-promotion).
+    // Company membership registry — employees register themselves on login.
+    // Assigning roles (create with a privileged role, or changing `role`) is
+    // Admin-only; HR may manage memberships but only as Teammate. A member may
+    // never change their own role (no self-promotion).
     match /companies/{adminUid}/members/{employeeUid} {
       allow read: if isAdmin(adminUid) || request.auth.uid == employeeUid;
-      allow create: if isAdminOrHR(adminUid)
+      allow create: if isAdminRole(adminUid)
+        || (isAdminOrHR(adminUid) && request.resource.data.get('role', 'Teammate') == 'Teammate')
         || (request.auth.uid == employeeUid && selfRoleAllowed());
-      allow update: if isAdminOrHR(adminUid)
-        || (request.auth.uid == employeeUid
+      allow update: if isAdminRole(adminUid)
+        || ((isAdminOrHR(adminUid) || request.auth.uid == employeeUid)
             && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']));
-      allow delete: if isAdminOrHR(adminUid);
+      allow delete: if isAdminRole(adminUid);
     }
 
     // Users collection:
     // 1) Users can read user docs to check workspace links
-    // 2) Owners / Admin / HR provision and manage user records
+    // 2) Owners / Admin / HR provision user records (Admin can assign roles,
+    //    HR only as Teammate)
     // 3) A user may edit their own doc but NOT their own role
     match /users/{userId} {
       allow read: if request.auth != null;
       allow create: if request.auth != null && (
         isWorkspaceOwner()
-        || (isPrivileged() && request.resource.data.get('companyUid', '') == callerCompanyUid())
+        || (isPrivileged()
+            && request.resource.data.get('companyUid', '') == callerCompanyUid()
+            && (callerRole() == 'Admin' || request.resource.data.get('role', 'Teammate') == 'Teammate'))
         || (request.auth.uid == userId && (
               request.resource.data.get('companyUid', '') == userId || selfRoleAllowed()
            ))
       );
       allow update: if request.auth != null && (
         isWorkspaceOwner()
-        || (isPrivileged() && resource.data.companyUid == callerCompanyUid())
+        || (isPrivileged()
+            && resource.data.get('companyUid', '') == callerCompanyUid()
+            && (callerRole() == 'Admin' || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role'])))
         || (request.auth.uid == userId
             && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']))
       );

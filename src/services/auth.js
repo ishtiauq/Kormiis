@@ -447,40 +447,9 @@ export const deleteCurrentUserAccount = async ({ uid, companyUid, employeeId } =
 };
 
 /**
- * Transfers/promotes another teammate to Admin role in the company.
- */
-export const transferAdminship = async (companyUid, targetTeammate) => {
-  if (!companyUid || !targetTeammate) throw new Error('Invalid arguments for admin transfer');
-  const targetUid = targetTeammate.uid || targetTeammate.id;
-  const { db, doc, setDoc } = await getFirebase();
-
-  if (db && targetUid) {
-    try {
-      await setDoc(doc(db, 'companies', companyUid, 'members', targetUid), {
-        role: 'Admin',
-        systemRole: 'Admin'
-      }, { merge: true });
-    } catch (e) {
-      console.warn('Failed to update company member role:', e);
-    }
-
-    try {
-      await setDoc(doc(db, 'users', targetUid), {
-        role: 'Admin',
-        companyUid
-      }, { merge: true });
-    } catch (e) {
-      console.warn('Failed to update user doc role:', e);
-    }
-  }
-
-  return true;
-};
-
-/**
  * Updates a teammate's system role and/or granular permissions across the
  * membership registry and their user doc. The roster record itself is
- * updated separately by the Employees UI.
+ * updated separately by the Settings Roles & Access panel.
  */
 export const updateMemberAccess = async (companyUid, targetUid, { role, permissions } = {}) => {
   if (!companyUid || !targetUid) return false;

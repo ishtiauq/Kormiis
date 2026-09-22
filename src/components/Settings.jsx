@@ -22,6 +22,7 @@ import {
   generateTestMessage
 } from "../services/whatsappService.js"
 import { getAiApiKey, setAiApiKey, getAiModel, setAiModel, testGeminiApiKey, GEMINI_MODELS } from "../services/aiAgent.js"
+import { updateMemberAccess } from "../services/auth.js"
 import { AiQuantumGlyph } from './ai/AiExpandableFab.jsx'
 
 const WHATSAPP_STATUS_META = {
@@ -30,7 +31,7 @@ const WHATSAPP_STATUS_META = {
   skipped: { label: 'Skipped', cls: 'bg-muted text-muted-foreground border-border/40' },
 }
 
-export default function Settings({ settings, setSettings, addLog, addToast, auditLogs, themeMode, toggleTheme, employees, setEmployees, currentUser, onLoadDemoData, onClearDemoData }) {
+export default function Settings({ settings, setSettings, addLog, addToast, auditLogs, themeMode, toggleTheme, employees, setEmployees, currentUser, adminUid, onLoadDemoData, onClearDemoData }) {
   // Accordion open states: by default, all sections are closed until explicitly opened
   const [openSections, setOpenSections] = useState({})
 
@@ -43,7 +44,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
   }
 
   const expandAll = () => {
-    const next = { company: true, payroll: true, expenses: true, notifications: true, ai: true, security: true, audit: true }
+    const next = { company: true, payroll: true, expenses: true, notifications: true, ai: true, security: true, audit: true, roles: true }
     setOpenSections(next)
     localStorage.setItem('kormiis_settings_open_sections', JSON.stringify(next))
   }
@@ -414,7 +415,56 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
     if (addToast) addToast("Audit logs exported to CSV", "success")
   }
 
-  const allSectionsOpen = openSections.company && openSections.payroll && openSections.expenses && openSections.notifications && openSections.ai && openSections.security && openSections.audit
+  const allSectionsOpen = openSections.company && openSections.payroll && openSections.expenses && openSections.notifications && openSections.ai && openSections.security && openSections.audit && openSections.roles
+
+  // --- Roles & Access helpers ---
+  const ROLE_OPTIONS = ['Teammate', 'Manager', 'HR', 'Admin']
+  const PERMISSION_OPTIONS = [
+    { key: 'payroll', label: 'Payroll', desc: 'Full payroll module access' },
+    { key: 'employees', label: 'Team Directory', desc: 'Manage team records' },
+    { key: 'approve_expenses', label: 'Expense Approver', desc: 'Approve & reimburse expense claims' },
+    { key: 'approve_leaves', label: 'Leave Approver', desc: 'Approve leave requests' },
+    { key: 'manage_attendance', label: 'Manage Attendance', desc: 'Edit team attendance & shifts' },
+    { key: 'assets', label: 'Asset Management', desc: 'Manage company assets' },
+  ]
+  const companyUidForAccess = adminUid || currentUser?.uid
+
+  const isSelfEmployee = (emp) =>
+    emp && (emp.uid === currentUser?.uid || emp.id === currentUser?.id || emp.id === currentUser?.uid || emp.employeeId === currentUser?.employeeId)
+
+  const handleAccessRoleChange = (emp, role) => {
+    if (emp.isOwner) {
+      if (addToast) addToast('The workspace owner always stays an Admin.', 'warning')
+      return
+    }
+    if (isSelfEmployee(emp) && role !== 'Admin') {
+      if (addToast) addToast('You cannot demote yourself. Promote another Admin first.', 'warning')
+      return
+    }
+    const nextPermissions = role === 'Admin' ? [] : (emp.permissions || [])
+    setEmployees(prev => prev.map(e => e.id === emp.id ? { ...e, role, systemRole: role, permissions: nextPermissions } : e))
+    if (addLog) addLog(role === 'Admin' ? 'Promoted to Admin' : `Role set to ${role}`, `${emp.name || emp.id} (${emp.id})`)
+    const targetUid = emp.uid || emp.id
+    if (companyUidForAccess && targetUid) {
+      updateMemberAccess(companyUidForAccess, targetUid, { role, permissions: nextPermissions }).catch(() => {})
+    }
+    if (addToast) addToast(`${emp.name || emp.id} role set to ${role}`, 'success')
+  }
+
+  const handlePermissionToggle = (emp, permKey) => {
+    const next = (emp.permissions || []).includes(permKey)
+      ? (emp.permissions || []).filter(p => p !== permKey)
+      : [...(emp.permissions || []), permKey]
+    setEmployees(prev => prev.map(e => e.id === emp.id ? { ...e, permissions: next } : e))
+    const targetUid = emp.uid || emp.id
+    if (companyUidForAccess && targetUid) {
+      updateMemberAccess(companyUidForAccess, targetUid, { permissions: next }).catch(() => {})
+    }
+  }
+
+  const handleReportsToChange = (emp, reportsTo) => {
+    setEmployees(prev => prev.map(e => e.id === emp.id ? { ...e, reportsTo } : e))
+  }
 
   const renderActionFooter = (disabled = false) => (
     <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-border/50 dark:border-white/8 mt-2">
@@ -1507,6 +1557,115 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                         )
                       })
                     )}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* 7. Roles & Access Accordion */}
+        <div className={`glass-kormiis border rounded-3xl transition-all duration-300 overflow-hidden shadow-sm ${
+          openSections.roles 
+            ? 'border-primary/40 dark:border-white/20 ring-1 ring-primary/20' 
+            : 'border-border/80 dark:border-white/10 hover:border-primary/30'
+        }`}>
+          <button
+            type="button"
+            onClick={() => toggleSection('roles')}
+            className="w-full py-2.5 px-4 sm:px-5 flex items-center justify-between gap-4 text-left transition-colors hover:bg-black/[0.02] dark:hover:bg-white/[0.03] cursor-pointer select-none border-0 outline-none"
+          >
+            <div className="flex items-center gap-3.5 min-w-0">
+              <Icon name="manage_accounts" className="text-violet-500 shrink-0" size={32}/>
+              <h3 className="font-bold text-fluid text-foreground tracking-tight">Roles & Access</h3>
+            </div>
+
+            <Icon 
+              name="expand_more" 
+              size={24} 
+              className={`transition-transform duration-300 shrink-0 ${openSections.roles ? 'rotate-180 text-foreground' : 'rotate-0 text-muted-foreground'}`}
+            />
+          </button>
+
+          {openSections.roles && (
+            <div className="border-t border-border/60 dark:border-white/8 p-5 sm:p-6 flex flex-col gap-4 animate-in fade-in-50 duration-200">
+              <p className="text-fluid-sm text-muted-foreground m-0">
+                Assign system roles, granular permissions and reporting lines. Only the workspace Admin can change these — changes take effect on the member's next sign-in.
+              </p>
+
+              <div className="rounded-2xl border border-border/60 dark:border-white/10 overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[200px]">Team Member</TableHead>
+                      <TableHead className="w-[150px]">System Role</TableHead>
+                      <TableHead>Permissions</TableHead>
+                      <TableHead className="w-[170px]">Reports To</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {(employees || [])
+                      .filter(e => e && e.status !== 'Terminated')
+                      .map(emp => (
+                        <TableRow key={emp.id}>
+                          <TableCell>
+                            <div className="flex items-center gap-2.5">
+                              <div className="size-9 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm font-bold shrink-0">
+                                {(emp.name || emp.id || '?').charAt(0).toUpperCase()}
+                              </div>
+                              <div className="min-w-0">
+                                <div className="text-sm font-semibold text-foreground truncate">{emp.name || emp.id}</div>
+                                <div className="text-xs text-muted-foreground">{emp.id}{emp.department ? ` · ${emp.department}` : ''}</div>
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            {emp.isOwner ? (
+                              <Badge variant="default" className="text-[10px]">Admin · Owner</Badge>
+                            ) : (
+                              <Select value={emp.role || 'Teammate'} onChange={(val) => handleAccessRoleChange(emp, val)}>
+                                {ROLE_OPTIONS.map(r => <SelectItem key={r} id={r}>{r}</SelectItem>)}
+                              </Select>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex flex-wrap gap-1.5">
+                              {PERMISSION_OPTIONS.map(opt => {
+                                const checked = (emp.permissions || []).includes(opt.key)
+                                return (
+                                  <label
+                                    key={opt.key}
+                                    title={opt.desc}
+                                    className={`flex items-center gap-1.5 text-[11px] font-medium px-2 py-1 rounded-full border cursor-pointer select-none transition-colors ${
+                                      checked ? 'border-primary/50 bg-primary/10 text-primary' : 'border-border/70 dark:border-white/10 text-muted-foreground hover:border-primary/40'
+                                    }`}
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      className="accent-primary w-3 h-3"
+                                      checked={checked}
+                                      disabled={emp.role === 'Admin' || emp.isOwner}
+                                      onChange={() => handlePermissionToggle(emp, opt.key)}
+                                    />
+                                    {opt.label}
+                                  </label>
+                                )
+                              })}
+                              {emp.role === 'Admin' && !emp.isOwner && (
+                                <span className="text-[11px] text-muted-foreground self-center">Admins have full access</span>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Select value={emp.reportsTo || ''} onChange={(val) => handleReportsToChange(emp, val)}>
+                              <SelectItem id="">—</SelectItem>
+                              {(employees || [])
+                                .filter(e => e && e.id !== emp.id && e.status !== 'Terminated')
+                                .map(e => <SelectItem key={e.id} id={e.id}>{e.name || e.id}</SelectItem>)}
+                            </Select>
+                          </TableCell>
+                        </TableRow>
+                      ))}
                   </TableBody>
                 </Table>
               </div>

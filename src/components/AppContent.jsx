@@ -130,7 +130,7 @@ export default function AppContent({ currentView, setCurrentView, isAppLoading, 
       view = <Payroll employees={data.employees} payroll={data.payroll} setPayroll={data.handleSetPayroll} addLog={data.addLog} settings={data.settings} addAuditLog={data.addAuditLog} expenses={data.expenses} setExpenses={data.handleSetExpenses} addToast={data.addToast} currentUser={user} addNotification={data.addNotification} defaultTab="expenses" />
       break
     case 'settings':
-      view = <Settings settings={data.settings} setSettings={data.handleSetSettings} addLog={data.addLog} addToast={data.addToast} auditLogs={data.auditLogs} themeMode={themeMode} toggleTheme={toggleTheme} employees={data.employees} setEmployees={data.handleSetEmployees} currentUser={user} onLoadDemoData={data.handleLoadDemoData} onClearDemoData={data.handleClearDemoData} />
+      view = <Settings settings={data.settings} setSettings={data.handleSetSettings} addLog={data.addLog} addToast={data.addToast} auditLogs={data.auditLogs} themeMode={themeMode} toggleTheme={toggleTheme} employees={data.employees} setEmployees={data.handleSetEmployees} currentUser={user} adminUid={data.adminUid} onLoadDemoData={data.handleLoadDemoData} onClearDemoData={data.handleClearDemoData} />
       break
     case 'profile':
       view = <ProfileView currentUser={user} pendingProfileEdits={data.pendingProfileEdits} setPendingProfileEdits={data.setPendingProfileEdits} addToast={data.addToast} addLog={data.addLog} settings={data.settings} setSettings={data.handleSetSettings} employees={data.employees} setEmployees={data.handleSetEmployees} handleLogout={data.handleLogout} announcements={data.announcements} setAnnouncements={data.setAnnouncements} addNotification={data.addNotification} />

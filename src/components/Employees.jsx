@@ -3,7 +3,7 @@ import Icon from "@/components/ui/Icon.jsx"
 import { useModal } from '../services/useModal.js'
 import AdSlot from './AdSlot.jsx'
 import { formatDate } from '../services/date.js'
-import { provisionEmployeeAccount, revokeInvite, updateMemberAccess } from '../services/auth.js'
+import { provisionEmployeeAccount, revokeInvite } from '../services/auth.js'
 import { cascadeDeleteEmployees } from '../services/cascadeDeleteEmployee.js'
 import { sendEmployeeInviteEmail } from '../services/emailService.js'
 
@@ -37,10 +37,7 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
   // Form states
   const [newEmpId, setNewEmpId] = useState('')
   const [newName, setNewName] = useState('')
-  const [newRole, setNewRole] = useState('Teammate')
   const [newDesignation, setNewDesignation] = useState('')
-  const [newPermissions, setNewPermissions] = useState([])
-  const [newReportsTo, setNewReportsTo] = useState('')
   const [newDept, setNewDept] = useState('Engineering')
   const [newEmail, setNewEmail] = useState('')
   const [newPhone, setNewPhone] = useState('')
@@ -267,11 +264,6 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
       return
     }
 
-    if (!newRole || !newRole.trim()) {
-      addToast('Cannot create team member record: System Role is required.', 'danger')
-      return
-    }
-
     if (!newDesignation || !newDesignation.trim()) {
       addToast('Cannot create team member record: Designation / Job Title is required.', 'danger')
       return
@@ -319,10 +311,7 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
         ...emp,
         id: newEmpId,
         name: newName,
-        role: newRole,
         designation: newDesignation,
-        permissions: newPermissions,
-        reportsTo: newReportsTo || '',
         department: finalDept,
         status: newStatus,
         email: newEmail,
@@ -335,17 +324,6 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
       
       addLog('Updated employee profile', `Saved edits for ${newName} (${newEmpId})`)
       if (addAuditLog) addAuditLog('UPDATE', 'Employee', `Updated employee profile for ${newName} (${newEmpId})`)
-
-      // Keep the membership registry and user doc in sync with the roster so
-      // role/permission edits actually take effect at sign-in. The workspace
-      // owner is never demoted here.
-      const targetUid = editingEmployee.uid || editingEmployee.id
-      if (!editingEmployee.isOwner && targetUid && (adminUid || currentUser?.uid)) {
-        await updateMemberAccess(adminUid || currentUser.uid, targetUid, {
-          role: newRole,
-          permissions: newPermissions,
-        }).catch(() => {})
-      }
     } else {
       const authIdentifier = newEmail.trim() || newPhone.trim()
 
@@ -358,7 +336,7 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
           email: authIdentifier,
           password: newPassword,
           name: newName,
-          role: newRole,
+          role: 'Teammate',
           companyUid,
           employeeId: newEmpId,
           department: finalDept,
@@ -375,10 +353,10 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
       const newEmp = {
         id: newEmpId,
         name: newName,
-        role: newRole,
+        role: 'Teammate',
         designation: newDesignation,
-        permissions: newPermissions,
-        reportsTo: newReportsTo || '',
+        permissions: [],
+        reportsTo: '',
         department: finalDept,
         status: newStatus,
         email: newEmail,
@@ -425,10 +403,7 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
   const handleCloseForm = () => {
     setNewEmpId('')
     setNewName('')
-    setNewRole('Teammate')
     setNewDesignation('')
-    setNewPermissions([])
-    setNewReportsTo('')
     setNewDept('Engineering')
     setNewEmail('')
     setNewPhone('')
@@ -447,10 +422,7 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
     setEditingEmployee(emp)
     setNewEmpId(emp.id || '')
     setNewName(emp.name || '')
-    setNewRole(emp.role || 'Teammate')
     setNewDesignation(emp.designation || emp.role || '')
-    setNewPermissions(emp.permissions || [])
-    setNewReportsTo(emp.reportsTo || emp.managerId || '')
     setNewDept(emp.department || 'Engineering')
     setNewEmail(emp.email || '')
     setNewPhone(emp.phone || '')
@@ -680,7 +652,6 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
           "Work Email (Required)": "rafiqul@kormiis.com",
           "Department": "Engineering",
           "Role / Designation": "Full Stack Developer",
-          "System Role": "Manager",
           "Reports To (Employee ID)": "",
           "Employment Status": "Active",
           "Phone Number": "+880 1712 345678",
@@ -695,7 +666,6 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
           "Work Email (Required)": "tasnim@kormiis.com",
           "Department": "Design",
           "Role / Designation": "UI/UX Designer",
-          "System Role": "Teammate",
           "Reports To (Employee ID)": "EMP-101",
           "Employment Status": "Active",
           "Phone Number": "+880 1812 987654",
@@ -710,7 +680,6 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
           "Work Email (Required)": "shakil@kormiis.com",
           "Department": "Human Resources",
           "Role / Designation": "HR Executive",
-          "System Role": "HR Officer",
           "Reports To (Employee ID)": "",
           "Employment Status": "Active",
           "Phone Number": "+880 1912 112233",
@@ -725,7 +694,6 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
           "Work Email (Required)": "nusrat@kormiis.com",
           "Department": "Marketing",
           "Role / Designation": "Content Strategist",
-          "System Role": "Teammate",
           "Reports To (Employee ID)": "EMP-101",
           "Employment Status": "On Leave",
           "Phone Number": "+880 1612 445566",
@@ -742,7 +710,6 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
         { "Column Name": "Employee ID (Optional)", "Mandatory": "NO", "Valid Format / Example": "EMP-101 (or leave blank)", "Notes / Instructions": "Unique company ID. Auto-generated if left blank." },
         { "Column Name": "Department", "Mandatory": "NO", "Valid Format / Example": "Engineering / HR / Design / Marketing", "Notes / Instructions": "Department to organize the employee into groups." },
         { "Column Name": "Role / Designation", "Mandatory": "NO", "Valid Format / Example": "Senior Developer, UI Designer", "Notes / Instructions": "Designation displayed on employee profile cards." },
-        { "Column Name": "System Role", "Mandatory": "NO", "Valid Format / Example": "Teammate | HR Officer | Manager", "Notes / Instructions": "Access permission level in the app (default: Teammate)." },
         { "Column Name": "Reports To (Employee ID)", "Mandatory": "NO", "Valid Format / Example": "EMP-101 (manager's Employee ID)", "Notes / Instructions": "Explicit reporting line. Scopes a Manager's team (falls back to Department when blank)." },
         { "Column Name": "Employment Status", "Mandatory": "NO", "Valid Format / Example": "Active | On Leave | Inactive", "Notes / Instructions": "Current status (default: Active)." },
         { "Column Name": "Phone Number", "Mandatory": "NO", "Valid Format / Example": "+880 1712 345678", "Notes / Instructions": "Contact phone number." },
@@ -762,7 +729,6 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
         { wch: 28 }, // Email
         { wch: 20 }, // Department
         { wch: 24 }, // Role
-        { wch: 16 }, // System Role
         { wch: 22 }, // Reports To
         { wch: 18 }, // Status
         { wch: 20 }, // Phone
@@ -931,7 +897,8 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
                     const id = getVal(rawRow, 'employeeid', 'id', 'empid', 'employeeid(optional)') || `EMP-${Date.now().toString().slice(-4)}${i + 1}`
                     const department = getVal(rawRow, 'department', 'dept') || 'General'
                     const role = getVal(rawRow, 'roledesignation', 'role', 'designation', 'jobtitle') || 'Teammate'
-                    const systemRole = getVal(rawRow, 'systemrole', 'accessrole') || 'Teammate'
+                    // System Role is assigned via Settings → Roles & Access. Imports always land as Teammate.
+                    const systemRole = 'Teammate'
                     const reportsTo = getVal(rawRow, 'reportsto', 'manager', 'managerid', 'reportsto(employeeid)')
                     const status = getVal(rawRow, 'employmentstatus', 'status') || 'Active'
                     const phone = getVal(rawRow, 'phonenumber', 'phone', 'mobile', 'contact')
@@ -970,7 +937,7 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
                         const prov = await provisionEmployeeAccount({
                           email: row.email,
                           name: row.name,
-                          role: row.role || 'Teammate',
+                          role: 'Teammate',
                           companyUid,
                           employeeId: row.id,
                           department: row.department || '',
@@ -1285,10 +1252,7 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
                   setEditingEmployee(viewingEmployee);
                   setNewEmpId(viewingEmployee.id);
                   setNewName(viewingEmployee.name);
-                  setNewRole(viewingEmployee.role || 'Teammate');
                   setNewDesignation(viewingEmployee.designation || viewingEmployee.role || '');
-                  setNewPermissions(viewingEmployee.permissions || []);
-                  setNewReportsTo(viewingEmployee.reportsTo || viewingEmployee.managerId || '');
                   setNewDept(viewingEmployee.department);
                   setNewEmail(viewingEmployee.email || '');
                   setNewPhone(viewingEmployee.phone || '');
@@ -1421,97 +1385,6 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
               </div>
 
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium">System Access Role</label>
-                <Select value={newRole} onChange={(val) => { setNewRole(val); if(val === 'Admin') setNewPermissions([]); }}>
-                  <SelectItem id="Teammate">Teammate</SelectItem>
-                  <SelectItem id="Manager">Manager</SelectItem>
-                  <SelectItem id="HR">HR</SelectItem>
-                  <SelectItem id="Admin">Admin</SelectItem>
-                </Select>
-              </div>
-
-              {newRole !== 'Admin' && (
-                <div className="flex flex-col gap-2 md:col-span-2 mt-2 bg-muted/30 p-4 rounded-xl border border-border">
-                  <label className="text-sm font-bold text-foreground">Special Access Permissions</label>
-                  <p className="text-fluid-xs text-muted-foreground mb-3">Teammates can only see basic modules (Dashboard, Tasks, Calendar, Expenses). Select below to give them extra access to Admin modules.</p>
-                  <div className="flex flex-wrap gap-4">
-                    <label className="flex items-center gap-2 text-sm cursor-pointer hover:text-primary transition-colors">
-                      <input 
-                        type="checkbox" 
-                        checked={newPermissions.includes('payroll')} 
-                        onChange={(e) => {
-                          if (e.target.checked) setNewPermissions(prev => [...prev, 'payroll'])
-                          else setNewPermissions(prev => prev.filter(p => p !== 'payroll'))
-                        }} 
-                        className="rounded border-input text-primary focus:ring-primary w-4 h-4"
-                      />
-                      Payroll Module
-                    </label>
-                    <label className="flex items-center gap-2 text-sm cursor-pointer hover:text-primary transition-colors">
-                      <input 
-                        type="checkbox" 
-                        checked={newPermissions.includes('employees')} 
-                        onChange={(e) => {
-                          if (e.target.checked) setNewPermissions(prev => [...prev, 'employees'])
-                          else setNewPermissions(prev => prev.filter(p => p !== 'employees'))
-                        }} 
-                        className="rounded border-input text-primary focus:ring-primary w-4 h-4"
-                      />
-                      Team Directory
-                    </label>
-                    <label className="flex items-center gap-2 text-sm cursor-pointer hover:text-primary transition-colors">
-                      <input 
-                        type="checkbox" 
-                        checked={newPermissions.includes('approve_expenses')} 
-                        onChange={(e) => {
-                          if (e.target.checked) setNewPermissions(prev => [...prev, 'approve_expenses'])
-                          else setNewPermissions(prev => prev.filter(p => p !== 'approve_expenses'))
-                        }} 
-                        className="rounded border-input text-primary focus:ring-primary w-4 h-4"
-                      />
-                      Expense Approver
-                    </label>
-                    <label className="flex items-center gap-2 text-sm cursor-pointer hover:text-primary transition-colors">
-                      <input 
-                        type="checkbox" 
-                        checked={newPermissions.includes('approve_leaves')} 
-                        onChange={(e) => {
-                          if (e.target.checked) setNewPermissions(prev => [...prev, 'approve_leaves'])
-                          else setNewPermissions(prev => prev.filter(p => p !== 'approve_leaves'))
-                        }} 
-                        className="rounded border-input text-primary focus:ring-primary w-4 h-4"
-                      />
-                      Leave Approver
-                    </label>
-                    <label className="flex items-center gap-2 text-sm cursor-pointer hover:text-primary transition-colors">
-                      <input 
-                        type="checkbox" 
-                        checked={newPermissions.includes('manage_attendance')} 
-                        onChange={(e) => {
-                          if (e.target.checked) setNewPermissions(prev => [...prev, 'manage_attendance'])
-                          else setNewPermissions(prev => prev.filter(p => p !== 'manage_attendance'))
-                        }} 
-                        className="rounded border-input text-primary focus:ring-primary w-4 h-4"
-                      />
-                      Manage Attendance & Leaves
-                    </label>
-                    <label className="flex items-center gap-2 text-sm cursor-pointer hover:text-primary transition-colors">
-                      <input 
-                        type="checkbox" 
-                        checked={newPermissions.includes('assets')} 
-                        onChange={(e) => {
-                          if (e.target.checked) setNewPermissions(prev => [...prev, 'assets'])
-                          else setNewPermissions(prev => prev.filter(p => p !== 'assets'))
-                        }} 
-                        className="rounded border-input text-primary focus:ring-primary w-4 h-4"
-                      />
-                      Asset Management
-                    </label>
-                  </div>
-                </div>
-              )}
-              
-              <div className="flex flex-col gap-2">
                 <Select label="Department" value={isCustomDept ? 'NEW' : newDept} onChange={(val) => {
                     if (val === 'NEW') { setIsCustomDept(true); } 
                     else { setIsCustomDept(false); setNewDept(val); }
@@ -1522,17 +1395,6 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
                 {isCustomDept && (
                   <Input required placeholder="New dept name..." value={customDept} onChange={(e) => setCustomDept(e.target.value)} className="mt-1" />
                 )}
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium">Reports To</label>
-                <Select value={newReportsTo} onChange={(val) => setNewReportsTo(val)}>
-                  <SelectItem id="">No manager (top level)</SelectItem>
-                  {employees
-                    .filter(e => e && e.id !== newEmpId && e.status !== 'Terminated')
-                    .map(e => <SelectItem key={e.id} id={e.id}>{e.name} ({e.id})</SelectItem>)}
-                </Select>
-                <p className="text-fluid-xs text-muted-foreground m-0">Sets the explicit reporting line used to scope a Manager's team.</p>
               </div>
 
               <div className="flex flex-col gap-2">
