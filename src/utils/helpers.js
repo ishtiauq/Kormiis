@@ -23,7 +23,7 @@ export function timestampArrayChanges(prev, next) {
 export const allNavItems = [
   { id: 'dashboard', label: 'Dashboard', icon: createElement(Icon, { name: 'dashboard', size: 20 }) },
   { id: 'tasks', label: 'Tasks', icon: createElement(Icon, { name: 'check_box', size: 20 }) },
-  { id: 'announcements', label: 'Announcements', icon: createElement(Icon, { name: 'rss_feed', size: 20 }) },
+  { id: 'announcements', label: 'Catch Up', icon: createElement(Icon, { name: 'rss_feed', size: 20 }) },
   { id: 'documents', label: 'Documents', icon: createElement(Icon, { name: 'folder_open', size: 20 }) },
   { id: 'employees', label: 'Team', icon: createElement(Icon, { name: 'group', size: 20 }) },
   { id: 'payroll', label: 'Payroll', icon: createElement(Icon, { name: 'account_balance', size: 20 }) },

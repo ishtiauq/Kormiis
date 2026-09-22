@@ -998,7 +998,7 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
             <Button variant="outline" onClick={handleDownloadDemoExcel} className="shadow-sm flex-1 sm:flex-none">
               <Icon name="table_view" className="mr-2 h-4 w-4 text-emerald-500" size={16}/> Demo Excel
             </Button>
-            <Button onClick={handleOpenAddForm} className="shadow-sm flex-1 sm:flex-none">
+            <Button onClick={handleOpenAddForm} className="shadow-sm flex-1 sm:flex-none text-foreground">
               <Icon name="add" className="mr-2 h-4 w-4" size={16}/> Add Team Member
             </Button>
           </div>

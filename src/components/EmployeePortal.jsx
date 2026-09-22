@@ -421,7 +421,7 @@ export default function EmployeePortal({
     { id: 'dashboard', icon: <Icon name="dashboard" size={20}/>, label: 'Dashboard' },
     { id: 'attendance', icon: <Icon name="schedule" size={20}/>, label: 'Attendance' },
     { id: 'my-tasks', icon: <Icon name="check_box" size={20}/>, label: 'Tasks' },
-    { id: 'announcements', icon: <Icon name="rss_feed" size={20}/>, label: 'Announcements' },
+    { id: 'announcements', icon: <Icon name="rss_feed" size={20}/>, label: 'Catch Up' },
     { id: 'payslips', icon: <Icon name="account_balance" size={20}/>, label: 'Payroll' },
     { id: 'documents', icon: <Icon name="folder_open" size={20}/>, label: 'Documents' },
     { id: 'my-assets', icon: <Icon name="devices_other" size={20}/>, label: 'Assets' },

@@ -585,7 +585,7 @@ export const MobileResponsiveBottomBar = memo(({
               data-menu-drawer={isMenuExpanded ? "true" : undefined}
               data-notif-panel={isNotifExpanded ? "true" : undefined}
               data-ai-panel={isAiExpanded ? "true" : undefined}
-              className="relative z-40 w-full max-w-[345px] xs:max-w-[370px] mb-3 glass-mobile-drawer liquid-glass-drawer glass-kormiis border border-black/10 dark:border-white/14 rounded-[28px] p-4 flex flex-col overflow-hidden pointer-events-auto shadow-none"
+              className="relative z-40 w-full max-w-[345px] xs:max-w-[370px] mb-3 glass-kormiis border border-black/10 dark:border-white/14 rounded-[28px] p-4 flex flex-col overflow-hidden pointer-events-auto shadow-none"
               style={{
                 background: 'transparent',
                 backgroundColor: 'transparent',
@@ -599,9 +599,9 @@ export const MobileResponsiveBottomBar = memo(({
                 {/* 1. MENU MODE */}
                 {isMenuExpanded && (
                   <div className="w-full flex flex-col overflow-hidden pb-1">
-                    {/* 3x3 Grid of Navigation Items (No Box, Standalone Icon on Top, Name Underneath) */}
+                    {/* 2-column grid of navigation items */}
                     <div 
-                      className="grid grid-cols-3 gap-y-3.5 gap-x-1 max-h-[50vh] overflow-y-auto no-scrollbar pt-0.5 pb-2 px-0.5" 
+                      className="grid grid-cols-2 gap-2 max-h-[50vh] overflow-y-auto no-scrollbar p-1" 
                       style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}
                     >
                       {visibleNavItems.filter(item => item.id !== 'profile').map((item) => {
@@ -611,25 +611,24 @@ export const MobileResponsiveBottomBar = memo(({
                             key={`mob-item-${item.id}`}
                             type="button"
                             onClick={() => handleSelectTab(item.id)}
-                            whileTap={{ scale: 0.88 }}
+                            whileTap={{ scale: 0.97 }}
                             transition={{ scale: { duration: 0.12 } }}
-                            className="flex flex-col items-center justify-center text-center p-1.5 rounded-2xl cursor-pointer bg-transparent border-0 !border-none shadow-none outline-none gap-1 transition-all select-none"
-                            style={{ background: 'transparent', border: 'none', boxShadow: 'none', outline: 'none' }}
+                            className={`flex items-center gap-2.5 min-w-0 w-full text-left px-3 py-2.5 rounded-xl cursor-pointer transition-colors select-none ${
+                              isActive ? 'bg-primary/10 border border-primary/30' : 'border border-transparent hover:bg-black/5 dark:hover:bg-white/10'
+                            }`}
+                            style={{ boxShadow: 'none' }}
                           >
-                            {/* Standalone Icon on Top (Zero background box) */}
                             <span 
-                              className={`flex items-center justify-center transition-transform ${
-                                isActive ? 'text-primary scale-110' : 'text-foreground/75 hover:text-foreground'
+                              className={`flex items-center justify-center shrink-0 ${
+                                isActive ? 'text-primary' : 'text-foreground/75'
                               }`}
                               style={isActive ? { color: '#FE3501' } : undefined}
                             >
                               {item.icon}
                             </span>
-                            
-                            {/* Menu Name Underneath (No truncation, full name displayed) */}
                             <span 
-                              className={`text-[11px] leading-tight text-center whitespace-normal break-words w-full px-0.5 transition-colors ${
-                                isActive ? 'text-primary font-bold' : 'text-foreground/75 font-medium'
+                              className={`text-[13px] leading-tight min-w-0 break-words ${
+                                isActive ? 'text-primary font-bold' : 'text-foreground/80 font-medium'
                               }`}
                               style={isActive ? { color: '#FE3501' } : undefined}
                             >
@@ -1210,15 +1209,16 @@ export const MobileResponsiveBottomBar = memo(({
               transition={{ scale: { duration: 0.12 } }}
               className={`relative size-11 rounded-full flex items-center justify-center cursor-pointer ${
                 (currentView === 'profile' || currentView === 'settings')
-                  ? 'ring-2 ring-primary text-primary'
+                  ? 'text-white font-bold shadow-none'
                   : 'text-foreground/80 hover:text-foreground hover:bg-black/5 dark:hover:bg-white/8'
               }`}
+              style={(currentView === 'profile' || currentView === 'settings') ? { background: 'linear-gradient(135deg, #FE3501 0%, #e62f00 100%)', color: '#ffffff' } : undefined}
             >
               {user?.avatar ? (
                 <img 
                   src={user.avatar} 
                   alt={user.name || "User"} 
-                  className={`size-8 rounded-full object-cover select-none ${(currentView === 'profile' || currentView === 'settings') ? 'ring-2 ring-primary' : ''}`} 
+                  className="size-8 rounded-full object-cover select-none" 
                 />
               ) : (
                 <Icon name="person" size={23} />

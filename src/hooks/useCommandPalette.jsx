@@ -38,7 +38,7 @@ export function useCommandPalette({ employees, themeMode, toggleTheme, setCurren
       { id: 'page-payroll', category: 'Pages', label: 'Go to Payroll', action: () => setCurrentView('payroll'), keywords: 'payroll salary pay compensation' },
       { id: 'page-attendance', category: 'Pages', label: 'Go to Attendance', action: () => setCurrentView('attendance'), keywords: 'attendance daily logs roster schedule overtime clock in out' },
       { id: 'page-leaves', category: 'Pages', label: 'Go to Leaves', action: () => setCurrentView('leaves'), keywords: 'leaves time off vacation leave requests balance' },
-      { id: 'page-announcements', category: 'Pages', label: 'Go to Announcements', action: () => setCurrentView('announcements'), keywords: 'announcements news posts updates' },
+      { id: 'page-announcements', category: 'Pages', label: 'Go to Catch Up', action: () => setCurrentView('announcements'), keywords: 'catch up announcements news posts updates' },
       { id: 'page-calendar', category: 'Pages', label: 'Go to Events', action: () => setCurrentView('calendar'), keywords: 'calendar events meetings holidays schedule' },
       { id: 'page-documents', category: 'Pages', label: 'Go to Documents', action: () => setCurrentView('documents'), keywords: 'documents files upload download manager' },
       { id: 'page-assets', category: 'Pages', label: 'Go to Assets', action: () => setCurrentView('assets'), keywords: 'assets inventory devices macbook laptop' },

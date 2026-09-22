@@ -216,7 +216,7 @@ WORKSPACE CONTEXT:
 - Total Employees: ${employees.length}
 - Active Employees: ${JSON.stringify(employeeSummary)}
 - Total Tasks: ${tasks.length}
-- Total Announcements: ${announcements.length}
+- Total Catch Up Posts: ${announcements.length}
 - Total Expenses: ${expenses.length}
 
 STRICT SCOPE & GUARDRAIL RULES:

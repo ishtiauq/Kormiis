@@ -1,7 +1,7 @@
 import { useState, useRef, useMemo, useEffect } from 'react'
 import Icon from "@/components/ui/Icon.jsx"
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -13,6 +13,15 @@ import AdSlot from './AdSlot.jsx'
 import Expenses from './Expenses.jsx'
 import { formatDate } from '../services/date.js'
 import { generatePayrollSlipMessage, queueWhatsAppMessages, openWhatsAppDirect } from '../services/whatsappService.js'
+
+function PayrollDetailRow({ label, value, valueClass = 'text-foreground' }) {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <span className="text-xs text-muted-foreground">{label}</span>
+      <span className={`font-sans text-sm font-semibold ${valueClass}`}>{value}</span>
+    </div>
+  )
+}
 
 export default function Payroll({ employees, payroll, setPayroll, addLog, settings, addAuditLog, expenses, setExpenses, addToast, currentUser, addNotification, defaultTab = 'payroll' }) {
   const [activeMainTab, setActiveMainTab] = useState(defaultTab)
@@ -65,6 +74,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
   // Bulk Action State
   const [selectedRows, setSelectedRows] = useState([])
   const [scrollTop, setScrollTop] = useState(0)
+  const [expandedRow, setExpandedRow] = useState(null)
 
   const currency = settings?.currency || '$'
   const pdfCurrency = { '৳': 'BDT', '€': 'EUR', '£': 'GBP', '₹': 'INR', '¥': 'JPY', '$': 'USD', 'د.إ': 'AED', '﷼': 'SAR', 'S$': 'SGD', 'C$': 'CAD', 'A$': 'AUD' }[currency] || currency
@@ -740,23 +750,77 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
     { id: 'expenses', label: 'Expense Claims', icon: <Icon name="wallet" size={15}/> },
   ]
 
+  // Reusable month/year selector (lives in the summary strip and empty state).
+  const periodPicker = (
+    <div ref={pickerRef} className="flex items-center gap-2">
+      {/* Month dropdown */}
+      <div className="relative h-9">
+        <button
+          type="button"
+          onClick={() => { setMonthOpen(!monthOpen); setYearOpen(false) }}
+          className={`inline-flex h-9 items-center justify-between gap-1.5 rounded-full border border-border bg-background px-3 text-sm font-semibold whitespace-nowrap ${monthOpen ? 'ring-2 ring-ring' : ''}`}
+        >
+          <span className="flex items-center gap-1.5">
+            <Icon name="calendar_month" className="h-4 w-4 shrink-0 text-muted-foreground" size={16}/>
+            <span className="whitespace-nowrap">{monthNames[currentMonth - 1]}</span>
+          </span>
+          <Icon name="keyboard_arrow_down" className={`h-4 w-4 shrink-0 opacity-50 transition-transform ${monthOpen ? 'rotate-180' : ''}`} size={16}/>
+        </button>
+        {monthOpen && (
+          <div className="absolute top-full left-0 right-0 mt-2 max-h-60 overflow-y-auto z-[100] rounded-md border glass-kormiis glass-popover p-1 text-popover-foreground shadow-none animate-in fade-in-0 zoom-in-95">
+            {monthNames.map((name, i) => (
+              <button key={name} type="button" onClick={() => { setSelectedMonth(`${currentYear}-${String(i + 1).padStart(2, '0')}`); setMonthOpen(false) }}
+                className={`relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none hover:bg-accent hover:text-accent-foreground ${i + 1 === currentMonth ? 'bg-accent text-accent-foreground font-semibold' : ''}`}>
+                {name}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+      {/* Year dropdown */}
+      <div className="relative w-[88px] h-9">
+        <button
+          type="button"
+          onClick={() => { setYearOpen(!yearOpen); setMonthOpen(false) }}
+          className={`flex w-full h-9 items-center justify-between rounded-full border border-border bg-background px-3 text-sm font-semibold ${yearOpen ? 'ring-2 ring-ring' : ''}`}
+        >
+          <span className="truncate">{currentYear}</span>
+          <Icon name="keyboard_arrow_down" className={`h-4 w-4 shrink-0 opacity-50 transition-transform ${yearOpen ? 'rotate-180' : ''}`} size={16}/>
+        </button>
+        {yearOpen && (
+          <div className="absolute top-full left-0 right-0 mt-2 max-h-60 overflow-y-auto z-[100] rounded-md border glass-kormiis glass-popover p-1 text-popover-foreground shadow-none animate-in fade-in-0 zoom-in-95">
+            {yearOptions.map(y => (
+              <button key={y} type="button" onClick={() => { setSelectedMonth(`${y}-${String(currentMonth).padStart(2, '0')}`); setYearOpen(false) }}
+                className={`relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none hover:bg-accent hover:text-accent-foreground ${y === currentYear ? 'bg-accent text-accent-foreground font-semibold' : ''}`}>
+                {y}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+
   return (
-    <div className="animate-fade-in flex flex-col gap-6 w-full pb-10">
+    <div className="animate-fade-in flex flex-col gap-4 w-full pb-10">
       {/* Sub-navigation Switcher */}
       <div className="bg-card p-2 rounded-xl border border-border/50 shadow-sm w-full max-w-full">
         <div role="tablist" aria-label="Finance sections" className="menu-bar">
           {mainTabs.map(t => (
-            <Button
+            <button
               key={t.id}
+              type="button"
               role="tab"
               aria-selected={activeMainTab === t.id}
-              variant={activeMainTab === t.id ? 'default' : 'ghost'}
-              size="sm"
-              className={`rounded-full px-4 justify-center ${activeMainTab !== t.id ? 'text-muted-foreground hover:bg-muted hover:text-foreground' : ''}`}
               onClick={() => setActiveMainTab(t.id)}
+              className={`inline-flex items-center justify-center gap-1.5 h-8.5 px-4 rounded-full text-xs transition-all cursor-pointer border ${
+                activeMainTab === t.id
+                  ? 'bg-primary text-white border-white/20 font-bold'
+                  : 'bg-transparent border-transparent font-semibold text-muted-foreground hover:bg-black/5 dark:hover:bg-white/10 hover:text-foreground'
+              }`}
             >
               {t.icon} {t.label}
-            </Button>
+            </button>
           ))}
         </div>
       </div>
@@ -775,52 +839,6 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
         />
       ) : (
         <>
-          <div ref={pickerRef} className="flex flex-wrap gap-2 items-center justify-between">
-        <Button variant="outline" size="sm" onClick={handleDownloadPayrollPDF} disabled={!entries} className="rounded-full text-xs font-semibold hover:text-primary hover:border-primary/50 transition-colors shadow-sm">
-          <Icon name="picture_as_pdf" size={16} className="mr-1.5" /> Download Sheet PDF
-        </Button>
-
-        <div className="flex gap-2 items-center">
-          {/* Month dropdown */}
-          <div className="relative w-[140px] h-10">
-            <button onClick={() => { setMonthOpen(!monthOpen); setYearOpen(false) }} className={`flex w-full h-10 items-center justify-between rounded-md border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${monthOpen ? 'ring-2 ring-ring ring-offset-2' : ''}`}>
-              <div className="flex items-center gap-2 overflow-hidden">
-                <Icon name="calendar_month" className="h-4 w-4 shrink-0 text-muted-foreground" size={16}/>
-                <span className="break-words">{monthNames[currentMonth - 1]}</span>
-              </div>
-              <Icon name="keyboard_arrow_down" className={`h-4 w-4 shrink-0 opacity-50 transition-transform ${monthOpen ? 'rotate-180' : ''}`} size={16}/>
-            </button>
-          {monthOpen && (
-            <div className="absolute top-full left-0 right-0 mt-2 max-h-60 overflow-y-auto z-[100] rounded-md border glass-kormiis glass-popover p-1 text-popover-foreground shadow-none animate-in fade-in-0 zoom-in-95">
-              {monthNames.map((name, i) => (
-                <button key={name} onClick={() => { setSelectedMonth(`${currentYear}-${String(i + 1).padStart(2, '0')}`); setMonthOpen(false) }} 
-                  className={`relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none hover:bg-accent hover:text-accent-foreground ${i + 1 === currentMonth ? 'bg-accent text-accent-foreground font-semibold' : ''}`}>
-                  {name}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-        {/* Year dropdown */}
-        <div className="relative w-24 h-10">
-          <button onClick={() => { setYearOpen(!yearOpen); setMonthOpen(false) }} className={`flex w-full h-10 items-center justify-between rounded-md border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${yearOpen ? 'ring-2 ring-ring ring-offset-2' : ''}`}>
-            <span className="break-words">{currentYear}</span>
-            <Icon name="keyboard_arrow_down" className={`h-4 w-4 shrink-0 opacity-50 transition-transform ${yearOpen ? 'rotate-180' : ''}`} size={16}/>
-          </button>
-          {yearOpen && (
-            <div className="absolute top-full left-0 right-0 mt-2 max-h-60 overflow-y-auto z-[100] rounded-md border glass-kormiis glass-popover p-1 text-popover-foreground shadow-none animate-in fade-in-0 zoom-in-95">
-              {yearOptions.map(y => (
-                <button key={y} onClick={() => { setSelectedMonth(`${y}-${String(currentMonth).padStart(2, '0')}`); setYearOpen(false) }} 
-                  className={`relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none hover:bg-accent hover:text-accent-foreground ${y === currentYear ? 'bg-accent text-accent-foreground font-semibold' : ''}`}>
-                  {y}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-        </div>
-      </div>
-
       {!entries ? (
         <Card className="flex flex-col items-center justify-center p-12 text-center border-dashed border-2 bg-muted/20">
           <Icon name="calendar_month" className="h-12 w-12 text-primary opacity-80 mb-4" size={48}/>
@@ -829,57 +847,60 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
             The payroll sheet for {monthLabel} has not been created yet. 
             Initialize it to pull the active roster and carry over compensation parameters.
           </p>
+          <div className="flex justify-center mb-6">{periodPicker}</div>
           <Button onClick={handleInitializeMonth} size="lg">
             <Icon name="add_circle" className="mr-2 h-5 w-5" size={20}/> Initialize Month Payroll
           </Button>
         </Card>
       ) : (
         <>
-          {/* Stats Cards Row */}
-          <div className="grid gap-4 md:grid-cols-2">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium uppercase text-muted-foreground tracking-wider">Total Payout Budget</CardTitle>
-                <Icon name="account_balance" className="h-4 w-4 text-muted-foreground" size={16}/>
-              </CardHeader>
-              <CardContent>
-                <div className="text-fluid-display font-bold font-sans">{currency}{totalCost.toLocaleString()}</div>
-              </CardContent>
-            </Card>
+          {/* Compact Summary Strip */}
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-3 rounded-2xl border border-border/60 dark:border-white/10 bg-card px-4 py-3">
+            {periodPicker}
+            <span className="hidden sm:block h-5 w-px bg-border" />
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Total</span>
+              <span className="font-sans text-sm font-bold text-foreground tabular-nums">{currency}{totalCost.toLocaleString()}</span>
+            </div>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Avg</span>
+              <span className="font-sans text-sm font-bold text-foreground tabular-nums">{currency}{averageSalary.toLocaleString()}</span>
+            </div>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Paid</span>
+              <span className="font-sans text-sm font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">{paidCount}/{totalCount}</span>
+            </div>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium uppercase text-muted-foreground tracking-wider">Average Salary</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-fluid-display font-bold font-sans">{currency}{averageSalary.toLocaleString()}</div>
-              </CardContent>
-            </Card>
+            <Button variant="outline" size="sm" onClick={handleDownloadPayrollPDF} disabled={!entries} className="ml-auto w-full sm:w-auto rounded-full text-xs font-semibold hover:text-primary hover:border-primary/50 transition-colors shadow-sm">
+              <Icon name="picture_as_pdf" size={16} className="mr-1.5" /> Download Sheet PDF
+            </Button>
           </div>
 
-          {/* Toolbar Filter Section */}
-          <div className="flex justify-between items-center flex-wrap gap-4 mt-2">
-            <div className="flex items-center gap-3 bg-muted/30 px-3 py-1.5 rounded-lg border border-border">
-              <input type="checkbox" className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer accent-primary" aria-label="Select all" checked={selectedRows.length === filteredEntries.length && filteredEntries.length > 0} onChange={toggleSelectAll} />
-              <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">Select All</span>
-            </div>
-            
-            <div className="relative flex-1 min-w-[200px] max-w-[350px] flex items-center">
+          {/* Filters: search + status + select all */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+            <div className="relative w-full sm:flex-1 sm:max-w-[360px] flex items-center">
               <Icon name="search" className="absolute left-3.5 text-muted-foreground z-10 pointer-events-none" size={18}/>
               <Input placeholder="Search employee or role..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="!pl-10.5 h-11 rounded-2xl w-full" />
             </div>
 
-            <div className="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground">
-              {['All', 'Paid', 'Pending'].map(status => (
-                <button
-                  key={status}
-                  onClick={() => setStatusFilter(status)}
-                  className={`inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${statusFilter === status ? 'bg-background text-foreground shadow-sm' : 'hover:bg-background/50 hover:text-foreground'}`}
-                >
-                  {statusFilter === status && <Icon name="check" className="mr-1.5 h-3.5 w-3.5" size={14}/>}
-                  {status}
-                </button>
-              ))}
+            <div className="flex items-center gap-3 sm:ml-auto w-full sm:w-auto">
+              <label className="flex items-center gap-2 bg-muted/30 px-3 py-2 rounded-lg border border-border cursor-pointer shrink-0">
+                <input type="checkbox" className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer accent-primary" aria-label="Select all" checked={selectedRows.length === filteredEntries.length && filteredEntries.length > 0} onChange={toggleSelectAll} />
+                <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">Select All</span>
+              </label>
+
+              <div className="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground flex-1 sm:flex-none">
+                {['All', 'Paid', 'Pending'].map(status => (
+                  <button
+                    key={status}
+                    onClick={() => setStatusFilter(status)}
+                    className={`inline-flex flex-1 sm:flex-none items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${statusFilter === status ? 'bg-background text-foreground shadow-sm' : 'hover:bg-background/50 hover:text-foreground'}`}
+                  >
+                    {statusFilter === status && <Icon name="check" className="mr-1.5 h-3.5 w-3.5" size={14}/>}
+                    {status}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -899,107 +920,198 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
             </div>
           )}
 
-          {/* Universal Payroll Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            {filteredEntries.length === 0 && (
-              <div className="text-center py-8 text-muted-foreground border border-dashed border-border rounded-lg bg-muted/20">No employees found.</div>
-            )}
-            {filteredEntries.map(entry => {
-              const emp = entry.employee
-              const loanDeduction = Math.min(entry.loan.remaining, entry.loan.installment)
-              const netPay = entry.baseSalary + entry.allowance - entry.deductions - entry.advance - loanDeduction
-              const isPaid = entry.status === 'Paid'
-              const isProcessing = processingId === entry.employeeId
-              const isSelected = selectedRows.includes(entry.employeeId)
+          {/* Payroll Entries: table on desktop/tablet, accordion dropdown on mobile */}
+          {filteredEntries.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground border border-dashed border-border rounded-lg bg-muted/20">No employees found.</div>
+          ) : (
+            <>
+              {/* Desktop / tablet: scrollable table */}
+              <div className="hidden sm:block">
+                <Table containerClassName="max-h-[65vh] overflow-y-auto">
+                  <TableHeader className="sticky top-0 z-10" style={{ backgroundColor: 'var(--background)' }}>
+                    <TableRow>
+                      <TableHead className="w-10"></TableHead>
+                      <TableHead>Employee</TableHead>
+                      <TableHead>Gross</TableHead>
+                      <TableHead>Deductions</TableHead>
+                      <TableHead>Advance / Loan</TableHead>
+                      <TableHead>Net Pay</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredEntries.map(entry => {
+                      const emp = entry.employee
+                      const loanDeduction = Math.min(entry.loan.remaining, entry.loan.installment)
+                      const netPay = entry.baseSalary + entry.allowance - entry.deductions - entry.advance - loanDeduction
+                      const isPaid = entry.status === 'Paid'
+                      const isProcessing = processingId === entry.employeeId
+                      const isSelected = selectedRows.includes(entry.employeeId)
+                      return (
+                        <TableRow key={entry.employeeId} className={isSelected ? 'bg-primary/5' : ''}>
+                          <TableCell>
+                            <input type="checkbox" className="h-4 w-4 rounded border-gray-300 accent-primary cursor-pointer" aria-label={`Select ${emp.name}`} checked={isSelected} onChange={() => toggleRowSelection(entry.employeeId)} />
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-3">
+                              <Avatar className="w-9 h-9 shrink-0 ring-1 ring-border">
+                                {emp.avatar ? <AvatarImage src={emp.avatar} alt={emp.name} className="object-cover" /> : null}
+                                <AvatarFallback className="bg-primary/10 text-primary"><Icon name="person" size={18}/></AvatarFallback>
+                              </Avatar>
+                              <div className="flex flex-col min-w-0">
+                                <span className="font-semibold text-sm leading-tight truncate">{emp.name}</span>
+                                <span className="text-xs text-muted-foreground truncate">{emp.designation && emp.designation.toLowerCase() !== 'teammate' ? emp.designation : (emp.role && emp.role.toLowerCase() !== 'teammate' ? emp.role : '')}</span>
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell className="font-sans text-sm">{currency}{entry.grossSalary.toLocaleString()}</TableCell>
+                          <TableCell className="font-sans text-sm text-red-500 dark:text-red-400">-{currency}{entry.deductions.toLocaleString()}</TableCell>
+                          <TableCell className="font-sans text-sm text-yellow-600 dark:text-yellow-500">{(entry.advance + loanDeduction) > 0 ? `-${currency}${(entry.advance + loanDeduction).toLocaleString()}` : '—'}</TableCell>
+                          <TableCell className="font-sans text-sm font-bold text-primary">{currency}{netPay.toLocaleString()}</TableCell>
+                          <TableCell>
+                            <Badge
+                              variant="outline"
+                              className={`font-semibold px-2.5 py-0.5 rounded-full text-xs flex items-center gap-1.5 w-fit ${
+                                isPaid
+                                  ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'
+                                  : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30'
+                              }`}
+                            >
+                              <span className={`size-1.5 rounded-full ${isPaid ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                              {entry.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex items-center justify-end gap-1.5">
+                              <Button variant="ghost" size="icon" className="h-8 w-8" title="Edit compensation" onClick={() => openCompensationModal(entry)}>
+                                <Icon name="edit" size={16} className="text-blue-500"/>
+                              </Button>
+                              {!isPaid ? (
+                                <Button size="sm" className="h-8 text-xs" onClick={() => handleExecutePayment(entry)} disabled={isProcessing}>
+                                  {isProcessing ? '...' : 'Execute'}
+                                </Button>
+                              ) : (
+                                <>
+                                  <Button variant="secondary" size="sm" className="h-8 text-xs" onClick={() => generatePayslipReceipt(entry, entry.paymentDate)}>
+                                    <Icon name="download" className="mr-1 h-3.5 w-3.5" size={14}/> Payslip
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="icon"
+                                    className="h-8 w-8 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10"
+                                    title="Send WhatsApp Salary Statement"
+                                    onClick={() => handleSendWhatsAppSlip(entry)}
+                                  >
+                                    <Icon name="chat" size={14} />
+                                  </Button>
+                                </>
+                              )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      )
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
 
-              return (
-                <Card key={entry.employeeId} className={`overflow-hidden transition-all ${isSelected ? 'ring-2 ring-primary ring-offset-1 ring-offset-background' : ''}`}>
-                  <div className="p-4 flex flex-col gap-4">
-                    {/* Header */}
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-3">
-                        <input type="checkbox" className="h-5 w-5 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer accent-primary mt-1" aria-label={`Select ${emp.name}`} checked={isSelected} onChange={() => toggleRowSelection(entry.employeeId)} />
-                        <Avatar className="w-10 h-10 shrink-0 ring-1 ring-border">
-                          {emp.avatar ? <AvatarImage src={emp.avatar} alt={emp.name} className="object-cover" /> : null}
-                          <AvatarFallback className="bg-primary/10 text-primary"><Icon name="person" size={20}/></AvatarFallback>
-                        </Avatar>
-                        <div className="flex flex-col">
-                          <span className="font-semibold text-base leading-tight">{emp.name}</span>
-                          <span className="text-xs text-muted-foreground">{emp.designation && emp.designation.toLowerCase() !== 'teammate' ? emp.designation : (emp.role && emp.role.toLowerCase() !== 'teammate' ? emp.role : '')}</span>
-                        </div>
-                      </div>
-                      <Badge 
-                        variant="outline" 
-                        className={`font-semibold px-2.5 py-0.5 rounded-full text-xs flex items-center gap-1.5 shrink-0 ${
-                          isPaid 
-                            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30' 
-                            : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30'
-                        }`}
-                      >
-                        <span className={`size-1.5 rounded-full ${isPaid ? 'bg-emerald-500' : 'bg-amber-500'}`} />
-                        {entry.status}
-                      </Badge>
-                    </div>
-                    
-                    {/* Body: Salary Grid */}
-                    <div className="grid grid-cols-2 gap-3 bg-muted/30 p-3 rounded-lg text-sm border border-border/50">
-                      <div className="flex flex-col">
-                        <span className="text-muted-foreground text-xs font-medium">Gross Salary</span>
-                        <span className="font-sans font-medium">{currency}{entry.grossSalary.toLocaleString()}</span>
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-muted-foreground text-xs font-medium">Deductions</span>
-                        <span className="font-sans font-medium text-red-500 dark:text-red-400">-{currency}{entry.deductions.toLocaleString()}</span>
-                      </div>
-                      {(entry.advance > 0 || entry.loan.total > 0) && (
-                        <>
-                          <div className="flex flex-col">
-                            <span className="text-muted-foreground text-xs font-medium">Advance/Loan</span>
-                            <span className="font-sans font-medium text-yellow-600 dark:text-yellow-500">-{currency}{(entry.advance + loanDeduction).toLocaleString()}</span>
+              {/* Mobile: accordion dropdown — no horizontal scroll */}
+              <div className="sm:hidden flex flex-col gap-3">
+                {filteredEntries.map(entry => {
+                  const emp = entry.employee
+                  const loanDeduction = Math.min(entry.loan.remaining, entry.loan.installment)
+                  const netPay = entry.baseSalary + entry.allowance - entry.deductions - entry.advance - loanDeduction
+                  const isPaid = entry.status === 'Paid'
+                  const isProcessing = processingId === entry.employeeId
+                  const isSelected = selectedRows.includes(entry.employeeId)
+                  const open = expandedRow === entry.employeeId
+                  return (
+                    <div key={entry.employeeId} className={`rounded-2xl border bg-card overflow-hidden ${isSelected ? 'border-primary/50 ring-1 ring-primary/30' : 'border-border/60 dark:border-white/10'}`}>
+                      <div className="flex items-center gap-3 px-4 py-3.5">
+                        <input type="checkbox" className="h-4 w-4 rounded border-gray-300 accent-primary cursor-pointer shrink-0" aria-label={`Select ${emp.name}`} checked={isSelected} onChange={() => toggleRowSelection(entry.employeeId)} />
+                        <button
+                          type="button"
+                          onClick={() => setExpandedRow(open ? null : entry.employeeId)}
+                          aria-expanded={open}
+                          className="flex-1 min-w-0 flex items-center justify-between gap-3 text-left cursor-pointer border-0 bg-transparent"
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <Avatar className="w-9 h-9 shrink-0 ring-1 ring-border">
+                              {emp.avatar ? <AvatarImage src={emp.avatar} alt={emp.name} className="object-cover" /> : null}
+                              <AvatarFallback className="bg-primary/10 text-primary"><Icon name="person" size={18}/></AvatarFallback>
+                            </Avatar>
+                            <div className="flex flex-col min-w-0">
+                              <span className="font-semibold text-sm leading-tight truncate">{emp.name}</span>
+                              <span className="font-sans text-xs font-bold text-primary">{currency}{netPay.toLocaleString()}</span>
+                            </div>
                           </div>
-                          <div className="flex flex-col">
-                            <span className="text-muted-foreground text-xs font-medium">Loan Rem.</span>
-                            <span className="font-sans text-muted-foreground">{currency}{entry.loan.remaining}</span>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <Badge
+                              variant="outline"
+                              className={`font-semibold px-2 py-0.5 rounded-full text-[10px] flex items-center gap-1 ${
+                                isPaid
+                                  ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'
+                                  : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30'
+                              }`}
+                            >
+                              <span className={`size-1.5 rounded-full ${isPaid ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                              {entry.status}
+                            </Badge>
+                            <Icon name="expand_more" size={20} className={`text-muted-foreground transition-transform duration-300 ${open ? 'rotate-180' : ''}`} />
                           </div>
-                        </>
-                      )}
-                      <div className="flex flex-col col-span-2 pt-2 mt-1 border-t border-border/50">
-                        <span className="text-muted-foreground text-xs font-medium uppercase tracking-wider">Net Payout</span>
-                        <span className="font-sans font-bold text-primary text-fluid-lg">{currency}{netPay.toLocaleString()}</span>
+                        </button>
                       </div>
-                    </div>
 
-                    {/* Footer Actions */}
-                    <div className="flex items-center gap-2 pt-1">
-                      <Button variant="outline" size="sm" className="flex-1 text-xs" onClick={() => openCompensationModal(entry)}>
-                        <Icon name="edit" className="mr-1.5 h-3.5 w-3.5 text-blue-500" size={14}/> Edit
-                      </Button>
-                      {!isPaid ? (
-                        <Button size="sm" className="flex-1 text-xs" onClick={() => handleExecutePayment(entry)} disabled={isProcessing}>
-                          {isProcessing ? '...' : 'Execute'}
-                        </Button>
-                      ) : (
-                        <div className="flex-1 flex items-center gap-1.5">
-                          <Button variant="secondary" size="sm" className="flex-1 text-xs px-2" onClick={() => generatePayslipReceipt(entry, entry.paymentDate)}>
-                            <Icon name="download" className="mr-1 h-3.5 w-3.5" size={14}/> Payslip
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="px-2.5 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10 text-xs" 
-                            title="Send WhatsApp Salary Statement"
-                            onClick={() => handleSendWhatsAppSlip(entry)}
-                          >
-                            <Icon name="chat" size={14} />
-                          </Button>
+                      {open && (
+                        <div className="border-t border-border/60 dark:border-white/10 px-4 py-3.5 flex flex-col gap-2.5 animate-in fade-in-50 duration-200">
+                          <PayrollDetailRow label="Gross Salary" value={`${currency}${entry.grossSalary.toLocaleString()}`} />
+                          <PayrollDetailRow label="Deductions" value={`-${currency}${entry.deductions.toLocaleString()}`} valueClass="text-red-500 dark:text-red-400" />
+                          {(entry.advance > 0 || entry.loan.total > 0) && (
+                            <>
+                              <PayrollDetailRow label="Advance / Loan" value={`-${currency}${(entry.advance + loanDeduction).toLocaleString()}`} valueClass="text-yellow-600 dark:text-yellow-500" />
+                              <PayrollDetailRow label="Loan Remaining" value={`${currency}${entry.loan.remaining}`} valueClass="text-muted-foreground" />
+                            </>
+                          )}
+                          <div className="border-t border-border/50 my-1" />
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-semibold text-foreground">Net Payout</span>
+                            <span className="font-sans text-base font-bold text-primary">{currency}{netPay.toLocaleString()}</span>
+                          </div>
+
+                          <div className="flex items-center gap-2 pt-2 mt-1 border-t border-border/50">
+                            <Button variant="outline" size="sm" className="flex-1 text-xs" onClick={() => openCompensationModal(entry)}>
+                              <Icon name="edit" className="mr-1.5 h-3.5 w-3.5 text-blue-500" size={14}/> Edit
+                            </Button>
+                            {!isPaid ? (
+                              <Button size="sm" className="flex-1 text-xs" onClick={() => handleExecutePayment(entry)} disabled={isProcessing}>
+                                {isProcessing ? '...' : 'Execute'}
+                              </Button>
+                            ) : (
+                              <div className="flex-1 flex items-center gap-1.5">
+                                <Button variant="secondary" size="sm" className="flex-1 text-xs px-2" onClick={() => generatePayslipReceipt(entry, entry.paymentDate)}>
+                                  <Icon name="download" className="mr-1 h-3.5 w-3.5" size={14}/> Payslip
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="px-2.5 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10 text-xs"
+                                  title="Send WhatsApp Salary Statement"
+                                  onClick={() => handleSendWhatsAppSlip(entry)}
+                                >
+                                  <Icon name="chat" size={14} />
+                                </Button>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       )}
                     </div>
-                  </div>
-                </Card>
-              )
-            })}
-          </div>
+                  )
+                })}
+              </div>
+            </>
+          )}
         </>
       )}
 

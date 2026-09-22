@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import Icon from "@/components/ui/Icon.jsx"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import {
   WA_QUEUE_EVENT,
   getPendingWhatsAppQueue,
@@ -215,7 +215,7 @@ export default function WhatsAppQueueModal({ settings }) {
                 )}
               </div>
 
-              <div className="max-h-32 overflow-y-auto rounded-xl bg-muted/40 dark:bg-white/5 border border-border/40 dark:border-white/8 p-3">
+              <div className="max-h-32 sm:max-h-40 overflow-y-auto rounded-xl bg-muted/40 dark:bg-white/5 border border-border/40 dark:border-white/8 p-3">
                 <p className="text-[11px] text-foreground/90 whitespace-pre-wrap break-words font-mono leading-relaxed">
                   {current?.message || ''}
                 </p>
@@ -242,26 +242,32 @@ export default function WhatsAppQueueModal({ settings }) {
           </div>
         )}
 
-        <DialogFooter className="flex-col-reverse sm:flex-row gap-2">
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            <Button type="button" variant="outline" size="sm" className="flex-1 sm:flex-none" onClick={handleCopyMessage} disabled={busy || !current}>
-              <Icon name={copied ? 'check' : 'content_copy'} size={14} />
-              {copied ? 'Copied' : 'Copy'}
-            </Button>
-            <Button type="button" variant="ghost" size="sm" onClick={() => { if (queue) downloadCsv(queue) }} disabled={!queue} className="flex-1 sm:flex-none">
-              <Icon name="download" size={14} />
-              CSV
-            </Button>
-            <Button type="button" variant="ghost" size="sm" onClick={handleSkip} disabled={busy || !current} className="flex-1 sm:flex-none text-muted-foreground">
-              <Icon name="skip_next" size={14} />
-              Skip
-            </Button>
-          </div>
-          <Button type="button" className="flex-1 sm:flex-none sm:min-w-[150px]" onClick={handleOpen} disabled={busy || !current}>
-            <Icon name={busy ? 'monitoring' : 'chat'} size={15} className={busy ? 'animate-spin' : ''} />
+        <div className="flex flex-col gap-2.5 sm:gap-3 pt-5 border-t border-border/80 dark:border-white/12 mt-2 shrink-0">
+          <Button
+            type="button"
+            className="w-full h-11 rounded-2xl font-bold"
+            onClick={handleOpen}
+            disabled={busy || !current}
+          >
+            <Icon name={busy ? 'monitoring' : 'chat'} size={16} className={busy ? 'animate-spin' : ''} />
             {busy ? 'Opening…' : 'Open in WhatsApp'}
           </Button>
-        </DialogFooter>
+
+          <div className="grid grid-cols-3 gap-2 w-full">
+            <Button type="button" variant="outline" size="sm" className="w-full min-w-0" onClick={handleCopyMessage} disabled={busy || !current}>
+              <Icon name={copied ? 'check' : 'content_copy'} size={14} />
+              <span className="truncate">{copied ? 'Copied' : 'Copy'}</span>
+            </Button>
+            <Button type="button" variant="ghost" size="sm" className="w-full min-w-0" onClick={() => { if (queue) downloadCsv(queue) }} disabled={!queue}>
+              <Icon name="download" size={14} />
+              <span className="truncate">CSV</span>
+            </Button>
+            <Button type="button" variant="ghost" size="sm" className="w-full min-w-0 text-muted-foreground" onClick={handleSkip} disabled={busy || !current}>
+              <Icon name="skip_next" size={14} />
+              <span className="truncate">Skip</span>
+            </Button>
+          </div>
+        </div>
 
         <div className="flex items-center justify-between pt-1 text-[10px] text-muted-foreground px-1">
           <span>

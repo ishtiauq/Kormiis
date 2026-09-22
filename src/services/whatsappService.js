@@ -254,7 +254,7 @@ Your WhatsApp notification system for *${companyName}* is configured and operati
 📅 *Timestamp:* ${timestamp}
 ✨ *Status:* Active & Connected
 
-Automated updates for Leaves, Payroll, and Announcements will now be dispatched seamlessly.`
+Automated updates for Leaves, Payroll, and Catch Up will now be dispatched seamlessly.`
 }
 
 // ---------------------------------------------------------------------------

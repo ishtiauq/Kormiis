@@ -22,7 +22,7 @@ const HoverTooltip = ({ content, children }) => {
   )
 }
 
-export default function Announcements({ employees, announcements, setAnnouncements, addLog, addToast, currentUser, addNotification, settings, headline = 'Announcements', events = [], setEvents, defaultTab = 'feed' }) {
+export default function Announcements({ employees, announcements, setAnnouncements, addLog, addToast, currentUser, addNotification, settings, headline = 'Catch Up', events = [], setEvents, defaultTab = 'feed' }) {
   const [activeHubTab, setActiveHubTab] = useState(defaultTab === 'calendar' ? 'calendar' : (defaultTab === 'notice' || defaultTab === 'announcements' ? 'notice' : 'feed'))
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingPostId, setEditingPostId] = useState(null)

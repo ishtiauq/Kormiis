@@ -423,7 +423,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
   const MODULE_PERMISSIONS = [
     { key: 'dashboard', label: 'Dashboard' },
     { key: 'tasks', label: 'Tasks' },
-    { key: 'announcements', label: 'Announcements' },
+    { key: 'announcements', label: 'Catch Up' },
     { key: 'documents', label: 'Documents' },
     { key: 'employees', label: 'Team Directory' },
     { key: 'payroll', label: 'Payroll' },
@@ -565,7 +565,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
             <div>
               <h4 className="font-bold text-sm text-foreground">Workspace Demo Dataset</h4>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Load or remove realistic sample data across all widgets (Team, Attendance, Payroll, Expenses, Tasks, Assets, Events & Announcements).
+                Load or remove realistic sample data across all widgets (Team, Attendance, Payroll, Expenses, Tasks, Assets, Events & Catch Up).
               </p>
             </div>
           </div>
@@ -1244,7 +1244,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                         </label>
                         <label className="flex items-center gap-1.5 cursor-pointer">
                           <input type="checkbox" checked={whatsappNotifyAnnouncements} onChange={e => setWhatsappNotifyAnnouncements(e.target.checked)} className="rounded accent-emerald-500" />
-                          <span>Announcements</span>
+                          <span>Catch Up</span>
                         </label>
                         <label className="flex items-center gap-1.5 cursor-pointer">
                           <input type="checkbox" checked={whatsappNotifyShiftSwap} onChange={e => setWhatsappNotifyShiftSwap(e.target.checked)} className="rounded accent-emerald-500" />
