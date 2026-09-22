@@ -447,29 +447,24 @@ export const deleteCurrentUserAccount = async ({ uid, companyUid, employeeId } =
 };
 
 /**
- * Updates a teammate's system role and/or granular permissions across the
- * membership registry and their user doc. The roster record itself is
- * updated separately by the Settings Roles & Access panel.
+ * Updates a teammate's system role across the membership registry and their
+ * user doc. Granular per-member permissions are no longer supported — role
+ * templates (settings.rolePermissions) are the source of truth for access.
  */
-export const updateMemberAccess = async (companyUid, targetUid, { role, permissions } = {}) => {
+export const updateMemberAccess = async (companyUid, targetUid, { role } = {}) => {
   if (!companyUid || !targetUid) return false;
   const { db, doc, setDoc } = await getFirebase();
   if (!db) return false;
 
-  const memberPatch = {};
-  const userPatch = {};
-  if (role) { memberPatch.role = role; memberPatch.systemRole = role; userPatch.role = role; }
-  if (Array.isArray(permissions)) memberPatch.permissions = permissions;
-
-  if (Object.keys(memberPatch).length) {
+  if (role) {
+    const memberPatch = { role, systemRole: role };
+    const userPatch = { role };
     try {
       await setDoc(doc(db, 'companies', companyUid, 'members', targetUid), memberPatch, { merge: true });
     } catch (e) {
       console.warn('Failed to update member access:', e);
       return false;
     }
-  }
-  if (Object.keys(userPatch).length) {
     try {
       await setDoc(doc(db, 'users', targetUid), { ...userPatch, companyUid }, { merge: true });
     } catch (e) {

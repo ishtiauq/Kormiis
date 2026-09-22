@@ -426,7 +426,6 @@ export default function EmployeePortal({
     { id: 'documents', icon: <Icon name="folder_open" size={20}/>, label: 'Documents' },
     { id: 'my-assets', icon: <Icon name="devices_other" size={20}/>, label: 'Assets' },
     { id: 'performance', icon: <Icon name="insights" size={20}/>, label: 'Performance' },
-    ...(currentUser?.permissions?.includes('manage_attendance') ? [{ id: 'team_attendance', icon: <Icon name="check_circle" size={20}/>, label: 'Team Attendance' }] : []),
     { id: 'settings', icon: <Icon name="settings" size={20}/>, label: 'Settings' }
   ]
 
