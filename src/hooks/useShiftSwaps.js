@@ -1,4 +1,3 @@
-import { useState } from 'react'
 
 export function useShiftSwaps(shiftSwaps, setShiftSwaps, roster, setRoster, addToast) {
   const pendingSwaps = (shiftSwaps || []).filter(s => s.status === 'Pending')

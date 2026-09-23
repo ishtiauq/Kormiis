@@ -192,7 +192,6 @@ export default function AiExpandableFab({
                   damping: 30,
                   mass: 0.8
                 }}
-                data-ai-panel
                 data-mobile-panel
                 className="pointer-events-auto w-full max-w-2xl h-[min(88vh,720px)] glass-mobile-drawer glass-kormiis rounded-t-[28px] sm:rounded-t-3xl rounded-b-none border-t border-x border-white/30 dark:border-white/14 shadow-none overflow-hidden flex flex-col relative"
                 style={{
