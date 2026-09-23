@@ -614,23 +614,17 @@ export const MobileResponsiveBottomBar = memo(({
                             whileTap={{ scale: 0.97 }}
                             transition={{ scale: { duration: 0.12 } }}
                             className={`flex items-center gap-2.5 min-w-0 w-full text-left px-3 py-2.5 rounded-xl cursor-pointer transition-colors select-none ${
-                              isActive ? 'bg-primary/10 border border-primary/30' : 'border border-transparent hover:bg-black/5 dark:hover:bg-white/10'
+                              isActive ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 font-bold border border-black/10 dark:border-white/20' : 'border border-transparent hover:bg-black/5 dark:hover:bg-white/10 text-foreground/80'
                             }`}
                             style={{ boxShadow: 'none' }}
                           >
                             <span 
-                              className={`flex items-center justify-center shrink-0 ${
-                                isActive ? 'text-primary' : 'text-foreground/75'
-                              }`}
-                              style={isActive ? { color: '#FE3501' } : undefined}
+                              className="flex items-center justify-center shrink-0"
                             >
                               {item.icon}
                             </span>
                             <span 
-                              className={`text-[13px] leading-tight min-w-0 break-words ${
-                                isActive ? 'text-primary font-bold' : 'text-foreground/80 font-medium'
-                              }`}
-                              style={isActive ? { color: '#FE3501' } : undefined}
+                              className="text-[13px] leading-tight min-w-0 break-words"
                             >
                               {item.label}
                             </span>
@@ -677,14 +671,14 @@ export const MobileResponsiveBottomBar = memo(({
                         onClick={() => setNotificationTab('all')}
                         className={`flex-1 h-8 text-xs font-bold rounded-xl transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer select-none border border-transparent ${
                           notificationTab === 'all'
-                            ? 'bg-primary text-white shadow-xs dark:bg-primary dark:text-white'
+                            ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 shadow-xs'
                             : 'bg-transparent text-muted-foreground hover:text-foreground'
                         }`}
                       >
                         <span>All</span>
                         <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
                           notificationTab === 'all'
-                            ? 'bg-white/25 text-white'
+                            ? 'bg-white/25 text-white dark:bg-black/15 dark:text-neutral-900'
                             : 'bg-black/5 dark:bg-white/10 text-muted-foreground'
                         }`}>
                           {notifications.length}
@@ -696,7 +690,7 @@ export const MobileResponsiveBottomBar = memo(({
                         onClick={() => setNotificationTab('unread')}
                         className={`flex-1 h-8 text-xs font-bold rounded-xl transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer select-none border border-transparent ${
                           notificationTab === 'unread'
-                            ? 'bg-primary text-white shadow-xs dark:bg-primary dark:text-white'
+                            ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 shadow-xs'
                             : 'bg-transparent text-muted-foreground hover:text-foreground'
                         }`}
                       >
@@ -704,7 +698,7 @@ export const MobileResponsiveBottomBar = memo(({
                         {actualUnreadCount > 0 && (
                           <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
                             notificationTab === 'unread'
-                              ? 'bg-white/25 text-white'
+                              ? 'bg-white/25 text-white dark:bg-black/15 dark:text-neutral-900'
                               : 'bg-destructive/15 text-destructive'
                           }`}>
                             {actualUnreadCount}
@@ -995,10 +989,9 @@ export const MobileResponsiveBottomBar = memo(({
                                 <div
                                   className={`max-w-[88%] p-3 rounded-2xl text-xs leading-relaxed ${
                                     isUser
-                                      ? 'bg-primary text-white rounded-br-xs font-medium'
+                                      ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 rounded-br-xs font-semibold'
                                       : 'bg-black/4 dark:bg-white/6 text-foreground border border-black/5 dark:border-white/8 rounded-bl-xs'
                                   }`}
-                                  style={isUser ? { background: 'linear-gradient(135deg, #FE3501 0%, #e62f00 100%)', color: '#ffffff' } : undefined}
                                 >
                                   {m.fileData && (
                                     <div className={`flex items-center gap-1.5 p-1.5 px-2.5 rounded-xl mb-1.5 text-[11px] font-semibold ${
@@ -1101,8 +1094,7 @@ export const MobileResponsiveBottomBar = memo(({
                             <button
                               type="submit"
                               disabled={(!aiInput.trim() && !attachedFile) || isAiLoading}
-                              className="size-8 rounded-xl bg-primary text-white flex items-center justify-center cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 transition-all border-none shrink-0"
-                              style={{ background: 'linear-gradient(135deg, #FE3501 0%, #e62f00 100%)' }}
+                              className="size-8 rounded-xl bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 flex items-center justify-center cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 transition-all border-none shrink-0"
                             >
                               <Icon name="arrow_upward" size={18} />
                             </button>
@@ -1139,17 +1131,15 @@ export const MobileResponsiveBottomBar = memo(({
               onClick={handleToggleMenu}
               whileTap={{ scale: 0.90 }}
               transition={{ scale: { duration: 0.12 } }}
-              className={`relative size-11 rounded-full flex items-center justify-center cursor-pointer ${
+              className={`relative size-11 rounded-full flex items-center justify-center cursor-pointer transition-colors ${
                 isMenuExpanded
-                  ? 'bg-primary text-white font-bold shadow-none'
+                  ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 font-bold shadow-none border border-black/10 dark:border-white/20'
                   : 'text-foreground/80 hover:text-foreground hover:bg-black/5 dark:hover:bg-white/8'
               }`}
-              style={isMenuExpanded ? { background: 'linear-gradient(135deg, #FE3501 0%, #e62f00 100%)', color: '#ffffff' } : undefined}
             >
               <Icon 
                 name="grid_view" 
                 size={23}
-                className={isMenuExpanded ? 'text-white' : ''}
               />
             </motion.button>
 
@@ -1160,12 +1150,11 @@ export const MobileResponsiveBottomBar = memo(({
               onClick={handleToggleAi}
               whileTap={{ scale: 0.90 }}
               transition={{ scale: { duration: 0.12 } }}
-              className={`relative size-11 rounded-full flex items-center justify-center cursor-pointer ${
+              className={`relative size-11 rounded-full flex items-center justify-center cursor-pointer transition-colors ${
                 isAiExpanded
-                  ? 'bg-primary text-white font-bold shadow-none'
+                  ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 font-bold shadow-none border border-black/10 dark:border-white/20'
                   : 'text-foreground/80 hover:text-foreground hover:bg-black/5 dark:hover:bg-white/8'
               }`}
-              style={isAiExpanded ? { background: 'linear-gradient(135deg, #FE3501 0%, #e62f00 100%)', color: '#ffffff' } : undefined}
             >
               <AiQuantumGlyph size={23} />
             </motion.button>
@@ -1177,12 +1166,11 @@ export const MobileResponsiveBottomBar = memo(({
               onClick={handleToggleNotifications}
               whileTap={{ scale: 0.90 }}
               transition={{ scale: { duration: 0.12 } }}
-              className={`relative size-11 rounded-full flex items-center justify-center cursor-pointer ${
+              className={`relative size-11 rounded-full flex items-center justify-center cursor-pointer transition-colors ${
                 isNotifExpanded
-                  ? 'bg-primary text-white font-bold shadow-none'
+                  ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 font-bold shadow-none border border-black/10 dark:border-white/20'
                   : 'text-foreground/80 hover:text-foreground hover:bg-black/5 dark:hover:bg-white/8'
               }`}
-              style={isNotifExpanded ? { background: 'linear-gradient(135deg, #FE3501 0%, #e62f00 100%)', color: '#ffffff' } : undefined}
             >
               <Icon name={actualUnreadCount > 0 ? "notifications_active" : "notifications"} size={23} />
               {actualUnreadCount > 0 && !isNotifExpanded && (
@@ -1207,12 +1195,11 @@ export const MobileResponsiveBottomBar = memo(({
               }}
               whileTap={{ scale: 0.90 }}
               transition={{ scale: { duration: 0.12 } }}
-              className={`relative size-11 rounded-full flex items-center justify-center cursor-pointer ${
+              className={`relative size-11 rounded-full flex items-center justify-center cursor-pointer transition-colors ${
                 (currentView === 'profile' || currentView === 'settings')
-                  ? 'text-white font-bold shadow-none'
+                  ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 font-bold shadow-none border border-black/10 dark:border-white/20'
                   : 'text-foreground/80 hover:text-foreground hover:bg-black/5 dark:hover:bg-white/8'
               }`}
-              style={(currentView === 'profile' || currentView === 'settings') ? { background: 'linear-gradient(135deg, #FE3501 0%, #e62f00 100%)', color: '#ffffff' } : undefined}
             >
               {user?.avatar ? (
                 <img 

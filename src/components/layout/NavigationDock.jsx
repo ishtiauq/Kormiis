@@ -50,12 +50,12 @@ export const NavigationDock = memo(({
                 }}
                 className={`relative h-8 sm:h-8.5 rounded-full flex items-center justify-center shrink-0 cursor-pointer select-none border-0 !border-none outline-none focus-visible:ring-2 focus-visible:ring-primary/40 transition-colors duration-150 ${
                   isActive
-                    ? 'nav-capsule-active px-3 sm:px-3.5 gap-1.5 font-bold z-10 !text-white'
+                    ? 'nav-capsule-active px-3 sm:px-3.5 gap-1.5 font-bold z-10'
                     : 'w-8 sm:w-8.5 text-foreground/65 hover:text-foreground hover:bg-white/20 dark:hover:bg-white/8 bg-transparent p-0'
                 }`}
-                style={isActive ? { background: 'linear-gradient(135deg, #FE3501 0%, #e62f00 100%)', backgroundColor: '#FE3501', color: '#ffffff', border: 'none', outline: 'none' } : { background: 'transparent', border: 'none', boxShadow: 'none', outline: 'none' }}
+                style={{ border: 'none', outline: 'none' }}
               >
-                {/* Gliding morphing pill indicator (Brand Color) */}
+                {/* Gliding morphing pill indicator (Monochrome Brand Standard) */}
                 {isActive && (
                   <motion.div
                     layoutId={`${prefix}-active-nav-pill`}
@@ -73,7 +73,7 @@ export const NavigationDock = memo(({
                 {/* Icon */}
                 <span 
                   className={`relative z-10 shrink-0 flex items-center justify-center transition-all duration-200 ${
-                    isActive ? '!text-white scale-105' : 'text-foreground/75'
+                    isActive ? 'scale-105' : 'text-foreground/75'
                   }`}
                 >
                   {item.icon}
@@ -93,7 +93,7 @@ export const NavigationDock = memo(({
                         damping: 30,
                         mass: 0.65
                       }}
-                      className="relative z-10 text-[12px] sm:text-xs md:text-sm font-semibold tracking-tight whitespace-nowrap overflow-hidden inline-block leading-none !text-white"
+                      className="relative z-10 text-[12px] sm:text-xs md:text-sm font-semibold tracking-tight whitespace-nowrap overflow-hidden inline-block leading-none"
                     >
                       {item.label}
                     </motion.span>

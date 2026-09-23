@@ -230,17 +230,6 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
     testImg.src = avatarUrl
   }
 
-  const handleCopyInviteLink = () => {
-    const companyId = adminUid || currentUser?.uid;
-    if (!companyId) {
-      addToast('Error: Company ID not found. Ensure you are logged in correctly.', 'danger');
-      return;
-    }
-    const inviteLink = `${window.location.origin}?company=${companyId}`;
-    navigator.clipboard.writeText(inviteLink);
-    addToast('Invite link copied to clipboard!', 'success');
-  };
-
   const handleOpenAddForm = () => {
     const generatedId = `EMP-${Math.floor(100 + Math.random() * 900)}`
     setNewEmpId(generatedId)
@@ -325,15 +314,14 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
       addLog('Updated employee profile', `Saved edits for ${newName} (${newEmpId})`)
       if (addAuditLog) addAuditLog('UPDATE', 'Employee', `Updated employee profile for ${newName} (${newEmpId})`)
     } else {
-      const authIdentifier = newEmail.trim() || newPhone.trim()
-
-      // Invite the teammate by email/phone
+      // Invite the teammate by email and/or phone
       let uid = null
       let wasAlreadyExisted = false
       const companyUid = adminUid || currentUser?.uid
       try {
         const result = await provisionEmployeeAccount({
-          email: authIdentifier,
+          email: newEmail,
+          phone: newPhone,
           password: newPassword,
           name: newName,
           role: 'Teammate',
@@ -380,13 +368,12 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
       // Automatically dispatch Resend onboarding invitation email if configured
       const resendApiKey = settings?.company?.resendApiKey || import.meta.env.VITE_RESEND_API_KEY
       if (resendApiKey && newEmail) {
-        const inviteUrl = `${window.location.origin}/?company=${companyUid}`
         sendEmployeeInviteEmail({
           apiKey: resendApiKey,
           fromEmail: settings?.company?.resendFromEmail,
           companyName: settings?.company?.name || 'Kormiis Ltd.',
           employee: newEmp,
-          inviteLink: inviteUrl,
+          inviteLink: window.location.origin,
           temporaryPassword: newPassword || null,
         }).then(res => {
           if (res.success && addToast) {
@@ -931,11 +918,12 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
                       continue
                     }
 
-                    if (row.email) {
+                    if (row.email || row.phone) {
                       try {
                         const companyUid = adminUid || currentUser?.uid
                         const prov = await provisionEmployeeAccount({
                           email: row.email,
+                          phone: row.phone,
                           name: row.name,
                           role: 'Teammate',
                           companyUid,
@@ -989,9 +977,6 @@ export default function Employees({ employees, setEmployees, attendance, addLog,
                 })
               }}
             />
-            <Button variant="outline" onClick={handleCopyInviteLink} className="shadow-sm flex-1 sm:flex-none">
-              <Icon name="link" className="mr-2 h-4 w-4 text-primary" size={16}/> Invite Link
-            </Button>
             <Button variant="outline" onClick={() => document.getElementById('employee-file-input').click()} className="shadow-sm flex-1 sm:flex-none">
               <Icon name="table_chart" className="mr-2 h-4 w-4 text-primary" size={16}/> Import Excel / CSV
             </Button>

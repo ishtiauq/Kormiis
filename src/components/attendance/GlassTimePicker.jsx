@@ -84,7 +84,7 @@ const Wheel = ({ items, value, onChange, label }) => {
                 onClick={() => handleItemClick(item, index)}
                 className={`h-[44px] flex items-center justify-center snap-center text-lg font-bold font-sans tabular-nums transition-all duration-150 cursor-pointer select-none ${
                   isSelected 
-                    ? 'text-primary dark:text-primary scale-110 font-extrabold drop-shadow-[0_0_10px_rgba(255,87,34,0.35)]' 
+                    ? 'text-primary dark:text-primary scale-110 font-extrabold drop-shadow-[0_0_10px_rgba(0,0,0,0.25)] dark:drop-shadow-[0_0_10px_rgba(255,255,255,0.35)]' 
                     : 'text-muted-foreground/40 dark:text-white/30 hover:text-muted-foreground/80 dark:hover:text-white/70 scale-95'
                 }`}
               >

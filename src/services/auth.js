@@ -1,4 +1,4 @@
-import { auth, secondaryAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, createUserWithEmailAndPassword, signInWithEmailAndPassword, updatePassword, deleteUser, signOut, RecaptchaVerifier, signInWithPhoneNumber, EmailAuthProvider, reauthenticateWithCredential, setPersistence, browserLocalPersistence, browserSessionPersistence } from './firebaseCore.js';
+import { auth, secondaryAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, createUserWithEmailAndPassword, signInWithEmailAndPassword, updatePassword, deleteUser, signOut, RecaptchaVerifier, signInWithPhoneNumber, EmailAuthProvider, reauthenticateWithCredential, linkWithPopup, setPersistence, browserLocalPersistence, browserSessionPersistence } from './firebaseCore.js';
 
 // Firestore/Storage are loaded on demand (after sign-in) so the login screen
 // never downloads the Firestore bundle. This module can be reached from the
@@ -61,6 +61,12 @@ export const formatAuthError = (err) => {
   }
   if (code === 'auth/email-already-in-use') {
     return 'An account with this email already exists. Try signing in.';
+  }
+  if (code === 'auth/account-exists-with-different-credential') {
+    return 'This email is registered with a password. Sign in with your email and password, then link Google from Profile → Security.';
+  }
+  if (code === 'auth/credential-already-in-use') {
+    return 'This Google account is already linked to another Kormiis account.';
   }
   if (code === 'auth/weak-password') {
     return 'Password is too weak. Please use at least 6 characters.';
@@ -125,6 +131,8 @@ export const getCompanyForUser = async (uid) => {
       designation: profile?.designation || null,
       permissions: Array.isArray(profile?.permissions) ? profile.permissions : [],
       avatar: data.avatar || profile?.avatar || null,
+      mustChangePassword: data.mustChangePassword === true,
+      onboardingPending: data.onboardingPending === true,
     };
   } catch (error) {
     console.error('Failed to read user doc:', error);
@@ -160,6 +168,7 @@ export const createBusinessSpace = async (user, { name }) => {
     companyUid: uid,
     role: 'Admin',
     companyName,
+    onboardingPending: true,
     createdAt: serverTimestamp(),
   }, { merge: true });
 
@@ -175,7 +184,37 @@ export const createBusinessSpace = async (user, { name }) => {
     lastUpdated: new Date(),
   }, { merge: true });
 
-  return { companyUid: uid, companyName };
+  return { companyUid: uid, companyName, onboardingPending: true };
+};
+
+/**
+ * Clears the onboarding flag for a workspace owner once they finish (or skip)
+ * the guided setup wizard. Persists on the user doc and the settings snapshot
+ * so the wizard never re-opens.
+ */
+export const completeWorkspaceOnboarding = async (uid, { company } = {}) => {
+  const { db, doc, getDoc, setDoc } = await getFirebase();
+  if (!db || !uid) return;
+  try {
+    await setDoc(doc(db, 'users', uid), { onboardingPending: false }, { merge: true });
+  } catch (error) {
+    console.warn('[completeWorkspaceOnboarding] users doc update skipped:', error.message);
+  }
+  try {
+    const settingsRef = doc(db, 'companies', uid, 'snapshots', 'settings');
+    const snap = await getDoc(settingsRef);
+    const existing = snap.exists() ? (snap.data().data || {}) : {};
+    await setDoc(settingsRef, {
+      data: {
+        ...existing,
+        ...(company ? { company: { ...(existing.company || {}), ...company } } : {}),
+        onboardingCompleted: true,
+      },
+      lastUpdated: new Date(),
+    }, { merge: true });
+  } catch (error) {
+    console.warn('[completeWorkspaceOnboarding] settings update skipped:', error.message);
+  }
 };
 
 /**
@@ -241,105 +280,127 @@ export const acceptInvite = async (user, invite) => {
 };
 
 /**
- * Registers a teammate by email or phone. Uses secondaryAuth to create the account 
- * without signing out the admin. If the account already exists in Firebase Auth,
- * it automatically links the teammate to the company and creates an invite record.
+ * Registers a teammate by email and/or phone. Uses secondaryAuth to create the
+ * account(s) without signing out the admin. When both a work email and a phone
+ * number are supplied, BOTH become valid login identifiers (each backed by its
+ * own Firebase Auth account with the shared temporary password) so the teammate
+ * can sign in with whichever they remember — or their Google account when the
+ * email is a Gmail address. If an account already exists in Firebase Auth, it
+ * is linked to the company instead of failing.
  */
-export const provisionEmployeeAccount = async ({ email, password, name, role, companyUid, employeeId, department, avatar }) => {
+export const TEMP_EMPLOYEE_PASSWORD = '12345678';
+
+export const provisionEmployeeAccount = async ({ email, phone, password, name, role, companyUid, employeeId, department, avatar }) => {
   const { db, doc, setDoc, getDocs, collection, query, where, serverTimestamp } = await getFirebase();
   if (!db || !secondaryAuth) throw new Error('Firebase not configured');
-  if (!email) throw new Error('Teammate identifier is required.');
   if (!companyUid) throw new Error('Missing company ID.');
-  
-  const parsedEmail = parseIdentifier(email);
-  const rawEmail = (email || '').trim().toLowerCase();
-  let uid = null;
-  let alreadyExisted = false;
 
-  try {
-    // 1. Try to create the user in Firebase Auth using the secondary instance
-    const userCredential = await createUserWithEmailAndPassword(secondaryAuth, parsedEmail, password || 'KormiisTemp123!');
-    uid = userCredential.user.uid;
-    
-    // Sign out from the secondary instance just in case
-    await signOut(secondaryAuth);
-  } catch (error) {
-    if (error.code === 'auth/email-already-in-use') {
-      alreadyExisted = true;
-      // The email/phone is already registered in Firebase Auth!
-      // Look up if a Firestore user record already exists for this email
-      try {
-        const usersQ = query(collection(db, 'users'), where('email', 'in', [parsedEmail, rawEmail]));
-        const userSnaps = await getDocs(usersQ);
-        if (!userSnaps.empty) {
-          uid = userSnaps.docs[0].id;
-        }
-      } catch (lookupErr) {
-        console.warn('Could not query users collection for existing user:', lookupErr);
-      }
-    } else {
-      throw error;
+  const tempPassword = password || TEMP_EMPLOYEE_PASSWORD;
+  const rawEmail = (email || '').trim().toLowerCase();
+  const rawPhone = (phone || '').trim();
+
+  // Build the list of distinct login identifiers to provision.
+  const identifiers = [];
+  if (rawEmail) identifiers.push({ key: rawEmail, parsed: parseIdentifier(rawEmail) });
+  if (rawPhone) {
+    const parsedPhone = parseIdentifier(rawPhone);
+    if (!identifiers.some(i => i.parsed === parsedPhone)) {
+      identifiers.push({ key: rawPhone.toLowerCase(), parsed: parsedPhone });
     }
   }
+  if (identifiers.length === 0) throw new Error('Teammate identifier is required.');
 
-  // 2. If UID is known, update user doc and company members collection
-  if (uid) {
+  const uids = [];
+  let alreadyExisted = false;
+
+  for (const identifier of identifiers) {
+    let uid = null;
     try {
-      await setDoc(doc(db, 'users', uid), {
-        uid,
-        email: parsedEmail,
-        fullName: name || '',
-        companyUid,
-        employeeId: employeeId || '',
-        role: role || 'Teammate',
-        department: department || '',
-        avatar: avatar || '',
-        joinedAt: serverTimestamp(),
-      }, { merge: true });
-    } catch (userDocErr) {
-      console.warn('[provisionEmployeeAccount] Note: users/{uid} write skipped or deferred (rules):', userDocErr.message);
+      // 1. Create the account in Firebase Auth using the secondary instance.
+      const userCredential = await createUserWithEmailAndPassword(secondaryAuth, identifier.parsed, tempPassword);
+      uid = userCredential.user.uid;
+      await signOut(secondaryAuth);
+    } catch (error) {
+      if (error.code === 'auth/email-already-in-use') {
+        alreadyExisted = true;
+        // Already registered — look up the existing Firestore user record.
+        try {
+          const usersQ = query(collection(db, 'users'), where('email', 'in', [identifier.parsed, identifier.key]));
+          const userSnaps = await getDocs(usersQ);
+          if (!userSnaps.empty) uid = userSnaps.docs[0].id;
+        } catch (lookupErr) {
+          console.warn('Could not query users collection for existing user:', lookupErr);
+        }
+      } else {
+        throw error;
+      }
     }
 
+    // 2. Write the user doc + membership registry for this identifier.
+    if (uid) {
+      uids.push(uid);
+      try {
+        await setDoc(doc(db, 'users', uid), {
+          uid,
+          email: identifier.parsed,
+          loginEmail: rawEmail || '',
+          phone: rawPhone || '',
+          fullName: name || '',
+          companyUid,
+          employeeId: employeeId || '',
+          role: role || 'Teammate',
+          department: department || '',
+          avatar: avatar || '',
+          mustChangePassword: true,
+          joinedAt: serverTimestamp(),
+        }, { merge: true });
+      } catch (userDocErr) {
+        console.warn('[provisionEmployeeAccount] Note: users/{uid} write skipped or deferred (rules):', userDocErr.message);
+      }
+
+      try {
+        await setDoc(doc(db, 'companies', companyUid, 'members', uid), {
+          employeeId: employeeId || '',
+          email: identifier.parsed,
+          name: name || '',
+          role: role || 'Teammate',
+          department: department || '',
+          avatar: avatar || '',
+          mustChangePassword: true,
+          registeredAt: serverTimestamp(),
+        }, { merge: true });
+      } catch (memberDocErr) {
+        console.warn('[provisionEmployeeAccount] Note: members/{uid} write skipped or deferred (rules):', memberDocErr.message);
+      }
+    }
+
+    // 3. Invite record keyed by the identifier so Google/email/phone sign-in
+    //    auto-links to the workspace.
     try {
-      await setDoc(doc(db, 'companies', companyUid, 'members', uid), {
+      const inviteData = {
+        email: rawEmail,
+        parsedEmail: identifier.parsed,
+        phone: rawPhone || '',
+        companyUid,
         employeeId: employeeId || '',
-        email: parsedEmail,
         name: name || '',
         role: role || 'Teammate',
         department: department || '',
         avatar: avatar || '',
-        registeredAt: serverTimestamp(),
-      }, { merge: true });
-    } catch (memberDocErr) {
-      console.warn('[provisionEmployeeAccount] Note: members/{uid} write skipped or deferred (rules):', memberDocErr.message);
+        createdAt: serverTimestamp(),
+        status: uid ? 'linked' : 'pending',
+        linkedUid: uid || null,
+      };
+      await setDoc(doc(db, 'invites', identifier.parsed), inviteData, { merge: true });
+      if (identifier.key && identifier.key !== identifier.parsed) {
+        await setDoc(doc(db, 'invites', identifier.key), inviteData, { merge: true });
+      }
+    } catch (inviteErr) {
+      console.warn('[provisionEmployeeAccount] Note: invites record write skipped or deferred (rules):', inviteErr.message);
     }
   }
 
-  // 3. Always create an invite record in 'invites' so when they sign in with Google or credentials, they auto-link
-  try {
-    const inviteData = {
-      email: rawEmail,
-      parsedEmail,
-      companyUid,
-      employeeId: employeeId || '',
-      name: name || '',
-      role: role || 'Teammate',
-      department: department || '',
-      avatar: avatar || '',
-      createdAt: serverTimestamp(),
-      status: uid ? 'linked' : 'pending',
-      linkedUid: uid || null,
-    };
-
-    await setDoc(doc(db, 'invites', parsedEmail), inviteData, { merge: true });
-    if (rawEmail && rawEmail !== parsedEmail) {
-      await setDoc(doc(db, 'invites', rawEmail), inviteData, { merge: true });
-    }
-  } catch (inviteErr) {
-    console.warn('[provisionEmployeeAccount] Note: invites record write skipped or deferred (rules):', inviteErr.message);
-  }
-
-  return { uid, invited: !uid, alreadyExisted };
+  return { uid: uids[0] || null, uids, invited: uids.length === 0, alreadyExisted };
 };
 
 /**
@@ -375,6 +436,28 @@ export const changeEmployeePassword = async (currentPassword, newPassword) => {
   const credential = EmailAuthProvider.credential(account.email, currentPassword);
   await reauthenticateWithCredential(account, credential);
   await updatePassword(auth.currentUser, newPassword);
+
+  // Clear the forced first-login flag so the gate never reappears.
+  try {
+    const { db, doc, setDoc } = await getFirebase();
+    if (db) await setDoc(doc(db, 'users', account.uid), { mustChangePassword: false }, { merge: true });
+  } catch (flagErr) {
+    console.warn('[changeEmployeePassword] Could not clear mustChangePassword flag:', flagErr.message);
+  }
+};
+
+/**
+ * Links the signed-in employee's Google account to their existing email/password
+ * account so "Continue with Google" works as a one-tap login afterwards.
+ */
+export const linkGoogleAccount = async () => {
+  if (!auth) throw new Error('Firebase not configured');
+  const account = auth.currentUser;
+  if (!account) throw new Error('You must be signed in to link a Google account.');
+  const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: 'select_account' });
+  const result = await linkWithPopup(account, provider);
+  return { email: result.user.email, providerId: 'google.com' };
 };
 
 /**

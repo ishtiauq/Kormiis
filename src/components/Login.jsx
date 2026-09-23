@@ -323,19 +323,6 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
     }
   }, [])
 
-  useEffect(() => {
-    try {
-      const searchParams = new URLSearchParams(window.location.search)
-      const companyFromUrl = searchParams.get('company') || searchParams.get('workspace')
-      if (companyFromUrl) {
-        setAuthModalOpen(true)
-        setAuthTab('in')
-      }
-    } catch {
-      // ignore in environments without window.location.search
-    }
-  }, [])
-
   const handleInstallClick = async () => {
     if (!deferredPrompt) {
       alert('To install the app, use your browser menu (e.g. Chrome 3 dots -> Install App, or Safari -> Add to Home Screen).')
@@ -351,7 +338,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
 
 // --- Auth Handlers ---
 
-  const completeAdminLogin = (user, companyName) => {
+  const completeAdminLogin = (user, companyName, opts = {}) => {
     const adminObj = {
       uid: user.uid,
       id: user.uid,
@@ -362,6 +349,8 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
       companyUid: user.uid,
       role: 'Admin',
       department: 'Management',
+      mustChangePassword: opts.mustChangePassword === true,
+      onboardingPending: opts.onboardingPending === true,
     }
     setIsLoading(false)
     setLoadingMode(null)
@@ -384,6 +373,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
       designation: linkage.designation || '',
       permissions: linkage.permissions || [],
       avatar: linkage.avatar || user.photoURL || '',
+      mustChangePassword: linkage.mustChangePassword === true,
     }
     setIsLoading(false)
     setLoadingMode(null)
@@ -410,30 +400,9 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
         }
       }
 
-      // 2. If still not linked, check if user came via a ?company= invite link
-      if (!linkage?.companyUid) {
-        try {
-          const searchParams = new URLSearchParams(window.location.search)
-          const companyFromUrl = searchParams.get('company') || searchParams.get('workspace')
-          if (companyFromUrl) {
-            const autoInvite = {
-              companyUid: companyFromUrl,
-              role: 'Teammate',
-              department: 'General',
-              name: user.displayName || user.email?.split('@')[0] || 'Teammate',
-              employeeId: '',
-            }
-            await acceptInvite(user, autoInvite)
-            linkage = await getCompanyForUser(user.uid)
-          }
-        } catch (urlInviteErr) {
-          console.warn('Error linking via company url param:', urlInviteErr)
-        }
-      }
-
       if (linkage?.companyUid) {
         if (linkage.companyUid === user.uid) {
-          completeAdminLogin(user, linkage.companyName)
+          completeAdminLogin(user, linkage.companyName, { onboardingPending: linkage.onboardingPending })
         } else {
           completeTeammateLogin(user, linkage)
         }
@@ -523,7 +492,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
         activeUser = await registerWithEmail(emailOrPhone, password, rememberMe)
       }
       const created = await createBusinessSpace(activeUser, { name: spaceName })
-      completeAdminLogin(activeUser, created.companyName)
+      completeAdminLogin(activeUser, created.companyName, { onboardingPending: true })
     } catch (err) {
       setError(formatAuthError(err))
       setIsLoading(false)
@@ -763,13 +732,13 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
             <h1 className="text-fluid-display-xl font-black tracking-tight leading-[1.1] text-center w-full uppercase">
               <span className="text-white landing-headline-text" style={{ color: '#ffffff' }}>MANAGE YOUR</span>
               <br className="sm:hidden" />{' '}
-              <span className="landing-changeable-word relative inline-block text-[#FE3501]" style={{ color: '#FE3501' }}>
+              <span className="landing-changeable-word relative inline-block text-white" style={{ color: '#ffffff' }}>
                 {typed || '\u00A0'}
                 <motion.span
                   animate={{ opacity: [1, 0, 1] }}
                   transition={{ repeat: Infinity, duration: 0.8, ease: "easeInOut" }}
-                  className="inline-block w-[3px] sm:w-[5px] h-[0.82em] align-baseline ml-1"
-                  style={{ backgroundColor: '#FE3501' }}
+                  className="inline-block w-[3px] sm:w-[5px] h-[0.82em] align-baseline ml-1 bg-white"
+                  style={{ backgroundColor: '#ffffff' }}
                 />
               </span>
               <br />
@@ -1308,7 +1277,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
             <Button variant="outline" className="rounded-full text-xs border-white/10 text-white hover:bg-white/[0.08]" onClick={() => setShowAlreadyInSpace(false)}>
               Cancel
             </Button>
-            <Button className="rounded-full text-xs bg-primary text-white hover:opacity-90" onClick={useJoinFromPopup}>
+            <Button className="rounded-full text-xs bg-primary text-primary-foreground hover:opacity-90" onClick={useJoinFromPopup}>
               Sign In to Workspace
             </Button>
           </DialogFooter>

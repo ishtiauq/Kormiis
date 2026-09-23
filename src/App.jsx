@@ -11,10 +11,12 @@ import ToastContainer from './components/layout/ToastContainer.jsx'
 
 const Login = lazy(() => import('./components/Login.jsx'))
 const DashboardShell = lazy(() => import('./components/DashboardShell.jsx'))
+const ForcePasswordChange = lazy(() => import('./components/ForcePasswordChange.jsx'))
+const OnboardingWizard = lazy(() => import('./components/OnboardingWizard.jsx'))
 
 export default function App() {
   const { themeMode, isDarkMode, toggleTheme, setThemeMode } = useTheme()
-  const { user, handleLogin, handleLogout } = useAuth()
+  const { user, setUser, handleLogin, handleLogout } = useAuth()
   const { toasts, addToast, removeToast } = useToast()
 
   // Read initial view from URL hash or localStorage
@@ -79,6 +81,15 @@ export default function App() {
     return () => { clearTimeout(resizeTimer); window.removeEventListener('resize', handleResize) }
   }, [])
 
+  const persistUser = (patch) => {
+    setUser(prev => {
+      if (!prev) return prev
+      const next = { ...prev, ...patch }
+      localStorage.setItem('kormiis_user', JSON.stringify(next))
+      return next
+    })
+  }
+
   if (!user) {
     return (
       <>
@@ -86,6 +97,23 @@ export default function App() {
         <ToastContainer toasts={toasts} removeToast={removeToast} />
         <Suspense fallback={<LoadingScreen isDarkMode={isDarkMode} message="Loading Kormiis..." />}>
           <Login onLogin={handleLogin} themeMode={themeMode} toggleTheme={toggleTheme} setThemeMode={setThemeMode} addToast={addToast} />
+        </Suspense>
+      </>
+    )
+  }
+
+  if (user.mustChangePassword) {
+    return (
+      <>
+        <GlobalTooltip />
+        <ToastContainer toasts={toasts} removeToast={removeToast} />
+        <Suspense fallback={<LoadingScreen isDarkMode={isDarkMode} message="Securing your account..." />}>
+          <ForcePasswordChange
+            user={user}
+            addToast={addToast}
+            handleLogout={handleLogout}
+            onComplete={() => persistUser({ mustChangePassword: false })}
+          />
         </Suspense>
       </>
     )
@@ -110,6 +138,15 @@ export default function App() {
           isMobile={isMobile}
         />
       </Suspense>
+      {user.onboardingPending && (
+        <Suspense fallback={null}>
+          <OnboardingWizard
+            user={user}
+            addToast={addToast}
+            onComplete={() => persistUser({ onboardingPending: false })}
+          />
+        </Suspense>
+      )}
     </>
   )
 }

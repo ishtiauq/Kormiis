@@ -150,7 +150,7 @@ export default function Documents({
       }
 
       // Separator Line
-      doc.setDrawColor(254, 53, 1)
+      doc.setDrawColor(30, 30, 30)
       doc.setLineWidth(0.8)
       doc.line(20, startY, 190, startY)
       startY += 10

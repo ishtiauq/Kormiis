@@ -395,12 +395,12 @@ export default function Topbar({
                 transition={{ layout: { type: 'spring', stiffness: 440, damping: 32, mass: 0.7 } }}
                 className={`relative flex items-center rounded-full select-none cursor-pointer border-0 !border-none outline-none transition-colors duration-150 ${
                   isAiOpen
-                    ? 'px-3 sm:px-3.5 h-9 sm:h-9.5 gap-1.5 text-white font-bold z-10'
+                    ? 'px-3 sm:px-3.5 h-9 sm:h-9.5 gap-1.5 bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 font-bold z-10'
                     : 'size-9 sm:size-10 justify-center text-foreground/75 hover:text-foreground p-0'
                 }`}
-                style={isAiOpen ? { background: 'linear-gradient(135deg, #FE3501 0%, #e62f00 100%)', color: '#ffffff', border: 'none', outline: 'none' } : { background: 'transparent', border: 'none', boxShadow: 'none', outline: 'none' }}
+                style={{ border: 'none', outline: 'none' }}
               >
-                <span className={`relative z-10 shrink-0 flex items-center justify-center ${isAiOpen ? 'text-white scale-105' : ''}`}>
+                <span className={`relative z-10 shrink-0 flex items-center justify-center ${isAiOpen ? 'scale-105' : ''}`}>
                   <AiQuantumGlyph size={20} />
                 </span>
 
@@ -412,7 +412,7 @@ export default function Topbar({
                       animate={{ opacity: 1, width: 'auto', filter: 'blur(0px)', x: 0 }}
                       exit={{ opacity: 0, width: 0, filter: 'blur(3px)', x: -3 }}
                       transition={{ type: 'spring', stiffness: 440, damping: 30, mass: 0.65 }}
-                      className="relative z-10 text-xs font-bold tracking-tight whitespace-nowrap overflow-hidden inline-block leading-none !text-white"
+                      className="relative z-10 text-xs font-bold tracking-tight whitespace-nowrap overflow-hidden inline-block leading-none"
                     >
                       Kormiis AI
                     </motion.span>
@@ -535,12 +535,12 @@ export default function Topbar({
                 onClick={() => setNotificationTab('all')}
                 className={`flex-1 h-8 text-xs font-bold rounded-xl transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5 border border-transparent ${
                   notificationTab === 'all' 
-                    ? 'bg-primary text-white shadow-xs dark:bg-primary dark:text-white' 
+                    ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 shadow-xs' 
                     : 'text-muted-foreground hover:text-foreground hover:bg-white/40 dark:hover:bg-white/10'
                 }`}
               >
                 <span>All</span>
-                <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${notificationTab === 'all' ? 'bg-white/25 text-white' : 'bg-black/[0.05] dark:bg-white/10 text-muted-foreground'}`}>
+                <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${notificationTab === 'all' ? 'bg-white/25 text-white dark:bg-black/15 dark:text-neutral-900' : 'bg-black/[0.05] dark:bg-white/10 text-muted-foreground'}`}>
                   {notifications.length + (hasIntegrityIssues ? 1 : 0)}
                 </span>
               </button>
@@ -548,13 +548,13 @@ export default function Topbar({
                 onClick={() => setNotificationTab('unread')}
                 className={`flex-1 h-8 text-xs font-bold rounded-xl transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5 border border-transparent ${
                   notificationTab === 'unread' 
-                    ? 'bg-primary text-white shadow-xs dark:bg-primary dark:text-white' 
+                    ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 shadow-xs' 
                     : 'text-muted-foreground hover:text-foreground hover:bg-white/40 dark:hover:bg-white/10'
                 }`}
               >
                 <span>Unread</span>
                 {totalUnreadCount > 0 && (
-                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${notificationTab === 'unread' ? 'bg-white/25 text-white' : 'bg-destructive/15 text-destructive'}`}>
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${notificationTab === 'unread' ? 'bg-white/25 text-white dark:bg-black/15 dark:text-neutral-900' : 'bg-destructive/15 text-destructive'}`}>
                     {totalUnreadCount}
                   </span>
                 )}

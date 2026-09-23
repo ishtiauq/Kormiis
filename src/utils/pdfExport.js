@@ -68,12 +68,12 @@ function addCompanyBranding(doc, rawSettings, startY = 14) {
   // Subtitle / System Tag
   doc.setFontSize(7.5)
   doc.setFont('helvetica', 'bold')
-  doc.setTextColor(254, 53, 1) // Kormiis Brand Accent
+  doc.setTextColor(50, 50, 50) // Monochrome Accent
   doc.text('OFFICIAL HR & ATTENDANCE RECORD', textStartX, currentY + 17)
 
   // Accent Horizontal Separator Line
   const separatorY = currentY + 22
-  doc.setDrawColor(254, 53, 1)
+  doc.setDrawColor(40, 40, 40)
   doc.setLineWidth(0.6)
   doc.line(14, separatorY, 196, separatorY)
 
@@ -149,7 +149,7 @@ export async function exportDailyAttendancePDF(employees = [], logs = {}, select
     body: tableRows,
     theme: 'striped',
     headStyles: { 
-      fillColor: [254, 53, 1], // Brand Orange
+      fillColor: [24, 24, 27], // Neutral Monochrome
       textColor: [255, 255, 255],
       fontStyle: 'bold',
       fontSize: 9
@@ -266,7 +266,7 @@ export async function exportMonthlyAttendancePDF(employees = [], attendance = {}
     body: tableRows,
     theme: 'striped',
     headStyles: { 
-      fillColor: [254, 53, 1], // Brand Orange
+      fillColor: [24, 24, 27], // Neutral Monochrome
       textColor: [255, 255, 255],
       fontStyle: 'bold',
       fontSize: 9

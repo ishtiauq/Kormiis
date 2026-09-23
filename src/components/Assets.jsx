@@ -955,7 +955,7 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
           [asset.id, asset.name, asset.category, asset.serialNumber || 'N/A', notes]
         ],
         theme: 'striped',
-        headStyles: { fillColor: [254, 53, 1] },
+        headStyles: { fillColor: [24, 24, 27] },
         styles: { fontSize: 9.5, cellPadding: 3.5 },
       })
 

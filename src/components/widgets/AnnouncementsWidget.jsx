@@ -398,26 +398,24 @@ export const AnnouncementsWidget = memo(({
             <button
               type="button"
               onClick={() => handleTabClick('feed')}
-              style={activeTab === 'feed' ? { backgroundColor: '#FE3501', color: '#ffffff', borderColor: '#FE3501' } : {}}
               className={`relative h-8 sm:h-8.5 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer select-none flex items-center justify-center gap-1.5 sm:gap-2 px-2 border active:scale-[0.97] ${
                 activeTab === 'feed'
-                  ? 'bg-[#FE3501] !text-white border-[#FE3501] shadow-xs'
+                  ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 border-black/10 dark:border-white/20 shadow-xs'
                   : 'bg-black/[0.04] dark:bg-white/[0.06] text-foreground hover:bg-black/[0.08] dark:hover:bg-white/[0.12] border-black/10 dark:border-white/12'
               }`}
             >
               <Icon 
                 name="forum" 
                 size={15} 
-                className={`shrink-0 ${activeTab === 'feed' ? '!text-white' : 'text-foreground/80'}`} 
+                className="shrink-0" 
               />
               <span 
-                style={activeTab === 'feed' ? { color: '#ffffff' } : {}}
-                className={`whitespace-nowrap text-xs sm:text-sm font-bold tracking-tight ${activeTab === 'feed' ? '!text-white' : 'text-foreground'}`}
+                className="whitespace-nowrap text-xs sm:text-sm font-bold tracking-tight"
               >
                 Feed
               </span>
               {feedPosts.length > 0 && !seenTabs.has('feed') && (
-                <span className="absolute top-1 right-1.5 size-2 rounded-full bg-[#FE3501] ring-1.5 ring-background shrink-0 pointer-events-none" />
+                <span className="absolute top-1 right-1.5 size-2 rounded-full bg-foreground ring-1.5 ring-background shrink-0 pointer-events-none" />
               )}
             </button>
 
@@ -425,26 +423,24 @@ export const AnnouncementsWidget = memo(({
             <button
               type="button"
               onClick={() => handleTabClick('notice')}
-              style={activeTab === 'notice' ? { backgroundColor: '#FE3501', color: '#ffffff', borderColor: '#FE3501' } : {}}
               className={`relative h-8 sm:h-8.5 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer select-none flex items-center justify-center gap-1.5 sm:gap-2 px-2 border active:scale-[0.97] ${
                 activeTab === 'notice'
-                  ? 'bg-[#FE3501] !text-white border-[#FE3501] shadow-xs'
+                  ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 border-black/10 dark:border-white/20 shadow-xs'
                   : 'bg-black/[0.04] dark:bg-white/[0.06] text-foreground hover:bg-black/[0.08] dark:hover:bg-white/[0.12] border-black/10 dark:border-white/12'
               }`}
             >
               <Icon 
                 name="campaign" 
                 size={16} 
-                className={`shrink-0 ${activeTab === 'notice' ? '!text-white' : 'text-foreground/80'}`} 
+                className="shrink-0" 
               />
               <span 
-                style={activeTab === 'notice' ? { color: '#ffffff' } : {}}
-                className={`whitespace-nowrap text-xs sm:text-sm font-bold tracking-tight ${activeTab === 'notice' ? '!text-white' : 'text-foreground'}`}
+                className="whitespace-nowrap text-xs sm:text-sm font-bold tracking-tight"
               >
                 Notice
               </span>
               {noticePosts.length > 0 && !seenTabs.has('notice') && (
-                <span className="absolute top-1 right-1.5 size-2 rounded-full bg-[#FE3501] ring-1.5 ring-background shrink-0 pointer-events-none" />
+                <span className="absolute top-1 right-1.5 size-2 rounded-full bg-foreground ring-1.5 ring-background shrink-0 pointer-events-none" />
               )}
             </button>
 
@@ -452,26 +448,24 @@ export const AnnouncementsWidget = memo(({
             <button
               type="button"
               onClick={() => handleTabClick('upcoming')}
-              style={activeTab === 'upcoming' ? { backgroundColor: '#FE3501', color: '#ffffff', borderColor: '#FE3501' } : {}}
               className={`relative h-8 sm:h-8.5 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer select-none flex items-center justify-center gap-1.5 sm:gap-2 px-2 border active:scale-[0.97] ${
                 activeTab === 'upcoming'
-                  ? 'bg-[#FE3501] !text-white border-[#FE3501] shadow-xs'
+                  ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 border-black/10 dark:border-white/20 shadow-xs'
                   : 'bg-black/[0.04] dark:bg-white/[0.06] text-foreground hover:bg-black/[0.08] dark:hover:bg-white/[0.12] border-black/10 dark:border-white/12'
               }`}
             >
               <Icon 
                 name="calendar_month" 
                 size={15} 
-                className={`shrink-0 ${activeTab === 'upcoming' ? '!text-white' : 'text-foreground/80'}`} 
+                className="shrink-0" 
               />
               <span 
-                style={activeTab === 'upcoming' ? { color: '#ffffff' } : {}}
-                className={`whitespace-nowrap text-xs sm:text-sm font-bold tracking-tight ${activeTab === 'upcoming' ? '!text-white' : 'text-foreground'}`}
+                className="whitespace-nowrap text-xs sm:text-sm font-bold tracking-tight"
               >
                 Events
               </span>
               {upcomingCount > 0 && !seenTabs.has('upcoming') && (
-                <span className="absolute top-1 right-1.5 size-2 rounded-full bg-[#FE3501] ring-1.5 ring-background shrink-0 pointer-events-none" />
+                <span className="absolute top-1 right-1.5 size-2 rounded-full bg-foreground ring-1.5 ring-background shrink-0 pointer-events-none" />
               )}
             </button>
           </div>

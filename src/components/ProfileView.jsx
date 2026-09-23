@@ -6,7 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { formatDate } from '../services/date.js'
-import { changeEmployeePassword, deleteCurrentUserAccount, scheduleWorkspaceDeletion, cancelWorkspaceDeletion } from '../services/auth.js'
+import { changeEmployeePassword, deleteCurrentUserAccount, scheduleWorkspaceDeletion, cancelWorkspaceDeletion, linkGoogleAccount } from '../services/auth.js'
+import { auth } from '../services/firebaseCore.js'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { getGoogleCalendarConnection, connectGoogleCalendar, disconnectGoogleCalendar } from '../services/googleCalendarService.js'
 
@@ -39,6 +40,10 @@ export default function ProfileView({
   const [showPwNew, setShowPwNew] = useState(false)
   const [showPwConfirm, setShowPwConfirm] = useState(false)
   const [pwLoading, setPwLoading] = useState(false)
+
+  // Google account linking state
+  const [googleLinkLoading, setGoogleLinkLoading] = useState(false)
+  const [googleLinked, setGoogleLinked] = useState(() => !!auth?.currentUser?.providerData?.some(p => p.providerId === 'google.com'))
 
   // Account Deletion State
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
@@ -160,6 +165,20 @@ export default function ProfileView({
       addToast?.('Failed to change password: ' + (err.message || 'Unknown error'), 'danger')
     } finally {
       setPwLoading(false)
+    }
+  }
+
+  const handleLinkGoogle = async () => {
+    setGoogleLinkLoading(true)
+    try {
+      const res = await linkGoogleAccount()
+      setGoogleLinked(true)
+      addToast?.(`Google account linked (${res.email}). You can now use one-tap sign-in.`, 'success')
+      addLog?.('Google Linked', `${currentUser.name || 'User'} linked their Google account.`, 'info')
+    } catch (err) {
+      addToast?.('Failed to link Google: ' + (err.message || 'Unknown error'), 'danger')
+    } finally {
+      setGoogleLinkLoading(false)
     }
   }
 
@@ -841,7 +860,55 @@ export default function ProfileView({
             </CardContent>
           </Card>
 
-          {/* Google Calendar Integration & Mirror Sync */}
+          {/* Sign-in methods — link Google for one-tap login */}
+          <Card className="glass-kormiis rounded-3xl border border-white/30 dark:border-white/10 shadow-sm overflow-hidden mt-6">
+            <CardHeader className="p-6 sm:p-8 pb-4 border-b border-border/40 dark:border-white/5">
+              <CardTitle className="text-fluid-lg font-bold flex items-center gap-2">
+                <Icon name="login" size={20} className="text-primary" />
+                Sign-in Methods
+              </CardTitle>
+              <CardDescription className="text-fluid-xs text-muted-foreground mt-1">
+                Use your email/phone password, or link Google for one-tap sign-in.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-6 sm:p-8 pt-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4.5 rounded-2xl bg-white/40 dark:bg-white/[0.04] border border-white/40 dark:border-white/10">
+                <div className="flex items-center gap-3">
+                  <div className="size-10 rounded-2xl bg-white/70 dark:bg-white/10 flex items-center justify-center shrink-0">
+                    <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59a14.5 14.5 0 0 1 0-9.18l-7.98-6.19a24.01 24.01 0 0 0 0 21.56l7.98-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+                  </div>
+                  <div>
+                    <h4 className="text-fluid-sm font-bold text-foreground m-0">Google Account</h4>
+                    <p className="text-fluid-xs text-muted-foreground m-0">
+                      {googleLinked
+                        ? 'Linked. Tap “Continue with Google” on the sign-in screen for instant access.'
+                        : 'Link your Google account to sign in with one tap.'}
+                    </p>
+                  </div>
+                </div>
+                {googleLinked ? (
+                  <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-bold px-2.5 py-0.5 shrink-0">
+                    Linked
+                  </Badge>
+                ) : (
+                  <Button
+                    type="button"
+                    onClick={handleLinkGoogle}
+                    disabled={googleLinkLoading}
+                    className="h-11 px-5 rounded-2xl font-bold shrink-0 shadow-sm bg-white text-neutral-900 hover:bg-white/90 border border-black/10 flex items-center gap-2 cursor-pointer"
+                  >
+                    {googleLinkLoading ? (
+                      <Icon name="progress_activity" size={17} className="animate-spin" />
+                    ) : (
+                      <Icon name="link" size={17} />
+                    )}
+                    <span>Link Google</span>
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
           <Card className="glass-kormiis rounded-3xl border border-white/25 dark:border-white/10 shadow-sm overflow-hidden mt-6">
             <CardHeader className="p-6 sm:p-8 pb-4 border-b border-border/80 dark:border-white/10">
               <div className="flex items-center justify-between gap-3">

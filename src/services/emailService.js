@@ -66,7 +66,7 @@ export function generateInviteEmailHtml({ companyName = 'Kormiis Ltd.', employee
           
           <!-- Header Accent Banner -->
           <tr>
-            <td style="background: linear-gradient(135deg, #FE3501 0%, #ff5e36 100%); padding: 36px 32px; text-align: center;">
+            <td style="background: #18181b; padding: 36px 32px; text-align: center;">
               <h1 style="color: #ffffff; margin: 0; font-size: 26px; font-weight: 800; letter-spacing: -0.5px;">Welcome to ${companyName}</h1>
               <p style="color: rgba(255,255,255,0.9); margin: 8px 0 0 0; font-size: 14px;">Your workspace portal is ready for you</p>
             </td>
@@ -88,7 +88,7 @@ export function generateInviteEmailHtml({ companyName = 'Kormiis Ltd.', employee
                   <td>
                     <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; margin-bottom: 12px;">Your Login Credentials</div>
                     <div style="font-size: 14px; margin-bottom: 8px; color: #1e293b;">
-                      <strong>Work Email:</strong> <span style="color: #2563eb;">${email}</span>
+                      <strong>Work Email:</strong> <span style="color: #0f172a; font-weight: 600;">${email}</span>
                     </div>
                     ${temporaryPassword ? `
                     <div style="font-size: 14px; color: #1e293b;">
@@ -105,7 +105,7 @@ export function generateInviteEmailHtml({ companyName = 'Kormiis Ltd.', employee
 
               <!-- Call to Action Button -->
               <div style="text-align: center; margin-bottom: 32px;">
-                <a href="${inviteLink || 'https://kormiis.vercel.app'}" target="_blank" style="display: inline-block; background-color: #FE3501; color: #ffffff; text-decoration: none; font-weight: 700; font-size: 15px; padding: 14px 36px; border-radius: 14px; box-shadow: 0 4px 14px rgba(254,53,1,0.35);">
+                <a href="${inviteLink || 'https://kormiis.vercel.app'}" target="_blank" style="display: inline-block; background-color: #18181b; color: #ffffff; text-decoration: none; font-weight: 700; font-size: 15px; padding: 14px 36px; border-radius: 14px; box-shadow: 0 4px 14px rgba(0,0,0,0.15);">
                   Accept Invite & Sign In →
                 </a>
               </div>
@@ -168,7 +168,7 @@ export async function sendTestEmail({ apiKey, fromEmail, recipientEmail, company
   const html = `
     <div style="font-family: -apple-system, BlinkMacSystemFont, sans-serif; padding: 30px; background-color: #f8fafc; color: #1e293b;">
       <div style="max-width: 500px; margin: 0 auto; background: #ffffff; padding: 30px; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-        <div style="color: #FE3501; font-weight: 800; font-size: 22px; margin-bottom: 12px;">🎉 Resend Integration Working!</div>
+        <div style="color: #09090b; font-weight: 800; font-size: 22px; margin-bottom: 12px;">🎉 Resend Integration Working!</div>
         <p style="font-size: 14px; line-height: 1.6; color: #475569;">
           Congratulations! Your <strong>Resend</strong> transactional email API is successfully configured for <strong>${companyName}</strong>.
         </p>

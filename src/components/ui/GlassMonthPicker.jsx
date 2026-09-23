@@ -205,11 +205,11 @@ export default function GlassMonthPicker({
                   onClick={() => handleSelectMonth(idx)}
                   className={`group relative h-9.5 rounded-xl flex items-center justify-center transition-all duration-200 cursor-pointer border select-none ${
                     isSelected
-                      ? 'bg-primary text-white font-black border-primary scale-[1.03]'
+                      ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 font-black border-neutral-900 dark:border-white scale-[1.03]'
                       : 'bg-transparent hover:bg-black/5 dark:hover:bg-white/10 text-foreground hover:text-primary border-black/[0.06] dark:border-white/10 hover:border-primary/30 font-bold text-fluid-xs'
                   }`}
                 >
-                  <span className={`text-fluid-xs tracking-tight ${isSelected ? 'font-black text-white' : 'font-bold text-foreground group-hover:text-primary'}`}>
+                  <span className={`text-fluid-xs tracking-tight ${isSelected ? 'font-black text-white dark:text-neutral-900' : 'font-bold text-foreground group-hover:text-primary'}`}>
                     {shortMonth}
                   </span>
 

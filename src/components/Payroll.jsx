@@ -136,6 +136,15 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
       const baseSalary = Math.round(gross * (basicPercent / 100))
       const allowance = Math.round(gross * (allowancePercent / 100))
       const deductions = Math.round(gross * (deductionPercent / 100))
+
+      // Individual itemized breakdown based on salaryStructure settings
+      const earningsBreakdown = structure.filter(s => s.type === 'earning').map(s => ({
+        id: s.id,
+        name: s.name,
+        percentage: s.percentage,
+        amount: Math.round(gross * (s.percentage / 100))
+      }))
+      const allowancesList = earningsBreakdown.filter(item => item.id !== (basicComp?.id || 'basic'))
       
       // Advance and Loan allocations
       const advance = existing?.advance || 0
@@ -146,6 +155,8 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
         grossSalary: gross,
         baseSalary,
         allowance,
+        earningsBreakdown,
+        allowancesList,
         deductions,
         advance,
         loan,
@@ -706,7 +717,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
       head: [tableColumn],
       body: tableRows,
       theme: 'striped',
-      headStyles: { fillColor: [254, 53, 1] }, 
+      headStyles: { fillColor: [24, 24, 27] }, 
       styles: { fontSize: 9, cellPadding: 3 },
       didDrawPage: (data) => {
         if (settings?.company?.logo) {
@@ -815,7 +826,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
               onClick={() => setActiveMainTab(t.id)}
               className={`inline-flex items-center justify-center gap-1.5 h-8.5 px-4 rounded-full text-xs transition-all cursor-pointer border ${
                 activeMainTab === t.id
-                  ? 'bg-primary text-white border-white/20 font-bold'
+                  ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 border-black/10 dark:border-white/20 font-bold'
                   : 'bg-transparent border-transparent font-semibold text-muted-foreground hover:bg-black/5 dark:hover:bg-white/10 hover:text-foreground'
               }`}
             >
@@ -933,6 +944,8 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
                       <TableHead className="w-10"></TableHead>
                       <TableHead>Employee</TableHead>
                       <TableHead>Gross</TableHead>
+                      <TableHead>Basic</TableHead>
+                      <TableHead>Allowances</TableHead>
                       <TableHead>Deductions</TableHead>
                       <TableHead>Advance / Loan</TableHead>
                       <TableHead>Net Pay</TableHead>
@@ -965,7 +978,26 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
                               </div>
                             </div>
                           </TableCell>
-                          <TableCell className="font-sans text-sm">{currency}{entry.grossSalary.toLocaleString()}</TableCell>
+                          <TableCell className="font-sans text-sm font-semibold">{currency}{entry.grossSalary.toLocaleString()}</TableCell>
+                          <TableCell className="font-sans text-sm text-muted-foreground">{currency}{entry.baseSalary.toLocaleString()}</TableCell>
+                          <TableCell className="font-sans text-sm">
+                            <div className="flex flex-col gap-1 min-w-[140px]">
+                              <span className="font-semibold text-emerald-600 dark:text-emerald-400">+{currency}{entry.allowance.toLocaleString()}</span>
+                              {entry.allowancesList && entry.allowancesList.length > 0 && (
+                                <div className="flex flex-wrap items-center gap-1">
+                                  {entry.allowancesList.map(a => (
+                                    <span 
+                                      key={a.id} 
+                                      title={`${a.name}: ${currency}${a.amount.toLocaleString()} (${a.percentage}%)`}
+                                      className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-muted/60 text-muted-foreground border border-border/40 whitespace-nowrap"
+                                    >
+                                      {a.name.split(' ')[0]}: {currency}{a.amount.toLocaleString()}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          </TableCell>
                           <TableCell className="font-sans text-sm text-red-500 dark:text-red-400">-{currency}{entry.deductions.toLocaleString()}</TableCell>
                           <TableCell className="font-sans text-sm text-yellow-600 dark:text-yellow-500">{(entry.advance + loanDeduction) > 0 ? `-${currency}${(entry.advance + loanDeduction).toLocaleString()}` : '—'}</TableCell>
                           <TableCell className="font-sans text-sm font-bold text-primary">{currency}{netPay.toLocaleString()}</TableCell>
@@ -1066,6 +1098,18 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
                       {open && (
                         <div className="border-t border-border/60 dark:border-white/10 px-4 py-3.5 flex flex-col gap-2.5 animate-in fade-in-50 duration-200">
                           <PayrollDetailRow label="Gross Salary" value={`${currency}${entry.grossSalary.toLocaleString()}`} />
+                          <PayrollDetailRow label="Basic Salary" value={`${currency}${entry.baseSalary.toLocaleString()}`} />
+                          <PayrollDetailRow label="Total Allowances" value={`+${currency}${entry.allowance.toLocaleString()}`} valueClass="text-emerald-600 dark:text-emerald-400" />
+                          {entry.allowancesList && entry.allowancesList.length > 0 && (
+                            <div className="pl-3 py-1 flex flex-col gap-1 border-l-2 border-emerald-500/30 my-0.5">
+                              {entry.allowancesList.map(a => (
+                                <div key={a.id} className="flex items-center justify-between text-xs text-muted-foreground">
+                                  <span>{a.name} ({a.percentage}%)</span>
+                                  <span className="font-sans font-medium text-foreground">{currency}{a.amount.toLocaleString()}</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
                           <PayrollDetailRow label="Deductions" value={`-${currency}${entry.deductions.toLocaleString()}`} valueClass="text-red-500 dark:text-red-400" />
                           {(entry.advance > 0 || entry.loan.total > 0) && (
                             <>
