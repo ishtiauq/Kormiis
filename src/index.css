@@ -2435,6 +2435,49 @@ body [class*="saturate-"]:not(header):not(.topbar):not(.landing-glass-header):no
   display: none !important;
 }
 
+/* Apple Slide-to-Confirm Shimmer Animation (Left to Right) */
+@keyframes textShimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.slider-shimmer-text {
+  background: linear-gradient(
+    90deg,
+    rgba(115, 115, 115, 0.55) 0%,
+    rgba(115, 115, 115, 0.55) 35%,
+    rgba(20, 20, 20, 1) 50%,
+    rgba(115, 115, 115, 0.55) 65%,
+    rgba(115, 115, 115, 0.55) 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: textShimmer 2.8s infinite linear;
+}
+
+.dark .slider-shimmer-text,
+[data-theme="dark"] .slider-shimmer-text {
+  background: linear-gradient(
+    90deg,
+    rgba(163, 163, 163, 0.45) 0%,
+    rgba(163, 163, 163, 0.45) 35%,
+    rgba(255, 255, 255, 1) 50%,
+    rgba(163, 163, 163, 0.45) 65%,
+    rgba(163, 163, 163, 0.45) 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: textShimmer 2.8s infinite linear;
+}
+
 
 
 

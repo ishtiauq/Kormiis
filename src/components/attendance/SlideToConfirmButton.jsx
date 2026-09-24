@@ -28,8 +28,13 @@ export default function SlideToConfirmButton({
   const [dragging, setDragging] = useState(false)
 
   const isIn = action === 'in'
-  const accent = isIn ? '#10b981' : '#f43f5e'
-  const accentSoft = isIn ? 'rgba(16, 185, 129, 0.20)' : 'rgba(244, 63, 94, 0.20)'
+  // Exact gradient fills matching Present and No Show cards
+  const accent = isIn 
+    ? 'linear-gradient(135deg, var(--color-status-green) 0%, #047857 100%)' 
+    : 'linear-gradient(135deg, var(--color-status-red) 0%, #b91c1c 100%)'
+  const accentSoft = isIn 
+    ? 'rgba(16, 185, 129, 0.22)' 
+    : 'rgba(239, 68, 68, 0.22)'
   const label = isIn ? 'Check In' : 'Check Out'
 
   const paint = (p) => {
@@ -135,23 +140,13 @@ export default function SlideToConfirmButton({
         style={{ width: `${PAD}px`, background: accentSoft }}
       />
 
-      {/* Dual labels + recorded times + slide instruction */}
-      <span className="absolute inset-0 flex items-center justify-between gap-3 pl-16 pr-4 pointer-events-none">
-        <span className="flex flex-col items-start min-w-0">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Check In</span>
-          <span className="text-sm font-mono font-semibold text-foreground truncate">{checkIn || '—'}</span>
-        </span>
-
+      {/* Slide instruction text */}
+      <span className="absolute inset-0 flex items-center justify-center pl-16 pr-6 pointer-events-none">
         <span
-          className="flex-1 text-center text-xs font-extrabold uppercase tracking-wider text-muted-foreground truncate"
+          className="slider-shimmer-text text-xs sm:text-sm font-extrabold uppercase tracking-wider truncate"
           style={{ opacity: 1 - progress }}
         >
-          Slide to {label}
-        </span>
-
-        <span className="flex flex-col items-end text-right min-w-0">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Check Out</span>
-          <span className="text-sm font-mono font-semibold text-foreground truncate">{checkOut || '—'}</span>
+          {isIn ? 'Slide to Check In' : 'Slide to Check Out'}
         </span>
       </span>
 

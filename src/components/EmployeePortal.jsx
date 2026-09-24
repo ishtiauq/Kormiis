@@ -777,7 +777,7 @@ function DashboardView({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 lg:gap-6 auto-rows-[minmax(148px,auto)] items-stretch pt-2">
 
         {/* Column 1: Attendance / Geo Check-In Column — col-span-12 lg:col-span-4 */}
-        <div className="col-span-12 lg:col-span-4 h-[680px] w-full flex flex-col">
+        <div className="col-span-12 lg:col-span-4 h-auto min-h-fit w-full flex flex-col">
           {currentUser && (
             <GeoCheckInWidget 
               currentUser={currentUser} 

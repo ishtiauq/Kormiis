@@ -126,6 +126,9 @@ export default function GeoCheckInWidget({
   const displayCheckIn = empLog.checkIn && empLog.checkIn !== '--' ? empLog.checkIn : '0'
   const displayCheckOut = empLog.checkOut && empLog.checkOut !== '--' ? empLog.checkOut : '0'
 
+  // Whether employee is currently actively in the office (clocked in and not yet clocked out)
+  const isInOffice = empId && empLog.checkIn && empLog.checkIn !== '--' && empLog.checkIn !== '0' && (!empLog.checkOut || empLog.checkOut === '--' || empLog.checkOut === '0')
+
   // Real-time worked timer calculation (shows 0h 00m instead of '--')
   const workedDurationStr = useMemo(() => {
     if (!empLog || !empLog.checkIn || empLog.checkIn === '--' || empLog.checkIn === '0') {
@@ -210,6 +213,40 @@ export default function GeoCheckInWidget({
       totalWorkHours: totalWorkHours.toFixed(1)
     }
   }, [attendance, empId, currentMonthPrefix])
+
+  // Available leave balances for the current employee
+  const leaveBalances = useMemo(() => {
+    const defaultPolicies = settings?.leavePolicies || { Annual: 14, Sick: 7, Casual: 3, Unpaid: 0 }
+    const empBalance = attendance?.balances?.[empId] || defaultPolicies
+    const allLeaves = Array.isArray(attendance?.leaves) ? attendance.leaves : []
+
+    const getStats = (key) => {
+      const val = empBalance?.[key] ?? empBalance?.[key.toLowerCase()]
+      const limit = typeof val === 'object' && val?.limit != null ? Number(val.limit) : Number(defaultPolicies[key] || 0)
+      
+      let used = 0
+      if (typeof val === 'object' && val?.used != null) {
+        used = Number(val.used) || 0
+      } else {
+        // Fallback: sum approved leaves matching leaveType
+        const approvedOfType = allLeaves.filter(l => 
+          l && l.employeeId === empId && l.status === 'Approved' && 
+          String(l.leaveType || '').toLowerCase() === key.toLowerCase()
+        )
+        used = approvedOfType.reduce((acc, l) => acc + (Number(l.days) || 1), 0)
+      }
+
+      const remaining = Math.max(0, limit - used)
+      return { used, limit, remaining }
+    }
+
+    const annual = getStats('Annual')
+    const sick = getStats('Sick')
+    const casual = getStats('Casual')
+    const totalRemaining = annual.remaining + sick.remaining + casual.remaining
+
+    return { annual, sick, casual, total: totalRemaining }
+  }, [attendance?.balances, attendance?.leaves, empId, settings?.leavePolicies])
 
   const cooldownRemaining = empLog.checkOut !== '--' && !cooldownPassed ? Math.max(0, STANDARD_COOLDOWN_MINS - (minutesSince(empLog.checkOut) ?? 0)) : 0
 
@@ -583,116 +620,211 @@ export default function GeoCheckInWidget({
         </DialogContent>
       </Dialog>
 
-      <Card className={`overflow-hidden dashboard-widget relative rounded-3xl border border-border/60 dark:border-white/10 ${cardClassName ? cardClassName : 'col-span-full xl:col-span-12'} min-h-0 flex flex-col p-0 isolate`}>
-        {/* Header — no headline, just the My Logs action */}
-        <CardHeader className="flex-row items-center justify-end px-4 sm:px-5 pt-4 pb-1 space-y-0 gap-3 border-none">
-          <button
-            onClick={() => setCurrentView && setCurrentView(myLogsTarget)}
-            className="apple-glass-btn text-xs font-semibold px-3.5 h-7 rounded-full cursor-pointer shrink-0 text-foreground"
-          >
-            My Logs
-          </button>
-        </CardHeader>
-
-        {/* Hero: live clock (timer) on top, then the slide-to-confirm control */}
-        <div className="flex flex-col items-center gap-3 px-4 sm:px-5 pt-5 pb-5">
-          {/* Live clock (timer) */}
-          <div className="flex flex-col items-center">
-            <span aria-live="polite" role="timer" className="text-2xl sm:text-3xl font-bold tabular-nums tracking-tight text-foreground leading-none">
-              {timeStr}
-            </span>
-            <span className="text-[11px] font-semibold text-muted-foreground mt-1">
-              {formatLongDate(currentTime)}
-            </span>
-          </div>
-
-          {/* Slide-to-confirm action OR cooldown status */}
-          {canCheckIn || canCheckOut ? (
-            <SlideToConfirmButton
-              action={canCheckIn ? 'in' : 'out'}
-              busy={isLoadingLoc}
-              onConfirm={canCheckIn ? handleCheckIn : handleCheckOut}
-              checkIn={displayCheckIn}
-              checkOut={displayCheckOut}
-            />
-          ) : (
-            <div className="w-full flex items-center justify-between px-4 h-12 rounded-2xl border border-border/70 dark:border-white/12 bg-black/[0.03] dark:bg-white/[0.04] text-xs">
-              <span className="flex items-center gap-2 font-bold text-foreground">
-                <Icon name="check_circle" className="shrink-0 text-emerald-600 dark:text-emerald-400" size={17}/>
-                Checked Out
+      <div className={`flex flex-col gap-4 ${cardClassName ? cardClassName : 'col-span-full xl:col-span-12'}`}>
+        {/* Widget 1: Timer and Slider (No outline/border) */}
+        <div 
+          className="relative rounded-3xl min-h-0 flex flex-col p-0 isolate bg-transparent shadow-none"
+          style={{ border: 'none', outline: 'none', boxShadow: 'none' }}
+        >
+          <div className="flex flex-col items-center gap-6 px-4 sm:px-5 pt-3 pb-2">
+            {/* Live clock (timer) */}
+            <div className="flex flex-col items-center">
+              <span aria-live="polite" role="timer" className="text-4xl sm:text-5xl font-black tabular-nums tracking-normal text-foreground leading-none">
+                {timeStr}
               </span>
-              <span className="text-[11px] font-mono font-bold text-muted-foreground flex items-center gap-1">
-                <Icon name="history_toggle_off" size={13} className="shrink-0"/>
-                {cooldownRemaining > 0 ? `Check In available in ${cooldownRemaining}m` : 'No action needed'}
+              <span className="text-xs sm:text-sm font-semibold text-muted-foreground mt-2.5">
+                {formatLongDate(currentTime)}
               </span>
             </div>
-          )}
 
-          {/* GPS phase feedback (while an action is acquiring/verifying) */}
-          {gpsPhase !== 'idle' && (
-            <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
-              <Icon name="progress_activity" size={14} className="animate-spin" />
-              {gpsPhase === 'acquiring' ? 'Acquiring live GPS…' : 'Verifying GPS…'}
-            </span>
-          )}
+            {/* Slide-to-confirm action OR cooldown status */}
+            {canCheckIn || canCheckOut ? (
+              <SlideToConfirmButton
+                action={canCheckIn ? 'in' : 'out'}
+                busy={isLoadingLoc}
+                onConfirm={canCheckIn ? handleCheckIn : handleCheckOut}
+                checkIn={displayCheckIn}
+                checkOut={displayCheckOut}
+              />
+            ) : (
+              <div className="w-full flex items-center justify-between px-4 h-12 rounded-2xl border border-border/70 dark:border-white/12 bg-black/[0.03] dark:bg-white/[0.04] text-xs">
+                <span className="flex items-center gap-2 font-bold text-foreground">
+                  <Icon name="check_circle" className="shrink-0 text-emerald-600 dark:text-emerald-400" size={17}/>
+                  Checked Out
+                </span>
+                <span className="text-[11px] font-mono font-bold text-muted-foreground flex items-center gap-1">
+                  <Icon name="history_toggle_off" size={13} className="shrink-0"/>
+                  {cooldownRemaining > 0 ? `Check In available in ${cooldownRemaining}m` : 'No action needed'}
+                </span>
+              </div>
+            )}
+
+            {/* GPS phase feedback (while an action is acquiring/verifying) */}
+            {gpsPhase !== 'idle' && (
+              <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                <Icon name="progress_activity" size={14} className="animate-spin" />
+                {gpsPhase === 'acquiring' ? 'Acquiring live GPS…' : 'Verifying GPS…'}
+              </span>
+            )}
+          </div>
         </div>
 
-        {/* Unified Attendance Content Section */}
-        <CardContent className="flex flex-col gap-3.5 p-3.5 sm:p-4 mt-auto">
-          {/* Today's worked duration — compact summary line */}
-          <div className="flex items-center justify-between px-1">
-            <span className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-              <Icon name="timer" size={14} className="shrink-0 text-foreground" />
-              Total worked
-            </span>
-            <span className="text-base sm:text-lg font-black text-foreground font-mono tabular-nums">
-              {workedDurationStr}
-            </span>
-          </div>
+        {/* Widget 2: Today's Activity & Monthly Report (With outline / border) */}
+        <Card className="dashboard-widget relative rounded-3xl border border-border/60 dark:border-white/10 min-h-fit flex flex-col p-0 isolate flex-1">
+          <CardContent className="flex flex-col gap-3.5 p-3.5 sm:p-4 h-full min-h-fit">
+            {/* Today's Activity & Office Duration Box */}
+            <div className="flex flex-col gap-2.5 p-3 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/8 dark:border-white/10">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                  <Icon name="schedule" size={14} className="text-foreground" />
+                  Today's Activity
+                </span>
+              </div>
 
-          {isOffDay && (
-            <span className="text-xs font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-1">
-              <Icon name="event_available" size={14} />
-              Off Day (Scheduled in Roster)
-            </span>
-          )}
+              <div className="grid grid-cols-3 gap-2">
+                <div className="flex flex-col items-center justify-center p-2 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5">
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Clock In</span>
+                  <span className="text-xs sm:text-sm font-black font-mono tabular-nums text-foreground mt-0.5">
+                    {displayCheckIn !== '0' ? displayCheckIn : '—'}
+                  </span>
+                </div>
 
-          {/* 2. Monthly Attendance Progress Bar Style Representation */}
-          <div className="flex flex-col gap-2.5 p-3 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/8 dark:border-white/10">
-            {/* Header with Title and Total Hours */}
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-                Monthly Report
-              </span>
-              <div className="flex items-center gap-1 font-mono text-xs font-bold text-foreground">
-                <Icon name="timer" size={13} className="text-primary shrink-0" />
-                <span>{monthlyStats.totalWorkHours}h total worked</span>
+                <div className="flex flex-col items-center justify-center p-2 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5">
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Clock Out</span>
+                  <span className="text-xs sm:text-sm font-black font-mono tabular-nums text-foreground mt-0.5">
+                    {displayCheckOut !== '0' ? displayCheckOut : '—'}
+                  </span>
+                </div>
+
+                <div className="flex flex-col items-center justify-center p-2 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5">
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+                    {isInOffice && <span className="size-1.5 rounded-full animate-pulse" style={{ backgroundColor: 'var(--color-status-green)' }} />}
+                    {isInOffice ? 'In Office' : 'Office Time'}
+                  </span>
+                  <span className="text-xs sm:text-sm font-black font-mono tabular-nums text-primary mt-0.5">
+                    {workedDurationStr}
+                  </span>
+                </div>
               </div>
             </div>
 
-            {/* Monthly stat cards */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {[
-                { key: 'present', label: 'Present', count: monthlyStats.presentDays, bg: 'linear-gradient(135deg, var(--color-status-green) 0%, #047857 100%)', color: '#065f46' },
-                { key: 'late', label: 'Late', count: monthlyStats.lateDays, bg: 'linear-gradient(135deg, var(--color-status-yellow) 0%, #b45309 100%)', color: '#92400e' },
-                { key: 'noshow', label: 'No Show', count: monthlyStats.noShowDays, bg: 'linear-gradient(135deg, var(--color-status-red) 0%, #b91c1c 100%)', color: '#991b1b' },
-                { key: 'leave', label: 'Leave', count: monthlyStats.leavesCount, bg: 'linear-gradient(135deg, var(--color-status-blue) 0%, #3730a3 100%)', color: '#312e81' },
-              ].map(({ key, label, count, bg, color }) => (
-                <div
-                  key={key}
-                  className="flex items-center justify-between gap-2 min-w-0 rounded-xl px-3 py-2 shadow-none"
-                  style={{ background: bg }}
-                >
-                  <span className="text-[11px] font-bold text-white truncate drop-shadow-sm">{label}</span>
-                  <span className="shrink-0 flex items-center justify-center size-7 rounded-md bg-white">
-                    <span className="text-sm font-black tabular-nums font-mono leading-none" style={{ color }}>{count}</span>
-                  </span>
-                </div>
-              ))}
+            {isOffDay && (
+              <span className="text-xs font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                <Icon name="event_available" size={14} />
+                Off Day (Scheduled in Roster)
+              </span>
+            )}
+
+            {/* This Month Report Section */}
+            <div className="flex flex-col gap-2.5 p-3 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/8 dark:border-white/10">
+              {/* Header with Title */}
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                  This Month Report
+                </span>
+              </div>
+
+              {/* Total Worked Hours Box */}
+              <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5">
+                <span className="text-xs font-bold text-muted-foreground flex items-center gap-1.5">
+                  <Icon name="timer" size={15} className="text-primary shrink-0" />
+                  Total Worked
+                </span>
+                <span className="text-sm font-black font-mono tabular-nums text-foreground">
+                  {monthlyStats.totalWorkHours} <span className="text-xs font-semibold text-muted-foreground">hrs</span>
+                </span>
+              </div>
+
+              {/* Monthly stat cards */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {[
+                  { key: 'present', label: 'Present', count: monthlyStats.presentDays, bg: 'linear-gradient(135deg, var(--color-status-green) 0%, #047857 100%)', color: '#065f46' },
+                  { key: 'late', label: 'Late', count: monthlyStats.lateDays, bg: 'linear-gradient(135deg, var(--color-status-yellow) 0%, #b45309 100%)', color: '#92400e' },
+                  { key: 'noshow', label: 'No Show', count: monthlyStats.noShowDays, bg: 'linear-gradient(135deg, var(--color-status-red) 0%, #b91c1c 100%)', color: '#991b1b' },
+                  { key: 'leave', label: 'Leave', count: monthlyStats.leavesCount, bg: 'linear-gradient(135deg, var(--color-status-blue) 0%, #3730a3 100%)', color: '#312e81' },
+                ].map(({ key, label, count, bg, color }) => (
+                  <div
+                    key={key}
+                    className="flex items-center justify-between gap-2 min-w-0 rounded-xl px-3 py-2 shadow-none"
+                    style={{ background: bg }}
+                  >
+                    <span className="text-[11px] font-bold text-white truncate drop-shadow-sm">{label}</span>
+                    <span className="shrink-0 flex items-center justify-center size-7 rounded-md bg-white">
+                      <span className="text-sm font-black tabular-nums font-mono leading-none" style={{ color }}>{count}</span>
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+
+            {/* Available Leave Balance Box with Breakdown */}
+            <div className="flex flex-col gap-2.5 p-3 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/8 dark:border-white/10">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                  <Icon name="event_available" size={14} className="text-foreground" />
+                  Available Leave Balance
+                </span>
+                <span className="text-[11px] font-mono font-bold text-primary">
+                  {leaveBalances.total} days total
+                </span>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2">
+                <div className="flex flex-col items-center justify-center p-2 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5">
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider truncate">Annual</span>
+                  <div className="flex items-baseline gap-0.5 mt-0.5">
+                    <span className="text-xs sm:text-sm font-black font-mono tabular-nums text-foreground">
+                      {leaveBalances.annual.used}
+                    </span>
+                    <span className="text-[11px] font-mono font-bold text-muted-foreground">
+                      /{leaveBalances.annual.limit}
+                    </span>
+                    <span className="text-[10px] font-semibold text-muted-foreground ml-0.5">d</span>
+                  </div>
+                </div>
+
+                <div className="flex flex-col items-center justify-center p-2 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5">
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider truncate">Sick</span>
+                  <div className="flex items-baseline gap-0.5 mt-0.5">
+                    <span className="text-xs sm:text-sm font-black font-mono tabular-nums text-foreground">
+                      {leaveBalances.sick.used}
+                    </span>
+                    <span className="text-[11px] font-mono font-bold text-muted-foreground">
+                      /{leaveBalances.sick.limit}
+                    </span>
+                    <span className="text-[10px] font-semibold text-muted-foreground ml-0.5">d</span>
+                  </div>
+                </div>
+
+                <div className="flex flex-col items-center justify-center p-2 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5">
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider truncate">Casual</span>
+                  <div className="flex items-baseline gap-0.5 mt-0.5">
+                    <span className="text-xs sm:text-sm font-black font-mono tabular-nums text-foreground">
+                      {leaveBalances.casual.used}
+                    </span>
+                    <span className="text-[11px] font-mono font-bold text-muted-foreground">
+                      /{leaveBalances.casual.limit}
+                    </span>
+                    <span className="text-[10px] font-semibold text-muted-foreground ml-0.5">d</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Widget Footer Action: My Attendance Logs */}
+            <div className="pt-1 w-full mt-auto">
+              <button
+                type="button"
+                onClick={() => setCurrentView && setCurrentView(myLogsTarget)}
+                className="apple-glass-btn w-full h-11 px-5 rounded-2xl flex items-center justify-center gap-2 text-xs font-bold text-foreground cursor-pointer transition-all active:scale-[0.98] border border-border/80 dark:border-white/12 hover:bg-black/5 dark:hover:bg-white/10"
+              >
+                <Icon name="history" size={17} className="text-muted-foreground" />
+                <span>My Attendance Logs</span>
+              </button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </>
   )
 }
