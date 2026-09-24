@@ -45,6 +45,12 @@ export default function GlobalTooltip() {
 
       if (!text || !text.trim()) return
 
+      // Suppress redundant/obvious tooltips (e.g., Close, Dismiss, Cancel buttons)
+      const normalized = text.trim().toLowerCase()
+      if (/^(close|close\b.*|dismiss|cancel)$/i.test(normalized)) {
+        return
+      }
+
       currentTargetRef.current = target
       clearTimeout(timerRef.current)
       clearTimeout(hideTimerRef.current)
@@ -109,7 +115,7 @@ export default function GlobalTooltip() {
     >
       <div
         role="tooltip"
-        className="glass-tooltip rounded-[14px] px-3.5 py-2 whitespace-nowrap text-fluid-sm font-semibold tracking-tight text-foreground select-none pointer-events-none"
+        className="glass-tooltip rounded-[10px] px-3 py-1.5 whitespace-nowrap text-xs font-medium tracking-tight select-none pointer-events-none"
       >
         {tooltip.text}
       </div>

@@ -45,6 +45,13 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
 
+  /* Canonical status palette (green / yellow / red / blue) — used app-wide.
+     Generates utilities: bg-status-green, text-status-red, border-status-blue, ... */
+  --color-status-green: #10b981;
+  --color-status-yellow: #f59e0b;
+  --color-status-red: #ef4444;
+  --color-status-blue: #3b82f6;
+
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
@@ -65,7 +72,7 @@
   --muted-foreground: #555555;
   --accent: rgba(240, 243, 250, 0.75);
   --accent-foreground: #000000;
-  --destructive: hsl(0 84.2% 60.2%);
+  --destructive: #ef4444;
   --destructive-foreground: #ffffff;
   --border: rgba(0, 0, 0, 0.08);
   --input: rgba(0, 0, 0, 0.09);
@@ -126,7 +133,7 @@ html.dark,
   --muted-foreground: #a1a1aa;
   --accent: rgba(28, 28, 40, 0.45);
   --accent-foreground: #ffffff;
-  --destructive: hsl(0 60% 40%);
+  --destructive: #f87171;
   --destructive-foreground: #ffffff;
   --border: rgba(255, 255, 255, 0.09);
   --input: rgba(255, 255, 255, 0.07);
@@ -383,10 +390,10 @@ html.dark,
    ZERO blur and ZERO saturation.
    ============================================================== */
 
-.glass-kormiis:not([role="dialog"]):not([role="alertdialog"]):not([data-notif-panel]):not(.notification-modal):not(.notification-dropdown):not([data-ai-panel]):not([data-ai-modal]):not(.ai-panel):not([data-bottom-bar]):not([data-mobile-dock]):not(.mobile-bottom-dock):not([data-mobile-panel]):not([data-menu-drawer]):not(.menu-bar-dock):not(.bottom-bar):not(.topbar):not(header):not([data-topbar]):not(.glass-mobile-drawer):not(.liquid-glass-drawer):not(.toast):not([role="menu"]):not([role="listbox"]):not([role="tooltip"]):not(.glass-tooltip):not(.glass-popover):not(.glass-toast):not(.popover-content):not([data-radix-popper-content-wrapper]),
-.glass-apple:not([role="dialog"]):not([role="alertdialog"]):not([data-notif-panel]):not(.notification-modal):not(.notification-dropdown):not([data-ai-panel]):not([data-ai-modal]):not(.ai-panel):not([data-bottom-bar]):not([data-mobile-dock]):not(.mobile-bottom-dock):not([data-mobile-panel]):not([data-menu-drawer]):not(.menu-bar-dock):not(.bottom-bar):not(.topbar):not(header):not([data-topbar]):not(.glass-mobile-drawer):not(.liquid-glass-drawer):not(.toast):not([role="menu"]):not([role="listbox"]):not([role="tooltip"]):not(.glass-tooltip):not(.glass-popover):not(.glass-toast):not(.popover-content):not([data-radix-popper-content-wrapper]),
-.glass-card:not([role="dialog"]):not([role="alertdialog"]):not([data-notif-panel]):not(.notification-modal):not(.notification-dropdown):not([data-ai-panel]):not([data-ai-modal]):not(.ai-panel):not([data-bottom-bar]):not([data-mobile-dock]):not(.mobile-bottom-dock):not([data-mobile-panel]):not([data-menu-drawer]):not(.menu-bar-dock):not(.bottom-bar):not(.topbar):not(header):not([data-topbar]):not(.glass-mobile-drawer):not(.liquid-glass-drawer):not(.toast):not([role="menu"]):not([role="listbox"]):not([role="tooltip"]):not(.glass-tooltip):not(.glass-popover):not(.glass-toast):not(.popover-content):not([data-radix-popper-content-wrapper]),
-.bg-card:not([role="dialog"]):not([role="alertdialog"]):not([data-notif-panel]):not(.notification-modal):not(.notification-dropdown):not([data-ai-panel]):not([data-ai-modal]):not(.ai-panel):not([data-bottom-bar]):not([data-mobile-dock]):not(.mobile-bottom-dock):not([data-mobile-panel]):not([data-menu-drawer]):not(.menu-bar-dock):not(.bottom-bar):not(.topbar):not(header):not([data-topbar]):not(.glass-mobile-drawer):not(.liquid-glass-drawer):not(.toast):not([role="menu"]):not([role="listbox"]):not([role="tooltip"]):not(.glass-tooltip):not(.glass-popover):not(.glass-toast):not(.popover-content):not([data-radix-popper-content-wrapper]),
+.glass-kormiis:not([role="dialog"]):not([role="alertdialog"]):not([data-notif-panel]):not(.notification-modal):not(.notification-dropdown):not([data-ai-panel]):not([data-ai-modal]):not(.ai-panel):not([data-bottom-bar]):not([data-mobile-dock]):not(.mobile-bottom-dock):not([data-mobile-panel]):not([data-menu-drawer]):not(.menu-bar-dock):not(.bottom-bar):not(.topbar):not(header):not([data-topbar]):not(.glass-mobile-drawer):not(.liquid-glass-drawer):not(.toast):not([role="menu"]):not([role="listbox"]):not([role="tooltip"]):not(.glass-tooltip):not(.glass-popover):not(.glass-toast):not(.popover-content):not([data-radix-popper-content-wrapper]):not(.bg-primary):not([data-variant="default"]):not([aria-selected="true"]):not([data-selected="true"]):not([data-state="active"]):not([data-active="true"]):not(.nav-capsule-active),
+.glass-apple:not([role="dialog"]):not([role="alertdialog"]):not([data-notif-panel]):not(.notification-modal):not(.notification-dropdown):not([data-ai-panel]):not([data-ai-modal]):not(.ai-panel):not([data-bottom-bar]):not([data-mobile-dock]):not(.mobile-bottom-dock):not([data-mobile-panel]):not([data-menu-drawer]):not(.menu-bar-dock):not(.bottom-bar):not(.topbar):not(header):not([data-topbar]):not(.glass-mobile-drawer):not(.liquid-glass-drawer):not(.toast):not([role="menu"]):not([role="listbox"]):not([role="tooltip"]):not(.glass-tooltip):not(.glass-popover):not(.glass-toast):not(.popover-content):not([data-radix-popper-content-wrapper]):not(.bg-primary):not([data-variant="default"]):not([aria-selected="true"]):not([data-selected="true"]):not([data-state="active"]):not([data-active="true"]):not(.nav-capsule-active),
+.glass-card:not([role="dialog"]):not([role="alertdialog"]):not([data-notif-panel]):not(.notification-modal):not(.notification-dropdown):not([data-ai-panel]):not([data-ai-modal]):not(.ai-panel):not([data-bottom-bar]):not([data-mobile-dock]):not(.mobile-bottom-dock):not([data-mobile-panel]):not([data-menu-drawer]):not(.menu-bar-dock):not(.bottom-bar):not(.topbar):not(header):not([data-topbar]):not(.glass-mobile-drawer):not(.liquid-glass-drawer):not(.toast):not([role="menu"]):not([role="listbox"]):not([role="tooltip"]):not(.glass-tooltip):not(.glass-popover):not(.glass-toast):not(.popover-content):not([data-radix-popper-content-wrapper]):not(.bg-primary):not([data-variant="default"]):not([aria-selected="true"]):not([data-selected="true"]):not([data-state="active"]):not([data-active="true"]):not(.nav-capsule-active),
+.bg-card:not([role="dialog"]):not([role="alertdialog"]):not([data-notif-panel]):not(.notification-modal):not(.notification-dropdown):not([data-ai-panel]):not([data-ai-modal]):not(.ai-panel):not([data-bottom-bar]):not([data-mobile-dock]):not(.mobile-bottom-dock):not([data-mobile-panel]):not([data-menu-drawer]):not(.menu-bar-dock):not(.bottom-bar):not(.topbar):not(header):not([data-topbar]):not(.glass-mobile-drawer):not(.liquid-glass-drawer):not(.toast):not([role="menu"]):not([role="listbox"]):not([role="tooltip"]):not(.glass-tooltip):not(.glass-popover):not(.glass-toast):not(.popover-content):not([data-radix-popper-content-wrapper]):not(.bg-primary):not([data-variant="default"]):not([aria-selected="true"]):not([data-selected="true"]):not([data-state="active"]):not([data-active="true"]):not(.nav-capsule-active),
 .dashboard-widget {
   background: transparent !important;
   background-color: transparent !important;
@@ -431,17 +438,14 @@ header[aria-label="Top navigation bar"],
 [data-sonner-toast],
 ol[data-sonner-toaster],
 li[data-sonner-toast],
-[role="dialog"],
-[role="alertdialog"],
+.react-aria-Modal,
+.glass-kormiis-modal,
 [data-radix-dialog-content],
 [data-radix-alert-dialog-content],
 .dialog-content,
 .alert-dialog-content,
-.glass-kormiis-modal,
 .glass-mobile-drawer,
 .liquid-glass-drawer,
-[data-radix-dialog-overlay],
-[data-radix-alert-dialog-overlay],
 [role="menu"],
 [role="listbox"],
 [data-radix-popper-content-wrapper],
@@ -450,8 +454,10 @@ li[data-sonner-toast],
 [data-radix-popover-content],
 [data-radix-tooltip-content],
 .popover-content,
-.map-floating-glass,
-[role="tooltip"] {
+.glass-popover,
+.react-aria-Popover,
+[data-trigger="date-picker"] [role="dialog"],
+.map-floating-glass {
   background: transparent !important;
   background-color: transparent !important;
   -webkit-backdrop-filter: blur(32px) saturate(190%) !important;
@@ -460,16 +466,43 @@ li[data-sonner-toast],
   box-shadow: none !important;
 }
 
+/* Ensure modal and dialog overlays have zero dark background fill and zero backdrop filter overlay */
+[data-radix-dialog-overlay],
+[data-radix-alert-dialog-overlay],
+.react-aria-ModalOverlay,
+[data-modal-overlay] {
+  background: transparent !important;
+  background-color: transparent !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  border: none !important;
+}
+
+/* Modals & Dialogs: Strict continuous rounded squircle corners (rounded-[28px]) */
+.glass-kormiis-modal,
+[data-radix-dialog-content],
+[data-radix-alert-dialog-content],
+.dialog-content,
+.alert-dialog-content,
+.react-aria-Modal {
+  border-radius: 28px !important;
+  overflow: hidden !important;
+}
+
 /* Ensure inner aria dialog inside modal container does not create a redundant double border or duplicate backdrop blur container */
 .glass-kormiis-modal [role="dialog"],
 .glass-kormiis-modal [role="alertdialog"],
-.glass-kormiis-modal [data-dialog-inner] {
+.glass-kormiis-modal [data-dialog-inner],
+.react-aria-Modal [role="dialog"],
+.react-aria-Modal [role="alertdialog"],
+.react-aria-Modal [data-dialog-inner] {
   background: transparent !important;
   background-color: transparent !important;
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
   border: none !important;
   box-shadow: none !important;
+  border-radius: inherit !important;
 }
 
 /* Force pure solid black text, labels, numbers and icons for GeoCheckInWidget map controls in both light and dark mode */
@@ -519,8 +552,7 @@ li[data-sonner-toast],
 .glass-mobile-drawer,
 .liquid-glass-drawer,
 .glass-kormiis-modal,
-[role="dialog"],
-[role="alertdialog"],
+.react-aria-Modal,
 .popover-content,
 [role="menu"],
 [role="listbox"] {
@@ -548,8 +580,7 @@ li[data-sonner-toast],
 .dark .glass-mobile-drawer,
 .dark .liquid-glass-drawer,
 .dark .glass-kormiis-modal,
-.dark [role="dialog"],
-.dark [role="alertdialog"],
+.dark .react-aria-Modal,
 .dark .popover-content,
 .dark [role="menu"],
 .dark [role="listbox"],
@@ -569,8 +600,7 @@ li[data-sonner-toast],
 [data-theme="dark"] .glass-mobile-drawer,
 [data-theme="dark"] .liquid-glass-drawer,
 [data-theme="dark"] .glass-kormiis-modal,
-[data-theme="dark"] [role="dialog"],
-[data-theme="dark"] [role="alertdialog"],
+[data-theme="dark"] .react-aria-Modal,
 [data-theme="dark"] .popover-content,
 [data-theme="dark"] [role="menu"],
 [data-theme="dark"] [role="listbox"] {
@@ -596,28 +626,47 @@ li[data-sonner-toast],
   box-shadow: none !important;
 }
 
-/* Floating Popover / Tooltip / Toast Surfaces: Pure MonoGlass (Zero fill, blur 32px / saturate 190%) */
+/* Floating Popover / Toast Surfaces: Pure MonoGlass (Zero fill, blur 32px / saturate 190%) */
 .glass-popover,
-.glass-tooltip,
+.react-aria-Popover,
+[data-slot="dropdown-menu-content"],
 .glass-toast {
   background: transparent !important;
   background-color: transparent !important;
   -webkit-backdrop-filter: blur(32px) saturate(190%) !important;
   backdrop-filter: blur(32px) saturate(190%) !important;
   border: 1px solid var(--glass-border) !important;
+  border-radius: 24px !important;
   box-shadow: none !important;
+  overflow: hidden !important;
 }
 
-/* Tooltip surface: MonoGlass — transparent, blur 32px / saturate 190%, rounded, zero shadow */
+/* Tooltip surface: Solid fill color, no transparent, no blur, no saturation.
+   Light mode: subtle dark / charcoal.
+   Dark mode: subtle white / light cream. */
 .glass-tooltip,
 [role="tooltip"] {
-  background: transparent !important;
-  background-color: transparent !important;
-  -webkit-backdrop-filter: blur(32px) saturate(190%) !important;
-  backdrop-filter: blur(32px) saturate(190%) !important;
-  border: 1px solid var(--glass-border) !important;
-  border-radius: 14px !important;
-  box-shadow: none !important;
+  background: #27272a !important;
+  background-color: #27272a !important;
+  color: #f4f4f5 !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 9px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16) !important;
+}
+
+.dark .glass-tooltip,
+.dark [role="tooltip"],
+[data-theme="dark"] .glass-tooltip,
+[data-theme="dark"] [role="tooltip"] {
+  background: #f4f4f5 !important;
+  background-color: #f4f4f5 !important;
+  color: #18181b !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  border: 1px solid rgba(0, 0, 0, 0.10) !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.22) !important;
 }
 
 /* Smooth tooltip reveal: fade + gentle rise, no jitter while following the pointer */
@@ -1977,12 +2026,14 @@ button[role="tab"][aria-selected="true"] .msr {
    and White in Dark Mode, with clean neutral grayscale tones for muted captions.
    ============================================================== */
 
-body, html, input, button, select, textarea {
-  color: var(--foreground);
-}
+@layer base {
+  body, html, input, button, select, textarea {
+    color: var(--foreground);
+  }
 
-h1, h2, h3, h4, h5, h6, p, span, a, label, strong, b, em, i, th, td {
-  color: inherit;
+  h1, h2, h3, h4, h5, h6, p, span, a, label, strong, b, em, i, th, td {
+    color: inherit;
+  }
 }
 
 /* Muted / Secondary grayscale tones */
@@ -2022,59 +2073,49 @@ button.sidebar-logout-btn svg {
   color: #ffffff !important;
 }
 
-/* Enforce monochrome text across all colored Tailwind typography utility classes */
-:not(svg):not(i):not([role="img"]) > [class*="text-emerald-"],
-:not(svg):not(i):not([role="img"]) > [class*="text-amber-"],
-:not(svg):not(i):not([role="img"]) > [class*="text-blue-"],
-:not(svg):not(i):not([role="img"]) > [class*="text-rose-"],
+/* Enforce monochrome text for non-status accents only —
+   green / yellow / red / blue stay vibrant app-wide. */
 :not(svg):not(i):not([role="img"]) > [class*="text-purple-"],
 :not(svg):not(i):not([role="img"]) > [class*="text-teal-"],
 :not(svg):not(i):not([role="img"]) > [class*="text-indigo-"],
-:not(svg):not(i):not([role="img"]) > [class*="text-cyan-"],
-:not(svg):not(i):not([role="img"]) > [class*="text-green-"],
-:not(svg):not(i):not([role="img"]) > [class*="text-red-"] {
+:not(svg):not(i):not([role="img"]) > [class*="text-cyan-"] {
   color: var(--foreground) !important;
 }
 
-span[class*="text-emerald-"]:not([class*="pulse-dot"]):not([class*="msr"]),
-span[class*="text-amber-"]:not([class*="pulse-dot"]):not([class*="msr"]),
-span[class*="text-blue-"]:not([class*="pulse-dot"]):not([class*="msr"]),
-span[class*="text-rose-"]:not([class*="pulse-dot"]):not([class*="msr"]),
 span[class*="text-purple-"]:not([class*="pulse-dot"]):not([class*="msr"]),
 span[class*="text-teal-"]:not([class*="pulse-dot"]):not([class*="msr"]),
 span[class*="text-indigo-"]:not([class*="pulse-dot"]):not([class*="msr"]),
-span[class*="text-green-"]:not([class*="pulse-dot"]):not([class*="msr"]),
-span[class*="text-red-"]:not([class*="pulse-dot"]):not([class*="msr"]),
-span.text-destructive:not([class*="pulse-dot"]),
-p[class*="text-emerald-"],
-p[class*="text-amber-"],
-p[class*="text-blue-"],
-p[class*="text-rose-"],
 p[class*="text-purple-"],
 p[class*="text-teal-"],
-p[class*="text-destructive"],
-div[class*="text-emerald-"]:not([class*="bg-"]):not([class*="size-"]):not([class*="border-"]),
-div[class*="text-amber-"]:not([class*="bg-"]):not([class*="size-"]):not([class*="border-"]),
-div[class*="text-blue-"]:not([class*="bg-"]):not([class*="size-"]):not([class*="border-"]),
-div[class*="text-rose-"]:not([class*="bg-"]):not([class*="size-"]):not([class*="border-"]) {
+div[class*="text-purple-"]:not([class*="bg-"]):not([class*="size-"]):not([class*="border-"]),
+div[class*="text-teal-"]:not([class*="bg-"]):not([class*="size-"]):not([class*="border-"]) {
   color: var(--foreground) !important;
 }
 
-.dark span[class*="text-emerald-"]:not([class*="pulse-dot"]):not([class*="msr"]),
-.dark span[class*="text-amber-"]:not([class*="pulse-dot"]):not([class*="msr"]),
-.dark span[class*="text-blue-"]:not([class*="pulse-dot"]):not([class*="msr"]),
-.dark span[class*="text-rose-"]:not([class*="pulse-dot"]):not([class*="msr"]),
 .dark span[class*="text-purple-"]:not([class*="pulse-dot"]):not([class*="msr"]),
 .dark span[class*="text-teal-"]:not([class*="pulse-dot"]):not([class*="msr"]),
 .dark span[class*="text-indigo-"]:not([class*="pulse-dot"]):not([class*="msr"]),
-.dark span[class*="text-green-"]:not([class*="pulse-dot"]):not([class*="msr"]),
-.dark span[class*="text-red-"]:not([class*="pulse-dot"]):not([class*="msr"]),
-.dark span.text-destructive:not([class*="pulse-dot"]),
-.dark p[class*="text-emerald-"],
-.dark p[class*="text-amber-"],
-.dark p[class*="text-blue-"],
-.dark p[class*="text-rose-"] {
+.dark p[class*="text-purple-"],
+.dark p[class*="text-teal-"] {
   color: var(--foreground) !important;
+}
+
+/* Destructive Actions & Text: Refined Fixed Red */
+.text-destructive,
+[class*="text-destructive"],
+button[data-variant="destructive"],
+.btn-destructive {
+  color: #dc2626 !important;
+}
+.dark .text-destructive,
+.dark [class*="text-destructive"],
+.dark button[data-variant="destructive"],
+.dark .btn-destructive,
+[data-theme="dark"] .text-destructive,
+[data-theme="dark"] [class*="text-destructive"],
+[data-theme="dark"] button[data-variant="destructive"],
+[data-theme="dark"] .btn-destructive {
+  color: #f87171 !important;
 }
 
 /* ==============================================================
@@ -2083,69 +2124,84 @@ div[class*="text-rose-"]:not([class*="bg-"]):not([class*="size-"]):not([class*="
    strictly monochrome (Grayscale Liquid Glass).
    ============================================================== */
 
-/* Light Mode: Monochrome Glass Badges & Tags */
-[class*="bg-emerald-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
-[class*="bg-amber-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
-[class*="bg-blue-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
-[class*="bg-rose-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
+/* Light Mode: Monochrome Glass Badges & Tags (non-status accents only) */
 [class*="bg-purple-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
 [class*="bg-teal-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
 [class*="bg-indigo-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
-[class*="bg-cyan-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
-[class*="bg-green-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
-[class*="bg-red-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button) {
+[class*="bg-cyan-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button) {
   background-color: rgba(0, 0, 0, 0.06) !important;
   border-color: rgba(0, 0, 0, 0.12) !important;
   color: #000000 !important;
 }
 
-/* Dark Mode: Monochrome Glass Badges & Tags */
-.dark [class*="bg-emerald-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
-.dark [class*="bg-amber-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
-.dark [class*="bg-blue-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
-.dark [class*="bg-rose-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
+/* Dark Mode: Monochrome Glass Badges & Tags (non-status accents only) */
 .dark [class*="bg-purple-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
 .dark [class*="bg-teal-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
 .dark [class*="bg-indigo-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
 .dark [class*="bg-cyan-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
-.dark [class*="bg-green-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
-.dark [class*="bg-red-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
-[data-theme="dark"] [class*="bg-emerald-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
-[data-theme="dark"] [class*="bg-amber-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
-[data-theme="dark"] [class*="bg-blue-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
-[data-theme="dark"] [class*="bg-rose-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
 [data-theme="dark"] [class*="bg-purple-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
 [data-theme="dark"] [class*="bg-teal-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
 [data-theme="dark"] [class*="bg-indigo-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
-[data-theme="dark"] [class*="bg-cyan-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
-[data-theme="dark"] [class*="bg-green-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button),
-[data-theme="dark"] [class*="bg-red-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button) {
+[data-theme="dark"] [class*="bg-cyan-"]:not([class*="gradient"]):not([class*="mesh"]):not([class*="aurora"]):not(button) {
   background-color: rgba(255, 255, 255, 0.10) !important;
   border-color: rgba(255, 255, 255, 0.16) !important;
   color: #ffffff !important;
 }
 
-/* Monochrome Borders */
-[class*="border-emerald-"],
-[class*="border-amber-"],
-[class*="border-blue-"],
-[class*="border-rose-"],
+/* Destructive Badges & Chips: Subtle Fixed Red */
+[data-variant="destructive"],
+.badge-destructive {
+  background-color: rgba(239, 68, 68, 0.12) !important;
+  border-color: rgba(239, 68, 68, 0.28) !important;
+  color: #dc2626 !important;
+}
+.dark [data-variant="destructive"],
+.dark .badge-destructive,
+[data-theme="dark"] [data-variant="destructive"],
+[data-theme="dark"] .badge-destructive {
+  background-color: rgba(248, 113, 113, 0.16) !important;
+  border-color: rgba(248, 113, 113, 0.32) !important;
+  color: #fca5a5 !important;
+}
+
+/* Destructive Button Styling: Subtle Fixed Red */
+button[data-variant="destructive"] {
+  background-color: rgba(239, 68, 68, 0.12) !important;
+  border-color: rgba(239, 68, 68, 0.28) !important;
+  color: #dc2626 !important;
+}
+button[data-variant="destructive"]:hover {
+  background-color: rgba(239, 68, 68, 0.20) !important;
+  border-color: rgba(239, 68, 68, 0.40) !important;
+}
+button[data-variant="destructive"]:active {
+  background-color: rgba(239, 68, 68, 0.26) !important;
+}
+.dark button[data-variant="destructive"],
+[data-theme="dark"] button[data-variant="destructive"] {
+  background-color: rgba(248, 113, 113, 0.16) !important;
+  border-color: rgba(248, 113, 113, 0.32) !important;
+  color: #fca5a5 !important;
+}
+.dark button[data-variant="destructive"]:hover,
+[data-theme="dark"] button[data-variant="destructive"]:hover {
+  background-color: rgba(248, 113, 113, 0.26) !important;
+  border-color: rgba(248, 113, 113, 0.45) !important;
+}
+.dark button[data-variant="destructive"]:active,
+[data-theme="dark"] button[data-variant="destructive"]:active {
+  background-color: rgba(248, 113, 113, 0.34) !important;
+}
+
+/* Monochrome Borders (non-status accents only) */
 [class*="border-purple-"],
 [class*="border-teal-"],
 [class*="border-indigo-"] {
   border-color: rgba(0, 0, 0, 0.12) !important;
 }
-.dark [class*="border-emerald-"],
-.dark [class*="border-amber-"],
-.dark [class*="border-blue-"],
-.dark [class*="border-rose-"],
 .dark [class*="border-purple-"],
 .dark [class*="border-teal-"],
 .dark [class*="border-indigo-"],
-[data-theme="dark"] [class*="border-emerald-"],
-[data-theme="dark"] [class*="border-amber-"],
-[data-theme="dark"] [class*="border-blue-"],
-[data-theme="dark"] [class*="border-rose-"],
 [data-theme="dark"] [class*="border-purple-"],
 [data-theme="dark"] [class*="border-teal-"],
 [data-theme="dark"] [class*="border-indigo-"] {
@@ -2155,10 +2211,16 @@ div[class*="text-rose-"]:not([class*="bg-"]):not([class*="size-"]):not([class*="
 /* Data-visualization color fills — exempt from the monochrome badge/tag rule
    above (progress bars, charts, legend dots). Class names intentionally avoid
    the `bg-*` pattern so the monochrome selector never matches them. */
-.attendance-color-emerald { background-color: #10b981 !important; }
-.attendance-color-amber   { background-color: #f59e0b !important; }
-.attendance-color-rose    { background-color: #f43f5e !important; }
-.attendance-color-blue    { background-color: #3b82f6 !important; }
+.attendance-color-emerald { background-color: var(--color-status-green) !important; }
+.attendance-color-amber   { background-color: var(--color-status-yellow) !important; }
+.attendance-color-rose    { background-color: var(--color-status-red) !important; }
+.attendance-color-blue    { background-color: var(--color-status-blue) !important; }
+
+/* Vibrant status text fills (exempt from the monochrome typography rule) */
+.attendance-text-emerald { color: var(--color-status-green) !important; }
+.attendance-text-amber   { color: var(--color-status-yellow) !important; }
+.attendance-text-rose    { color: var(--color-status-red) !important; }
+.attendance-text-blue    { color: var(--color-status-blue) !important; }
 
 /* Navigation Bar Active Capsule: Apple Monochrome High-Contrast Standard (Zero Shadow) */
 .nav-capsule-active,
@@ -2338,12 +2400,12 @@ button.nav-capsule-active svg {
    overlays: topbar, bottombar, notifications, toasts, modals, and dropdowns.
    ============================================================== */
 
-body [class*="backdrop-blur-"]:not(header):not(.topbar):not(.landing-glass-header):not(.bottom-bar):not([data-bottom-bar]):not(.mobile-bottom-dock):not([data-mobile-dock]):not([data-mobile-panel]):not([data-menu-drawer]):not(.menu-bar-dock):not([data-ai-panel]):not([data-ai-modal]):not(.ai-panel):not([data-notif-panel]):not(.notification-modal):not(.notification-dropdown):not(.landing-glass-bottom-bar):not(.toast):not([data-sonner-toast]):not([data-sonner-toaster]):not([role="dialog"]):not([role="dialog"] *):not([role="alertdialog"]):not([role="alertdialog"] *):not([data-radix-dialog-content]):not([data-radix-dialog-content] *):not([data-radix-alert-dialog-content]):not([data-radix-alert-dialog-content] *):not(.dialog-content):not(.dialog-content *):not(.alert-dialog-content):not(.alert-dialog-content *):not(.glass-mobile-drawer):not(.glass-mobile-drawer *):not(.liquid-glass-drawer):not(.liquid-glass-drawer *):not([data-radix-dialog-overlay]):not([data-radix-alert-dialog-overlay]):not([role="menu"]):not([role="menu"] *):not([role="listbox"]):not([role="listbox"] *):not([data-radix-popper-content-wrapper]):not([data-radix-popper-content-wrapper] *):not([data-radix-select-content]):not([data-radix-select-content] *):not([data-radix-dropdown-menu-content]):not([data-radix-dropdown-menu-content] *):not([data-radix-popover-content]):not([data-radix-popover-content] *):not([data-radix-tooltip-content]):not([data-radix-tooltip-content] *):not(.popover-content):not(.popover-content *):not([role="tooltip"]):not([role="tooltip"] *):not([data-ai-panel] *):not([data-ai-modal] *):not(.ai-panel *):not([data-mobile-dock] *):not([data-mobile-panel] *):not([data-menu-drawer] *):not(.menu-bar-dock *):not([data-notif-panel] *):not(.notification-modal *):not(.notification-dropdown *) {
+body [class*="backdrop-blur-"]:not(header):not(.topbar):not(.landing-glass-header):not(.bottom-bar):not([data-bottom-bar]):not(.mobile-bottom-dock):not([data-mobile-dock]):not([data-mobile-panel]):not([data-menu-drawer]):not(.menu-bar-dock):not([data-ai-panel]):not([data-ai-modal]):not(.ai-panel):not([data-notif-panel]):not(.notification-modal):not(.notification-dropdown):not(.landing-glass-bottom-bar):not(.toast):not([data-sonner-toast]):not([data-sonner-toaster]):not([role="dialog"]):not([role="dialog"] *):not([role="alertdialog"]):not([role="alertdialog"] *):not([data-radix-dialog-content]):not([data-radix-dialog-content] *):not([data-radix-alert-dialog-content]):not([data-radix-alert-dialog-content] *):not(.dialog-content):not(.dialog-content *):not(.alert-dialog-content):not(.alert-dialog-content *):not(.glass-mobile-drawer):not(.glass-mobile-drawer *):not(.liquid-glass-drawer):not(.liquid-glass-drawer *):not([data-radix-dialog-overlay]):not([data-radix-alert-dialog-overlay]):not([role="menu"]):not([role="menu"] *):not([role="listbox"]):not([role="listbox"] *):not([data-radix-popper-content-wrapper]):not([data-radix-popper-content-wrapper] *):not([data-radix-select-content]):not([data-radix-select-content] *):not([data-radix-dropdown-menu-content]):not([data-radix-dropdown-menu-content] *):not([data-radix-popover-content]):not([data-radix-popover-content] *):not([data-radix-tooltip-content]):not([data-radix-tooltip-content] *):not(.popover-content):not(.popover-content *):not(.react-aria-Popover):not(.react-aria-Popover *):not([role="tooltip"]):not([role="tooltip"] *):not([data-ai-panel] *):not([data-ai-modal] *):not(.ai-panel *):not([data-mobile-dock] *):not([data-mobile-panel] *):not([data-menu-drawer] *):not(.menu-bar-dock *):not([data-notif-panel] *):not(.notification-modal *):not(.notification-dropdown *) {
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
 }
 
-body [class*="saturate-"]:not(header):not(.topbar):not(.landing-glass-header):not(.bottom-bar):not([data-bottom-bar]):not(.mobile-bottom-dock):not([data-mobile-dock]):not([data-mobile-panel]):not([data-menu-drawer]):not(.menu-bar-dock):not([data-ai-panel]):not([data-ai-modal]):not(.ai-panel):not([data-notif-panel]):not(.notification-modal):not(.notification-dropdown):not(.landing-glass-bottom-bar):not(.toast):not([data-sonner-toast]):not([data-sonner-toaster]):not([role="dialog"]):not([role="dialog"] *):not([role="alertdialog"]):not([role="alertdialog"] *):not([data-radix-dialog-content]):not([data-radix-dialog-content] *):not([data-radix-alert-dialog-content]):not([data-radix-alert-dialog-content] *):not(.dialog-content):not(.dialog-content *):not(.alert-dialog-content):not(.alert-dialog-content *):not(.glass-mobile-drawer):not(.glass-mobile-drawer *):not(.liquid-glass-drawer):not(.liquid-glass-drawer *):not([data-radix-dialog-overlay]):not([data-radix-alert-dialog-overlay]):not([role="menu"]):not([role="menu"] *):not([role="listbox"]):not([role="listbox"] *):not([data-radix-popper-content-wrapper]):not([data-radix-popper-content-wrapper] *):not([data-radix-select-content]):not([data-radix-select-content] *):not([data-radix-dropdown-menu-content]):not([data-radix-dropdown-menu-content] *):not([data-radix-popover-content]):not([data-radix-popover-content] *):not([data-radix-tooltip-content]):not([data-radix-tooltip-content] *):not(.popover-content):not(.popover-content *):not([role="tooltip"]):not([role="tooltip"] *):not([data-ai-panel] *):not([data-ai-modal] *):not(.ai-panel *):not([data-mobile-dock] *):not([data-mobile-panel] *):not([data-menu-drawer] *):not(.menu-bar-dock *):not([data-notif-panel] *):not(.notification-modal *):not(.notification-dropdown *) {
+body [class*="saturate-"]:not(header):not(.topbar):not(.landing-glass-header):not(.bottom-bar):not([data-bottom-bar]):not(.mobile-bottom-dock):not([data-mobile-dock]):not([data-mobile-panel]):not([data-menu-drawer]):not(.menu-bar-dock):not([data-ai-panel]):not([data-ai-modal]):not(.ai-panel):not([data-notif-panel]):not(.notification-modal):not(.notification-dropdown):not(.landing-glass-bottom-bar):not(.toast):not([data-sonner-toast]):not([data-sonner-toaster]):not([role="dialog"]):not([role="dialog"] *):not([role="alertdialog"]):not([role="alertdialog"] *):not([data-radix-dialog-content]):not([data-radix-dialog-content] *):not([data-radix-alert-dialog-content]):not([data-radix-alert-dialog-content] *):not(.dialog-content):not(.dialog-content *):not(.alert-dialog-content):not(.alert-dialog-content *):not(.glass-mobile-drawer):not(.glass-mobile-drawer *):not(.liquid-glass-drawer):not(.liquid-glass-drawer *):not([data-radix-dialog-overlay]):not([data-radix-alert-dialog-overlay]):not([role="menu"]):not([role="menu"] *):not([role="listbox"]):not([role="listbox"] *):not([data-radix-popper-content-wrapper]):not([data-radix-popper-content-wrapper] *):not([data-radix-select-content]):not([data-radix-select-content] *):not([data-radix-dropdown-menu-content]):not([data-radix-dropdown-menu-content] *):not([data-radix-popover-content]):not([data-radix-popover-content] *):not([data-radix-tooltip-content]):not([data-radix-tooltip-content] *):not(.popover-content):not(.popover-content *):not(.react-aria-Popover):not(.react-aria-Popover *):not([role="tooltip"]):not([role="tooltip"] *):not([data-ai-panel] *):not([data-ai-modal] *):not(.ai-panel *):not([data-mobile-dock] *):not([data-mobile-panel] *):not([data-menu-drawer] *):not(.menu-bar-dock *):not([data-notif-panel] *):not(.notification-modal *):not(.notification-dropdown *) {
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
 }

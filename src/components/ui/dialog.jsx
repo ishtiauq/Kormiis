@@ -14,7 +14,7 @@ const DialogOverlay = React.forwardRef(({ className, ...props }, ref) => (
   <AriaModalOverlay
     ref={ref}
     className={cn(
-      "fixed inset-0 z-50 bg-black/50 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200",
+      "fixed inset-0 z-50 bg-transparent flex items-center justify-center p-4 animate-in fade-in duration-200",
       className
     )}
     isDismissable={true}

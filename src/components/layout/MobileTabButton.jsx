@@ -10,7 +10,7 @@ export default function MobileTabButton({ active, label, onClick, children, badg
         onClick={onClick}
         className={`relative flex items-center justify-center border-0 cursor-pointer size-11 rounded-full transition-all duration-300 outline-none select-none tap-highlight-transparent active:scale-90 ${
           active 
-            ? 'text-primary scale-105' 
+            ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 scale-105' 
             : 'text-foreground/70 hover:text-foreground'
         } ${className}`}
       >

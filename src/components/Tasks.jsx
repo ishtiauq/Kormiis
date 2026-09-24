@@ -364,7 +364,7 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
                 onClick={() => setActiveStatusTab(col)}
               >
                 {col}
-                <span className={`flex items-center justify-center text-[11px] h-5 min-w-[22px] px-1.5 font-bold rounded-full transition-colors ${isActive ? 'bg-primary-foreground/20 text-primary-foreground' : 'bg-muted-foreground/20 text-muted-foreground'}`}>
+                <span className={`flex items-center justify-center text-[11px] h-5 min-w-[22px] px-1.5 font-bold rounded-full transition-colors ${isActive ? 'bg-white/20 text-white dark:bg-black/10 dark:text-black' : 'bg-muted-foreground/20 text-muted-foreground'}`}>
                   {count}
                 </span>
               </Button>

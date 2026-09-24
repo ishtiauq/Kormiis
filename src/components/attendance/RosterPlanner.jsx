@@ -22,6 +22,18 @@ export default function RosterPlanner({ employees, roster, setRoster, shiftTempl
 
   const colorFor = (t, i) => t?.color || SHIFT_COLOR_PALETTE[i % SHIFT_COLOR_PALETTE.length]
 
+  // Picks a readable text color (dark on light fills, white on dark fills).
+  const readableOn = (hex) => {
+    if (!hex || typeof hex !== 'string') return '#ffffff'
+    const h = hex.replace('#', '')
+    const full = h.length === 3 ? h.split('').map(c => c + c).join('') : h
+    const n = parseInt(full, 16)
+    if (Number.isNaN(n)) return '#ffffff'
+    const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255
+    const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+    return lum > 0.6 ? '#1c1c1e' : '#ffffff'
+  }
+
   const closeMenu = () => { setOpenRosterEmp(null); setOpenRosterDate(null); setMenuRect(null) }
 
   useEffect(() => {
@@ -149,7 +161,7 @@ export default function RosterPlanner({ employees, roster, setRoster, shiftTempl
                             className="w-full px-2 py-1.5 rounded-md text-xs font-semibold min-h-8 cursor-pointer flex items-center justify-center gap-1 border border-input"
                             style={{
                               background: cellColor ? `${cellColor}18` : undefined,
-                              color: cellColor || 'text-muted-foreground',
+                              color: cellColor || 'var(--muted-foreground)',
                             }}>
                             {tmpl ? tmpl.name : 'Off'}
                             <svg width="8" height="5" viewBox="0 0 10 6" fill="none" className="opacity-50"><path d="M1 1l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -171,7 +183,7 @@ export default function RosterPlanner({ employees, roster, setRoster, shiftTempl
                                   className="block w-full px-2.5 py-1.5 rounded-full text-xs font-semibold text-center transition-colors hover:bg-accent"
                                   style={{
                                     background: tid === t.id ? colorFor(t, i) : undefined,
-                                    color: tid === t.id ? '#fff' : undefined,
+                                    color: tid === t.id ? readableOn(colorFor(t, i)) : undefined,
                                   }}>
                                   {t.name}
                                 </button>

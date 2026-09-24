@@ -1,7 +1,4 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
-import { MapContainer, TileLayer, Marker, Circle, Polyline, useMap, Popup, Tooltip } from 'react-leaflet'
-import 'leaflet/dist/leaflet.css'
-import L from 'leaflet'
 import Icon from "@/components/ui/Icon.jsx"
 import { toLocal, parseMin, fmtH } from '../../services/attendance.js'
 import {
@@ -11,38 +8,10 @@ import {
   getGeoMessage,
   GEO_REASON,
 } from '../../services/geolocation.js'
-import { getStreetBasemap } from '../../services/mapTiles.js'
 import { Button } from "@/components/ui/button"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import { Card, CardHeader, CardContent } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog"
-
-// Fix Leaflet default icon paths
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-});
-
-// Custom user location dot icon
-const userPinIcon = L.divIcon({
-  className: 'custom-user-marker',
-  html: `
-    <div style="position: relative; display: flex; align-items: center; justify-content: center; width: 26px; height: 26px;">
-      <span style="position: absolute; width: 24px; height: 24px; border-radius: 9999px; background-color: rgba(59, 130, 246, 0.35); animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;"></span>
-      <span style="position: relative; width: 14px; height: 14px; border-radius: 9999px; background-color: #2563eb; border: 2.5px solid #ffffff; box-shadow: 0 1px 4px rgba(0,0,0,0.3);"></span>
-    </div>
-  `,
-  iconSize: [26, 26],
-  iconAnchor: [13, 13],
-  popupAnchor: [0, -13],
-});
-
-// Always frame the office and the user together (auto zoom + center) so the
-// distance line stays centered in view. Refits are throttled so continuous GPS
-// updates stay smooth instead of animating on every noisy tick.
-const REFIT_THROTTLE_MS = 600
-const MIN_REFIT_MOVE_METERS = 2
+import SlideToConfirmButton from './SlideToConfirmButton.jsx'
 
 // Desktop/laptop browsers locate themselves via network (Wi-Fi/IP) positioning
 // which can be off by hundreds of metres. We accept a check-in when the
@@ -50,87 +19,9 @@ const MIN_REFIT_MOVE_METERS = 2
 // wildly inaccurate IP-only fix cannot bypass the geofence entirely.
 const ACCURACY_TOLERANCE_CAP = 500
 
-function MapBoundsUpdater({ officeCoords, userCoords }) {
-  const map = useMap()
-  const lastFitRef = useRef(null)
-  const lastFitAtRef = useRef(0)
-  const pendingFitRef = useRef(null)
-
-  useEffect(() => {
-    if (!map) return
-    // Cancel any pending trailing fit from a previous coordinate update.
-    if (pendingFitRef.current) {
-      clearTimeout(pendingFitRef.current)
-      pendingFitRef.current = null
-    }
-    const hasUser = userCoords && Number.isFinite(userCoords.lat) && Number.isFinite(userCoords.lng)
-    const hasOffice = officeCoords && Number.isFinite(officeCoords.lat) && Number.isFinite(officeCoords.lng)
-
-    if (!hasOffice) return
-
-    // Keep both points centered inside the visible map area (clearing the top
-    // header and the bottom action button overlays).
-    const fit = (user, animate) => {
-      if (user) {
-        const bounds = L.latLngBounds([
-          [officeCoords.lat, officeCoords.lng],
-          [user.lat, user.lng]
-        ])
-        map.fitBounds(bounds, {
-          paddingTopLeft: [48, 84],
-          paddingBottomRight: [48, 112],
-          maxZoom: 18,
-          animate
-        })
-      } else {
-        map.setView([officeCoords.lat, officeCoords.lng], 16, { animate })
-      }
-      lastFitRef.current = {
-        officeLat: officeCoords.lat,
-        officeLng: officeCoords.lng,
-        userLat: user ? user.lat : null,
-        userLng: user ? user.lng : null,
-      }
-      lastFitAtRef.current = Date.now()
-    }
-
-    const last = lastFitRef.current
-    const officeChanged = !last
-      || last.officeLat !== officeCoords.lat
-      || last.officeLng !== officeCoords.lng
-
-    if (officeChanged) {
-      fit(hasUser ? userCoords : null, true)
-      return
-    }
-
-    if (!hasUser) return
-
-    const movedEnough = last.userLat == null || last.userLng == null
-      || getDistanceFromLatLonInMeters(last.userLat, last.userLng, userCoords.lat, userCoords.lng) >= MIN_REFIT_MOVE_METERS
-
-    if (!movedEnough) return
-
-    const elapsed = Date.now() - lastFitAtRef.current
-    if (elapsed >= REFIT_THROTTLE_MS) {
-      fit(userCoords, false)
-    } else {
-      // Trailing refit guarantees the latest position is framed even if GPS
-      // updates arrive faster than the throttle window.
-      if (pendingFitRef.current) clearTimeout(pendingFitRef.current)
-      pendingFitRef.current = setTimeout(() => {
-        pendingFitRef.current = null
-        fit(userCoords, false)
-      }, REFIT_THROTTLE_MS - elapsed)
-    }
-  }, [map, userCoords?.lat, userCoords?.lng, officeCoords?.lat, officeCoords?.lng])
-
-  useEffect(() => () => {
-    if (pendingFitRef.current) clearTimeout(pendingFitRef.current)
-  }, [])
-
-  return null
-}
+// Pretty long-form date for the live clock hero.
+const formatLongDate = (d) =>
+  d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
 
 export default function GeoCheckInWidget({ 
   currentUser, 
@@ -147,8 +38,6 @@ export default function GeoCheckInWidget({
   myLogsTarget = 'attendance'
 }) {
   const today = toLocal(new Date())
-  const basemap = getStreetBasemap()
-  const mapRef = useRef(null)
   const [currentTime, setCurrentTime] = useState(new Date())
   
   // Use settings or fallback to default
@@ -156,9 +45,6 @@ export default function GeoCheckInWidget({
   const officeLng = settings?.officeLocation?.lng ?? 90.4125
   const maxDistance = settings?.officeLocation?.radius ?? 100
   
-  const [userLocation, setUserLocation] = useState(null)
-  const [distance, setDistance] = useState(null)
-  const [locError, setLocError] = useState(null)
   const [isLoadingLoc, setIsLoadingLoc] = useState(false)
   const [gpsPhase, setGpsPhase] = useState('idle') // 'idle' | 'acquiring' | 'verifying' | 'outside'
   
@@ -194,14 +80,12 @@ export default function GeoCheckInWidget({
       const lat = position.coords.latitude
       const lng = position.coords.longitude
       const acc = Number.isFinite(position.coords.accuracy) ? Math.round(position.coords.accuracy) : null
-      setUserLocation({ lat, lng })
-      setDistance(getDistanceFromLatLonInMeters(lat, lng, officeLat, officeLng))
       storeFix(lat, lng, acc)
     }
 
     const stop = watchPositionRobust(
       applyPosition,
-      ({ reason }) => setLocError(getGeoMessage(reason).title),
+      () => {},
       { highAccuracy: true, timeout: 20000, maximumAge: 10000 }
     )
 
@@ -327,7 +211,6 @@ export default function GeoCheckInWidget({
     }
   }, [attendance, empId, currentMonthPrefix])
 
-  const isWorking = empLog.checkIn !== '--' && empLog.checkOut === '--'
   const cooldownRemaining = empLog.checkOut !== '--' && !cooldownPassed ? Math.max(0, STANDARD_COOLDOWN_MINS - (minutesSince(empLog.checkOut) ?? 0)) : 0
 
   const showSuccessOverlay = (type, time, hoursWorked = null) => {
@@ -344,9 +227,7 @@ export default function GeoCheckInWidget({
   // Applies a fix to the UI, caches it and returns the distance to the office.
   const applyFix = (lat, lng, acc) => {
     const rounded = Number.isFinite(acc) ? Math.round(acc) : null
-    setUserLocation({ lat, lng })
     const dist = getDistanceFromLatLonInMeters(lat, lng, officeLat, officeLng)
-    setDistance(dist)
     storeFix(lat, lng, rounded)
     return dist
   }
@@ -368,7 +249,6 @@ export default function GeoCheckInWidget({
 
   const refreshLocation = async () => {
     setIsLoadingLoc(true)
-    setLocError(null)
     try {
       const position = await getCurrentPositionRobust({ highAccuracy: true, timeout: 10000, maximumAge: 0 })
       applyFix(position.coords.latitude, position.coords.longitude, position.coords.accuracy)
@@ -380,7 +260,6 @@ export default function GeoCheckInWidget({
       } else {
         const reason = err?.reason || GEO_REASON.UNKNOWN
         const msg = getGeoMessage(reason)
-        setLocError(msg.title)
         addToast?.(msg.description, 'error')
       }
     } finally {
@@ -390,7 +269,6 @@ export default function GeoCheckInWidget({
 
   const executeActionWithLocation = async (actionCallback) => {
     setIsLoadingLoc(true)
-    setLocError(null)
     setGpsPhase('acquiring')
 
     let fix = null
@@ -405,7 +283,6 @@ export default function GeoCheckInWidget({
         setIsLoadingLoc(false)
         setGpsPhase('idle')
         const reason = err?.reason || GEO_REASON.UNKNOWN
-        setLocError(getGeoMessage(reason).title)
         setGpsDisabledModal({ open: true, reason })
         return
       }
@@ -707,306 +584,85 @@ export default function GeoCheckInWidget({
       </Dialog>
 
       <Card className={`overflow-hidden dashboard-widget relative rounded-3xl border border-border/60 dark:border-white/10 ${cardClassName ? cardClassName : 'col-span-full xl:col-span-12'} min-h-0 flex flex-col p-0 isolate`}>
-        {/* Progressive blur backdrop on top of map, under header buttons */}
-        <div className="map-header-progressive-blur" aria-hidden="true" />
-
-        {/* Floating Top Header over Map (Above progressive blur) */}
-        <CardHeader className="absolute top-0 left-0 right-0 flex-row items-center justify-between px-3.5 sm:px-4 pt-3.5 pb-2.5 space-y-0 gap-3 z-20 border-none pointer-events-none">
-          <div className="pointer-events-auto flex items-center gap-2.5 min-w-0">
-            <div className="shrink-0 flex items-center justify-center [&_.msr]:!text-black">
-              <Icon name="schedule" className="!text-black shrink-0" size={20} />
-            </div>
-            <CardTitle className="text-fluid font-bold tracking-tight !text-black m-0 leading-snug break-words">
-              Attendance
-            </CardTitle>
-          </div>
-          <div className="pointer-events-auto flex items-center gap-1.5 sm:gap-2">
-            <button
-              onClick={() => setCurrentView && setCurrentView(myLogsTarget)}
-              className="apple-glass-btn text-xs font-semibold px-3.5 h-7 rounded-full cursor-pointer shrink-0 !text-black !border-black"
-            >
-              My Logs
-            </button>
-          </div>
+        {/* Header — no headline, just the My Logs action */}
+        <CardHeader className="flex-row items-center justify-end px-4 sm:px-5 pt-4 pb-1 space-y-0 gap-3 border-none">
+          <button
+            onClick={() => setCurrentView && setCurrentView(myLogsTarget)}
+            className="apple-glass-btn text-xs font-semibold px-3.5 h-7 rounded-full cursor-pointer shrink-0 text-foreground"
+          >
+            My Logs
+          </button>
         </CardHeader>
 
-        {/* Map View Section: expands responsively and pushes lower content down */}
-        <div className="relative w-full flex-[1_1_340px] min-h-[300px] pt-14 overflow-hidden border-none flex flex-col justify-between">
-          {/* Full Box Interactive Map View */}
-          <div className="absolute inset-0 w-full h-full z-0">
-            <MapContainer
-              ref={mapRef}
-              center={[officeLat, officeLng]}
-              zoom={19}
-              scrollWheelZoom={false}
-              zoomControl={false}
-              attributionControl={false}
-              className="w-full h-full"
-            >
-              <TileLayer
-                url={basemap.url}
-                attribution={false}
-                subdomains={basemap.subdomains}
-                maxZoom={basemap.maxZoom}
-                className={basemap.className}
-                keepBuffer={4}
-                updateWhenIdle={true}
-                updateWhenZooming={false}
-              />
-              {/* Office Geofence Circle */}
-              <Circle
-                center={[officeLat, officeLng]}
-                radius={maxDistance}
-                pathOptions={{
-                  color: distance !== null && distance <= maxDistance ? '#10b981' : '#3b82f6',
-                  fillColor: distance !== null && distance <= maxDistance ? '#10b981' : '#3b82f6',
-                  fillOpacity: 0.15,
-                  weight: 2,
-                  dashArray: '4, 4'
-                }}
-              />
-              {/* Office Location Marker */}
-              <Marker position={[officeLat, officeLng]}>
-                <Popup>
-                  <div className="text-xs font-sans">
-                    <p className="font-bold text-foreground">Office Location</p>
-                    <p className="text-muted-foreground">Radius: {maxDistance}m</p>
-                  </div>
-                </Popup>
-              </Marker>
-
-              {/* User Location Marker with floating distance card right above the pin */}
-              {userLocation?.lat && userLocation?.lng && (
-                <Marker position={[userLocation.lat, userLocation.lng]} icon={userPinIcon}>
-                  <Tooltip
-                    permanent
-                    direction="top"
-                    offset={[0, -18]}
-                    className="geo-distance-tooltip"
-                  >
-                    <div 
-                      style={{ 
-                        backdropFilter: 'saturate(190%) blur(24px)', 
-                        WebkitBackdropFilter: 'saturate(190%) blur(24px)',
-                        background: 'transparent'
-                      }}
-                      className="px-3 py-1.5 rounded-xl border border-black/25 dark:border-black/25 !text-black font-semibold text-xs leading-none whitespace-nowrap flex items-center gap-1.5 shadow-sm select-none map-floating-glass geo-map-floating-text"
-                    >
-                      <span className="font-mono font-bold tabular-nums text-[13px] !text-black">
-                        {distance !== null ? `${distance}m` : 'Detecting...'}
-                      </span>
-                      <span className="text-[11px] font-medium !text-black/80">
-                        {distance !== null && distance <= maxDistance ? 'from office (in zone)' : 'from office'}
-                      </span>
-                    </div>
-                  </Tooltip>
-                  <Popup>
-                    <div className="text-xs font-sans">
-                      <p className="font-bold text-blue-600">Your Location</p>
-                      <p className="text-muted-foreground">
-                        {distance !== null ? `${distance}m from office` : 'Detecting...'}
-                      </p>
-                    </div>
-                  </Popup>
-                </Marker>
-              )}
-
-              {/* Connecting visual distance line between office and user location */}
-              {userLocation?.lat && userLocation?.lng && (
-                <Polyline
-                  positions={[
-                    [officeLat, officeLng],
-                    [userLocation.lat, userLocation.lng]
-                  ]}
-                  pathOptions={{
-                    color: distance !== null && distance <= maxDistance ? '#10b981' : '#3b82f6',
-                    weight: 3,
-                    dashArray: '6, 8',
-                    opacity: 0.85
-                  }}
-                />
-              )}
-
-              {/* Auto Bounds View Component */}
-              <MapBoundsUpdater 
-                officeCoords={{ lat: officeLat, lng: officeLng }} 
-                userCoords={userLocation} 
-                radius={maxDistance} 
-              />
-            </MapContainer>
+        {/* Hero: live clock (timer) on top, then the slide-to-confirm control */}
+        <div className="flex flex-col items-center gap-3 px-4 sm:px-5 pt-5 pb-5">
+          {/* Live clock (timer) */}
+          <div className="flex flex-col items-center">
+            <span aria-live="polite" role="timer" className="text-2xl sm:text-3xl font-bold tabular-nums tracking-tight text-foreground leading-none">
+              {timeStr}
+            </span>
+            <span className="text-[11px] font-semibold text-muted-foreground mt-1">
+              {formatLongDate(currentTime)}
+            </span>
           </div>
 
-          {/* Floating Top Controls: Right-aligned Zoom Controls & GPS Refresh (Distance is now pinned directly above user's location) */}
-          <div className="relative z-10 p-3 sm:p-4 flex items-start justify-end gap-2.5 pointer-events-none">
-            {/* Top-Right Tools: Zoom Controls & GPS Refresh */}
-            <div className="pointer-events-auto flex flex-col items-center gap-2">
-              <button
-                data-geo-map-control
-                type="button"
-                onClick={() => mapRef.current?.zoomIn()}
-                title="Zoom in"
-                aria-label="Zoom in"
-                style={{ 
-                  backdropFilter: 'saturate(190%) blur(32px)', 
-                  WebkitBackdropFilter: 'saturate(190%) blur(32px)', 
-                  background: 'transparent'
-                }}
-                className="size-10 rounded-2xl border border-black/25 hover:bg-black/10 flex items-center justify-center !text-black transition-all active:scale-95 cursor-pointer map-floating-glass geo-map-floating-text kormiis-shadow"
-              >
-                <Icon name="add" size={19} className="!text-black"/>
-              </button>
-              <button
-                data-geo-map-control
-                type="button"
-                onClick={() => mapRef.current?.zoomOut()}
-                title="Zoom out"
-                aria-label="Zoom out"
-                style={{ 
-                  backdropFilter: 'saturate(190%) blur(32px)', 
-                  WebkitBackdropFilter: 'saturate(190%) blur(32px)', 
-                  background: 'transparent'
-                }}
-                className="size-10 rounded-2xl border border-black/25 hover:bg-black/10 flex items-center justify-center !text-black transition-all active:scale-95 cursor-pointer map-floating-glass geo-map-floating-text kormiis-shadow"
-              >
-                <Icon name="remove" size={19} className="!text-black"/>
-              </button>
-              <button
-                data-geo-map-control
-                type="button"
-                onClick={refreshLocation}
-                title="Refresh GPS"
-                aria-label="Refresh GPS"
-                disabled={isLoadingLoc}
-                style={{ 
-                  backdropFilter: 'saturate(190%) blur(32px)', 
-                  WebkitBackdropFilter: 'saturate(190%) blur(32px)', 
-                  background: 'transparent'
-                }}
-                className="size-10 rounded-2xl border border-black/25 hover:bg-black/10 flex items-center justify-center !text-black transition-all active:scale-95 disabled:opacity-50 cursor-pointer map-floating-glass geo-map-floating-text kormiis-shadow"
-              >
-                <Icon name="my_location" size={17} className={isLoadingLoc ? "animate-spin !text-black" : "!text-black"}/>
-              </button>
+          {/* Slide-to-confirm action OR cooldown status */}
+          {canCheckIn || canCheckOut ? (
+            <SlideToConfirmButton
+              action={canCheckIn ? 'in' : 'out'}
+              busy={isLoadingLoc}
+              onConfirm={canCheckIn ? handleCheckIn : handleCheckOut}
+              checkIn={displayCheckIn}
+              checkOut={displayCheckOut}
+            />
+          ) : (
+            <div className="w-full flex items-center justify-between px-4 h-12 rounded-2xl border border-border/70 dark:border-white/12 bg-black/[0.03] dark:bg-white/[0.04] text-xs">
+              <span className="flex items-center gap-2 font-bold text-foreground">
+                <Icon name="check_circle" className="shrink-0 text-emerald-600 dark:text-emerald-400" size={17}/>
+                Checked Out
+              </span>
+              <span className="text-[11px] font-mono font-bold text-muted-foreground flex items-center gap-1">
+                <Icon name="history_toggle_off" size={13} className="shrink-0"/>
+                {cooldownRemaining > 0 ? `Check In available in ${cooldownRemaining}m` : 'No action needed'}
+              </span>
             </div>
-          </div>
+          )}
 
-          {/* Floating Bottom Section: Dynamic Compact Primary Action Button */}
-          <div className="relative z-10 mt-auto p-3 sm:p-4 flex flex-col gap-2 pointer-events-none">
-
-            {/* Primary Floating Action Button with Ultra-Liquid Glass Style */}
-            <div className="pointer-events-auto w-full">
-              {canCheckIn || canCheckOut ? (
-                <button
-                  data-geo-map-control
-                  type="button"
-                  onClick={canCheckIn ? handleCheckIn : handleCheckOut}
-                  disabled={(!canCheckIn && !canCheckOut) || isLoadingLoc}
-                  style={{ 
-                    backdropFilter: 'saturate(190%) blur(32px)', 
-                    WebkitBackdropFilter: 'saturate(190%) blur(32px)', 
-                    background: 'transparent'
-                  }}
-                  className={`w-full h-12 rounded-2xl text-sm font-bold flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] cursor-pointer map-floating-glass geo-map-floating-text kormiis-shadow ${
-                    canCheckIn 
-                      ? '!text-black border-2 border-emerald-600/80 hover:bg-emerald-500/20' 
-                      : '!text-black border-2 border-red-600/80 hover:bg-red-500/20'
-                  }`}
-                >
-                  {isLoadingLoc ? (
-                    <Icon name="progress_activity" className="animate-spin shrink-0 !text-black" size={16}/>
-                  ) : (
-                    <Icon name={canCheckIn ? "login" : "logout"} className={canCheckIn ? "shrink-0 !text-emerald-800" : "shrink-0 !text-red-700"} size={16}/>
-                  )}
-                  
-                  <span className="text-sm font-extrabold tracking-wide flex items-center gap-1.5 !text-black">
-                    {gpsPhase === 'acquiring' ? (
-                      'Acquiring Live GPS...'
-                    ) : gpsPhase === 'verifying' ? (
-                      'Verifying GPS...'
-                    ) : (
-                      canCheckIn ? 'Clock In' : 'Clock Out'
-                    )}
-                  </span>
-                </button>
-              ) : (
-                <div 
-                  data-geo-map-control
-                  style={{ 
-                    backdropFilter: 'saturate(190%) blur(32px)', 
-                    WebkitBackdropFilter: 'saturate(190%) blur(32px)', 
-                    background: 'transparent'
-                  }}
-                  className="w-full h-12 flex items-center justify-between px-4 rounded-2xl border border-black/25 text-xs map-floating-glass geo-map-floating-text kormiis-shadow"
-                >
-                  <span className="flex items-center gap-2 font-bold !text-black">
-                    <Icon name="check_circle" className="shrink-0 !text-emerald-600" size={17}/>
-                    Clocked Out
-                  </span>
-                  <span className="text-[11px] font-mono font-bold !text-black/80 flex items-center gap-1">
-                    <Icon name="history_toggle_off" size={13} className="!text-black shrink-0"/>
-                    Clock In available in {cooldownRemaining}m
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
+          {/* GPS phase feedback (while an action is acquiring/verifying) */}
+          {gpsPhase !== 'idle' && (
+            <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
+              <Icon name="progress_activity" size={14} className="animate-spin" />
+              {gpsPhase === 'acquiring' ? 'Acquiring live GPS…' : 'Verifying GPS…'}
+            </span>
+          )}
         </div>
 
         {/* Unified Attendance Content Section */}
         <CardContent className="flex flex-col gap-3.5 p-3.5 sm:p-4 mt-auto">
-          {/* 1. Today's Punch & Realtime Worked Duration Banner */}
-          <div className="flex items-center justify-between p-3 sm:p-3.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/8 dark:border-white/10">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <Icon 
-                name={isWorking ? 'login' : empLog.checkOut && empLog.checkOut !== '--' && empLog.checkOut !== '0' ? 'task_alt' : isOffDay ? 'weekend' : 'schedule'} 
-                size={16} 
-                className={`shrink-0 ${
-                  isWorking 
-                    ? 'text-emerald-600 dark:text-emerald-400' 
-                    : empLog.checkOut && empLog.checkOut !== '--' && empLog.checkOut !== '0'
-                    ? 'text-blue-600 dark:text-blue-400'
-                    : isOffDay
-                    ? 'text-amber-600 dark:text-amber-400'
-                    : 'text-muted-foreground'
-                }`}
-              />
-
-              <div className="flex flex-col min-w-0">
-                <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
-                  <span className="text-sm sm:text-base font-bold text-foreground">
-                    Clock In: <span className="font-mono text-muted-foreground font-semibold">{displayCheckIn}</span>
-                  </span>
-                  <span className="text-muted-foreground text-sm font-bold">•</span>
-                  <span className="text-sm sm:text-base font-bold text-foreground">
-                    Clock Out: <span className="font-mono text-muted-foreground font-semibold">{displayCheckOut}</span>
-                  </span>
-                </div>
-                {isOffDay && (
-                  <span className="text-xs font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-1 mt-0.5">
-                    <Icon name="event_available" size={14} />
-                    Off Day (Scheduled in Roster)
-                  </span>
-                )}
-              </div>
-            </div>
-
-            <div className="flex items-center gap-1.5 shrink-0 pl-2">
-              <Icon 
-                name="timer" 
-                size={18} 
-                className={isWorking ? "text-emerald-500 animate-pulse" : "text-primary"} 
-              />
-              <span className="text-base sm:text-lg font-black text-foreground font-mono tabular-nums">
-                {workedDurationStr}
-              </span>
-            </div>
+          {/* Today's worked duration — compact summary line */}
+          <div className="flex items-center justify-between px-1">
+            <span className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+              <Icon name="timer" size={14} className="shrink-0 text-foreground" />
+              Total worked
+            </span>
+            <span className="text-base sm:text-lg font-black text-foreground font-mono tabular-nums">
+              {workedDurationStr}
+            </span>
           </div>
+
+          {isOffDay && (
+            <span className="text-xs font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-1">
+              <Icon name="event_available" size={14} />
+              Off Day (Scheduled in Roster)
+            </span>
+          )}
 
           {/* 2. Monthly Attendance Progress Bar Style Representation */}
           <div className="flex flex-col gap-2.5 p-3 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/8 dark:border-white/10">
             {/* Header with Title and Total Hours */}
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-                Monthly Attendance Breakdown
+                Monthly Report
               </span>
               <div className="flex items-center gap-1 font-mono text-xs font-bold text-foreground">
                 <Icon name="timer" size={13} className="text-primary shrink-0" />
@@ -1014,100 +670,26 @@ export default function GeoCheckInWidget({
               </div>
             </div>
 
-            {/* Segmented Multi-Color Progress Bar */}
-            {(() => {
-              const totalRecorded = (monthlyStats.presentDays - monthlyStats.lateDays) + monthlyStats.lateDays + monthlyStats.noShowDays + monthlyStats.leavesCount
-              const onTime = Math.max(0, monthlyStats.presentDays - monthlyStats.lateDays)
-              const late = monthlyStats.lateDays
-              const noShow = monthlyStats.noShowDays
-              const leaves = monthlyStats.leavesCount
-
-              // Proportional flex-grow segments share the full width exactly, so
-              // the colours merge seamlessly with no sub-pixel gaps or rounding.
-              const seg = (count, colorClass, label) => (
-                count > 0 ? (
-                  <div
-                    key={label}
-                    style={{ flexGrow: count, flexBasis: 0 }}
-                    className={`h-full min-w-0 ${colorClass} transition-all duration-500`}
-                    title={`${label}: ${count} days`}
-                  />
-                ) : null
-              )
-
-              return (
-                <div className="space-y-2">
-                  {/* Visual Bar Track */}
-                  <div className="w-full h-3 rounded-full bg-black/10 dark:bg-white/10 overflow-hidden flex">
-                    {totalRecorded === 0 ? (
-                      <div className="w-full h-full bg-muted-foreground/20" />
-                    ) : (
-                      <>
-                        {seg(onTime, 'attendance-color-emerald', 'Present (On-Time)')}
-                        {seg(late, 'attendance-color-amber', 'Late')}
-                        {seg(noShow, 'attendance-color-rose', 'No Show')}
-                        {seg(leaves, 'attendance-color-blue', 'Leave')}
-                      </>
-                    )}
-                  </div>
-
-                  {/* Bar Legend & Numerical Counts */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
-                    {/* Present / On-Time */}
-                    <div className="flex items-center gap-2">
-                      <div className="size-2 rounded-full attendance-color-emerald shrink-0" />
-                      <div className="flex items-baseline gap-1.5 min-w-0">
-                        <span className="text-xs font-black text-foreground tabular-nums font-mono">
-                          {monthlyStats.presentDays}
-                        </span>
-                        <span className="text-[11px] font-semibold text-muted-foreground truncate">
-                          Present
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Late */}
-                    <div className="flex items-center gap-2">
-                      <div className="size-2 rounded-full attendance-color-amber shrink-0" />
-                      <div className="flex items-baseline gap-1.5 min-w-0">
-                        <span className="text-xs font-black text-foreground tabular-nums font-mono">
-                          {monthlyStats.lateDays}
-                        </span>
-                        <span className="text-[11px] font-semibold text-muted-foreground truncate">
-                          Late
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* No Show */}
-                    <div className="flex items-center gap-2">
-                      <div className="size-2 rounded-full attendance-color-rose shrink-0" />
-                      <div className="flex items-baseline gap-1.5 min-w-0">
-                        <span className="text-xs font-black text-foreground tabular-nums font-mono">
-                          {monthlyStats.noShowDays}
-                        </span>
-                        <span className="text-[11px] font-semibold text-muted-foreground truncate">
-                          No Show
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Leave */}
-                    <div className="flex items-center gap-2">
-                      <div className="size-2 rounded-full attendance-color-blue shrink-0" />
-                      <div className="flex items-baseline gap-1.5 min-w-0">
-                        <span className="text-xs font-black text-foreground tabular-nums font-mono">
-                          {monthlyStats.leavesCount}
-                        </span>
-                        <span className="text-[11px] font-semibold text-muted-foreground truncate">
-                          Leave
-                        </span>
-                      </div>
-                    </div>
-                  </div>
+            {/* Monthly stat cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {[
+                { key: 'present', label: 'Present', count: monthlyStats.presentDays, bg: 'linear-gradient(135deg, var(--color-status-green) 0%, #047857 100%)', color: '#065f46' },
+                { key: 'late', label: 'Late', count: monthlyStats.lateDays, bg: 'linear-gradient(135deg, var(--color-status-yellow) 0%, #b45309 100%)', color: '#92400e' },
+                { key: 'noshow', label: 'No Show', count: monthlyStats.noShowDays, bg: 'linear-gradient(135deg, var(--color-status-red) 0%, #b91c1c 100%)', color: '#991b1b' },
+                { key: 'leave', label: 'Leave', count: monthlyStats.leavesCount, bg: 'linear-gradient(135deg, var(--color-status-blue) 0%, #3730a3 100%)', color: '#312e81' },
+              ].map(({ key, label, count, bg, color }) => (
+                <div
+                  key={key}
+                  className="flex items-center justify-between gap-2 min-w-0 rounded-xl px-3 py-2 shadow-none"
+                  style={{ background: bg }}
+                >
+                  <span className="text-[11px] font-bold text-white truncate drop-shadow-sm">{label}</span>
+                  <span className="shrink-0 flex items-center justify-center size-7 rounded-md bg-white">
+                    <span className="text-sm font-black tabular-nums font-mono leading-none" style={{ color }}>{count}</span>
+                  </span>
                 </div>
-              )
-            })()}
+              ))}
+            </div>
           </div>
         </CardContent>
       </Card>

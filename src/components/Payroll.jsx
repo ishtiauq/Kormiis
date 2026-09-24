@@ -11,6 +11,7 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@
 
 import AdSlot from './AdSlot.jsx'
 import Expenses from './Expenses.jsx'
+import GlassMonthPicker from '@/components/ui/GlassMonthPicker.jsx'
 import { formatDate } from '../services/date.js'
 import { generatePayrollSlipMessage, queueWhatsAppMessages, openWhatsAppDirect } from '../services/whatsappService.js'
 
@@ -31,30 +32,11 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
   const [statusFilter, setStatusFilter] = useState('All')
   const [processingId, setProcessingId] = useState(null)
 
-  // Month/Year dropdown states
-  const [monthOpen, setMonthOpen] = useState(false)
-  const [yearOpen, setYearOpen] = useState(false)
-  const pickerRef = useRef(null)
-
-  const currentMonth = parseInt(selectedMonth.split('-')[1])
-  const currentYear = parseInt(selectedMonth.split('-')[0])
+  const safeMonthStr = typeof selectedMonth === 'string' ? selectedMonth : `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+  const currentMonth = parseInt(safeMonthStr.split('-')[1]) || (now.getMonth() + 1)
+  const currentYear = parseInt(safeMonthStr.split('-')[0]) || now.getFullYear()
 
   const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-
-  const yearOptions = useMemo(() => {
-    const years = []
-    for (let y = 2050; y >= 2000; y--) years.push(y)
-    return years
-  }, [])
-
-  // Close pickers on outside click
-  useEffect(() => {
-    const handleClick = (e) => {
-      if (pickerRef.current && !pickerRef.current.contains(e.target)) { setMonthOpen(false); setYearOpen(false) }
-    }
-    document.addEventListener('mousedown', handleClick)
-    return () => document.removeEventListener('mousedown', handleClick)
-  }, [])
 
   // Global salary overrides (keyed by employeeId)
   const [salaryOverrides, setSalaryOverrides] = useState(() => {
@@ -171,7 +153,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
 
   // Initialize a new month copying previous settings and subtracting paid loan installments
   const handleInitializeMonth = () => {
-    const [y, m] = selectedMonth.split('-').map(Number)
+    const [y, m] = safeMonthStr.split('-').map(Number)
     const prevMonthVal = m === 1 ? `${y-1}-12` : `${y}-${String(m-1).padStart(2, '0')}`
     const prevMonthData = getMonthRecords(payroll, prevMonthVal) || []
 
@@ -761,54 +743,18 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
     { id: 'expenses', label: 'Expense Claims', icon: <Icon name="wallet" size={15}/> },
   ]
 
-  // Reusable month/year selector (lives in the summary strip and empty state).
+  // Reusable month/year selector with Ultra-Liquid Glass popover (highest layer above table)
   const periodPicker = (
-    <div ref={pickerRef} className="flex items-center gap-2">
-      {/* Month dropdown */}
-      <div className="relative h-9">
-        <button
-          type="button"
-          onClick={() => { setMonthOpen(!monthOpen); setYearOpen(false) }}
-          className={`inline-flex h-9 items-center justify-between gap-1.5 rounded-full border border-border bg-background px-3 text-sm font-semibold whitespace-nowrap ${monthOpen ? 'ring-2 ring-ring' : ''}`}
-        >
-          <span className="flex items-center gap-1.5">
-            <Icon name="calendar_month" className="h-4 w-4 shrink-0 text-muted-foreground" size={16}/>
-            <span className="whitespace-nowrap">{monthNames[currentMonth - 1]}</span>
-          </span>
-          <Icon name="keyboard_arrow_down" className={`h-4 w-4 shrink-0 opacity-50 transition-transform ${monthOpen ? 'rotate-180' : ''}`} size={16}/>
-        </button>
-        {monthOpen && (
-          <div className="absolute top-full left-0 right-0 mt-2 max-h-60 overflow-y-auto z-[100] rounded-md border glass-kormiis glass-popover p-1 text-popover-foreground shadow-none animate-in fade-in-0 zoom-in-95">
-            {monthNames.map((name, i) => (
-              <button key={name} type="button" onClick={() => { setSelectedMonth(`${currentYear}-${String(i + 1).padStart(2, '0')}`); setMonthOpen(false) }}
-                className={`relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none hover:bg-accent hover:text-accent-foreground ${i + 1 === currentMonth ? 'bg-accent text-accent-foreground font-semibold' : ''}`}>
-                {name}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-      {/* Year dropdown */}
-      <div className="relative w-[88px] h-9">
-        <button
-          type="button"
-          onClick={() => { setYearOpen(!yearOpen); setMonthOpen(false) }}
-          className={`flex w-full h-9 items-center justify-between rounded-full border border-border bg-background px-3 text-sm font-semibold ${yearOpen ? 'ring-2 ring-ring' : ''}`}
-        >
-          <span className="truncate">{currentYear}</span>
-          <Icon name="keyboard_arrow_down" className={`h-4 w-4 shrink-0 opacity-50 transition-transform ${yearOpen ? 'rotate-180' : ''}`} size={16}/>
-        </button>
-        {yearOpen && (
-          <div className="absolute top-full left-0 right-0 mt-2 max-h-60 overflow-y-auto z-[100] rounded-md border glass-kormiis glass-popover p-1 text-popover-foreground shadow-none animate-in fade-in-0 zoom-in-95">
-            {yearOptions.map(y => (
-              <button key={y} type="button" onClick={() => { setSelectedMonth(`${y}-${String(currentMonth).padStart(2, '0')}`); setYearOpen(false) }}
-                className={`relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none hover:bg-accent hover:text-accent-foreground ${y === currentYear ? 'bg-accent text-accent-foreground font-semibold' : ''}`}>
-                {y}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
+    <div className="relative z-30">
+      <GlassMonthPicker
+        value={selectedMonth}
+        onChange={(val) => {
+          const nextVal = typeof val === 'string' ? val : val?.target?.value
+          if (nextVal) setSelectedMonth(nextVal)
+        }}
+        align="left"
+        showQuickNav={false}
+      />
     </div>
   )
 
@@ -866,7 +812,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, settin
       ) : (
         <>
           {/* Compact Summary Strip */}
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-3 rounded-2xl border border-border/60 dark:border-white/10 bg-card px-4 py-3">
+          <div className="relative z-20 flex flex-wrap items-center gap-x-5 gap-y-3 rounded-2xl border border-border/60 dark:border-white/10 bg-card px-4 py-3">
             {periodPicker}
             <span className="hidden sm:block h-5 w-px bg-border" />
             <div className="flex items-baseline gap-1.5">

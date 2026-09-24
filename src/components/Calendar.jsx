@@ -456,7 +456,7 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
 
                   {isToday && (
                     <span className={`text-[9px] font-extrabold uppercase tracking-wider px-1.5 py-0.2 rounded-full hidden sm:inline-block ${
-                      isSelected ? 'bg-white/25 text-white' : 'bg-primary/20 text-primary'
+                      isSelected ? 'bg-white/25 text-white dark:bg-black/20 dark:text-black' : 'bg-primary/20 text-primary'
                     }`}>
                       Today
                     </span>

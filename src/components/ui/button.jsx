@@ -16,7 +16,7 @@ const buttonVariants = cva(
         ghost:
           "bg-transparent border-transparent hover:bg-black/5 dark:hover:bg-white/10 text-foreground",
         destructive:
-          "border-rose-500/30 bg-rose-500/15 text-rose-600 dark:text-rose-400 hover:bg-rose-500/25 active:bg-rose-500/30",
+          "border-red-500/30 bg-red-500/12 text-red-600 dark:text-red-400 dark:bg-red-500/15 dark:border-red-500/30 hover:bg-red-500/20 dark:hover:bg-red-500/25 active:bg-red-500/25 dark:active:bg-red-500/30",
         link: "bg-transparent border-transparent text-primary underline-offset-4 hover:underline",
         glass: "border-border text-foreground hover:bg-black/5 dark:hover:bg-white/10",
       },

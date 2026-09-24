@@ -996,7 +996,7 @@ export const MobileResponsiveBottomBar = memo(({
                                   {m.fileData && (
                                     <div className={`flex items-center gap-1.5 p-1.5 px-2.5 rounded-xl mb-1.5 text-[11px] font-semibold ${
                                       isUser 
-                                        ? 'bg-white/20 text-white' 
+                                        ? 'bg-white/20 text-white dark:bg-neutral-900/10 dark:text-neutral-900' 
                                         : 'bg-black/5 dark:bg-white/10 text-foreground'
                                     }`}>
                                       <Icon name="attach_file" size={14} className="shrink-0" />
