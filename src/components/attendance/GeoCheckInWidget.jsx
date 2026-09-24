@@ -697,8 +697,7 @@ export default function GeoCheckInWidget({
                 </div>
 
                 <div className="flex flex-col items-center justify-center p-2 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5">
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1">
-                    {isInOffice && <span className="size-1.5 rounded-full animate-pulse" style={{ backgroundColor: 'var(--color-status-green)' }} />}
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
                     {isInOffice ? 'In Office' : 'Office Time'}
                   </span>
                   <span className="text-xs sm:text-sm font-black font-mono tabular-nums text-primary mt-0.5">
