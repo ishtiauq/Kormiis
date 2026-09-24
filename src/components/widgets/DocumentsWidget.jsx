@@ -8,10 +8,10 @@ export const DocumentsWidget = memo(({ recentDocuments, setCurrentView, ...wProp
   <DashboardWidget
     id="documents-widget"
     title="Recent Documents"
-    icon={<Icon name="description" className="text-blue-500 shrink-0" size={22}/>}
+    icon={<Icon name="description" className="text-foreground shrink-0" size={22}/>}
     {...wProps}
     action={
-      <button onClick={() => setCurrentView('documents')} className="apple-glass-btn text-xs font-semibold px-3.5 h-7 rounded-full text-blue-500 hover:text-blue-600 cursor-pointer">
+      <button onClick={() => setCurrentView('documents')} className="apple-glass-btn text-xs font-semibold px-3.5 h-7 rounded-full text-foreground cursor-pointer">
         View All
       </button>
     }
@@ -27,7 +27,7 @@ export const DocumentsWidget = memo(({ recentDocuments, setCurrentView, ...wProp
         </div>
       )) : (
         <div className="flex-1 flex flex-col items-center justify-center text-center p-5">
-          <Icon name="description" size={34} className="text-blue-500/40 dark:text-blue-500/50 mb-2 shrink-0" />
+          <Icon name="description" size={34} className="text-foreground/40 mb-2 shrink-0" />
           <p className="m-0 text-fluid-sm font-medium text-muted-foreground max-w-[200px] leading-relaxed">No recent documents</p>
         </div>
       )}

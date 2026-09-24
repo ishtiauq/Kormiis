@@ -168,7 +168,7 @@ export default function AiExpandableFab({
         data-ai-fab
         className={
           isMobileOrTablet
-            ? "fixed bottom-0 left-0 right-0 w-full z-50 pointer-events-none flex flex-col items-center justify-end select-none"
+            ? "fixed inset-0 z-[60] pointer-events-none flex items-center justify-center p-4 select-none"
             : "fixed bottom-6 right-4 sm:right-6 z-[60] pointer-events-none flex flex-col items-end justify-end select-none"
         }
       >
@@ -193,7 +193,7 @@ export default function AiExpandableFab({
                   mass: 0.8
                 }}
                 data-mobile-panel
-                className="pointer-events-auto w-full max-w-2xl h-[min(88vh,720px)] glass-mobile-drawer glass-kormiis rounded-t-[28px] sm:rounded-t-3xl rounded-b-none border-t border-x border-white/30 dark:border-white/14 shadow-none overflow-hidden flex flex-col relative"
+                className="pointer-events-auto w-full max-w-2xl h-[min(85dvh,720px)] glass-kormiis rounded-[28px] border border-white/30 dark:border-white/14 shadow-none overflow-hidden flex flex-col relative"
                 style={{
                   background: 'transparent',
                   backgroundColor: 'transparent',

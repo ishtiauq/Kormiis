@@ -38,11 +38,7 @@ export default function DailyChecklistWidget({ notes = [], setNotes, ownerId = '
           {totalItems > 0 && (
             <Badge 
               variant="outline" 
-              className={`text-xs font-bold rounded-full px-2.5 py-0.5 border ${
-                completedItems === totalItems 
-                  ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30' 
-                  : 'bg-primary/10 text-primary border-primary/20'
-              }`}
+              className="text-xs font-bold rounded-full px-2.5 py-0.5 border border-black/10 dark:border-white/12 text-foreground bg-black/[0.04] dark:bg-white/[0.06]"
             >
               {completedItems}/{totalItems}
             </Badge>

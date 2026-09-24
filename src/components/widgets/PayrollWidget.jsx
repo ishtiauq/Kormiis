@@ -10,7 +10,7 @@ export const PayrollWidget = memo(({ currentPayrollMonth, paidCount, pendingCoun
     action={
       <button 
         onClick={() => setCurrentView && setCurrentView('payroll')} 
-        className="apple-glass-btn text-xs font-semibold px-3.5 h-7 rounded-full text-emerald-500 hover:text-emerald-600 cursor-pointer"
+        className="apple-glass-btn text-xs font-semibold px-3.5 h-7 rounded-full text-foreground cursor-pointer"
       >
         Details
       </button>

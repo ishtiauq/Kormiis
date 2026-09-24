@@ -388,7 +388,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
 
         {/* Column 1: Clock in / Geo Check-In Widget */}
         {currentUser && (
-          <div className="col-span-12 lg:col-span-4 h-auto min-h-fit w-full flex flex-col">
+          <div className="col-span-12 lg:col-span-4 lg:h-[680px] w-full flex flex-col">
             <GeoCheckInWidget 
               currentUser={currentUser} 
               attendance={attendance} 
@@ -422,7 +422,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
             addNotification={addNotification}
             settings={settings}
             hasPermission={hasPermission}
-            cardClass="col-span-12 lg:col-span-4 h-[680px] w-full"
+            cardClass="col-span-12 lg:col-span-4 lg:h-[680px] w-full"
             {...wProps}
           />
         )}
@@ -432,7 +432,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
           <EmployeeDirectoryWidget
             employees={employees}
             setCurrentView={setCurrentView}
-            cardClass="col-span-12 lg:col-span-4 h-[680px] w-full"
+            cardClass="col-span-12 lg:col-span-4 lg:h-[680px] w-full"
             {...wProps}
           />
         )}

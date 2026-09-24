@@ -602,7 +602,7 @@ export default function AiCoPilotModal({
       className={
         isMorphMode
           ? "w-full h-full flex flex-col overflow-hidden relative animate-in fade-in duration-200"
-          : "pointer-events-auto w-full sm:w-[85%] sm:max-w-3xl mx-auto h-[min(82vh,620px)] sm:h-[min(72vh,560px)] flex flex-col rounded-t-[32px] sm:rounded-[28px] rounded-b-none sm:rounded-b-[28px] glass-mobile-drawer sm:glass-kormiis border-t sm:border border-white/35 dark:border-white/16 shadow-none overflow-hidden relative animate-in slide-in-from-bottom sm:slide-in-from-top-3 duration-300 sm:duration-200"
+          : "pointer-events-auto w-full sm:w-[85%] sm:max-w-3xl mx-auto h-[min(82dvh,620px)] sm:h-[min(72vh,560px)] flex flex-col rounded-[28px] glass-kormiis border border-white/35 dark:border-white/16 shadow-none overflow-hidden relative animate-in slide-in-from-bottom sm:slide-in-from-top-3 duration-300 sm:duration-200"
       }
       style={
         isMorphMode
@@ -616,11 +616,6 @@ export default function AiCoPilotModal({
             }
       }
     >
-      {/* Mobile Drawer Pull Indicator Handle */}
-      {!isMorphMode && (
-        <div className="w-10 h-1 rounded-full bg-foreground/25 mx-auto mt-2.5 mb-1 sm:hidden shrink-0" />
-      )}
-
       {/* MODAL HEADER — SEAMLESS MONOGLASS HEADER */}
       <div className="flex items-center justify-between px-4.5 sm:px-5 py-3.5 sm:py-4 shrink-0 bg-transparent">
         <div className="flex items-center gap-2">
@@ -650,7 +645,7 @@ export default function AiCoPilotModal({
               className="apple-glass-btn size-8 sm:size-8.5 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground cursor-pointer transition-all active:scale-95 border border-white/35 dark:border-white/15"
               title="Back to conversation"
             >
-              <Icon name="close" size={16} />
+              <Icon name="arrow_back" size={16} />
             </button>
           ) : (
             <div className="flex items-center gap-1.5">
@@ -677,17 +672,17 @@ export default function AiCoPilotModal({
                   </span>
                 )}
               </button>
-              <button
-                type="button"
-                onClick={onClose}
-                aria-label="Close Kormiis AI"
-                className="apple-glass-btn size-8 sm:size-8.5 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground cursor-pointer transition-all active:scale-95 border border-white/35 dark:border-white/15"
-                title="Close modal"
-              >
-                <Icon name="close" size={16} />
-              </button>
             </div>
           )}
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close Kormiis AI"
+            className="apple-glass-btn size-8 sm:size-8.5 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground cursor-pointer transition-all active:scale-95 border border-white/35 dark:border-white/15"
+            title="Close modal"
+          >
+            <Icon name="close" size={16} />
+          </button>
         </div>
       </div>
 
@@ -1046,7 +1041,7 @@ export default function AiCoPilotModal({
         onClick={onClose}
         aria-hidden="true"
       />
-      <div className="fixed inset-0 z-[60] pointer-events-none flex flex-col justify-end sm:items-center sm:justify-start sm:pt-[76px] md:pt-[84px] sm:px-4 md:px-6 bg-transparent animate-in fade-in duration-200">
+      <div className="fixed inset-0 z-[60] pointer-events-none flex flex-col items-center justify-center p-4 sm:justify-start sm:pt-[76px] md:pt-[84px] sm:px-4 md:px-6 bg-transparent animate-in fade-in duration-200">
         {modalInner}
       </div>
     </>

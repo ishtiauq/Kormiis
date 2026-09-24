@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, memo } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import Icon from "@/components/ui/Icon.jsx"
 import { AiQuantumGlyph } from '../ai/AiExpandableFab.jsx'
@@ -73,6 +74,7 @@ export const MobileResponsiveBottomBar = memo(({
   const [expandedSection, setExpandedSection] = useState(null)
   const [notificationTab, setNotificationTab] = useState('all')
   const menuContainerRef = useRef(null)
+  const panelRef = useRef(null)
   const messagesEndRef = useRef(null)
 
   const sessionsStorageKey = `kormiis_ai_sessions_${user?.id || user?.uid || 'admin'}`
@@ -180,7 +182,9 @@ export const MobileResponsiveBottomBar = memo(({
   useEffect(() => {
     if (!isExpanded) return
     const handleClickOutside = (e) => {
-      if (menuContainerRef.current && !menuContainerRef.current.contains(e.target)) {
+      const inDock = menuContainerRef.current && menuContainerRef.current.contains(e.target)
+      const inPanel = panelRef.current && panelRef.current.contains(e.target)
+      if (!inDock && !inPanel) {
         setExpandedSection(null)
       }
     }
@@ -527,6 +531,8 @@ export const MobileResponsiveBottomBar = memo(({
       className={`fixed bottom-0 left-0 right-0 z-40 flex flex-col items-center justify-end pointer-events-none px-3 sm:px-4 pb-3.5 sm:pb-4 transition-transform duration-300 ${
         isScrollingDown && !isExpanded && !isNotificationsOpen && !isAiOpen
           ? 'translate-y-full opacity-0' 
+          : isExpanded
+          ? 'opacity-100'
           : 'translate-y-0 opacity-100'
       }`}
     >
@@ -558,10 +564,17 @@ export const MobileResponsiveBottomBar = memo(({
           />
         )}
 
-        {/* Floating Panel: Reveals from top/above and stops with a sleek gap above the dock */}
+        {/* Floating Panel — portaled to <body> so it is never clipped by the bar's positioning context */}
+        {typeof document !== 'undefined' && createPortal(
         <AnimatePresence>
           {isExpanded && (
+            <div className={
+              isMenuExpanded
+                ? 'fixed left-0 right-0 bottom-[82px] z-40 flex justify-center px-3 pointer-events-none'
+                : 'fixed inset-0 z-[60] flex items-center justify-center p-4 pointer-events-none'
+            }>
             <motion.div
+              ref={panelRef}
               key={`mobile-panel-${expandedSection}`}
               initial={{ opacity: 0, y: -24, scale: 0.96 }}
               animate={{ 
@@ -585,7 +598,9 @@ export const MobileResponsiveBottomBar = memo(({
               data-menu-drawer={isMenuExpanded ? "true" : undefined}
               data-notif-panel={isNotifExpanded ? "true" : undefined}
               data-ai-panel={isAiExpanded ? "true" : undefined}
-              className="relative z-40 w-full max-w-[345px] xs:max-w-[370px] mb-3 glass-kormiis border border-black/10 dark:border-white/14 rounded-[28px] p-4 flex flex-col overflow-hidden pointer-events-auto shadow-none"
+              className={`relative z-40 w-full max-w-[345px] xs:max-w-[370px] glass-kormiis border border-black/10 dark:border-white/14 rounded-[28px] p-4 flex flex-col overflow-hidden pointer-events-auto shadow-none ${
+                (isNotifExpanded || isAiExpanded) ? 'max-h-[85dvh] overflow-y-auto' : ''
+              }`}
               style={{
                 background: 'transparent',
                 backgroundColor: 'transparent',
@@ -652,16 +667,27 @@ export const MobileResponsiveBottomBar = memo(({
                         )}
                       </div>
 
-                      {actualUnreadCount > 0 && markNotificationsRead && (
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        {actualUnreadCount > 0 && markNotificationsRead && (
+                          <button
+                            type="button"
+                            onClick={() => markNotificationsRead()}
+                            className="apple-glass-btn text-[11px] font-bold px-2.5 py-1 rounded-full text-foreground/80 hover:text-foreground flex items-center gap-1.5 cursor-pointer transition-all active:scale-95"
+                          >
+                            <Icon name="done_all" size={13} />
+                            <span>Mark read</span>
+                          </button>
+                        )}
                         <button
                           type="button"
-                          onClick={() => markNotificationsRead()}
-                          className="apple-glass-btn text-[11px] font-bold px-2.5 py-1 rounded-full text-foreground/80 hover:text-foreground flex items-center gap-1.5 cursor-pointer transition-all active:scale-95"
+                          onClick={() => setExpandedSection(null)}
+                          aria-label="Close notifications"
+                          title="Close"
+                          className="apple-glass-btn size-8 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground cursor-pointer transition-transform active:scale-90 shrink-0"
                         >
-                          <Icon name="done_all" size={13} />
-                          <span>Mark read</span>
+                          <Icon name="close" size={16} />
                         </button>
-                      )}
+                      </div>
                     </div>
 
                     {/* Segmented Filter Tabs (All / Unread) - High Contrast & Crystal Clear */}
@@ -818,7 +844,7 @@ export const MobileResponsiveBottomBar = memo(({
                       </div>
 
                       {/* Header Actions: New Conversation & History buttons */}
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-1.5 shrink-0">
                         {showAiHistory ? (
                           <button
                             type="button"
@@ -826,7 +852,7 @@ export const MobileResponsiveBottomBar = memo(({
                             title="Back to conversation"
                             className="apple-glass-btn size-8 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground cursor-pointer transition-transform active:scale-90"
                           >
-                            <Icon name="close" size={16} />
+                            <Icon name="arrow_back" size={16} />
                           </button>
                         ) : (
                           <>
@@ -851,6 +877,15 @@ export const MobileResponsiveBottomBar = memo(({
                             </button>
                           </>
                         )}
+                        <button
+                          type="button"
+                          onClick={() => setExpandedSection(null)}
+                          aria-label="Close Kormiis AI"
+                          title="Close"
+                          className="apple-glass-btn size-8 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground cursor-pointer transition-transform active:scale-90 shrink-0"
+                        >
+                          <Icon name="close" size={16} />
+                        </button>
                       </div>
                     </div>
 
@@ -1106,8 +1141,10 @@ export const MobileResponsiveBottomBar = memo(({
                 )}
               </div>
             </motion.div>
+            </div>
           )}
-        </AnimatePresence>
+        </AnimatePresence>,
+        document.body)}
 
         {/* ==================================================== */}
         {/* STATIC 4-ICON DOCK PILL (Always fixed 56px height, rounded-full) */}

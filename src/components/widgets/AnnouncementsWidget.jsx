@@ -378,12 +378,12 @@ export const AnnouncementsWidget = memo(({
       <DashboardWidget
         id="w4"
         title="Catch Up"
-        icon={<Icon name="rss_feed" className="text-amber-500 shrink-0" size={22}/>}
+        icon={<Icon name="rss_feed" className="text-foreground shrink-0" size={22}/>}
         cardClass={cardClass}
         action={
           <button
             onClick={() => setCurrentView && setCurrentView('announcements')}
-            className="apple-glass-btn text-xs font-semibold px-3.5 h-7 rounded-full cursor-pointer text-muted-foreground hover:text-foreground inline-flex items-center"
+            className="apple-glass-btn text-xs font-semibold px-3.5 h-7 rounded-full cursor-pointer text-foreground inline-flex items-center"
           >
             View All
           </button>

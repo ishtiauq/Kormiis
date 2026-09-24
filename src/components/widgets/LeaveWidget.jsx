@@ -47,7 +47,7 @@ export const LeaveWidget = memo(({
     <DashboardWidget
       id="leave-widget"
       title="Leaves & Balances"
-      icon={<Icon name="event_busy" className="text-blue-500 shrink-0" size={22}/>}
+      icon={<Icon name="event_busy" className="text-foreground shrink-0" size={22}/>}
       action={
         <div className="flex items-center gap-1.5 sm:gap-2">
           <button
