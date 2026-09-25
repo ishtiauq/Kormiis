@@ -308,7 +308,7 @@ export default function Topbar({
       <header 
         data-topbar
         aria-label="Top navigation bar" 
-        className="topbar relative z-10 pointer-events-auto w-full h-14 sm:h-16 md:h-18 lg:h-20 px-4 sm:px-6 md:px-8 flex items-center justify-between pt-2 sm:pt-3 md:pt-4 pb-1 sm:pb-1.5 md:pb-2 gap-2 sm:gap-4 text-foreground bg-transparent !bg-transparent border-none !border-none shadow-none backdrop-blur-[32px] backdrop-saturate-[190%]"
+        className="topbar relative z-10 pointer-events-auto w-full h-14 sm:h-16 md:h-18 lg:h-20 px-3 sm:px-5 md:px-6 lg:px-8 flex items-center justify-between pt-2 sm:pt-3 md:pt-4 pb-1 sm:pb-1.5 md:pb-2 gap-2 sm:gap-4 text-foreground bg-transparent !bg-transparent border-none !border-none shadow-none backdrop-blur-[32px] backdrop-saturate-[190%]"
         style={{ background: 'transparent', backgroundColor: 'transparent', border: 'none', boxShadow: 'none', backdropFilter: 'blur(32px) saturate(190%)', WebkitBackdropFilter: 'blur(32px) saturate(190%)' }}
       >
         

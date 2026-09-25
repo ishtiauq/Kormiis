@@ -25,7 +25,7 @@ export default function DailyChecklistWidget({ notes = [], setNotes, ownerId = '
 
   return (
     <Card className={`flex flex-col p-0 h-full dashboard-widget ${cardClass}`}>
-      <CardHeader className="flex-row items-center justify-between px-3.5 sm:px-4 pt-3.5 pb-2.5 space-y-0 gap-3">
+      <CardHeader className="flex-row items-center justify-between px-4 sm:px-5 pt-4 pb-3 space-y-0 gap-3">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="shrink-0 flex items-center justify-center [&_.msr]:!text-foreground">
             <Icon name="task_alt" className="text-primary shrink-0" size={22}/>
@@ -51,7 +51,7 @@ export default function DailyChecklistWidget({ notes = [], setNotes, ownerId = '
           </button>
         </div>
       </CardHeader>
-      <CardContent className="flex-1 p-2.5 sm:p-3 flex flex-col justify-between pt-0">
+      <CardContent className="flex-1 min-h-0 p-4 sm:p-5 lg:p-6 flex flex-col justify-between">
         {!checklistNote ? (
           <div className="flex-1 flex flex-col items-center justify-center text-center py-6">
             <Icon name="fact_check" className="text-muted-foreground/30 mb-3" size={40}/>
@@ -63,7 +63,7 @@ export default function DailyChecklistWidget({ notes = [], setNotes, ownerId = '
             This checklist is empty.
           </div>
         ) : (
-          <div className="flex flex-col gap-2 max-h-[280px] overflow-y-auto pr-1 py-1">
+          <div className="flex-1 min-h-0 flex flex-col gap-2 overflow-y-auto pr-1 py-1">
             {checklistNote.items.map(item => (
               <div 
                 key={item.id} 

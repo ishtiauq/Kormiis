@@ -207,7 +207,7 @@ const ALL_HERO_FEATURES = [...HERO_FEATURE_ROWS[0], ...HERO_FEATURE_ROWS[1]]
 export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode }) {
   const containerRef = useRef(null)
   const [isLoading, setIsLoading] = useState(false)
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 640)
 
   // Auth / onboarding state
   const [authTab, setAuthTab] = useState('in') // 'in' (Sign in) | 'up' (Sign up)

@@ -53,7 +53,7 @@ export default function MyLeaveView({ currentUser, attendance, setAttendance, ad
   }
 
   return (
-    <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[1000px] mx-auto pb-10">
+    <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[var(--measure-max)] mx-auto pb-10">
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {Object.entries(myBalance).map(([lType, days]) => (

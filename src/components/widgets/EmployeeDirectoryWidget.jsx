@@ -75,7 +75,7 @@ export const EmployeeDirectoryWidget = memo(({ employees = [], setCurrentView, .
               return (
                 <div
                   key={emp.id}
-                  className="flex items-center justify-between gap-3 p-2.5 sm:p-3 rounded-2xl border border-black/10 dark:border-white/12 bg-black/[0.02] dark:bg-white/[0.03] transition-all"
+                  className="flex items-center justify-between gap-3 p-2.5 sm:p-3 rounded-2xl liquid-widget-item"
                 >
                   <div className="flex items-center gap-3 min-w-0 flex-1">
                     <Avatar className="size-9 shrink-0 rounded-2xl ring-1 ring-border/60 dark:ring-white/10">

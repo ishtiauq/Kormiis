@@ -30,7 +30,7 @@ export const DashboardWidget = memo(({
 }) => {
   return (
     <Card className={`flex flex-col p-0 h-full dashboard-widget ${cardClass}`}>
-      <CardHeader className="flex-row items-center justify-between px-3.5 sm:px-4 pt-3.5 pb-2.5 space-y-0 gap-3">
+      <CardHeader className="flex-row items-center justify-between px-4 sm:px-5 pt-4 pb-3 space-y-0 gap-3">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="shrink-0 flex items-center justify-center [&_.msr]:!text-foreground">
             {icon}
@@ -39,7 +39,7 @@ export const DashboardWidget = memo(({
         </div>
         {action}
       </CardHeader>
-      <CardContent className={`flex-1 ${contentClass} p-2.5 sm:p-3`}>
+      <CardContent className={`flex-1 min-h-0 overflow-y-auto p-4 sm:p-5 lg:p-6 ${contentClass}`}>
         {children}
       </CardContent>
     </Card>
@@ -388,7 +388,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
 
         {/* Column 1: Clock in / Geo Check-In Widget */}
         {currentUser && (
-          <div className="col-span-12 lg:col-span-4 lg:h-[680px] w-full flex flex-col">
+          <div className="col-span-12 lg:col-span-4 lg:h-[var(--row-hero)] w-full flex flex-col">
             <GeoCheckInWidget 
               currentUser={currentUser} 
               attendance={attendance} 
@@ -422,7 +422,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
             addNotification={addNotification}
             settings={settings}
             hasPermission={hasPermission}
-            cardClass="col-span-12 lg:col-span-4 lg:h-[680px] w-full"
+            cardClass="col-span-12 lg:col-span-4 lg:h-[var(--row-hero)] w-full"
             {...wProps}
           />
         )}
@@ -432,13 +432,13 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
           <EmployeeDirectoryWidget
             employees={employees}
             setCurrentView={setCurrentView}
-            cardClass="col-span-12 lg:col-span-4 lg:h-[680px] w-full"
+            cardClass="col-span-12 lg:col-span-4 lg:h-[var(--row-hero)] w-full"
             {...wProps}
           />
         )}
 
         {/* Attendance widget moved down */}
-        <div className="col-span-12 lg:col-span-8 min-h-[460px] h-[460px] w-full flex flex-col">
+        <div className="col-span-12 lg:col-span-8 min-h-[var(--row-mid)] h-[var(--row-mid)] w-full flex flex-col">
           {canViewAttendance && (
             <DashboardWidget
               id="w2"
@@ -646,7 +646,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
         </div>
 
         {/* Column beside Attendance: Daily Checklist */}
-        <div className="col-span-12 lg:col-span-4 min-h-[460px] h-[460px] w-full flex flex-col">
+        <div className="col-span-12 lg:col-span-4 min-h-[var(--row-mid)] h-[var(--row-mid)] w-full flex flex-col">
           <DailyChecklistWidget 
             notes={notes} 
             setNotes={setNotes} 
@@ -662,7 +662,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
           taskCompletionRate={taskCompletionRate}
           attendanceRate={attendanceRate}
           setCurrentView={setCurrentView}
-          cardClass="col-span-12 sm:col-span-6 lg:col-span-4 min-h-[320px] h-[320px] w-full"
+          cardClass="col-span-12 sm:col-span-6 lg:col-span-4 min-h-[var(--row-card)] h-[var(--row-card)] w-full"
           {...wProps}
         />
 
@@ -673,7 +673,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
             pendingTasksCount={pendingTasksCount}
             taskCompletionRate={taskCompletionRate}
             setCurrentView={setCurrentView}
-            cardClass="col-span-12 sm:col-span-6 lg:col-span-4 min-h-[320px] h-[320px] w-full"
+            cardClass="col-span-12 sm:col-span-6 lg:col-span-4 min-h-[var(--row-card)] h-[var(--row-card)] w-full"
             {...wProps}
           />
         )}
@@ -683,7 +683,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
           <DocumentsWidget
             recentDocuments={recentDocuments}
             setCurrentView={setCurrentView}
-            cardClass="col-span-12 sm:col-span-6 lg:col-span-4 min-h-[320px] h-[320px] w-full"
+            cardClass="col-span-12 sm:col-span-6 lg:col-span-4 min-h-[var(--row-card)] h-[var(--row-card)] w-full"
             {...wProps}
           />
         )}
@@ -698,7 +698,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
             settings={settings}
             currentPayrollData={currentPayrollData}
             setCurrentView={setCurrentView}
-            cardClass="col-span-12 sm:col-span-6 lg:col-span-4 min-h-[320px] h-[320px] w-full"
+            cardClass="col-span-12 sm:col-span-6 lg:col-span-4 min-h-[var(--row-card)] h-[var(--row-card)] w-full"
             {...wProps}
           />
         )}
@@ -709,7 +709,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
             assets={assets}
             availableAssetsCount={availableAssetsCount}
             setCurrentView={setCurrentView}
-            cardClass="col-span-12 sm:col-span-6 lg:col-span-4 min-h-[320px] h-[320px] w-full"
+            cardClass="col-span-12 sm:col-span-6 lg:col-span-4 min-h-[var(--row-card)] h-[var(--row-card)] w-full"
             {...wProps}
           />
         )}

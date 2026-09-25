@@ -777,7 +777,7 @@ function DashboardView({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 lg:gap-6 auto-rows-[minmax(148px,auto)] items-stretch pt-2">
 
         {/* Column 1: Attendance / Geo Check-In Column — col-span-12 lg:col-span-4 */}
-        <div className="col-span-12 lg:col-span-4 h-auto min-h-fit w-full flex flex-col">
+        <div className="col-span-12 lg:col-span-4 lg:h-[var(--row-hero)] w-full flex flex-col">
           {currentUser && (
             <GeoCheckInWidget 
               currentUser={currentUser} 
@@ -810,14 +810,14 @@ function DashboardView({
           addLog={addLog}
           addNotification={addNotification}
           settings={settings}
-          cardClass="col-span-12 lg:col-span-4 h-[680px] w-full"
+          cardClass="col-span-12 lg:col-span-4 lg:h-[var(--row-hero)] w-full"
         />
 
         {/* Column 3: Team Directory Widget — col-span-12 lg:col-span-4 */}
         <EmployeeDirectoryWidget
           employees={employees}
           setCurrentView={setActiveTab}
-          cardClass="col-span-12 lg:col-span-4 h-[680px] w-full"
+          cardClass="col-span-12 lg:col-span-4 lg:h-[var(--row-hero)] w-full"
         />
 
         {/* Secondary Row: Tasks, Payroll & Leaves widgets */}
@@ -826,7 +826,7 @@ function DashboardView({
           pendingTasksCount={pendingTasksCount}
           taskCompletionRate={taskCompletionRate}
           setCurrentView={setActiveTab}
-          cardClass="col-span-12 sm:col-span-6 lg:col-span-4 min-h-[360px] h-[360px] w-full"
+          cardClass="col-span-12 sm:col-span-6 lg:col-span-4 min-h-[var(--row-card)] h-[var(--row-card)] w-full"
         />
 
         <MyPayrollWidget
@@ -836,7 +836,7 @@ function DashboardView({
           settings={settings}
           setCurrentView={setActiveTab}
           addToast={addToast}
-          cardClass="col-span-12 sm:col-span-6 lg:col-span-4 min-h-[360px] h-[360px] w-full"
+          cardClass="col-span-12 sm:col-span-6 lg:col-span-4 min-h-[var(--row-card)] h-[var(--row-card)] w-full"
         />
 
         <LeaveWidget
@@ -844,7 +844,7 @@ function DashboardView({
           attendance={attendance}
           settings={settings}
           setCurrentView={setActiveTab}
-          cardClass="col-span-12 sm:col-span-12 lg:col-span-4 min-h-[360px] h-[360px] w-full"
+          cardClass="col-span-12 sm:col-span-6 lg:col-span-4 min-h-[var(--row-card)] h-[var(--row-card)] w-full"
         />
 
       </div>
@@ -939,7 +939,7 @@ function PayslipsView({ currentUser, payroll, employees, expenses, setExpenses, 
   }
 
   return (
-    <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[1000px] mx-auto pb-10">
+    <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[var(--measure-max)] mx-auto pb-10">
       <div className="bg-card p-2 rounded-xl border border-border/50 shadow-sm w-full max-w-full">
         <div role="tablist" aria-label="Finance sections" className="menu-bar">
           <Button
@@ -1172,7 +1172,7 @@ function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetR
   }
 
   return (
-    <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[900px] mx-auto pb-10">
+    <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[var(--measure-max)] mx-auto pb-10">
       <div className="bg-card p-1.5 rounded-xl border border-border/50 shadow-sm w-full sm:w-auto">
           <div className="menu-bar">
             <Button variant={activeTab === 'assigned' ? 'default' : 'ghost'} size="sm" className="rounded-full px-4" onClick={() => setActiveTab('assigned')}>

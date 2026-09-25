@@ -131,7 +131,7 @@ export default function MyAttendanceView({
   }
 
   return (
-    <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[1000px] mx-auto pb-10">
+    <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[var(--measure-max)] mx-auto pb-10">
 
       <div className="bg-card p-2 rounded-xl border border-border/50 shadow-sm w-full max-w-full">
         <div role="tablist" aria-label="Attendance sections" className="menu-bar">
