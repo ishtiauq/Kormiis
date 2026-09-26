@@ -554,18 +554,172 @@ export default function Documents({
   return (
     <div className="fade-in px-1 sm:px-0 pb-12 space-y-6">
       
-      {/* Action Toolbar */}
-      <div className="flex items-center justify-end gap-2.5">
+      {/* All Documents Widget */}
+      <div className="rounded-2xl p-4 sm:p-5 glass-kormiis glass-apple text-foreground border border-white/20 dark:border-white/10 shadow-sm flex flex-col gap-4">
+        
+        {/* Widget Header & Search */}
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <Icon name="folder_open" className="text-primary" size={18}/>
+              <h3 className="font-bold text-sm text-foreground tracking-tight">
+                All Documents
+              </h3>
+              <Badge variant="outline" className="rounded-full px-2 py-0 text-[10px] font-semibold border-black/10 dark:border-white/10 text-muted-foreground">
+                {filteredDocs.length}
+              </Badge>
+            </div>
+          </div>
+
+          {/* Search Bar at the Top of Widget */}
+          <div className="relative flex items-center w-full">
+            <Icon name="search" className="absolute left-3.5 text-muted-foreground z-10 pointer-events-none" size={18}/>
+            <Input
+              type="text"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search documents by name, category, or uploader..."
+              aria-label="Search documents"
+              className="w-full !pl-10.5 h-10 rounded-xl bg-white/60 dark:bg-white/5 border border-border/80 dark:border-white/12 text-xs"
+            />
+            {search && (
+              <button 
+                type="button"
+                onClick={() => setSearch('')}
+                className="absolute right-3 text-muted-foreground hover:text-foreground p-1"
+              >
+                <Icon name="close" size={14}/>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Document Cards Grid (Scrollable on mobile when many docs) */}
+        {filteredDocs.length === 0 ? (
+          <div className="text-center py-12 px-4 rounded-xl border border-dashed border-border/80 dark:border-white/14">
+            <Icon name="description" size={42} className="text-primary mx-auto mb-3 opacity-60"/>
+            <h4 className="text-sm font-bold text-foreground">No documents found</h4>
+            <p className="text-xs text-muted-foreground mt-1 max-w-sm mx-auto">
+              {search
+                ? `No documents match "${search}". Try searching by another keyword.`
+                : 'Upload your company handbook, policies, forms, or training resources.'}
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[60vh] sm:max-h-none overflow-y-auto no-scrollbar">
+            {filteredDocs.map(doc => {
+              const catInfo = getCategoryInfo(doc.category)
+              const meta = getFileMeta(doc.fileType, doc.fileName)
+              const canManage = currentUser?.role === 'Admin' || currentUser?.isWorkspaceOwner || doc.uploadedById === (currentUser?.id || currentUser?.uid)
+              const uploadTimeFormatted = doc.uploadedAt ? formatDate(doc.uploadedAt) : 'Recently'
+              const uploaderName = doc.uploadedBy || 'Admin'
+
+              return (
+                <div
+                  key={doc.id}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => handleDownload(doc)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleDownload(doc) } }}
+                  className="group relative rounded-xl p-2.5 sm:p-3 bg-white dark:bg-[#1f1f23] border border-black/10 dark:border-white/10 hover:border-primary/40 transition-all duration-200 hover:-translate-y-0.5 shadow-2xs hover:shadow-sm flex items-center justify-between gap-3 cursor-pointer select-none overflow-hidden"
+                >
+                  {/* Left: Bare Icon + Document Info */}
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    {/* Bare Icon without any container box */}
+                    <Icon 
+                      name="folder_open" 
+                      size={34} 
+                      className="shrink-0 text-neutral-900 dark:text-white transition-transform duration-200 group-hover:scale-105"
+                    />
+
+                    {/* Document Details */}
+                    <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h4 className="font-bold text-xs text-foreground group-hover:text-primary transition-colors truncate leading-tight" title={doc.fileName || doc.name}>
+                          {doc.fileName || doc.name}
+                        </h4>
+                        <span className="text-[10px] text-muted-foreground font-medium">
+                          • {formatFileSize(doc.fileSize)}
+                        </span>
+                      </div>
+
+                      {/* Optional Description */}
+                      {doc.description && (
+                        <p className="text-[11px] text-muted-foreground truncate leading-tight">
+                          {doc.description}
+                        </p>
+                      )}
+
+                      {/* Uploader & Timestamp */}
+                      <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground font-medium mt-0.5 truncate">
+                        <span className="truncate max-w-[120px] text-foreground/80 font-semibold" title={uploaderName}>{uploaderName}</span>
+                        <span>•</span>
+                        <span className="shrink-0">{uploadTimeFormatted}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right: Inline Actions (Open, Edit, Delete) - Icon-only, no box/container, compact gap */}
+                  <div className="flex items-center gap-0.5 shrink-0" onClick={(e) => e.stopPropagation()}>
+                    <button
+                      type="button"
+                      onClick={() => handleDownload(doc)}
+                      className="p-1 text-muted-foreground hover:text-primary transition-colors cursor-pointer"
+                      title={`Open ${doc.fileName || doc.name}`}
+                      aria-label="Open document"
+                    >
+                      <Icon name="visibility" size={18}/>
+                    </button>
+
+                    {canManage && (
+                      <>
+                        <button
+                          type="button"
+                          title={`Edit ${doc.name}`}
+                          aria-label="Edit document"
+                          onClick={() => handleOpenEditModal(doc)}
+                          className="p-1 text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
+                        >
+                          <Icon name="edit" size={18}/>
+                        </button>
+                        <button
+                          type="button"
+                          title={`Delete ${doc.name}`}
+                          aria-label="Delete document"
+                          onClick={() => handleDelete(doc.id)}
+                          className="p-1 text-muted-foreground hover:text-destructive cursor-pointer transition-colors"
+                        >
+                          <Icon name="delete" size={18}/>
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Action Buttons: Generate Document & Upload Document Side-by-Side Below Document Widget */}
+      <div className="flex flex-wrap items-center gap-3">
         <Button 
           variant="default" 
-          onClick={handleOpenUploadModal} 
-          className="rounded-2xl h-11 px-5 font-bold shadow-sm"
+          onClick={() => handleOpenLetterModal('noc')} 
+          className="rounded-2xl h-11 px-5 font-bold shadow-sm flex-1 sm:flex-initial"
         >
-          <Icon name="upload" className="mr-2 h-4 w-4" size={16}/> Upload Document
+          <Icon name="assignment" className="mr-2" size={16}/> Generate Document
+        </Button>
+        <Button 
+          variant="outline" 
+          onClick={handleOpenUploadModal} 
+          className="rounded-2xl h-11 px-5 font-bold shadow-sm flex-1 sm:flex-initial"
+        >
+          <Icon name="upload" className="mr-2" size={16}/> Upload Document
         </Button>
       </div>
 
-      {/* 1. Cloud Storage Capacity Tracker Card (Compact) */}
+      {/* Cloud Storage Capacity Tracker Card (Compact, Moved to Bottom) */}
       <div className="rounded-2xl px-4 py-3 sm:px-5 sm:py-3.5 glass-kormiis glass-apple text-foreground border border-white/20 dark:border-white/10 shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           
@@ -625,277 +779,6 @@ export default function Documents({
           </div>
 
         </div>
-      </div>
-
-      {/* 2. Main 2-Column Section: Col 1 = All Documents + Search; Col 2 = Insta Documents */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        
-        {/* Column 1: All Documents Widget — col-span-12 lg:col-span-7 xl:col-span-8 */}
-        <div className="col-span-12 lg:col-span-7 xl:col-span-8 rounded-2xl p-4 sm:p-5 glass-kormiis glass-apple text-foreground border border-white/20 dark:border-white/10 shadow-sm flex flex-col gap-4">
-          
-          {/* Widget Header & Search */}
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <Icon name="folder_open" className="text-primary" size={18}/>
-                <h3 className="font-bold text-sm text-foreground tracking-tight">
-                  All Documents
-                </h3>
-                <Badge variant="outline" className="rounded-full px-2 py-0 text-[10px] font-semibold border-black/10 dark:border-white/10 text-muted-foreground">
-                  {filteredDocs.length}
-                </Badge>
-              </div>
-            </div>
-
-            {/* Search Bar at the Top of Widget */}
-            <div className="relative flex items-center w-full">
-              <Icon name="search" className="absolute left-3.5 text-muted-foreground z-10 pointer-events-none" size={18}/>
-              <Input
-                type="text"
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                placeholder="Search documents by name, category, or uploader..."
-                aria-label="Search documents"
-                className="w-full !pl-10.5 h-10 rounded-xl bg-white/60 dark:bg-white/5 border border-border/80 dark:border-white/12 text-xs"
-              />
-              {search && (
-                <button 
-                  type="button"
-                  onClick={() => setSearch('')}
-                  className="absolute right-3 text-muted-foreground hover:text-foreground p-1"
-                >
-                  <Icon name="close" size={14}/>
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* Document Cards Grid */}
-          {filteredDocs.length === 0 ? (
-            <div className="text-center py-12 px-4 rounded-xl border border-dashed border-border/80 dark:border-white/14">
-              <Icon name="description" size={42} className="text-primary mx-auto mb-3 opacity-60"/>
-              <h4 className="text-sm font-bold text-foreground">No documents found</h4>
-              <p className="text-xs text-muted-foreground mt-1 max-w-sm mx-auto">
-                {search
-                  ? `No documents match "${search}". Try searching by another keyword.`
-                  : 'Upload your company handbook, policies, forms, or training resources.'}
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {filteredDocs.map(doc => {
-                const catInfo = getCategoryInfo(doc.category)
-                const meta = getFileMeta(doc.fileType, doc.fileName)
-                const canManage = currentUser?.role === 'Admin' || currentUser?.isWorkspaceOwner || doc.uploadedById === (currentUser?.id || currentUser?.uid)
-                const uploadTimeFormatted = doc.uploadedAt ? formatDate(doc.uploadedAt) : 'Recently'
-                const uploaderName = doc.uploadedBy || 'Admin'
-
-                return (
-                  <div
-                    key={doc.id}
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => handleDownload(doc)}
-                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleDownload(doc) } }}
-                    className="group relative rounded-xl p-3 bg-white dark:bg-[#1f1f23] border border-black/10 dark:border-white/10 hover:border-primary/50 transition-all duration-200 hover:-translate-y-0.5 shadow-2xs hover:shadow-md flex flex-col justify-between cursor-pointer select-none gap-2.5 overflow-hidden"
-                  >
-                    {/* Top Accent Stripe */}
-                    <div className={`h-1 w-full rounded-full ${meta.ribbonColor} shrink-0`} />
-
-                    {/* Main Content: Big Document Icon on Left + Details on Right */}
-                    <div className="flex items-start gap-3 min-w-0 flex-1">
-                      {/* Big Document Filled Icon Box */}
-                      <div className={`size-16 rounded-2xl flex flex-col items-center justify-center shrink-0 border ${meta.tagColor} relative overflow-hidden bg-primary/5`}>
-                        <Icon name="description" fill={true} size={38} className="shrink-0 transition-transform duration-200 group-hover:scale-105"/>
-                        <span className="text-[8px] font-black uppercase tracking-tight mt-0.5">
-                          {meta.label}
-                        </span>
-                      </div>
-
-                      {/* Document Meta & Details */}
-                      <div className="flex flex-col gap-0.5 min-w-0 flex-1">
-                        <h4 className="font-bold text-xs text-foreground group-hover:text-primary transition-colors truncate leading-snug" title={doc.name}>
-                          {doc.name}
-                        </h4>
-
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="inline-flex items-center text-[10px] font-semibold text-primary px-1.5 py-0.2 rounded bg-primary/10 border border-primary/20">
-                            {catInfo.label}
-                          </span>
-                          <span className="text-[10px] text-muted-foreground font-medium">
-                            {formatFileSize(doc.fileSize)}
-                          </span>
-                        </div>
-
-                        {/* Uploader & Timestamp */}
-                        <div className="flex items-center gap-1 text-[10px] text-muted-foreground font-medium mt-1 truncate">
-                          <Icon name="person" size={12} className="shrink-0 text-muted-foreground/80"/>
-                          <span className="truncate max-w-[90px]" title={uploaderName}>{uploaderName}</span>
-                          <span>•</span>
-                          <Icon name="schedule" size={12} className="shrink-0 text-muted-foreground/80"/>
-                          <span className="shrink-0">{uploadTimeFormatted}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Bottom Action Footer */}
-                    <div className="pt-2 border-t border-black/[0.05] dark:border-white/[0.06] flex items-center justify-between gap-1 shrink-0">
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleDownload(doc)
-                        }}
-                        className="flex items-center gap-1 text-[11px] font-semibold text-primary hover:text-primary/80 transition-colors cursor-pointer px-1 py-0.5 rounded hover:bg-primary/5"
-                        title={`Open / Download ${doc.name}`}
-                      >
-                        <Icon name="visibility" size={13}/>
-                        <span>Open</span>
-                      </button>
-
-                      {canManage && (
-                        <div className="flex items-center gap-0.5" onClick={(e) => e.stopPropagation()}>
-                          <button
-                            type="button"
-                            title={`Edit ${doc.name}`}
-                            onClick={() => handleOpenEditModal(doc)}
-                            className="liquid-icon-btn size-6 rounded-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/10 cursor-pointer transition-all"
-                          >
-                            <Icon name="edit" size={12}/>
-                          </button>
-                          <button
-                            type="button"
-                            title={`Delete ${doc.name}`}
-                            onClick={() => handleDelete(doc.id)}
-                            className="liquid-icon-btn size-6 rounded-md flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer transition-all"
-                          >
-                            <Icon name="delete" size={12}/>
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          )}
-        </div>
-
-        {/* Column 2: Insta Documents — col-span-12 lg:col-span-5 xl:col-span-4 */}
-        <div className="col-span-12 lg:col-span-5 xl:col-span-4 rounded-2xl p-4 sm:p-5 glass-kormiis glass-apple text-foreground border border-white/20 dark:border-white/10 shadow-sm flex flex-col gap-3">
-          <div className="flex items-center justify-between pb-2 border-b border-border/40">
-            <h2 className="text-sm font-bold tracking-tight flex items-center gap-2 text-foreground">
-              <Icon name="description" className="text-primary" size={18}/>
-              <span>Generate Documents</span>
-            </h2>
-            <Badge variant="secondary" className="text-[10px] font-semibold px-2 py-0.5">
-              4 Formats
-            </Badge>
-          </div>
-
-          <div className="flex flex-col gap-2.5">
-            {/* Card 1: NOC */}
-            <div 
-              role="button"
-              tabIndex={0}
-              onClick={() => handleOpenLetterModal('noc')}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleOpenLetterModal('noc') } }}
-              className="group p-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] hover:bg-primary/[0.08] dark:hover:bg-primary/[0.12] border border-border/70 dark:border-white/10 hover:border-primary/50 transition-all duration-200 cursor-pointer flex items-center justify-between gap-3"
-            >
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className="size-8 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
-                  <Icon name="flight_takeoff" size={18} className="text-amber-600 dark:text-amber-400"/>
-                </div>
-                <div className="min-w-0">
-                  <h3 className="font-semibold text-xs text-foreground group-hover:text-primary transition-colors truncate">
-                    No Objection Certificate
-                  </h3>
-                  <span className="text-[10px] text-muted-foreground font-medium">NOC Clearance</span>
-                </div>
-              </div>
-              <div className="flex items-center text-xs font-semibold text-primary gap-1 shrink-0">
-                <span className="text-[11px]">Create</span>
-                <Icon name="arrow_forward" size={13} className="group-hover:translate-x-0.5 transition-transform"/>
-              </div>
-            </div>
-
-            {/* Card 2: Salary & Employment */}
-            <div 
-              role="button"
-              tabIndex={0}
-              onClick={() => handleOpenLetterModal('salary')}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleOpenLetterModal('salary') } }}
-              className="group p-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] hover:bg-primary/[0.08] dark:hover:bg-primary/[0.12] border border-border/70 dark:border-white/10 hover:border-primary/50 transition-all duration-200 cursor-pointer flex items-center justify-between gap-3"
-            >
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className="size-8 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">
-                  <Icon name="payments" size={18} className="text-emerald-600 dark:text-emerald-400"/>
-                </div>
-                <div className="min-w-0">
-                  <h3 className="font-semibold text-xs text-foreground group-hover:text-primary transition-colors truncate">
-                    Salary & Employment Certificate
-                  </h3>
-                  <span className="text-[10px] text-muted-foreground font-medium">Income Verification</span>
-                </div>
-              </div>
-              <div className="flex items-center text-xs font-semibold text-primary gap-1 shrink-0">
-                <span className="text-[11px]">Create</span>
-                <Icon name="arrow_forward" size={13} className="group-hover:translate-x-0.5 transition-transform"/>
-              </div>
-            </div>
-
-            {/* Card 3: Experience Certificate */}
-            <div 
-              role="button"
-              tabIndex={0}
-              onClick={() => handleOpenLetterModal('experience')}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleOpenLetterModal('experience') } }}
-              className="group p-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] hover:bg-primary/[0.08] dark:hover:bg-primary/[0.12] border border-border/70 dark:border-white/10 hover:border-primary/50 transition-all duration-200 cursor-pointer flex items-center justify-between gap-3"
-            >
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className="size-8 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
-                  <Icon name="workspace_premium" size={18} className="text-blue-600 dark:text-blue-400"/>
-                </div>
-                <div className="min-w-0">
-                  <h3 className="font-semibold text-xs text-foreground group-hover:text-primary transition-colors truncate">
-                    Experience Certificate
-                  </h3>
-                  <span className="text-[10px] text-muted-foreground font-medium">Tenure & Conduct</span>
-                </div>
-              </div>
-              <div className="flex items-center text-xs font-semibold text-primary gap-1 shrink-0">
-                <span className="text-[11px]">Create</span>
-                <Icon name="arrow_forward" size={13} className="group-hover:translate-x-0.5 transition-transform"/>
-              </div>
-            </div>
-
-            {/* Card 4: Employment Verification */}
-            <div 
-              role="button"
-              tabIndex={0}
-              onClick={() => handleOpenLetterModal('verification')}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleOpenLetterModal('verification') } }}
-              className="group p-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] hover:bg-primary/[0.08] dark:hover:bg-primary/[0.12] border border-border/70 dark:border-white/10 hover:border-primary/50 transition-all duration-200 cursor-pointer flex items-center justify-between gap-3"
-            >
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className="size-8 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0">
-                  <Icon name="verified_user" size={18} className="text-purple-600 dark:text-purple-400"/>
-                </div>
-                <div className="min-w-0">
-                  <h3 className="font-semibold text-xs text-foreground group-hover:text-primary transition-colors truncate">
-                    Employment Verification Letter
-                  </h3>
-                  <span className="text-[10px] text-muted-foreground font-medium">Designation Proof</span>
-                </div>
-              </div>
-              <div className="flex items-center text-xs font-semibold text-primary gap-1 shrink-0">
-                <span className="text-[11px]">Create</span>
-                <Icon name="arrow_forward" size={13} className="group-hover:translate-x-0.5 transition-transform"/>
-              </div>
-            </div>
-          </div>
-        </div>
-
       </div>
 
       {/* Upload / Edit Document Modal */}
