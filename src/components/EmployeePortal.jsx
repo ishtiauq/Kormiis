@@ -777,7 +777,7 @@ function DashboardView({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 lg:gap-6 auto-rows-[minmax(148px,auto)] items-stretch pt-2">
 
         {/* Column 1: Attendance / Geo Check-In Column — col-span-12 lg:col-span-4 */}
-        <div className="col-span-12 lg:col-span-4 w-full flex flex-col self-stretch">
+        <div className="col-span-12 lg:col-span-4 lg:h-[var(--row-hero)] w-full flex flex-col">
           {currentUser && (
             <GeoCheckInWidget 
               currentUser={currentUser} 
@@ -790,7 +790,7 @@ function DashboardView({
               roster={roster}
               shiftTemplates={shiftTemplates}
               setCurrentView={setActiveTab}
-              cardClassName="w-full"
+              cardClassName="h-full w-full min-h-0"
             />
           )}
         </div>
@@ -810,14 +810,14 @@ function DashboardView({
           addLog={addLog}
           addNotification={addNotification}
           settings={settings}
-          cardClass="col-span-12 lg:col-span-4 h-full w-full self-stretch"
+          cardClass="col-span-12 lg:col-span-4 lg:h-[var(--row-hero)] w-full"
         />
 
         {/* Column 3: Team Directory Widget — col-span-12 lg:col-span-4 */}
         <EmployeeDirectoryWidget
           employees={employees}
           setCurrentView={setActiveTab}
-          cardClass="col-span-12 lg:col-span-4 h-full w-full self-stretch"
+          cardClass="col-span-12 lg:col-span-4 lg:h-[var(--row-hero)] w-full"
         />
 
         {/* Secondary Row: Tasks, Payroll & Leaves widgets */}

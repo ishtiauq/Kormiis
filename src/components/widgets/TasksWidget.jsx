@@ -26,8 +26,12 @@ export const TasksWidget = memo(({ tasks, pendingTasksCount, taskCompletionRate,
         </Badge>
       </div>
       
-      <div className="flex flex-col gap-2 overflow-y-auto min-h-0 flex-1 pr-0.5">
-        {tasks.filter(t => t.status !== 'Done').slice(0, 3).map((t, i) => (
+      <div className="flex flex-col gap-2 overflow-y-auto min-h-0 flex-1 pr-0.5 pb-1">
+        {[...tasks]
+          .filter(t => t.status !== 'Done')
+          .sort((a, b) => new Date(b.createdAt || b.updatedAt || b.dueDate || 0) - new Date(a.createdAt || a.updatedAt || a.dueDate || 0))
+          .slice(0, 5)
+          .map((t, i) => (
           <div key={i} className="flex items-center gap-3 p-2.5 px-3 rounded-2xl liquid-widget-item cursor-pointer shrink-0">
             <div className="size-2 rounded-full bg-foreground shrink-0" />
             <p className="text-fluid-sm font-medium text-foreground break-words flex-1 m-0">{t.title}</p>

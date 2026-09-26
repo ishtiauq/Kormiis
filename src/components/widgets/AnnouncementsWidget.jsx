@@ -471,10 +471,9 @@ export const AnnouncementsWidget = memo(({
           </div>
         </div>
 
-        {/* --- DEDICATED POSTS / ITEMS CONTAINER --- */}
-        <div className="flex-1 min-h-0 w-full px-2 sm:px-2.5 pt-2 pb-2 flex flex-col overflow-hidden">
-          <div className="flex-1 min-h-0 w-full rounded-2xl border border-black/10 dark:border-white/12 flex flex-col p-2 sm:p-2.5 overflow-hidden bg-black/[0.015] dark:bg-white/[0.02]">
-            {/* --- FEED TAB CONTENT --- */}
+        {/* --- POSTS / ITEMS CONTENT --- */}
+        <div className="flex-1 min-h-0 w-full px-2.5 sm:px-3 py-2 flex flex-col overflow-hidden">
+          {/* --- FEED TAB CONTENT --- */}
             {activeTab === 'feed' && (
               feedPosts.length === 0 ? (
                 <div className="flex-1 flex flex-col items-center justify-center text-center p-6 gap-3">
@@ -724,7 +723,6 @@ export const AnnouncementsWidget = memo(({
                 </div>
               )
             )}
-          </div>
         </div>
 
         {/* Widget Footer: Post / Serve Notice / Add Event Action Button (Pinned to Bottom) */}

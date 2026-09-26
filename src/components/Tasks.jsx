@@ -187,7 +187,8 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
     } else {
       const newTask = {
         ...taskForm,
-        id: `task-${Date.now()}`
+        id: `task-${Date.now()}`,
+        createdAt: new Date().toISOString()
       }
       setTasks(prev => [newTask, ...prev])
       addToast('Task created successfully', 'success')

@@ -26,6 +26,7 @@ export const DashboardWidget = memo(({
   useAccordion, expandedWidgets, toggleWidget,
   cardClass = '',
   contentClass = '',
+  footer = null,
   children
 }) => {
   return (
@@ -42,6 +43,7 @@ export const DashboardWidget = memo(({
       <CardContent className={`flex-1 min-h-0 overflow-y-auto px-2.5 sm:px-3 pb-3 pt-1 ${contentClass}`}>
         {children}
       </CardContent>
+      {footer && <div className="shrink-0 px-2.5 sm:px-3 pb-3">{footer}</div>}
     </Card>
   )
 })
@@ -364,7 +366,11 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
   const completedTasksCount = taskList.filter(t => t && t.status === 'Done').length
   const taskCompletionRate = taskList.length > 0 ? Math.round((completedTasksCount / taskList.length) * 100) : 0
   const pendingTasksCount = taskList.filter(t => t && t.status !== 'Done').length
-  const recentDocuments = Array.isArray(documents) ? documents.slice(0, 3) : []
+  const recentDocuments = Array.isArray(documents)
+    ? [...documents]
+        .sort((a, b) => new Date(b.uploadedAt || b.updatedAt || b.date || 0) - new Date(a.uploadedAt || a.updatedAt || a.date || 0))
+        .slice(0, 5)
+    : []
   const assetList = Array.isArray(assets) ? assets : []
   const availableAssetsCount = assetList.filter(a => a && a.status === 'Available').length
 
@@ -388,7 +394,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
 
         {/* Column 1: Clock in / Geo Check-In Widget */}
         {currentUser && (
-          <div className="col-span-12 lg:col-span-4 w-full flex flex-col self-stretch">
+          <div className="col-span-12 lg:col-span-4 lg:h-[var(--row-hero)] w-full flex flex-col">
             <GeoCheckInWidget 
               currentUser={currentUser} 
               attendance={attendance} 
@@ -400,7 +406,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
               roster={roster}
               setCurrentView={setCurrentView}
               myLogsTarget="my-attendance"
-              cardClassName="w-full"
+              cardClassName="h-full w-full min-h-0"
             />
           </div>
         )}
@@ -422,7 +428,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
             addNotification={addNotification}
             settings={settings}
             hasPermission={hasPermission}
-            cardClass="col-span-12 lg:col-span-4 h-full w-full self-stretch"
+            cardClass="col-span-12 lg:col-span-4 lg:h-[var(--row-hero)] w-full"
             {...wProps}
           />
         )}
@@ -432,7 +438,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
           <EmployeeDirectoryWidget
             employees={employees}
             setCurrentView={setCurrentView}
-            cardClass="col-span-12 lg:col-span-4 h-full w-full self-stretch"
+            cardClass="col-span-12 lg:col-span-4 lg:h-[var(--row-hero)] w-full"
             {...wProps}
           />
         )}
@@ -455,7 +461,27 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
                   </button>
                 </div>
               }
-              contentClass="flex flex-col justify-between pt-1 min-h-0 overflow-y-auto"
+              contentClass="flex flex-col pt-1 min-h-0 overflow-y-auto"
+              footer={pendingLeaves.length > 0 ? (
+                <button
+                  type="button"
+                  onClick={() => setCurrentView && setCurrentView('leaves')}
+                  className="flex items-center gap-2.5 w-full p-3 rounded-2xl bg-amber-500/[0.08] dark:bg-amber-500/[0.1] border border-amber-500/25 hover:bg-amber-500/[0.14] transition-all cursor-pointer text-left"
+                >
+                  <span className="shrink-0 size-8 rounded-xl flex items-center justify-center bg-amber-500/15 border border-amber-500/25">
+                    <Icon name="event_busy" size={16} className="text-amber-600 dark:text-amber-400 shrink-0" />
+                  </span>
+                  <span className="flex-1 min-w-0">
+                    <span className="block text-xs font-bold text-foreground">
+                      {pendingLeaves.length} pending leave{pendingLeaves.length > 1 ? 's' : ''}
+                    </span>
+                    <span className="block text-[11px] text-muted-foreground truncate">
+                      {pendingPreview}
+                    </span>
+                  </span>
+                  <Icon name="chevron_right" size={16} className="text-muted-foreground shrink-0" />
+                </button>
+              ) : null}
               {...wProps}
             >
               {/* ================= 7-DAY TREND + TODAY BREAKDOWN ================= */}
@@ -618,28 +644,6 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
                     </span>
                   </button>
                 </div>
-
-                {/* 3. Pending Leave Banner */}
-                {pendingLeaves.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => setCurrentView && setCurrentView('leaves')}
-                    className="flex items-center gap-2.5 w-full p-3 rounded-2xl bg-amber-500/[0.08] dark:bg-amber-500/[0.1] border border-amber-500/25 hover:bg-amber-500/[0.14] transition-all cursor-pointer text-left"
-                  >
-                    <span className="shrink-0 size-8 rounded-xl flex items-center justify-center bg-amber-500/15 border border-amber-500/25">
-                      <Icon name="event_busy" size={16} className="text-amber-600 dark:text-amber-400 shrink-0" />
-                    </span>
-                    <span className="flex-1 min-w-0">
-                      <span className="block text-xs font-bold text-foreground">
-                        {pendingLeaves.length} pending leave{pendingLeaves.length > 1 ? 's' : ''}
-                      </span>
-                      <span className="block text-[11px] text-muted-foreground truncate">
-                        {pendingPreview}
-                      </span>
-                    </span>
-                    <Icon name="chevron_right" size={16} className="text-muted-foreground shrink-0" />
-                  </button>
-                )}
               </div>
             </DashboardWidget>
           )}

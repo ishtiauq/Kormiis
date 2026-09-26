@@ -10,6 +10,7 @@ import { Select, SelectItem } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import AdSlot from './AdSlot'
 import { formatDate } from '../services/date.js'
+import { DEMO_DOCUMENTS } from '../utils/demoData.js'
 
 const BLUE = '#3b82f6'
 const defaultCategories = [
@@ -42,6 +43,64 @@ const formatFileSize = (bytes) => {
   return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
 }
 
+const getFileMeta = (type, name) => {
+  const t = (type || '').toLowerCase()
+  const n = (name || '').toLowerCase()
+  if (t.includes('pdf') || n.endsWith('.pdf')) {
+    return {
+      label: 'PDF',
+      tagColor: 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20',
+      ribbonColor: 'bg-rose-500',
+      icon: 'picture_as_pdf',
+      accentColor: '#f43f5e'
+    }
+  }
+  if (t.includes('sheet') || t.includes('excel') || t.includes('xls') || t.includes('csv') || n.endsWith('.xlsx') || n.endsWith('.xls') || n.endsWith('.csv')) {
+    return {
+      label: 'EXCEL',
+      tagColor: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
+      ribbonColor: 'bg-emerald-500',
+      icon: 'table_chart',
+      accentColor: '#10b981'
+    }
+  }
+  if (t.includes('image') || t.includes('png') || t.includes('jpg') || t.includes('jpeg') || t.includes('webp') || n.endsWith('.png') || n.endsWith('.jpg') || n.endsWith('.jpeg') || n.endsWith('.webp')) {
+    return {
+      label: 'IMAGE',
+      tagColor: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20',
+      ribbonColor: 'bg-purple-500',
+      icon: 'image',
+      accentColor: '#a855f7',
+      isImage: true
+    }
+  }
+  if (t.includes('word') || t.includes('document') || t.includes('doc') || t.includes('docx') || n.endsWith('.doc') || n.endsWith('.docx') || n.endsWith('.txt')) {
+    return {
+      label: 'DOC',
+      tagColor: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20',
+      ribbonColor: 'bg-blue-500',
+      icon: 'article',
+      accentColor: '#3b82f6'
+    }
+  }
+  if (t.includes('zip') || t.includes('rar') || t.includes('tar') || n.endsWith('.zip') || n.endsWith('.rar')) {
+    return {
+      label: 'ZIP',
+      tagColor: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
+      ribbonColor: 'bg-amber-500',
+      icon: 'folder_zip',
+      accentColor: '#f59e0b'
+    }
+  }
+  return {
+    label: 'FILE',
+    tagColor: 'bg-neutral-500/10 text-neutral-600 dark:text-neutral-400 border-neutral-500/20',
+    ribbonColor: 'bg-neutral-500',
+    icon: 'description',
+    accentColor: '#737373'
+  }
+}
+
 export default function Documents({ 
   documents = [], 
   setDocuments, 
@@ -54,10 +113,6 @@ export default function Documents({
   employees = []
 }) {
   const [search, setSearch] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState('all')
-  const [filterFormat, setFilterFormat] = useState('all')
-  const [filterDate, setFilterDate] = useState('all')
-  const [showFilters, setShowFilters] = useState(false)
   const [showUploadModal, setShowUploadModal] = useState(false)
   const [editingDoc, setEditingDoc] = useState(null)
   const [isUploading, setIsUploading] = useState(false)
@@ -254,10 +309,16 @@ export default function Documents({
     }
   }
 
+  // Effective Documents (use DEMO_DOCUMENTS if documents list is empty)
+  const effectiveDocuments = useMemo(() => {
+    if (Array.isArray(documents) && documents.length > 0) return documents
+    return DEMO_DOCUMENTS
+  }, [documents])
+
   // Calculate Company Storage Usage
   const usedStorageBytes = useMemo(() => {
-    return (documents || []).reduce((acc, doc) => acc + (Number(doc.fileSize) || 0), 0)
-  }, [documents])
+    return effectiveDocuments.reduce((acc, doc) => acc + (Number(doc.fileSize) || 0), 0)
+  }, [effectiveDocuments])
 
   const usagePercentage = useMemo(() => {
     return Math.min(100, (usedStorageBytes / DEFAULT_COMPANY_STORAGE_LIMIT_BYTES) * 100)
@@ -463,44 +524,32 @@ export default function Documents({
       ))
     }
     setCategories(prev => prev.filter(c => c.id !== catId))
-    if (selectedCategory === catId) setSelectedCategory('all')
     addToast('Category deleted', 'info')
   }
 
   const getCategoryInfo = (catId) => categories.find(c => c.id === catId) || categories[categories.length - 1]
 
   const filteredDocs = useMemo(() => {
-    return (documents || []).filter(d => {
-      const matchSearch = !search || 
-        d.name?.toLowerCase().includes(search.toLowerCase()) || 
-        (d.description || '').toLowerCase().includes(search.toLowerCase()) ||
-        (d.fileName || '').toLowerCase().includes(search.toLowerCase())
-      
-      const matchCategory = selectedCategory === 'all' || d.category === selectedCategory
-      
-      let matchFormat = true
-      if (filterFormat !== 'all') {
-        const type = (d.fileType || '').toLowerCase()
-        const ext = (d.fileName || '').toLowerCase()
-        if (filterFormat === 'pdf') matchFormat = type.includes('pdf') || ext.endsWith('.pdf')
-        if (filterFormat === 'excel') matchFormat = type.includes('sheet') || type.includes('excel') || type.includes('csv') || ext.endsWith('.xlsx') || ext.endsWith('.xls') || ext.endsWith('.csv')
-        if (filterFormat === 'image') matchFormat = type.includes('image') || ext.endsWith('.png') || ext.endsWith('.jpg') || ext.endsWith('.jpeg') || ext.endsWith('.webp')
-        if (filterFormat === 'archive') matchFormat = type.includes('zip') || type.includes('rar') || type.includes('tar') || ext.endsWith('.zip') || ext.endsWith('.rar')
-      }
+    const q = search.trim().toLowerCase()
+    return (effectiveDocuments || []).filter(d => {
+      if (!q) return true
+      const catLabel = getCategoryInfo(d.category)?.label?.toLowerCase() || ''
+      const name = (d.name || '').toLowerCase()
+      const desc = (d.description || '').toLowerCase()
+      const fileName = (d.fileName || '').toLowerCase()
+      const uploader = (d.uploadedBy || '').toLowerCase()
+      const format = (d.fileType || '').toLowerCase()
 
-      let matchDate = true
-      if (filterDate !== 'all' && d.uploadedAt) {
-        const docDate = new Date(d.uploadedAt)
-        const now = new Date()
-        const diffDays = (now - docDate) / (1000 * 60 * 60 * 24)
-        if (filterDate === '7days') matchDate = diffDays <= 7
-        if (filterDate === '30days') matchDate = diffDays <= 30
-        if (filterDate === '90days') matchDate = diffDays <= 90
-      }
-
-      return matchSearch && matchCategory && matchFormat && matchDate
+      return (
+        name.includes(q) ||
+        desc.includes(q) ||
+        fileName.includes(q) ||
+        catLabel.includes(q) ||
+        uploader.includes(q) ||
+        format.includes(q)
+      )
     })
-  }, [documents, search, selectedCategory, filterFormat, filterDate])
+  }, [effectiveDocuments, search, categories])
 
   return (
     <div className="fade-in px-1 sm:px-0 pb-12 space-y-6">
@@ -516,137 +565,25 @@ export default function Documents({
         </Button>
       </div>
 
-      {/* Official HR Document & Certificate Studio (Quick Action Cards) */}
-      <div className="rounded-[28px] p-5 sm:p-6 glass-kormiis glass-apple text-foreground border border-white/30 dark:border-white/14 shadow-lg flex flex-col gap-4">
-        <div className="flex items-center justify-between flex-wrap gap-2">
-          <div>
-            <h2 className="text-fluid font-bold tracking-tight flex items-center gap-2 text-foreground">
-              <Icon name="description" className="text-primary" size={20}/>
-              <span>Official Document & Certificate Studio</span>
-            </h2>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Instantly generate, brand, and download official company PDF letters with company letterhead & QR-ready reference.
-            </p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
-          {/* Card 1: NOC */}
-          <div 
-            onClick={() => handleOpenLetterModal('noc')}
-            className="group relative p-4 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] hover:bg-primary/[0.08] dark:hover:bg-primary/[0.12] border border-border/70 dark:border-white/10 hover:border-primary/50 transition-all duration-300 cursor-pointer shadow-sm flex flex-col justify-between gap-3"
-          >
-            <div className="flex items-start justify-between gap-2">
-              <Icon name="flight_takeoff" size={32} className="text-foreground shrink-0"/>
-              <Badge variant="outline" className="text-[10px] uppercase font-bold text-amber-600 border-amber-500/30 bg-amber-500/5">
-                NOC
-              </Badge>
-            </div>
-            <div>
-              <h3 className="font-bold text-sm text-foreground group-hover:text-primary transition-colors">
-                No Objection Certificate
-              </h3>
-              <p className="text-[11px] text-muted-foreground mt-1 ">
-                For foreign visa applications, passport renewal, and official travel clearances.
-              </p>
-            </div>
-            <div className="flex items-center text-xs font-semibold text-primary gap-1 pt-1 border-t border-border/40">
-              <span>Generate PDF</span>
-              <Icon name="arrow_forward" size={14} className="group-hover:translate-x-1 transition-transform"/>
-            </div>
-          </div>
-
-          {/* Card 2: Salary & Employment */}
-          <div 
-            onClick={() => handleOpenLetterModal('salary')}
-            className="group relative p-4 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] hover:bg-primary/[0.08] dark:hover:bg-primary/[0.12] border border-border/70 dark:border-white/10 hover:border-primary/50 transition-all duration-300 cursor-pointer shadow-sm flex flex-col justify-between gap-3"
-          >
-            <div className="flex items-start justify-between gap-2">
-              <Icon name="payments" size={32} className="text-foreground shrink-0"/>
-              <Badge variant="outline" className="text-[10px] uppercase font-bold text-emerald-600 border-emerald-500/30 bg-emerald-500/5">
-                Salary
-              </Badge>
-            </div>
-            <div>
-              <h3 className="font-bold text-sm text-foreground group-hover:text-primary transition-colors">
-                Salary & Employment Certificate
-              </h3>
-              <p className="text-[11px] text-muted-foreground mt-1 ">
-                For bank loans, credit cards, rent agreements, and income verification.
-              </p>
-            </div>
-            <div className="flex items-center text-xs font-semibold text-primary gap-1 pt-1 border-t border-border/40">
-              <span>Generate PDF</span>
-              <Icon name="arrow_forward" size={14} className="group-hover:translate-x-1 transition-transform"/>
-            </div>
-          </div>
-
-          {/* Card 3: Experience */}
-          <div 
-            onClick={() => handleOpenLetterModal('experience')}
-            className="group relative p-4 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] hover:bg-primary/[0.08] dark:hover:bg-primary/[0.12] border border-border/70 dark:border-white/10 hover:border-primary/50 transition-all duration-300 cursor-pointer shadow-sm flex flex-col justify-between gap-3"
-          >
-            <div className="flex items-start justify-between gap-2">
-              <Icon name="workspace_premium" size={32} className="text-foreground shrink-0"/>
-              <Badge variant="outline" className="text-[10px] uppercase font-bold text-blue-600 border-blue-500/30 bg-blue-500/5">
-                Experience
-              </Badge>
-            </div>
-            <div>
-              <h3 className="font-bold text-sm text-foreground group-hover:text-primary transition-colors">
-                Experience Certificate
-              </h3>
-              <p className="text-[11px] text-muted-foreground mt-1 ">
-                Official proof of tenure, job performance, and professional conduct.
-              </p>
-            </div>
-            <div className="flex items-center text-xs font-semibold text-primary gap-1 pt-1 border-t border-border/40">
-              <span>Generate PDF</span>
-              <Icon name="arrow_forward" size={14} className="group-hover:translate-x-1 transition-transform"/>
-            </div>
-          </div>
-
-          {/* Card 4: Verification */}
-          <div 
-            onClick={() => handleOpenLetterModal('verification')}
-            className="group relative p-4 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] hover:bg-primary/[0.08] dark:hover:bg-primary/[0.12] border border-border/70 dark:border-white/10 hover:border-primary/50 transition-all duration-300 cursor-pointer shadow-sm flex flex-col justify-between gap-3"
-          >
-            <div className="flex items-start justify-between gap-2">
-              <Icon name="verified_user" size={32} className="text-foreground shrink-0"/>
-              <Badge variant="outline" className="text-[10px] uppercase font-bold text-purple-600 border-purple-500/30 bg-purple-500/5">
-                Verification
-              </Badge>
-            </div>
-            <div>
-              <h3 className="font-bold text-sm text-foreground group-hover:text-primary transition-colors">
-                Employment Verification Letter
-              </h3>
-              <p className="text-[11px] text-muted-foreground mt-1 ">
-                Standard proof of active employment and job designation in the organization.
-              </p>
-            </div>
-            <div className="flex items-center text-xs font-semibold text-primary gap-1 pt-1 border-t border-border/40">
-              <span>Generate PDF</span>
-              <Icon name="arrow_forward" size={14} className="group-hover:translate-x-1 transition-transform"/>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 1. Company Cloud Storage Capacity & Health Tracker Card */}
-      <div className="rounded-[28px] p-5 sm:p-6 glass-kormiis glass-apple text-foreground border border-white/30 dark:border-white/14 shadow-lg">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      {/* 1. Cloud Storage Capacity Tracker Card (Compact) */}
+      <div className="rounded-2xl px-4 py-3 sm:px-5 sm:py-3.5 glass-kormiis glass-apple text-foreground border border-white/20 dark:border-white/10 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           
           {/* Storage Meter Info */}
-          <div className="flex items-start gap-3.5 flex-1 min-w-0">
-            <Icon name="cloud_sync" size={32} className="text-primary shrink-0 animate-pulse"/>
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div className="size-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+              <Icon name="cloud_sync" size={20} className="text-primary"/>
+            </div>
             
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2.5 flex-wrap">
-                <span className="font-bold text-fluid text-foreground">{settings?.company?.name ? `${settings.company.name} Cloud Storage` : 'Company Cloud Storage'}</span>
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-sm text-foreground">Cloud Storage</span>
+                <span className="text-xs text-muted-foreground font-medium">
+                  ({formatFileSize(usedStorageBytes)} / 500 MB • {usagePercentage.toFixed(1)}%)
+                </span>
                 <Badge 
                   variant="outline" 
-                  className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full ${
+                  className={`text-[10px] font-semibold px-2 py-0 h-4 rounded-full ml-auto sm:ml-0 ${
                     usagePercentage > 90 
                       ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/30' 
                       : usagePercentage > 70 
@@ -654,299 +591,312 @@ export default function Documents({
                       : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'
                   }`}
                 >
-                  <span className={`size-1.5 rounded-full mr-1.5 inline-block ${
+                  <span className={`size-1.5 rounded-full mr-1 inline-block ${
                     usagePercentage > 90 ? 'bg-rose-500' : usagePercentage > 70 ? 'bg-amber-500' : 'bg-emerald-500'
                   }`}/>
-                  {usagePercentage > 90 ? 'Critical (Near Limit)' : usagePercentage > 70 ? 'High Usage' : 'Healthy Quota'}
+                  {usagePercentage > 90 ? 'Near Limit' : usagePercentage > 70 ? 'High' : 'Healthy'}
                 </Badge>
               </div>
 
               {/* Storage Capacity Progress Bar */}
-              <div className="mt-2.5 w-full">
-                <div className="w-full h-2.5 rounded-full bg-black/10 dark:bg-white/10 overflow-hidden p-0.5">
-                  <div 
-                    className={`h-full rounded-full transition-all duration-500 ease-out ${
-                      usagePercentage > 90 
-                        ? 'bg-rose-500' 
-                        : usagePercentage > 70 
-                        ? 'bg-amber-500' 
-                        : 'bg-gradient-to-r from-primary to-emerald-500'
-                    }`}
-                    style={{ width: `${Math.max(1, usagePercentage)}%` }}
-                  />
-                </div>
-              </div>
-
-              <div className="flex flex-wrap items-center justify-between gap-2 mt-2 text-fluid-xs text-muted-foreground font-medium">
-                <span>
-                  <strong className="text-foreground">{formatFileSize(usedStorageBytes)}</strong> used of <strong className="text-foreground">500 MB</strong> allocated ({usagePercentage.toFixed(1)}%)
-                </span>
-                <span>
-                  <strong className="text-foreground">{formatFileSize(remainingStorageBytes)}</strong> free space remaining
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Quick Metrics Capsule */}
-          <div className="flex items-center gap-3 self-stretch lg:self-auto border-t lg:border-t-0 lg:border-l border-border/80 dark:border-white/12 pt-3 lg:pt-0 lg:pl-6">
-            <div className="text-center px-3 py-1 flex-1 sm:flex-none">
-              <span className="block text-fluid-lg font-bold text-foreground">{documents.length}</span>
-              <span className="text-[11px] text-muted-foreground font-medium">Total Files</span>
-            </div>
-            <div className="text-center px-3 py-1 flex-1 sm:flex-none">
-              <span className="block text-fluid-lg font-bold text-foreground">
-                {documents.length > 0 ? formatFileSize(usedStorageBytes / documents.length) : '0 B'}
-              </span>
-              <span className="text-[11px] text-muted-foreground font-medium">Avg File Size</span>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      {/* 2. Controls: Search, Category Bar & Filters */}
-      <div className="flex flex-col gap-3">
-        <div className="flex gap-2">
-          <div className="relative flex-1 flex items-center">
-            <Icon name="search" className="absolute left-3.5 text-muted-foreground z-10 pointer-events-none" size={18}/>
-            <Input
-              type="text"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="Search documents by title, filename, or description..."
-              aria-label="Search documents"
-              className="w-full !pl-10.5 h-11 rounded-2xl bg-white/60 dark:bg-white/5 border border-border/80 dark:border-white/12"
-            />
-            {search && (
-              <button 
-                onClick={() => setSearch('')}
-                className="absolute right-3 text-muted-foreground hover:text-foreground p-1"
-              >
-                <Icon name="close" size={14}/>
-              </button>
-            )}
-          </div>
-          
-          <Button 
-            variant={showFilters ? "secondary" : "outline"} 
-            className="shrink-0 gap-2 h-11 px-4 rounded-2xl border-border/80 dark:border-white/12" 
-            onClick={() => setShowFilters(!showFilters)}
-          >
-            <Icon name="filter_list" size={16}/>
-            <span className="hidden sm:inline">Filters</span>
-          </Button>
-
-          <Button 
-            variant="outline" 
-            className="shrink-0 gap-2 h-11 px-4 rounded-2xl border-border/80 dark:border-white/12 text-muted-foreground hover:text-foreground" 
-            onClick={() => { setEditingCategory(null); setCatFormName(''); setShowCategoryModal(true) }}
-            title="Manage Categories"
-          >
-            <Icon name="category" size={16}/>
-            <span className="hidden sm:inline">Categories</span>
-          </Button>
-        </div>
-
-        {/* Dynamic Category Pill Bar with Smooth Scroll */}
-        <div className="relative flex items-center">
-          {canScrollLeft && (
-            <button 
-              onClick={() => scrollCategory(-1)}
-              className="liquid-icon-btn absolute left-0 z-10 size-8 rounded-full bg-background/90 border border-border shadow-md flex items-center justify-center"
-            >
-              <Icon name="chevron_left" size={16}/>
-            </button>
-          )}
-
-          <div 
-            ref={categoryScrollRef}
-            className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 w-full"
-          >
-            <button
-              onClick={() => setSelectedCategory('all')}
-              className={`px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-                selectedCategory === 'all'
-                  ? 'bg-primary text-primary-foreground shadow-xs'
-                  : 'bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 text-muted-foreground hover:text-foreground border border-black/10 dark:border-white/10'
-              }`}
-            >
-              All Categories ({documents.length})
-            </button>
-
-            {categories.map(cat => {
-              const count = documents.filter(d => d.category === cat.id).length
-              const isSelected = selectedCategory === cat.id
-              return (
-                <button
-                  key={cat.id}
-                  onClick={() => setSelectedCategory(cat.id)}
-                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-                    isSelected
-                      ? 'bg-primary text-primary-foreground shadow-xs'
-                      : 'bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 text-muted-foreground hover:text-foreground border border-black/10 dark:border-white/10'
+              <div className="mt-1.5 w-full h-1.5 rounded-full bg-black/10 dark:bg-white/10 overflow-hidden">
+                <div 
+                  className={`h-full rounded-full transition-all duration-500 ease-out ${
+                    usagePercentage > 90 
+                      ? 'bg-rose-500' 
+                      : usagePercentage > 70 
+                      ? 'bg-amber-500' 
+                      : 'bg-primary'
                   }`}
-                >
-                  {cat.icon}
-                  <span>{cat.label}</span>
-                  <span className="opacity-75 text-[11px]">({count})</span>
-                </button>
-              )
-            })}
+                  style={{ width: `${Math.max(1, usagePercentage)}%` }}
+                />
+              </div>
+            </div>
           </div>
 
-          {canScrollRight && (
-            <button 
-              onClick={() => scrollCategory(1)}
-              className="liquid-icon-btn absolute right-0 z-10 size-8 rounded-full bg-background/90 border border-border shadow-md flex items-center justify-center"
-            >
-              <Icon name="chevron_right" size={16}/>
-            </button>
+          {/* Quick Metrics */}
+          <div className="flex items-center gap-4 text-xs text-muted-foreground font-medium border-t sm:border-t-0 sm:border-l border-border/60 dark:border-white/10 pt-2 sm:pt-0 sm:pl-4 shrink-0">
+            <div>
+              <strong className="text-foreground font-semibold">{documents.length}</strong> Files
+            </div>
+            <div>
+              <strong className="text-foreground font-semibold">{formatFileSize(remainingStorageBytes)}</strong> Free
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      {/* 2. Main 2-Column Section: Col 1 = All Documents + Search; Col 2 = Insta Documents */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        {/* Column 1: All Documents Widget — col-span-12 lg:col-span-7 xl:col-span-8 */}
+        <div className="col-span-12 lg:col-span-7 xl:col-span-8 rounded-2xl p-4 sm:p-5 glass-kormiis glass-apple text-foreground border border-white/20 dark:border-white/10 shadow-sm flex flex-col gap-4">
+          
+          {/* Widget Header & Search */}
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <Icon name="folder_open" className="text-primary" size={18}/>
+                <h3 className="font-bold text-sm text-foreground tracking-tight">
+                  All Documents
+                </h3>
+                <Badge variant="outline" className="rounded-full px-2 py-0 text-[10px] font-semibold border-black/10 dark:border-white/10 text-muted-foreground">
+                  {filteredDocs.length}
+                </Badge>
+              </div>
+            </div>
+
+            {/* Search Bar at the Top of Widget */}
+            <div className="relative flex items-center w-full">
+              <Icon name="search" className="absolute left-3.5 text-muted-foreground z-10 pointer-events-none" size={18}/>
+              <Input
+                type="text"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="Search documents by name, category, or uploader..."
+                aria-label="Search documents"
+                className="w-full !pl-10.5 h-10 rounded-xl bg-white/60 dark:bg-white/5 border border-border/80 dark:border-white/12 text-xs"
+              />
+              {search && (
+                <button 
+                  type="button"
+                  onClick={() => setSearch('')}
+                  className="absolute right-3 text-muted-foreground hover:text-foreground p-1"
+                >
+                  <Icon name="close" size={14}/>
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Document Cards Grid */}
+          {filteredDocs.length === 0 ? (
+            <div className="text-center py-12 px-4 rounded-xl border border-dashed border-border/80 dark:border-white/14">
+              <Icon name="description" size={42} className="text-primary mx-auto mb-3 opacity-60"/>
+              <h4 className="text-sm font-bold text-foreground">No documents found</h4>
+              <p className="text-xs text-muted-foreground mt-1 max-w-sm mx-auto">
+                {search
+                  ? `No documents match "${search}". Try searching by another keyword.`
+                  : 'Upload your company handbook, policies, forms, or training resources.'}
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {filteredDocs.map(doc => {
+                const catInfo = getCategoryInfo(doc.category)
+                const meta = getFileMeta(doc.fileType, doc.fileName)
+                const canManage = currentUser?.role === 'Admin' || currentUser?.isWorkspaceOwner || doc.uploadedById === (currentUser?.id || currentUser?.uid)
+                const uploadTimeFormatted = doc.uploadedAt ? formatDate(doc.uploadedAt) : 'Recently'
+                const uploaderName = doc.uploadedBy || 'Admin'
+
+                return (
+                  <div
+                    key={doc.id}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => handleDownload(doc)}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleDownload(doc) } }}
+                    className="group relative rounded-xl p-3 bg-white dark:bg-[#1f1f23] border border-black/10 dark:border-white/10 hover:border-primary/50 transition-all duration-200 hover:-translate-y-0.5 shadow-2xs hover:shadow-md flex flex-col justify-between cursor-pointer select-none gap-2.5 overflow-hidden"
+                  >
+                    {/* Top Accent Stripe */}
+                    <div className={`h-1 w-full rounded-full ${meta.ribbonColor} shrink-0`} />
+
+                    {/* Main Content: Big Document Icon on Left + Details on Right */}
+                    <div className="flex items-start gap-3 min-w-0 flex-1">
+                      {/* Big Document Filled Icon Box */}
+                      <div className={`size-16 rounded-2xl flex flex-col items-center justify-center shrink-0 border ${meta.tagColor} relative overflow-hidden bg-primary/5`}>
+                        <Icon name="description" fill={true} size={38} className="shrink-0 transition-transform duration-200 group-hover:scale-105"/>
+                        <span className="text-[8px] font-black uppercase tracking-tight mt-0.5">
+                          {meta.label}
+                        </span>
+                      </div>
+
+                      {/* Document Meta & Details */}
+                      <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+                        <h4 className="font-bold text-xs text-foreground group-hover:text-primary transition-colors truncate leading-snug" title={doc.name}>
+                          {doc.name}
+                        </h4>
+
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="inline-flex items-center text-[10px] font-semibold text-primary px-1.5 py-0.2 rounded bg-primary/10 border border-primary/20">
+                            {catInfo.label}
+                          </span>
+                          <span className="text-[10px] text-muted-foreground font-medium">
+                            {formatFileSize(doc.fileSize)}
+                          </span>
+                        </div>
+
+                        {/* Uploader & Timestamp */}
+                        <div className="flex items-center gap-1 text-[10px] text-muted-foreground font-medium mt-1 truncate">
+                          <Icon name="person" size={12} className="shrink-0 text-muted-foreground/80"/>
+                          <span className="truncate max-w-[90px]" title={uploaderName}>{uploaderName}</span>
+                          <span>•</span>
+                          <Icon name="schedule" size={12} className="shrink-0 text-muted-foreground/80"/>
+                          <span className="shrink-0">{uploadTimeFormatted}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Bottom Action Footer */}
+                    <div className="pt-2 border-t border-black/[0.05] dark:border-white/[0.06] flex items-center justify-between gap-1 shrink-0">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleDownload(doc)
+                        }}
+                        className="flex items-center gap-1 text-[11px] font-semibold text-primary hover:text-primary/80 transition-colors cursor-pointer px-1 py-0.5 rounded hover:bg-primary/5"
+                        title={`Open / Download ${doc.name}`}
+                      >
+                        <Icon name="visibility" size={13}/>
+                        <span>Open</span>
+                      </button>
+
+                      {canManage && (
+                        <div className="flex items-center gap-0.5" onClick={(e) => e.stopPropagation()}>
+                          <button
+                            type="button"
+                            title={`Edit ${doc.name}`}
+                            onClick={() => handleOpenEditModal(doc)}
+                            className="liquid-icon-btn size-6 rounded-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/10 cursor-pointer transition-all"
+                          >
+                            <Icon name="edit" size={12}/>
+                          </button>
+                          <button
+                            type="button"
+                            title={`Delete ${doc.name}`}
+                            onClick={() => handleDelete(doc.id)}
+                            className="liquid-icon-btn size-6 rounded-md flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer transition-all"
+                          >
+                            <Icon name="delete" size={12}/>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
           )}
         </div>
 
-        {/* Collapsible Format & Date Filter Drawer */}
-        {showFilters && (
-          <Card className="p-4 sm:p-5 rounded-2xl glass-kormiis border-border/80 dark:border-white/12 shadow-sm animate-in fade-in slide-in-from-top-2">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="flex flex-col gap-1.5">
-                <span className="text-xs font-bold text-muted-foreground ml-1">Filter by Category</span>
-                <Select value={selectedCategory} onChange={setSelectedCategory}>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  {categories.map(cat => <SelectItem key={cat.id} value={cat.id}>{cat.label}</SelectItem>)}
-                </Select>
+        {/* Column 2: Insta Documents — col-span-12 lg:col-span-5 xl:col-span-4 */}
+        <div className="col-span-12 lg:col-span-5 xl:col-span-4 rounded-2xl p-4 sm:p-5 glass-kormiis glass-apple text-foreground border border-white/20 dark:border-white/10 shadow-sm flex flex-col gap-3">
+          <div className="flex items-center justify-between pb-2 border-b border-border/40">
+            <h2 className="text-sm font-bold tracking-tight flex items-center gap-2 text-foreground">
+              <Icon name="description" className="text-primary" size={18}/>
+              <span>Generate Documents</span>
+            </h2>
+            <Badge variant="secondary" className="text-[10px] font-semibold px-2 py-0.5">
+              4 Formats
+            </Badge>
+          </div>
+
+          <div className="flex flex-col gap-2.5">
+            {/* Card 1: NOC */}
+            <div 
+              role="button"
+              tabIndex={0}
+              onClick={() => handleOpenLetterModal('noc')}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleOpenLetterModal('noc') } }}
+              className="group p-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] hover:bg-primary/[0.08] dark:hover:bg-primary/[0.12] border border-border/70 dark:border-white/10 hover:border-primary/50 transition-all duration-200 cursor-pointer flex items-center justify-between gap-3"
+            >
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="size-8 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
+                  <Icon name="flight_takeoff" size={18} className="text-amber-600 dark:text-amber-400"/>
+                </div>
+                <div className="min-w-0">
+                  <h3 className="font-semibold text-xs text-foreground group-hover:text-primary transition-colors truncate">
+                    No Objection Certificate
+                  </h3>
+                  <span className="text-[10px] text-muted-foreground font-medium">NOC Clearance</span>
+                </div>
               </div>
-              <div className="flex flex-col gap-1.5">
-                <span className="text-xs font-bold text-muted-foreground ml-1">File Format</span>
-                <Select value={filterFormat} onChange={setFilterFormat}>
-                  <SelectItem value="all">All File Types</SelectItem>
-                  <SelectItem value="pdf">PDF Documents</SelectItem>
-                  <SelectItem value="excel">Excel & Spreadsheets (.xlsx, .csv)</SelectItem>
-                  <SelectItem value="image">Images (PNG, JPG, WEBP)</SelectItem>
-                  <SelectItem value="archive">Archives (ZIP, RAR)</SelectItem>
-                </Select>
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <span className="text-xs font-bold text-muted-foreground ml-1">Upload Date</span>
-                <Select value={filterDate} onChange={setFilterDate}>
-                  <SelectItem value="all">All Time</SelectItem>
-                  <SelectItem value="7days">Past 7 Days</SelectItem>
-                  <SelectItem value="30days">Past 30 Days</SelectItem>
-                  <SelectItem value="90days">Past 3 Months</SelectItem>
-                </Select>
+              <div className="flex items-center text-xs font-semibold text-primary gap-1 shrink-0">
+                <span className="text-[11px]">Create</span>
+                <Icon name="arrow_forward" size={13} className="group-hover:translate-x-0.5 transition-transform"/>
               </div>
             </div>
-          </Card>
-        )}
-      </div>
 
-      {/* 3. Real-Time Documents List / Cards */}
-      {filteredDocs.length === 0 ? (
-        <div className="text-center py-16 px-4 rounded-[28px] glass-kormiis border border-dashed border-border/80 dark:border-white/14">
-          <Icon name="description" size={54} className="text-primary mx-auto mb-4"/>
-          <h3 className="text-fluid-lg font-bold text-foreground">No documents found</h3>
-          <p className="text-fluid-xs text-muted-foreground mt-1 max-w-md mx-auto">
-            {search || selectedCategory !== 'all' || filterFormat !== 'all' || filterDate !== 'all'
-              ? 'No documents match your active search or filter criteria.'
-              : 'Upload your company handbook, policies, forms, or training resources to get started.'}
-          </p>
-          <Button 
-            variant="default" 
-            onClick={handleOpenUploadModal} 
-            className="mt-5 rounded-full"
-          >
-            <Icon name="upload" className="mr-2" size={16}/> Upload New Document
-          </Button>
-        </div>
-      ) : (
-        <div role="list" className="flex flex-col gap-3">
-          {filteredDocs.map(doc => {
-            const catInfo = getCategoryInfo(doc.category)
-            const fileIcon = getFileIcon(doc.fileType || doc.fileName)
-            const canManage = currentUser?.role === 'Admin' || currentUser?.isWorkspaceOwner || doc.uploadedById === (currentUser?.id || currentUser?.uid)
-
-            return (
-              <div 
-                key={doc.id} 
-                role="listitem" 
-                className="group rounded-2xl p-4 sm:p-5 glass-kormiis glass-apple text-foreground border border-white/30 dark:border-white/14 hover:border-primary/50 transition-all duration-300 shadow-sm hover:shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-              >
-                {/* Left Document Details */}
-                <div className="flex items-start gap-3.5 flex-1 min-w-0">
-                  <Icon name={fileIcon} size={32} className="text-primary shrink-0 group-hover:scale-105 transition-transform"/>
-
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-bold text-fluid text-foreground tracking-tight group-hover:text-primary transition-colors">
-                        {doc.name}
-                      </span>
-                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-muted-foreground">
-                        {catInfo.icon}
-                        <span>{catInfo.label}</span>
-                      </span>
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-fluid-xs text-muted-foreground">
-                      <span className="font-mono text-muted-foreground/80 break-words max-w-[240px]">
-                        {doc.fileName}
-                      </span>
-                      <span>•</span>
-                      <span className="font-semibold text-foreground/80">
-                        {formatFileSize(doc.fileSize)}
-                      </span>
-                      <span>•</span>
-                      <span>
-                        Uploaded {formatDate(doc.uploadedAt)} by <strong className="text-foreground">{doc.uploadedBy}</strong>
-                      </span>
-                    </div>
-
-                    {doc.description && (
-                      <p className="text-fluid-xs text-muted-foreground/90 mt-1.5 ">
-                        {doc.description}
-                      </p>
-                    )}
-                  </div>
+            {/* Card 2: Salary & Employment */}
+            <div 
+              role="button"
+              tabIndex={0}
+              onClick={() => handleOpenLetterModal('salary')}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleOpenLetterModal('salary') } }}
+              className="group p-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] hover:bg-primary/[0.08] dark:hover:bg-primary/[0.12] border border-border/70 dark:border-white/10 hover:border-primary/50 transition-all duration-200 cursor-pointer flex items-center justify-between gap-3"
+            >
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="size-8 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">
+                  <Icon name="payments" size={18} className="text-emerald-600 dark:text-emerald-400"/>
                 </div>
-
-                {/* Right Action Buttons */}
-                <div className="flex items-center gap-1.5 self-end sm:self-center shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-border/80 dark:border-white/12 w-full sm:w-auto justify-end">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="h-9 px-3 rounded-full text-xs font-semibold gap-1.5"
-                    onClick={() => handleDownload(doc)}
-                    title={`Open / Download ${doc.name}`}
-                  >
-                    <Icon name="download" size={14} className="text-primary"/>
-                    <span>Download</span>
-                  </Button>
-
-                  {canManage && (
-                    <>
-                      <button
-                        title={`Edit ${doc.name}`}
-                        onClick={() => handleOpenEditModal(doc)}
-                        className="liquid-icon-btn size-8.5 rounded-full flex items-center justify-center bg-black/5 dark:bg-white/5 hover:bg-primary/20 hover:text-primary active:scale-90 border border-black/10 dark:border-white/10 transition-all text-muted-foreground hover:text-foreground cursor-pointer shadow-xs"
-                      >
-                        <Icon name="edit" size={14} />
-                      </button>
-
-                      <button
-                        title={`Delete ${doc.name}`}
-                        onClick={() => handleDelete(doc.id)}
-                        className="liquid-icon-btn size-8.5 rounded-full flex items-center justify-center bg-black/5 dark:bg-white/5 hover:bg-destructive/20 hover:text-destructive active:scale-90 border border-black/10 dark:border-white/10 transition-all text-muted-foreground hover:text-destructive cursor-pointer shadow-xs"
-                      >
-                        <Icon name="delete" size={14} />
-                      </button>
-                    </>
-                  )}
+                <div className="min-w-0">
+                  <h3 className="font-semibold text-xs text-foreground group-hover:text-primary transition-colors truncate">
+                    Salary & Employment Certificate
+                  </h3>
+                  <span className="text-[10px] text-muted-foreground font-medium">Income Verification</span>
                 </div>
-
               </div>
-            )
-          })}
+              <div className="flex items-center text-xs font-semibold text-primary gap-1 shrink-0">
+                <span className="text-[11px]">Create</span>
+                <Icon name="arrow_forward" size={13} className="group-hover:translate-x-0.5 transition-transform"/>
+              </div>
+            </div>
+
+            {/* Card 3: Experience Certificate */}
+            <div 
+              role="button"
+              tabIndex={0}
+              onClick={() => handleOpenLetterModal('experience')}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleOpenLetterModal('experience') } }}
+              className="group p-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] hover:bg-primary/[0.08] dark:hover:bg-primary/[0.12] border border-border/70 dark:border-white/10 hover:border-primary/50 transition-all duration-200 cursor-pointer flex items-center justify-between gap-3"
+            >
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="size-8 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
+                  <Icon name="workspace_premium" size={18} className="text-blue-600 dark:text-blue-400"/>
+                </div>
+                <div className="min-w-0">
+                  <h3 className="font-semibold text-xs text-foreground group-hover:text-primary transition-colors truncate">
+                    Experience Certificate
+                  </h3>
+                  <span className="text-[10px] text-muted-foreground font-medium">Tenure & Conduct</span>
+                </div>
+              </div>
+              <div className="flex items-center text-xs font-semibold text-primary gap-1 shrink-0">
+                <span className="text-[11px]">Create</span>
+                <Icon name="arrow_forward" size={13} className="group-hover:translate-x-0.5 transition-transform"/>
+              </div>
+            </div>
+
+            {/* Card 4: Employment Verification */}
+            <div 
+              role="button"
+              tabIndex={0}
+              onClick={() => handleOpenLetterModal('verification')}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleOpenLetterModal('verification') } }}
+              className="group p-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] hover:bg-primary/[0.08] dark:hover:bg-primary/[0.12] border border-border/70 dark:border-white/10 hover:border-primary/50 transition-all duration-200 cursor-pointer flex items-center justify-between gap-3"
+            >
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="size-8 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0">
+                  <Icon name="verified_user" size={18} className="text-purple-600 dark:text-purple-400"/>
+                </div>
+                <div className="min-w-0">
+                  <h3 className="font-semibold text-xs text-foreground group-hover:text-primary transition-colors truncate">
+                    Employment Verification Letter
+                  </h3>
+                  <span className="text-[10px] text-muted-foreground font-medium">Designation Proof</span>
+                </div>
+              </div>
+              <div className="flex items-center text-xs font-semibold text-primary gap-1 shrink-0">
+                <span className="text-[11px]">Create</span>
+                <Icon name="arrow_forward" size={13} className="group-hover:translate-x-0.5 transition-transform"/>
+              </div>
+            </div>
+          </div>
         </div>
-      )}
+
+      </div>
 
       {/* Upload / Edit Document Modal */}
       <Dialog open={showUploadModal} onOpenChange={(open) => { if (!open) { setShowUploadModal(false); resetForm() } }}>

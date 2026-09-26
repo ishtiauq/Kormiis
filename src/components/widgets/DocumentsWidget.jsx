@@ -16,14 +16,14 @@ export const DocumentsWidget = memo(({ recentDocuments, setCurrentView, ...wProp
       </button>
     }
   >
-    <div className="flex flex-col h-full gap-2.5">
+    <div className="flex flex-col flex-1 min-h-0 gap-2.5 overflow-y-auto pr-0.5 pb-1">
       {recentDocuments.length > 0 ? recentDocuments.map((doc, i) => (
-        <div key={i} className="flex flex-col gap-1 p-2.5 px-3 rounded-2xl liquid-widget-item border-black/[0.06] dark:border-white/[0.08]">
+        <div key={i} className="flex flex-col gap-1 p-2.5 px-3 rounded-2xl liquid-widget-item border-black/[0.06] dark:border-white/[0.08] shrink-0">
           <div className="flex justify-between items-center">
             <span className="text-xs font-bold text-foreground break-words pr-2">{doc.name}</span>
             <Badge variant="secondary" className="text-[10px] shrink-0 rounded-full px-2 py-0.5">{doc.category || 'Doc'}</Badge>
           </div>
-          <span className="text-[11px] text-muted-foreground">Updated {formatDateShort(doc.uploadDate || doc.date || new Date().toISOString())}</span>
+          <span className="text-[11px] text-muted-foreground">Updated {formatDateShort(doc.uploadedAt || doc.updatedAt || doc.uploadDate || doc.date)}</span>
         </div>
       )) : (
         <div className="flex-1 flex flex-col items-center justify-center text-center p-5">

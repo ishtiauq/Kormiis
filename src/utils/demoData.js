@@ -758,27 +758,68 @@ export const DEMO_EVENTS = [
 export const DEMO_DOCUMENTS = [
   {
     id: 'doc-801',
-    title: 'Kormiis Employee Handbook 2026.pdf',
-    category: 'HR Policy',
-    size: '2.4 MB',
-    uploadedBy: 'Nusrat Jahan',
-    date: '2026-01-10'
+    name: 'Kormiis Employee Handbook 2026',
+    category: 'hr-docs',
+    fileName: 'Kormiis_Employee_Handbook_2026.pdf',
+    fileSize: 2450000,
+    fileType: 'application/pdf',
+    uploadedBy: 'Sarah Rahman',
+    uploadedById: 'emp-101',
+    uploadedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 4).toISOString(),
+    downloadUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+    description: 'Comprehensive workspace code of conduct, core benefits, leave policies, and company culture guide.'
   },
   {
     id: 'doc-802',
-    title: 'Standard Operating Procedures & Security Guide.pdf',
-    category: 'Engineering',
-    size: '4.1 MB',
+    name: 'Standard Operating Procedures & Security Guide',
+    category: 'policies',
+    fileName: 'SOP_Security_Infrastructure_v3.pdf',
+    fileSize: 4200000,
+    fileType: 'application/pdf',
     uploadedBy: 'Arif Chowdhury',
-    date: '2026-02-15'
+    uploadedById: 'emp-104',
+    uploadedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 8).toISOString(),
+    downloadUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+    description: 'IT access standards, Zero-Trust credentials, and cloud incident mitigation procedures.'
   },
   {
     id: 'doc-803',
-    title: 'Medical Insurance Claim Form & Guidelines.pdf',
-    category: 'Benefits',
-    size: '1.2 MB',
+    name: 'Annual Compensation & Salary Matrix FY26',
+    category: 'forms',
+    fileName: 'Compensation_Tax_Matrix_FY26.xlsx',
+    fileSize: 1850000,
+    fileType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    uploadedBy: 'Nusrat Jahan',
+    uploadedById: 'emp-103',
+    uploadedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 12).toISOString(),
+    downloadUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+    description: 'Official department grading structure, payroll allowance tax formulas, and bonus thresholds.'
+  },
+  {
+    id: 'doc-804',
+    name: 'Medical & Dental Insurance Claim Package',
+    category: 'forms',
+    fileName: 'Healthcare_Claim_Authorization_Form.pdf',
+    fileSize: 1250000,
+    fileType: 'application/pdf',
     uploadedBy: 'HR Operations',
-    date: '2026-03-01'
+    uploadedById: 'emp-102',
+    uploadedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 15).toISOString(),
+    downloadUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+    description: 'Claim submission documents for OPD hospital reimbursement and dependent health insurance.'
+  },
+  {
+    id: 'doc-805',
+    name: 'Product Engineering Architecture Roadmap',
+    category: 'training',
+    fileName: 'Engineering_System_Roadmap_2026.png',
+    fileSize: 3100000,
+    fileType: 'image/png',
+    uploadedBy: 'Tanvir Hossain',
+    uploadedById: 'emp-102',
+    uploadedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 20).toISOString(),
+    downloadUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80',
+    description: 'Distributed microservices architecture diagram, database replica topologies, and high availability design.'
   }
 ]
 

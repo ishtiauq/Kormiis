@@ -64,9 +64,9 @@
   /* Unified layout scale — used by the dashboard grid & shells */
   --page-max: 1920px;
   --measure-max: 960px;
-  --row-hero: 680px;   /* top dashboard row (Check In / Catch Up / Directory) */
-  --row-mid: 460px;    /* mid dashboard row (Attendance / Daily Checklist) */
-  --row-card: 320px;   /* small widget row */
+  --row-hero: 610px;   /* top dashboard row (Check In / Catch Up / Directory) */
+  --row-mid: 420px;    /* mid dashboard row (Attendance / Daily Checklist) */
+  --row-card: 300px;   /* small widget row */
   --card-pad: clamp(1rem, 0.75rem + 0.8vw, 1.5rem);
   --background: #f5f5f7;
   --foreground: #000000;

@@ -653,9 +653,9 @@ export default function GeoCheckInWidget({
 
         {/* Widget 2: Today's Activity & Monthly Report (With outline / border) */}
         <Card className="dashboard-widget relative rounded-3xl border border-border/60 dark:border-white/10 min-h-0 h-full flex flex-col p-0 isolate flex-1 order-2 w-full">
-          <CardContent className="flex flex-col justify-between gap-2.5 p-2.5 sm:p-3 h-full flex-1 min-h-0">
+          <CardContent className="flex flex-col justify-start gap-2 p-2 sm:p-2.5 h-full flex-1 min-h-0 overflow-y-auto">
             {/* Today's Activity & Office Duration Box */}
-            <div className="flex flex-col gap-2 p-2.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/8 dark:border-white/10">
+            <div className="flex flex-col gap-1.5 p-2 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/8 dark:border-white/10">
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
                   <Icon name="schedule" size={14} className="text-foreground" />
@@ -663,22 +663,22 @@ export default function GeoCheckInWidget({
                 </span>
               </div>
 
-              <div className="grid grid-cols-3 gap-2">
-                <div className="flex flex-col items-center justify-center p-2 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5">
+              <div className="grid grid-cols-3 gap-2 items-start">
+                <div className="flex flex-col items-center justify-start p-2 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5">
                   <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Clock In</span>
                   <span className="text-xs sm:text-sm font-black font-mono tabular-nums text-foreground mt-0.5">
                     {displayCheckIn !== '0' ? displayCheckIn : '—'}
                   </span>
                 </div>
 
-                <div className="flex flex-col items-center justify-center p-2 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5">
+                <div                   className="flex flex-col items-center justify-start p-2 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5">
                   <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Clock Out</span>
                   <span className="text-xs sm:text-sm font-black font-mono tabular-nums text-foreground mt-0.5">
                     {displayCheckOut !== '0' ? displayCheckOut : '—'}
                   </span>
                 </div>
 
-                <div className="flex flex-col items-center justify-center p-2 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5">
+                <div                   className="flex flex-col items-center justify-start p-2 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5">
                   <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
                     {isInOffice ? 'In Office' : 'Office Time'}
                   </span>
@@ -697,7 +697,7 @@ export default function GeoCheckInWidget({
             )}
 
             {/* This Month Report Section */}
-            <div className="flex flex-col gap-2 p-2.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/8 dark:border-white/10">
+            <div className="flex flex-col gap-1.5 p-2 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/8 dark:border-white/10">
               {/* Header with Title */}
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
@@ -706,7 +706,7 @@ export default function GeoCheckInWidget({
               </div>
 
               {/* Total Worked Hours Box */}
-              <div className="flex items-center justify-between px-3 py-1.5 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5">
+              <div className="flex items-center justify-between px-2.5 py-1 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5">
                 <span className="text-xs font-bold text-muted-foreground flex items-center gap-1.5">
                   <Icon name="timer" size={15} className="text-primary shrink-0" />
                   Total Worked
@@ -726,7 +726,7 @@ export default function GeoCheckInWidget({
                 ].map(({ key, label, count, bg, color }) => (
                   <div
                     key={key}
-                    className="flex items-center justify-between gap-1.5 min-w-0 rounded-xl px-2.5 py-1.5 shadow-none overflow-hidden"
+                    className="flex items-center justify-between gap-1.5 min-w-0 rounded-xl px-2 py-1 shadow-none overflow-hidden"
                     style={{ background: bg }}
                   >
                     <span className="text-xs font-bold text-white whitespace-nowrap drop-shadow-sm select-none shrink-0">{label}</span>
@@ -739,7 +739,7 @@ export default function GeoCheckInWidget({
             </div>
 
             {/* Available Leave Balance Box with Breakdown */}
-            <div className="flex flex-col gap-2 p-2.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/8 dark:border-white/10">
+            <div className="flex flex-col gap-1.5 p-2 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/8 dark:border-white/10">
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
                   <Icon name="event_available" size={14} className="text-foreground" />
@@ -750,7 +750,7 @@ export default function GeoCheckInWidget({
                 </span>
               </div>
 
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 gap-2 items-start">
                 <div className="flex flex-col items-center justify-center p-1.5 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5">
                   <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider truncate">Annual</span>
                   <div className="flex items-baseline gap-0.5 mt-0.5">
@@ -793,7 +793,7 @@ export default function GeoCheckInWidget({
             </div>
 
             {/* Widget Footer Action: My Attendance Logs */}
-            <div className="pt-1 w-full">
+            <div className="pt-0.5 w-full">
               <button
                 type="button"
                 onClick={() => setCurrentView && setCurrentView(myLogsTarget)}
