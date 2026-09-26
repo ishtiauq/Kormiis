@@ -31,15 +31,23 @@ Whenever creating new components, pages, widgets, or modifying existing ones in 
 
 ---
 
-## 1. Core Material Architecture (Ultra-Liquid Glass)
+## 1. Core Material Architecture — GLASS = OVERLAYS ONLY, CONTENT = SOLID
 
-### Layered Translucency & Optical Refraction
-- **Backdrop Filter**: `backdrop-filter: saturate(190%) blur(32px)` / `-webkit-backdrop-filter: saturate(190%) blur(32px)` on all primary glass containers (`.glass-kormiis`).
-- **Zero Background Color Standard (Pure Refraction)**:
-  - **Light & Dark Mode**: `background: transparent !important;` (`--glass-bg: transparent`). Zero solid or tinted background fills — containers rely purely on backdrop blur, saturation, and contrast borders.
-- **Borders & Continuous Curvature**:
-  - Border: 1px solid `rgba(0, 0, 0, 0.08)` in Light Mode, `rgba(255, 255, 255, 0.09)` in Dark Mode (`var(--glass-border)`).
-  - Corner Radii: Continuous squircle corners — `rounded-2xl` to `rounded-3xl` (20px–32px) for cards/panels, `rounded-2xl` or `rounded-full` (16px–24px) for buttons/pills.
+### Rule (the single source of truth)
+**Glass (backdrop blur + saturation + transparency) is reserved STRICTLY for OVERLAY surfaces** — things that float on top of other content so refraction can actually be seen:
+- Topbar, bottom bar / dock, **dialogs & modals**, **popovers / dropdowns**, **select menus**, **tooltips**, notification panel, AI panel, drawers, toasts.
+
+**Every non-overlay surface is SOLID, basic, fast-rendering** — NO `backdrop-filter`, NO `saturate`, NO transparency:
+- Cards, widgets, tables, inputs, buttons, badges, pills, wells, list items, page content.
+- Solid fills: Light `#ffffff` (card) / `#f5f5f7` (item) / `#ececef` (well+hover); Dark `#232327` / `#2c2c2e` / `#343438`.
+- Rationale: a card with nothing behind it gains nothing from glass — it only costs paint time. Solid = lighter, faster, more distinct.
+
+### Implementation
+- Overlay whitelist lives in `src/index.css` (the `backdrop-filter: blur(32px) saturate(190%)` blocks and the `body [class*="backdrop-blur-"]` / `[class*="saturate-"]` enforcement rules). Do NOT add content selectors to it.
+- Content surfaces are painted solid by `--mono-surface-*` tokens (`.glass-kormiis` content variant, `.dashboard-widget`, `.liquid-widget-item`, `.mono-well`, `.glass-badge`, inputs, table).
+- `border: 1px solid` = Light `rgba(0,0,0,0.12)`, Dark `rgba(255,255,255,0.13)` (`var(--mono-surface-card-border)`).
+- Corner Radii: `rounded-2xl`–`rounded-3xl` for cards/panels; `rounded-2xl`/`rounded-full` for buttons/pills.
+- **Zero-Shadow Default** everywhere (`box-shadow: none !important;`). Only "Kormiis Shadow" (below) may elevate floating controls.
 - **Universal Zero-Shadow Standard & Kormiis Shadow**:
   - **Zero-Shadow Default**: Containers, modals, dialogs, drawers, cards, and popovers rely purely on optical translucency, continuous curvature, and crisp contrast borders (`box-shadow: none !important;`).
   - **Kormiis Shadow (`--kormiis-shadow`, `.kormiis-shadow`, `.shadow-kormiis`)**:

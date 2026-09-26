@@ -472,8 +472,8 @@ export const AnnouncementsWidget = memo(({
         </div>
 
         {/* --- DEDICATED POSTS / ITEMS CONTAINER --- */}
-        <div className="flex-1 min-h-0 w-full px-2.5 sm:px-3 pt-2.5 pb-2.5 flex flex-col overflow-hidden">
-          <div className="flex-1 min-h-0 w-full rounded-2xl border border-black/10 dark:border-white/12 flex flex-col p-2.5 sm:p-3 overflow-hidden bg-black/[0.015] dark:bg-white/[0.02]">
+        <div className="flex-1 min-h-0 w-full px-2 sm:px-2.5 pt-2 pb-2 flex flex-col overflow-hidden">
+          <div className="flex-1 min-h-0 w-full rounded-2xl border border-black/10 dark:border-white/12 flex flex-col p-2 sm:p-2.5 overflow-hidden bg-black/[0.015] dark:bg-white/[0.02]">
             {/* --- FEED TAB CONTENT --- */}
             {activeTab === 'feed' && (
               feedPosts.length === 0 ? (

@@ -28,28 +28,36 @@ export const EmployeeDirectoryWidget = memo(({ employees = [], setCurrentView, .
       title="Team Directory"
       icon={<Icon name="group" className="text-foreground shrink-0" size={22}/>}
       action={
-        <Badge variant="outline" className="px-2.5 py-0.5 rounded-full text-xs font-semibold shrink-0">
-          {employees.length} members
-        </Badge>
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <Badge variant="outline" className="px-2.5 py-0.5 rounded-full text-xs font-semibold shrink-0">
+            {employees.length} members
+          </Badge>
+          <button
+            onClick={() => setCurrentView && setCurrentView('employees')}
+            className="apple-glass-btn text-xs font-semibold px-3.5 h-7 rounded-full cursor-pointer text-foreground inline-flex items-center"
+          >
+            View All
+          </button>
+        </div>
       }
-      contentClass="flex flex-col p-0 pt-1 overflow-hidden"
+      contentClass="flex flex-col p-0 pt-0.5 overflow-hidden"
       {...wProps}
     >
       {/* Search */}
-      <div className="relative flex items-center px-2.5 sm:px-3 pt-2 pb-2.5 w-full">
-        <Icon name="search" size={18} className="absolute left-4.5 sm:left-5 text-muted-foreground z-10 pointer-events-none" />
+      <div className="relative flex items-center px-2 sm:px-2.5 pt-1.5 pb-2 w-full">
+        <Icon name="search" size={18} className="absolute left-4 sm:left-4.5 text-muted-foreground z-10 pointer-events-none" />
         <Input
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search team members..."
           aria-label="Search team members"
-          className="!pl-10.5 h-11 rounded-2xl w-full bg-muted/40"
+          className="!pl-10.5 h-10 rounded-2xl w-full bg-muted/40"
         />
       </div>
 
       {/* Scrollable list container */}
-      <div className="flex-1 min-h-0 w-full px-2.5 sm:px-3 pt-1 pb-3 flex flex-col overflow-hidden">
+      <div className="flex-1 min-h-0 w-full px-2 sm:px-2.5 pt-0.5 pb-2.5 flex flex-col overflow-hidden">
         <div className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-2.5 chat-scrollbar px-0.5 py-1">
           {filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center text-center py-10 gap-2">

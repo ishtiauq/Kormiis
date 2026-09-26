@@ -70,21 +70,21 @@
   --card-pad: clamp(1rem, 0.75rem + 0.8vw, 1.5rem);
   --background: #f5f5f7;
   --foreground: #000000;
-  --card: rgba(255, 255, 255, 0.75);
+  --card: #ffffff;
   --card-foreground: #000000;
   --popover: rgba(255, 255, 255, 0.85);
   --popover-foreground: #000000;
   --primary: #000000;
   --primary-foreground: #ffffff;
-  --secondary: rgba(0, 0, 0, 0.04);
+  --secondary: #f0f0f2;
   --secondary-foreground: #000000;
-  --muted: rgba(0, 0, 0, 0.04);
+  --muted: #f0f0f2;
   --muted-foreground: #555555;
-  --accent: rgba(0, 0, 0, 0.04);
+  --accent: #f0f0f2;
   --accent-foreground: #000000;
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
-  --border: rgba(0, 0, 0, 0.07);
+  --border: rgba(0, 0, 0, 0.12);
   --input: rgba(0, 0, 0, 0.07);
   --ring: rgba(0, 0, 0, 0.12);
   --radius: 1.5rem;
@@ -125,15 +125,15 @@
   --history-card-active-bg: rgba(0, 0, 0, 0.07);
   --history-card-active-border: rgba(0, 0, 0, 0.20);
 
-  /* Monochrome Elevation System (Fixed Hierarchy - Light Mode) */
+  /* Monochrome Elevation System (Fixed Hierarchy - Light Mode) — SOLID fills */
   --mono-surface-base: #f5f5f7;
-  --mono-surface-card: rgba(255, 255, 255, 0.75);
-  --mono-surface-card-border: rgba(0, 0, 0, 0.07);
-  --mono-surface-item: rgba(0, 0, 0, 0.03);
-  --mono-surface-item-hover: rgba(0, 0, 0, 0.055);
-  --mono-surface-item-border: rgba(0, 0, 0, 0.06);
-  --mono-surface-well: rgba(0, 0, 0, 0.055);
-  --mono-surface-well-border: rgba(0, 0, 0, 0.10);
+  --mono-surface-card: #ffffff;
+  --mono-surface-card-border: rgba(0, 0, 0, 0.12);
+  --mono-surface-item: #f5f5f7;
+  --mono-surface-item-hover: #ececef;
+  --mono-surface-item-border: rgba(0, 0, 0, 0.08);
+  --mono-surface-well: #ececef;
+  --mono-surface-well-border: rgba(0, 0, 0, 0.14);
 }
 
 .dark,
@@ -141,21 +141,21 @@ html.dark,
 [data-theme="dark"] {
   --background: #1c1c1e;
   --foreground: #ffffff;
-  --card: rgba(255, 255, 255, 0.045);
+  --card: #232327;
   --card-foreground: #ffffff;
   --popover: rgba(30, 30, 34, 0.85);
   --popover-foreground: #ffffff;
   --primary: #ffffff;
   --primary-foreground: #000000;
-  --secondary: rgba(255, 255, 255, 0.05);
+  --secondary: #2c2c2e;
   --secondary-foreground: #ffffff;
-  --muted: rgba(255, 255, 255, 0.04);
+  --muted: #2c2c2e;
   --muted-foreground: #a1a1aa;
-  --accent: rgba(255, 255, 255, 0.05);
+  --accent: #2c2c2e;
   --accent-foreground: #ffffff;
   --destructive: #f87171;
   --destructive-foreground: #ffffff;
-  --border: rgba(255, 255, 255, 0.08);
+  --border: rgba(255, 255, 255, 0.13);
   --input: rgba(255, 255, 255, 0.07);
   --ring: rgba(255, 255, 255, 0.4);
   --sidebar: rgba(255, 255, 255, 0.045);
@@ -183,15 +183,15 @@ html.dark,
   --glass-btn-hover-border: rgba(255, 255, 255, 0.18);
   --glass-btn-hover-shadow: none;
 
-  /* Monochrome Elevation System (Fixed Hierarchy - Dark Mode) */
+  /* Monochrome Elevation System (Fixed Hierarchy - Dark Mode) — SOLID fills */
   --mono-surface-base: #1c1c1e;
-  --mono-surface-card: rgba(255, 255, 255, 0.045);
-  --mono-surface-card-border: rgba(255, 255, 255, 0.08);
-  --mono-surface-item: rgba(255, 255, 255, 0.04);
-  --mono-surface-item-hover: rgba(255, 255, 255, 0.07);
-  --mono-surface-item-border: rgba(255, 255, 255, 0.07);
-  --mono-surface-well: rgba(255, 255, 255, 0.08);
-  --mono-surface-well-border: rgba(255, 255, 255, 0.14);
+  --mono-surface-card: #232327;
+  --mono-surface-card-border: rgba(255, 255, 255, 0.13);
+  --mono-surface-item: #2c2c2e;
+  --mono-surface-item-hover: #333338;
+  --mono-surface-item-border: rgba(255, 255, 255, 0.10);
+  --mono-surface-well: #343438;
+  --mono-surface-well-border: rgba(255, 255, 255, 0.18);
 }
 
 .force-dark-mode {
@@ -267,6 +267,17 @@ body[data-theme="dark"],
 [data-theme="dark"] body {
   background-color: #1c1c1e !important;
   background-image: none !important;
+}
+
+/* Fast theme toggle — while the dark/light classes flip, disable ALL
+   transitions so colors swap in a single instant paint (no per-element
+   animation, no repaint storm → no choppiness). `.theme-changing` is added
+   by useTheme only for the frame(s) around the class flip. */
+html.theme-changing,
+html.theme-changing *,
+html.theme-changing *::before,
+html.theme-changing *::after {
+  transition: none !important;
 }
 
 html {
@@ -425,20 +436,20 @@ html.dark,
 .glass-card:not([role="dialog"]):not([role="alertdialog"]):not([data-notif-panel]):not(.notification-modal):not(.notification-dropdown):not([data-ai-panel]):not([data-ai-modal]):not(.ai-panel):not([data-bottom-bar]):not([data-mobile-dock]):not(.mobile-bottom-dock):not([data-mobile-panel]):not([data-menu-drawer]):not(.menu-bar-dock):not(.bottom-bar):not(.topbar):not(header):not([data-topbar]):not(.glass-mobile-drawer):not(.liquid-glass-drawer):not(.toast):not([role="menu"]):not([role="listbox"]):not([role="tooltip"]):not(.glass-tooltip):not(.glass-popover):not(.glass-toast):not(.popover-content):not([data-radix-popper-content-wrapper]):not(.bg-primary):not([data-variant="default"]):not([aria-selected="true"]):not([data-selected="true"]):not([data-state="active"]):not([data-active="true"]):not(.nav-capsule-active),
 .bg-card:not([role="dialog"]):not([role="alertdialog"]):not([data-notif-panel]):not(.notification-modal):not(.notification-dropdown):not([data-ai-panel]):not([data-ai-modal]):not(.ai-panel):not([data-bottom-bar]):not([data-mobile-dock]):not(.mobile-bottom-dock):not([data-mobile-panel]):not([data-menu-drawer]):not(.menu-bar-dock):not(.bottom-bar):not(.topbar):not(header):not([data-topbar]):not(.glass-mobile-drawer):not(.liquid-glass-drawer):not(.toast):not([role="menu"]):not([role="listbox"]):not([role="tooltip"]):not(.glass-tooltip):not(.glass-popover):not(.glass-toast):not(.popover-content):not([data-radix-popper-content-wrapper]):not(.bg-primary):not([data-variant="default"]):not([aria-selected="true"]):not([data-selected="true"]):not([data-state="active"]):not([data-active="true"]):not(.nav-capsule-active),
 .dashboard-widget {
-  background: var(--mono-surface-card, rgba(255, 255, 255, 0.75)) !important;
-  background-color: var(--mono-surface-card, rgba(255, 255, 255, 0.75)) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(140%) !important;
-  backdrop-filter: blur(20px) saturate(140%) !important;
-  border: 1px solid var(--mono-surface-card-border, rgba(0, 0, 0, 0.07)) !important;
+  background: var(--mono-surface-card, #ffffff) !important;
+  background-color: var(--mono-surface-card, #ffffff) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  border: 1px solid var(--mono-surface-card-border, rgba(0, 0, 0, 0.12)) !important;
   box-shadow: none !important;
   isolation: isolate !important;
 }
 
 .dark .dashboard-widget,
 [data-theme="dark"] .dashboard-widget {
-  background: var(--mono-surface-card, rgba(255, 255, 255, 0.045)) !important;
-  background-color: var(--mono-surface-card, rgba(255, 255, 255, 0.045)) !important;
-  border-color: var(--mono-surface-card-border, rgba(255, 255, 255, 0.08)) !important;
+  background: var(--mono-surface-card, #232327) !important;
+  background-color: var(--mono-surface-card, #232327) !important;
+  border-color: var(--mono-surface-card-border, rgba(255, 255, 255, 0.13)) !important;
 }
 
 /* ==============================================================
@@ -567,8 +578,6 @@ li[data-sonner-toast],
   height: 68px;
   pointer-events: none;
   z-index: 10;
-  -webkit-backdrop-filter: blur(20px) saturate(190%);
-  backdrop-filter: blur(20px) saturate(190%);
   -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.85) 55%, rgba(0, 0, 0, 0) 100%);
   mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.85) 55%, rgba(0, 0, 0, 0) 100%);
 }
@@ -815,14 +824,13 @@ a.glass-kormiis:not(.bg-primary):not([data-variant="default"]):not([aria-selecte
 .apple-glass-btn:not(.bg-primary):not([data-variant="default"]):not([aria-selected="true"]):not([data-selected="true"]):not([data-selected]:not([data-selected="false"])):not(.nav-capsule-active) {
   border: 1px solid var(--glass-border);
   box-shadow: none !important;
-  background: transparent !important;
-  background-color: transparent !important;
+  background: var(--mono-surface-item, #f5f5f7) !important;
+  background-color: var(--mono-surface-item, #f5f5f7) !important;
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
   border-radius: 9999px;
   transition: 
     transform 450ms cubic-bezier(0.34, 1.56, 0.64, 1),
-    filter 250ms cubic-bezier(0.2, 0.8, 0.2, 1),
     background 300ms cubic-bezier(0.2, 0.8, 0.2, 1),
     border-color 300ms cubic-bezier(0.2, 0.8, 0.2, 1);
   cursor: pointer;
@@ -844,7 +852,7 @@ a.glass-kormiis:hover,
 .liquid-glass-btn:hover,
 .apple-glass-btn:hover {
   transform: scale(1.02);
-  filter: brightness(1.05);
+  background: var(--mono-surface-item-hover, #ececef) !important;
   box-shadow: none !important;
 }
 
@@ -854,7 +862,7 @@ a.glass-kormiis:active,
 .liquid-glass-btn:active,
 .apple-glass-btn:active {
   transform: scale(0.97) !important;
-  filter: brightness(0.95) !important;
+  background: var(--mono-surface-well, #ececef) !important;
   box-shadow: none !important;
   transition: transform 120ms cubic-bezier(0.2, 0.8, 0.2, 1) !important;
 }
@@ -1099,14 +1107,12 @@ button[aria-selected="true"]:not(.text-primary):active,
   border-top-color: #ffffff;
   border-radius: 50%;
   animation: liquid-wobble-spin 900ms cubic-bezier(0.4, 0, 0.2, 1) infinite;
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
 }
 
-/* Glass Badges & Tags */
+/* Solid Badges & Tags */
 .glass-badge {
-  background: transparent !important;
-  background-color: transparent !important;
+  background: var(--mono-surface-item, #f5f5f7) !important;
+  background-color: var(--mono-surface-item, #f5f5f7) !important;
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
   border: 1px solid var(--border) !important;
@@ -1114,8 +1120,8 @@ button[aria-selected="true"]:not(.text-primary):active,
 }
 .dark .glass-badge,
 [data-theme="dark"] .glass-badge {
-  background: transparent !important;
-  background-color: transparent !important;
+  background: var(--mono-surface-item, #2c2c2e) !important;
+  background-color: var(--mono-surface-item, #2c2c2e) !important;
   border: 1px solid rgba(255, 255, 255, 0.16) !important;
   box-shadow: none !important;
 }
@@ -1167,11 +1173,11 @@ button[aria-selected="true"]:not(.text-primary):active,
 .employee-portal-root .dashboard-widget,
 .glass-kormiis.dashboard-widget,
 .glass-kormiis.widget-card {
-  background: var(--mono-surface-card, rgba(255, 255, 255, 0.75)) !important;
-  background-color: var(--mono-surface-card, rgba(255, 255, 255, 0.75)) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(140%) !important;
-  backdrop-filter: blur(20px) saturate(140%) !important;
-  border: 1px solid var(--mono-surface-card-border, rgba(0, 0, 0, 0.07)) !important;
+  background: var(--mono-surface-card, #ffffff) !important;
+  background-color: var(--mono-surface-card, #ffffff) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  border: 1px solid var(--mono-surface-card-border, rgba(0, 0, 0, 0.12)) !important;
   box-shadow: none !important;
 }
 
@@ -1195,9 +1201,9 @@ button[aria-selected="true"]:not(.text-primary):active,
 [data-theme="dark"] .employee-portal-root .dashboard-widget,
 [data-theme="dark"] .glass-kormiis.dashboard-widget,
 [data-theme="dark"] .glass-kormiis.widget-card {
-  background: var(--mono-surface-card, rgba(255, 255, 255, 0.045)) !important;
-  background-color: var(--mono-surface-card, rgba(255, 255, 255, 0.045)) !important;
-  border-color: var(--mono-surface-card-border, rgba(255, 255, 255, 0.08)) !important;
+  background: var(--mono-surface-card, #232327) !important;
+  background-color: var(--mono-surface-card, #232327) !important;
+  border-color: var(--mono-surface-card-border, rgba(255, 255, 255, 0.13)) !important;
 }
 
 .liquid-widget-item,
@@ -1853,8 +1859,8 @@ input:not([role="switch"]):not([type="checkbox"]):not([type="radio"]),
 select,
 textarea,
 .border-input {
-  background: transparent !important;
-  background-color: transparent !important;
+  background: var(--mono-surface-item, #f5f5f7) !important;
+  background-color: var(--mono-surface-item, #f5f5f7) !important;
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
   border: 1px solid var(--border) !important;
@@ -1868,8 +1874,6 @@ textarea,
 
 input:hover, select:hover, textarea:hover, .border-input:hover {
   border-color: rgba(0, 0, 0, 0.25) !important;
-  background: transparent !important;
-  background-color: transparent !important;
 }
 
 .glass-kormiis-modal input,
@@ -1878,8 +1882,8 @@ input:hover, select:hover, textarea:hover, .border-input:hover {
 [role="dialog"] input,
 [role="dialog"] select,
 [role="dialog"] textarea {
-  background: transparent !important;
-  background-color: transparent !important;
+  background: var(--mono-surface-item, #f5f5f7) !important;
+  background-color: var(--mono-surface-item, #f5f5f7) !important;
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
   border: 1px solid var(--border) !important;
@@ -1897,8 +1901,8 @@ input:hover, select:hover, textarea:hover, .border-input:hover {
 .force-dark-mode input,
 .force-dark-mode select,
 .force-dark-mode textarea {
-  background: transparent !important;
-  background-color: transparent !important;
+  background: var(--mono-surface-item, #2c2c2e) !important;
+  background-color: var(--mono-surface-item, #2c2c2e) !important;
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
   border: 1px solid rgba(255, 255, 255, 0.16) !important;
@@ -1909,16 +1913,12 @@ input:hover, select:hover, textarea:hover, .border-input:hover {
 .dark input:hover, .dark select:hover, .dark textarea:hover,
 [data-theme="dark"] input:hover, [data-theme="dark"] select:hover, [data-theme="dark"] textarea:hover {
   border-color: rgba(255, 255, 255, 0.32) !important;
-  background: transparent !important;
-  background-color: transparent !important;
 }
 
 input:focus, select:focus, textarea:focus {
   outline: none !important;
   box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.25) !important;
   border-color: var(--foreground) !important;
-  background: transparent !important;
-  background-color: transparent !important;
 }
 
 .dark input:focus, .dark select:focus, .dark textarea:focus,
@@ -1926,8 +1926,6 @@ input:focus, select:focus, textarea:focus {
 .force-dark-mode input:focus, .force-dark-mode select:focus, .force-dark-mode textarea:focus,
 .dark [role="dialog"] input:focus,
 [data-theme="dark"] [role="dialog"] input:focus {
-  background: transparent !important;
-  background-color: transparent !important;
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.4) !important;
   border-color: #ffffff !important;
   color: #ffffff !important;

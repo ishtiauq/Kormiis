@@ -13,7 +13,7 @@ const Table = React.forwardRef(({ className, containerClassName, ...props }, ref
 Table.displayName = "Table"
 
 const TableHeader = React.forwardRef(({ className, ...props }, ref) => (
-  <thead ref={ref} className={cn("bg-white/10 dark:bg-white/5 border-b border-border/80 text-muted-foreground font-bold uppercase tracking-wider text-[11px]", className)} {...props} />
+  <thead ref={ref} className={cn("bg-[#f5f5f7] dark:bg-[#2c2c2e] border-b border-border/80 text-muted-foreground font-bold uppercase tracking-wider text-[11px]", className)} {...props} />
 ))
 TableHeader.displayName = "TableHeader"
 
@@ -29,7 +29,7 @@ TableBody.displayName = "TableBody"
 const TableFooter = React.forwardRef(({ className, ...props }, ref) => (
   <tfoot
     ref={ref}
-    className={cn("border-t border-border bg-white/10 dark:bg-white/5 font-medium text-muted-foreground", className)}
+    className={cn("border-t border-border bg-[#f5f5f7] dark:bg-[#2c2c2e] font-medium text-muted-foreground", className)}
     {...props}
   />
 ))
@@ -39,7 +39,7 @@ const TableRow = React.forwardRef(({ className, ...props }, ref) => (
   <tr
     ref={ref}
     className={cn(
-      "border-b border-border/50 transition-colors hover:bg-white/15 dark:hover:bg-white/5 data-[state=selected]:bg-muted/40",
+      "border-b border-border/60 transition-colors hover:bg-[#f5f5f7] dark:hover:bg-[#2c2c2e] data-[state=selected]:bg-[#ececef] dark:data-[state=selected]:bg-[#333338]",
       className
     )}
     {...props}

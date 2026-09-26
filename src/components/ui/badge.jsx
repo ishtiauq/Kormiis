@@ -8,16 +8,16 @@ const badgeVariants = cva(
     variants: {
       variant: {
         default:
-          "border-black/20 dark:border-white/25 bg-black/15 dark:bg-white/20 text-foreground hover:bg-black/20 dark:hover:bg-white/25 shadow-xs",
+          "border-border bg-[#f5f5f7] dark:bg-[#2c2c2e] text-foreground hover:bg-[#ececef] dark:hover:bg-[#333338] shadow-xs",
         secondary:
           "glass-badge text-foreground",
         destructive:
           "border-red-500/30 bg-red-500/15 text-red-600 dark:text-red-400 dark:bg-red-500/20 dark:border-red-500/35 font-bold",
-        outline: "border-black/15 dark:border-white/15 bg-transparent text-foreground",
+        outline: "border-border bg-card text-foreground",
         success:
-          "border-black/15 dark:border-white/20 bg-black/10 dark:bg-white/15 text-foreground",
+          "border-border bg-[#f5f5f7] dark:bg-[#2c2c2e] text-foreground",
         warning:
-          "border-black/15 dark:border-white/20 bg-black/10 dark:bg-white/15 text-foreground",
+          "border-border bg-[#f5f5f7] dark:bg-[#2c2c2e] text-foreground",
       },
     },
     defaultVariants: {

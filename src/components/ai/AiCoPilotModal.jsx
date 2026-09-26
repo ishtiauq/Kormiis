@@ -727,7 +727,7 @@ export default function AiCoPilotModal({
                   <div
                     key={session.id}
                     onClick={() => handleSelectSession(session.id)}
-                    className={`group relative p-3.5 rounded-2xl border transition-all cursor-pointer select-none flex items-start justify-between gap-3 shadow-xs backdrop-blur-xl ${
+                    className={`group relative p-3.5 rounded-2xl border transition-all cursor-pointer select-none flex items-start justify-between gap-3 shadow-xs ${
                       isActive
                         ? 'bg-black/10 dark:bg-white/15 border-foreground/30 text-foreground font-bold shadow-sm'
                         : 'border-white/35 dark:border-white/12 bg-white/60 hover:bg-white/85 dark:bg-white/[0.06] dark:hover:bg-white/[0.12] text-foreground'
@@ -812,7 +812,7 @@ export default function AiCoPilotModal({
 
                   {/* Message Bubble — MonoGlass Standard */}
                   <div
-                    className={`max-w-[88%] sm:max-w-[82%] rounded-2xl p-3.5 sm:p-4 text-xs sm:text-sm leading-relaxed relative backdrop-blur-2xl ${
+                    className={`max-w-[88%] sm:max-w-[82%] rounded-2xl p-3.5 sm:p-4 text-xs sm:text-sm leading-relaxed relative ${
                       msg.role === 'user'
                         ? 'rounded-tr-xs bg-neutral-900/90 text-white dark:bg-white/[0.16] dark:text-white border border-white/25 dark:border-white/20 shadow-[0_8px_24px_-4px_rgba(0,0,0,0.25),inset_0_1px_1px_rgba(255,255,255,0.3)]'
                         : msg.isError
@@ -861,7 +861,7 @@ export default function AiCoPilotModal({
                   {msg.pendingActions?.map(action => (
                     <div
                       key={action.actionId}
-                      className="w-full max-w-[92%] sm:max-w-[85%] p-4.5 glass-kormiis rounded-[22px] border border-white/45 dark:border-white/16 shadow-[0_12px_32px_-8px_rgba(0,0,0,0.12),inset_0_1px_1px_rgba(255,255,255,0.35)] space-y-3.5 animate-in fade-in duration-300 backdrop-blur-2xl"
+                      className="w-full max-w-[92%] sm:max-w-[85%] p-4.5 glass-kormiis rounded-[22px] border border-white/45 dark:border-white/16 shadow-[0_12px_32px_-8px_rgba(0,0,0,0.12),inset_0_1px_1px_rgba(255,255,255,0.35)] space-y-3.5 animate-in fade-in duration-300"
                     >
                       <div className="flex items-center justify-between gap-2 border-b border-border/70 dark:border-white/12 pb-2.5">
                         <div className="flex items-center gap-2">
@@ -920,7 +920,7 @@ export default function AiCoPilotModal({
 
               {/* Loading Indicator Bubble */}
               {isLoading && (
-                <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-full glass-kormiis border border-white/40 dark:border-white/16 shadow-[inset_0_1px_1px_0_rgba(255,255,255,0.40)] text-xs text-foreground font-semibold w-fit animate-pulse backdrop-blur-2xl">
+                <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-full glass-kormiis border border-white/40 dark:border-white/16 shadow-[inset_0_1px_1px_0_rgba(255,255,255,0.40)] text-xs text-foreground font-semibold w-fit animate-pulse">
                   <Icon name="sync" size={16} className="text-foreground animate-spin" />
                   <span>Kormiis AI is thinking and preparing actions...</span>
                 </div>
@@ -934,7 +934,7 @@ export default function AiCoPilotModal({
                   type="button"
                   onClick={() => scrollToBottom(true)}
                   aria-label="Scroll to latest messages"
-                  className="apple-glass-btn h-8.5 px-4 rounded-full flex items-center gap-1.5 text-xs font-bold text-foreground border border-white/45 dark:border-white/20 shadow-[0_8px_24px_-4px_rgba(0,0,0,0.25)] backdrop-blur-2xl bg-white/75 dark:bg-white/[0.12] hover:bg-white/95 dark:hover:bg-white/[0.20] active:scale-95 transition-all hover:scale-103 cursor-pointer select-none group"
+                  className="apple-glass-btn h-8.5 px-4 rounded-full flex items-center gap-1.5 text-xs font-bold text-foreground border border-white/45 dark:border-white/20 shadow-[0_8px_24px_-4px_rgba(0,0,0,0.25)] bg-white/75 dark:bg-white/[0.12] hover:bg-white/95 dark:hover:bg-white/[0.20] active:scale-95 transition-all hover:scale-103 cursor-pointer select-none group"
                   title="Jump to latest message"
                 >
                   <Icon name="arrow_downward" size={15} className="text-foreground transition-transform duration-200 group-hover:translate-y-0.5" />

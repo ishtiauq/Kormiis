@@ -9,7 +9,7 @@ import {
   GEO_REASON,
 } from '../../services/geolocation.js'
 import { Button } from "@/components/ui/button"
-import { Card, CardHeader, CardContent } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import SlideToConfirmButton from './SlideToConfirmButton.jsx'
 
@@ -246,7 +246,7 @@ export default function GeoCheckInWidget({
     const totalRemaining = annual.remaining + sick.remaining + casual.remaining
 
     return { annual, sick, casual, total: totalRemaining }
-  }, [attendance?.balances, attendance?.leaves, empId, settings?.leavePolicies])
+  }, [attendance, empId, settings])
 
   const cooldownRemaining = empLog.checkOut !== '--' && !cooldownPassed ? Math.max(0, STANDARD_COOLDOWN_MINS - (minutesSince(empLog.checkOut) ?? 0)) : 0
 
@@ -490,11 +490,7 @@ export default function GeoCheckInWidget({
                 setOutOfBoundsModal(prev => ({ ...prev, open: false }))
                 refreshLocation()
               }}
-              style={{ 
-                background: 'transparent',
-                backdropFilter: 'saturate(190%) blur(32px)', 
-                WebkitBackdropFilter: 'saturate(190%) blur(32px)',
-              }}
+              style={{ background: 'var(--mono-surface-item, #f5f5f7)' }}
               className="flex-1 h-12 min-h-[48px] px-5 rounded-2xl text-sm font-extrabold flex items-center justify-center gap-2 border border-black/15 dark:border-white/20 text-foreground hover:bg-black/5 dark:hover:bg-white/10 transition-all active:scale-[0.98] cursor-pointer"
             >
               <Icon name="refresh" size={18}/>
@@ -503,11 +499,7 @@ export default function GeoCheckInWidget({
             <button 
               type="button"
               onClick={() => setOutOfBoundsModal(prev => ({ ...prev, open: false }))}
-              style={{ 
-                background: 'transparent',
-                backdropFilter: 'saturate(190%) blur(32px)', 
-                WebkitBackdropFilter: 'saturate(190%) blur(32px)',
-              }}
+              style={{ background: 'var(--mono-surface-item, #f5f5f7)' }}
               className="flex-1 h-12 min-h-[48px] px-5 rounded-2xl text-sm font-extrabold flex items-center justify-center border-2 border-destructive/60 text-destructive hover:bg-destructive/10 transition-all active:scale-[0.98] cursor-pointer"
             >
               Understood
@@ -542,11 +534,7 @@ export default function GeoCheckInWidget({
           </div>
 
           <div 
-            style={{ 
-              background: 'transparent',
-              backdropFilter: 'saturate(190%) blur(32px)', 
-              WebkitBackdropFilter: 'saturate(190%) blur(32px)',
-            }}
+            style={{ background: 'var(--mono-surface-item, #f5f5f7)' }}
             className="w-full rounded-2xl p-3 border border-black/10 dark:border-white/10 flex items-center gap-3 text-left my-1"
           >
             <div className="size-8 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
@@ -569,11 +557,7 @@ export default function GeoCheckInWidget({
                 setGpsDisabledModal({ open: false, reason: null })
                 refreshLocation()
               }}
-              style={{ 
-                background: 'transparent',
-                backdropFilter: 'saturate(190%) blur(32px)', 
-                WebkitBackdropFilter: 'saturate(190%) blur(32px)',
-              }}
+              style={{ background: 'var(--mono-surface-item, #f5f5f7)' }}
               className="flex-1 h-12 min-h-[48px] px-5 rounded-2xl text-sm font-extrabold flex items-center justify-center gap-2 border-2 border-emerald-500/60 text-emerald-600 dark:text-emerald-300 hover:bg-emerald-500/10 transition-all active:scale-[0.98] cursor-pointer"
             >
               <Icon name="refresh" size={18}/>
@@ -582,11 +566,7 @@ export default function GeoCheckInWidget({
             <button
               type="button"
               onClick={() => setGpsDisabledModal({ open: false, reason: null })}
-              style={{ 
-                background: 'transparent',
-                backdropFilter: 'saturate(190%) blur(32px)', 
-                WebkitBackdropFilter: 'saturate(190%) blur(32px)',
-              }}
+              style={{ background: 'var(--mono-surface-item, #f5f5f7)' }}
               className="flex-1 h-12 min-h-[48px] px-5 rounded-2xl text-sm font-extrabold flex items-center justify-center border border-black/15 dark:border-white/20 text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/10 transition-all active:scale-[0.98] cursor-pointer"
             >
               Dismiss
@@ -620,34 +600,36 @@ export default function GeoCheckInWidget({
         </DialogContent>
       </Dialog>
 
-      <div className={`flex flex-col gap-4 ${cardClassName ? cardClassName : 'col-span-full xl:col-span-12'}`}>
+      <div className={`flex flex-col gap-3 h-full min-h-0 ${cardClassName ? cardClassName : 'col-span-full xl:col-span-12'}`}>
         {/* Widget 1: Timer and Slider (No outline/border) */}
         <div 
-          className="relative rounded-3xl min-h-0 flex flex-col p-0 isolate bg-transparent shadow-none"
+          className="relative rounded-3xl min-h-0 flex flex-col p-0 isolate bg-transparent shadow-none shrink-0 order-1 w-full"
           style={{ border: 'none', outline: 'none', boxShadow: 'none' }}
         >
-          <div className="flex flex-col items-center gap-6 px-4 sm:px-5 pt-3 pb-2">
+          <div className="flex flex-col items-center gap-4 px-2 sm:px-3 pt-1 pb-1">
             {/* Live clock (timer) */}
             <div className="flex flex-col items-center">
               <span aria-live="polite" role="timer" className="text-4xl sm:text-5xl font-black tabular-nums tracking-normal text-foreground leading-none">
                 {timeStr}
               </span>
-              <span className="text-xs sm:text-sm font-semibold text-muted-foreground mt-2.5">
+              <span className="text-xs sm:text-sm font-semibold text-muted-foreground mt-1.5">
                 {formatLongDate(currentTime)}
               </span>
             </div>
 
             {/* Slide-to-confirm action OR cooldown status */}
             {canCheckIn || canCheckOut ? (
-              <SlideToConfirmButton
-                action={canCheckIn ? 'in' : 'out'}
-                busy={isLoadingLoc}
-                onConfirm={canCheckIn ? handleCheckIn : handleCheckOut}
-                checkIn={displayCheckIn}
-                checkOut={displayCheckOut}
-              />
+              <div className="w-full max-w-[320px] sm:max-w-[340px] mx-auto">
+                <SlideToConfirmButton
+                  action={canCheckIn ? 'in' : 'out'}
+                  busy={isLoadingLoc}
+                  onConfirm={canCheckIn ? handleCheckIn : handleCheckOut}
+                  checkIn={displayCheckIn}
+                  checkOut={displayCheckOut}
+                />
+              </div>
             ) : (
-              <div className="w-full flex items-center justify-between px-4 h-12 rounded-2xl border border-border/70 dark:border-white/12 bg-black/[0.03] dark:bg-white/[0.04] text-xs">
+              <div className="w-full max-w-[320px] sm:max-w-[340px] mx-auto flex items-center justify-between px-3.5 h-11 rounded-2xl border border-border/70 dark:border-white/12 bg-black/[0.03] dark:bg-white/[0.04] text-xs">
                 <span className="flex items-center gap-2 font-bold text-foreground">
                   <Icon name="check_circle" className="shrink-0 text-emerald-600 dark:text-emerald-400" size={17}/>
                   Checked Out
@@ -670,10 +652,10 @@ export default function GeoCheckInWidget({
         </div>
 
         {/* Widget 2: Today's Activity & Monthly Report (With outline / border) */}
-        <Card className="dashboard-widget relative rounded-3xl border border-border/60 dark:border-white/10 min-h-fit flex flex-col p-0 isolate flex-1">
-          <CardContent className="flex flex-col gap-3.5 p-3.5 sm:p-4 h-full min-h-fit">
+        <Card className="dashboard-widget relative rounded-3xl border border-border/60 dark:border-white/10 min-h-0 h-full flex flex-col p-0 isolate flex-1 order-2 w-full">
+          <CardContent className="flex flex-col justify-between gap-2.5 p-2.5 sm:p-3 h-full flex-1 min-h-0">
             {/* Today's Activity & Office Duration Box */}
-            <div className="flex flex-col gap-2.5 p-3 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/8 dark:border-white/10">
+            <div className="flex flex-col gap-2 p-2.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/8 dark:border-white/10">
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
                   <Icon name="schedule" size={14} className="text-foreground" />
@@ -715,7 +697,7 @@ export default function GeoCheckInWidget({
             )}
 
             {/* This Month Report Section */}
-            <div className="flex flex-col gap-2.5 p-3 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/8 dark:border-white/10">
+            <div className="flex flex-col gap-2 p-2.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/8 dark:border-white/10">
               {/* Header with Title */}
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
@@ -724,7 +706,7 @@ export default function GeoCheckInWidget({
               </div>
 
               {/* Total Worked Hours Box */}
-              <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5">
+              <div className="flex items-center justify-between px-3 py-1.5 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5">
                 <span className="text-xs font-bold text-muted-foreground flex items-center gap-1.5">
                   <Icon name="timer" size={15} className="text-primary shrink-0" />
                   Total Worked
@@ -734,8 +716,8 @@ export default function GeoCheckInWidget({
                 </span>
               </div>
 
-              {/* Monthly stat cards */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {/* Monthly stat cards: 2x2 on narrow/hero column, 4 on spacious views so text and digit never collide */}
+              <div className="grid grid-cols-2 2xl:grid-cols-4 gap-1.5 sm:gap-2">
                 {[
                   { key: 'present', label: 'Present', count: monthlyStats.presentDays, bg: 'linear-gradient(135deg, var(--color-status-green) 0%, #047857 100%)', color: '#065f46' },
                   { key: 'late', label: 'Late', count: monthlyStats.lateDays, bg: 'linear-gradient(135deg, var(--color-status-yellow) 0%, #b45309 100%)', color: '#92400e' },
@@ -744,12 +726,12 @@ export default function GeoCheckInWidget({
                 ].map(({ key, label, count, bg, color }) => (
                   <div
                     key={key}
-                    className="flex items-center justify-between gap-2 min-w-0 rounded-xl px-3 py-2 shadow-none"
+                    className="flex items-center justify-between gap-1.5 min-w-0 rounded-xl px-2.5 py-1.5 shadow-none overflow-hidden"
                     style={{ background: bg }}
                   >
-                    <span className="text-[11px] font-bold text-white truncate drop-shadow-sm">{label}</span>
-                    <span className="shrink-0 flex items-center justify-center size-7 rounded-md bg-white">
-                      <span className="text-sm font-black tabular-nums font-mono leading-none" style={{ color }}>{count}</span>
+                    <span className="text-xs font-bold text-white whitespace-nowrap drop-shadow-sm select-none shrink-0">{label}</span>
+                    <span className="shrink-0 flex items-center justify-center size-6 sm:size-6.5 rounded-md bg-white shadow-xs">
+                      <span className="text-xs font-black tabular-nums font-mono leading-none" style={{ color }}>{count}</span>
                     </span>
                   </div>
                 ))}
@@ -757,7 +739,7 @@ export default function GeoCheckInWidget({
             </div>
 
             {/* Available Leave Balance Box with Breakdown */}
-            <div className="flex flex-col gap-2.5 p-3 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/8 dark:border-white/10">
+            <div className="flex flex-col gap-2 p-2.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/8 dark:border-white/10">
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
                   <Icon name="event_available" size={14} className="text-foreground" />
@@ -769,7 +751,7 @@ export default function GeoCheckInWidget({
               </div>
 
               <div className="grid grid-cols-3 gap-2">
-                <div className="flex flex-col items-center justify-center p-2 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5">
+                <div className="flex flex-col items-center justify-center p-1.5 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5">
                   <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider truncate">Annual</span>
                   <div className="flex items-baseline gap-0.5 mt-0.5">
                     <span className="text-xs sm:text-sm font-black font-mono tabular-nums text-foreground">
@@ -782,7 +764,7 @@ export default function GeoCheckInWidget({
                   </div>
                 </div>
 
-                <div className="flex flex-col items-center justify-center p-2 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5">
+                <div className="flex flex-col items-center justify-center p-1.5 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5">
                   <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider truncate">Sick</span>
                   <div className="flex items-baseline gap-0.5 mt-0.5">
                     <span className="text-xs sm:text-sm font-black font-mono tabular-nums text-foreground">
@@ -795,7 +777,7 @@ export default function GeoCheckInWidget({
                   </div>
                 </div>
 
-                <div className="flex flex-col items-center justify-center p-2 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5">
+                <div className="flex flex-col items-center justify-center p-1.5 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5">
                   <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider truncate">Casual</span>
                   <div className="flex items-baseline gap-0.5 mt-0.5">
                     <span className="text-xs sm:text-sm font-black font-mono tabular-nums text-foreground">
@@ -811,11 +793,11 @@ export default function GeoCheckInWidget({
             </div>
 
             {/* Widget Footer Action: My Attendance Logs */}
-            <div className="pt-1 w-full mt-auto">
+            <div className="pt-1 w-full">
               <button
                 type="button"
                 onClick={() => setCurrentView && setCurrentView(myLogsTarget)}
-                className="apple-glass-btn w-full h-11 px-5 rounded-2xl flex items-center justify-center gap-2 text-xs font-bold text-foreground cursor-pointer transition-all active:scale-[0.98] border border-border/80 dark:border-white/12 hover:bg-black/5 dark:hover:bg-white/10"
+                className="apple-glass-btn w-full h-10 px-4 rounded-2xl flex items-center justify-center gap-2 text-xs font-bold text-foreground cursor-pointer transition-all active:scale-[0.98] border border-border/80 dark:border-white/12 hover:bg-black/5 dark:hover:bg-white/10"
               >
                 <Icon name="history" size={17} className="text-muted-foreground" />
                 <span>My Attendance Logs</span>

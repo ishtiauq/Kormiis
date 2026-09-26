@@ -231,7 +231,7 @@ export default function Topbar({
 
     return (
       <div 
-        className="p-3.5 sm:p-4 rounded-2xl bg-rose-500/[0.07] dark:bg-rose-500/[0.14] border border-rose-500/25 dark:border-rose-500/35 shadow-sm flex flex-col gap-2.5 mb-2.5 relative overflow-hidden backdrop-blur-md transition-all select-none"
+        className="p-3.5 sm:p-4 rounded-2xl bg-rose-500/[0.07] dark:bg-rose-500/[0.14] border border-rose-500/25 dark:border-rose-500/35 shadow-sm flex flex-col gap-2.5 mb-2.5 relative overflow-hidden transition-all select-none"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-500 via-rose-500 to-amber-500" />
