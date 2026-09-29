@@ -388,7 +388,7 @@ export const AnnouncementsWidget = memo(({
             View All
           </button>
         }
-        contentClass="flex flex-col p-0 overflow-hidden"
+        contentClass="flex flex-col p-0 sm:p-0 overflow-hidden"
         {...wProps}
       >
         {/* Separate Split Buttons: Feed, Notice & Events */}
@@ -725,33 +725,33 @@ export const AnnouncementsWidget = memo(({
             )}
         </div>
 
-        {/* Widget Footer: Post / Serve Notice / Add Event Action Button (Pinned to Bottom) */}
-        <div className="mt-auto px-2.5 sm:px-3 pb-3 pt-0 shrink-0 flex items-center w-full">
+        {/* Widget Footer: Post / Serve Notice / Add Event Action Button (Pinned to Bottom & Aligned with Widget 1) */}
+        <div className="mt-auto px-2 sm:px-2.5 pb-2 sm:pb-2.5 pt-1 shrink-0 flex items-center w-full">
           {activeTab === 'feed' ? (
             <button
               type="button"
               onClick={() => setIsFeedModalOpen(true)}
-              className="w-full h-8.5 rounded-xl font-semibold text-xs transition-all cursor-pointer select-none flex items-center justify-center gap-2 bg-transparent text-foreground/80 hover:text-foreground border border-black/10 dark:border-white/15 hover:border-black/25 dark:hover:border-white/30 active:scale-[0.99]"
+              className="apple-glass-btn w-full h-10 px-4 rounded-2xl flex items-center justify-center gap-2 text-xs font-bold text-foreground cursor-pointer transition-all active:scale-[0.98] border border-border/80 dark:border-white/12 hover:bg-black/5 dark:hover:bg-white/10"
             >
-              <Icon name="add" size={15} className="text-foreground" />
+              <Icon name="add" size={17} className="text-muted-foreground" />
               <span>Share Update or Create Poll</span>
             </button>
           ) : activeTab === 'notice' ? (
             <button
               type="button"
               onClick={() => setIsNoticeModalOpen(true)}
-              className="w-full h-8.5 rounded-xl font-semibold text-xs transition-all cursor-pointer select-none flex items-center justify-center gap-2 bg-transparent text-foreground/80 hover:text-foreground border border-black/10 dark:border-white/15 hover:border-black/25 dark:hover:border-white/30 active:scale-[0.99]"
+              className="apple-glass-btn w-full h-10 px-4 rounded-2xl flex items-center justify-center gap-2 text-xs font-bold text-foreground cursor-pointer transition-all active:scale-[0.98] border border-border/80 dark:border-white/12 hover:bg-black/5 dark:hover:bg-white/10"
             >
-              <Icon name="campaign" size={15} className="text-foreground" />
+              <Icon name="campaign" size={17} className="text-muted-foreground" />
               <span>Post Company Notice</span>
             </button>
           ) : (
             <button
               type="button"
               onClick={() => setIsEventModalOpen(true)}
-              className="w-full h-8.5 rounded-xl font-semibold text-xs transition-all cursor-pointer select-none flex items-center justify-center gap-2 bg-transparent text-foreground/80 hover:text-foreground border border-black/10 dark:border-white/15 hover:border-black/25 dark:hover:border-white/30 active:scale-[0.99]"
+              className="apple-glass-btn w-full h-10 px-4 rounded-2xl flex items-center justify-center gap-2 text-xs font-bold text-foreground cursor-pointer transition-all active:scale-[0.98] border border-border/80 dark:border-white/12 hover:bg-black/5 dark:hover:bg-white/10"
             >
-              <Icon name="add" size={15} className="text-foreground" />
+              <Icon name="add" size={17} className="text-muted-foreground" />
               <span>Add Event</span>
             </button>
           )}

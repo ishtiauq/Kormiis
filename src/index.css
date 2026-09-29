@@ -129,8 +129,8 @@
   --mono-surface-base: #f5f5f7;
   --mono-surface-card: #ffffff;
   --mono-surface-card-border: rgba(0, 0, 0, 0.12);
-  --mono-surface-item: #f5f5f7;
-  --mono-surface-item-hover: #ececef;
+  --mono-surface-item: #ffffff;
+  --mono-surface-item-hover: #f0f0f2;
   --mono-surface-item-border: rgba(0, 0, 0, 0.08);
   --mono-surface-well: #ececef;
   --mono-surface-well-border: rgba(0, 0, 0, 0.14);
@@ -139,7 +139,7 @@
 .dark,
 html.dark,
 [data-theme="dark"] {
-  --background: #1c1c1e;
+  --background: #121212;
   --foreground: #ffffff;
   --card: #232327;
   --card-foreground: #ffffff;
@@ -170,7 +170,7 @@ html.dark,
   --glass-shadow: none;
 
   /* Apple Ultra-Liquid Glass Drawer Tokens (Dark Mode) */
-  --history-drawer-bg: #1c1c1e;
+  --history-drawer-bg: #121212;
   --history-card-bg: rgba(255, 255, 255, 0.035);
   --history-card-border: rgba(255, 255, 255, 0.08);
   --history-card-active-bg: rgba(255, 255, 255, 0.08);
@@ -184,18 +184,18 @@ html.dark,
   --glass-btn-hover-shadow: none;
 
   /* Monochrome Elevation System (Fixed Hierarchy - Dark Mode) — SOLID fills */
-  --mono-surface-base: #1c1c1e;
+  --mono-surface-base: #121212;
   --mono-surface-card: #232327;
   --mono-surface-card-border: rgba(255, 255, 255, 0.13);
-  --mono-surface-item: #2c2c2e;
-  --mono-surface-item-hover: #333338;
+  --mono-surface-item: #232327;
+  --mono-surface-item-hover: #2c2c2e;
   --mono-surface-item-border: rgba(255, 255, 255, 0.10);
   --mono-surface-well: #343438;
   --mono-surface-well-border: rgba(255, 255, 255, 0.18);
 }
 
 .force-dark-mode {
-  --background: #1c1c1e !important;
+  --background: #121212 !important;
   --foreground: #ffffff !important;
   --card: transparent !important;
   --card-foreground: #ffffff !important;
@@ -265,7 +265,7 @@ body {
 html.dark body,
 body[data-theme="dark"],
 [data-theme="dark"] body {
-  background-color: #1c1c1e !important;
+  background-color: #121212 !important;
   background-image: none !important;
 }
 
@@ -364,7 +364,7 @@ aside,
 html.dark,
 [data-theme="dark"] {
   color-scheme: dark;
-  background-color: #1c1c1e !important;
+  background-color: #121212 !important;
 }
 
 #root,
@@ -436,8 +436,8 @@ html.dark,
 .glass-card:not([role="dialog"]):not([role="alertdialog"]):not([data-notif-panel]):not(.notification-modal):not(.notification-dropdown):not([data-ai-panel]):not([data-ai-modal]):not(.ai-panel):not([data-bottom-bar]):not([data-mobile-dock]):not(.mobile-bottom-dock):not([data-mobile-panel]):not([data-menu-drawer]):not(.menu-bar-dock):not(.bottom-bar):not(.topbar):not(header):not([data-topbar]):not(.glass-mobile-drawer):not(.liquid-glass-drawer):not(.toast):not([role="menu"]):not([role="listbox"]):not([role="tooltip"]):not(.glass-tooltip):not(.glass-popover):not(.glass-toast):not(.popover-content):not([data-radix-popper-content-wrapper]):not(.bg-primary):not([data-variant="default"]):not([aria-selected="true"]):not([data-selected="true"]):not([data-state="active"]):not([data-active="true"]):not(.nav-capsule-active),
 .bg-card:not([role="dialog"]):not([role="alertdialog"]):not([data-notif-panel]):not(.notification-modal):not(.notification-dropdown):not([data-ai-panel]):not([data-ai-modal]):not(.ai-panel):not([data-bottom-bar]):not([data-mobile-dock]):not(.mobile-bottom-dock):not([data-mobile-panel]):not([data-menu-drawer]):not(.menu-bar-dock):not(.bottom-bar):not(.topbar):not(header):not([data-topbar]):not(.glass-mobile-drawer):not(.liquid-glass-drawer):not(.toast):not([role="menu"]):not([role="listbox"]):not([role="tooltip"]):not(.glass-tooltip):not(.glass-popover):not(.glass-toast):not(.popover-content):not([data-radix-popper-content-wrapper]):not(.bg-primary):not([data-variant="default"]):not([aria-selected="true"]):not([data-selected="true"]):not([data-state="active"]):not([data-active="true"]):not(.nav-capsule-active),
 .dashboard-widget {
-  background: var(--mono-surface-card, #ffffff) !important;
-  background-color: var(--mono-surface-card, #ffffff) !important;
+  background: transparent !important;
+  background-color: transparent !important;
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
   border: 1px solid var(--mono-surface-card-border, rgba(0, 0, 0, 0.12)) !important;
@@ -447,8 +447,8 @@ html.dark,
 
 .dark .dashboard-widget,
 [data-theme="dark"] .dashboard-widget {
-  background: var(--mono-surface-card, #232327) !important;
-  background-color: var(--mono-surface-card, #232327) !important;
+  background: transparent !important;
+  background-color: transparent !important;
   border-color: var(--mono-surface-card-border, rgba(255, 255, 255, 0.13)) !important;
 }
 
@@ -1173,8 +1173,8 @@ button[aria-selected="true"]:not(.text-primary):active,
 .employee-portal-root .dashboard-widget,
 .glass-kormiis.dashboard-widget,
 .glass-kormiis.widget-card {
-  background: var(--mono-surface-card, #ffffff) !important;
-  background-color: var(--mono-surface-card, #ffffff) !important;
+  background: transparent !important;
+  background-color: transparent !important;
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
   border: 1px solid var(--mono-surface-card-border, rgba(0, 0, 0, 0.12)) !important;
@@ -1201,8 +1201,8 @@ button[aria-selected="true"]:not(.text-primary):active,
 [data-theme="dark"] .employee-portal-root .dashboard-widget,
 [data-theme="dark"] .glass-kormiis.dashboard-widget,
 [data-theme="dark"] .glass-kormiis.widget-card {
-  background: var(--mono-surface-card, #232327) !important;
-  background-color: var(--mono-surface-card, #232327) !important;
+  background: transparent !important;
+  background-color: transparent !important;
   border-color: var(--mono-surface-card-border, rgba(255, 255, 255, 0.13)) !important;
 }
 

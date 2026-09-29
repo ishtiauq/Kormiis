@@ -653,9 +653,9 @@ export default function GeoCheckInWidget({
 
         {/* Widget 2: Today's Activity & Monthly Report (With outline / border) */}
         <Card className="dashboard-widget relative rounded-3xl border border-border/60 dark:border-white/10 min-h-0 h-full flex flex-col p-0 isolate flex-1 order-2 w-full">
-          <CardContent className="flex flex-col justify-start gap-2 p-2 sm:p-2.5 h-full flex-1 min-h-0 overflow-y-auto">
+          <CardContent className="flex flex-col justify-between gap-2 p-2 sm:p-2.5 h-full flex-1 min-h-0 overflow-y-auto">
             {/* Today's Activity & Office Duration Box */}
-            <div className="flex flex-col gap-1.5 p-2 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/8 dark:border-white/10">
+            <div className="flex flex-col gap-1.5 p-2 sm:p-2.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/8 dark:border-white/10">
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
                   <Icon name="schedule" size={14} className="text-foreground" />
@@ -739,61 +739,61 @@ export default function GeoCheckInWidget({
             </div>
 
             {/* Available Leave Balance Box with Breakdown */}
-            <div className="flex flex-col gap-1.5 p-2 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/8 dark:border-white/10">
+            <div className="flex flex-col gap-2 p-2.5 sm:p-3 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/8 dark:border-white/10">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-                  <Icon name="event_available" size={14} className="text-foreground" />
+                <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                  <Icon name="event_available" size={15} className="text-foreground" />
                   Available Leave Balance
                 </span>
-                <span className="text-[11px] font-mono font-bold text-primary">
+                <span className="text-xs font-mono font-bold text-primary">
                   {leaveBalances.total} days total
                 </span>
               </div>
 
-              <div className="grid grid-cols-3 gap-2 items-start">
-                <div className="flex flex-col items-center justify-center p-1.5 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5">
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider truncate">Annual</span>
-                  <div className="flex items-baseline gap-0.5 mt-0.5">
-                    <span className="text-xs sm:text-sm font-black font-mono tabular-nums text-foreground">
+              <div className="grid grid-cols-3 gap-2 sm:gap-2.5 items-stretch">
+                <div className="flex flex-col items-center justify-center py-2.5 px-2 sm:py-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5">
+                  <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider truncate">Annual</span>
+                  <div className="flex items-baseline gap-0.5 mt-1">
+                    <span className="text-base sm:text-lg font-black font-mono tabular-nums text-foreground">
                       {leaveBalances.annual.used}
                     </span>
-                    <span className="text-[11px] font-mono font-bold text-muted-foreground">
+                    <span className="text-xs sm:text-sm font-mono font-bold text-muted-foreground">
                       /{leaveBalances.annual.limit}
                     </span>
-                    <span className="text-[10px] font-semibold text-muted-foreground ml-0.5">d</span>
+                    <span className="text-xs font-semibold text-muted-foreground ml-0.5">d</span>
                   </div>
                 </div>
 
-                <div className="flex flex-col items-center justify-center p-1.5 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5">
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider truncate">Sick</span>
-                  <div className="flex items-baseline gap-0.5 mt-0.5">
-                    <span className="text-xs sm:text-sm font-black font-mono tabular-nums text-foreground">
+                <div className="flex flex-col items-center justify-center py-2.5 px-2 sm:py-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5">
+                  <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider truncate">Sick</span>
+                  <div className="flex items-baseline gap-0.5 mt-1">
+                    <span className="text-base sm:text-lg font-black font-mono tabular-nums text-foreground">
                       {leaveBalances.sick.used}
                     </span>
-                    <span className="text-[11px] font-mono font-bold text-muted-foreground">
+                    <span className="text-xs sm:text-sm font-mono font-bold text-muted-foreground">
                       /{leaveBalances.sick.limit}
                     </span>
-                    <span className="text-[10px] font-semibold text-muted-foreground ml-0.5">d</span>
+                    <span className="text-xs font-semibold text-muted-foreground ml-0.5">d</span>
                   </div>
                 </div>
 
-                <div className="flex flex-col items-center justify-center p-1.5 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5">
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider truncate">Casual</span>
-                  <div className="flex items-baseline gap-0.5 mt-0.5">
-                    <span className="text-xs sm:text-sm font-black font-mono tabular-nums text-foreground">
+                <div className="flex flex-col items-center justify-center py-2.5 px-2 sm:py-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5">
+                  <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider truncate">Casual</span>
+                  <div className="flex items-baseline gap-0.5 mt-1">
+                    <span className="text-base sm:text-lg font-black font-mono tabular-nums text-foreground">
                       {leaveBalances.casual.used}
                     </span>
-                    <span className="text-[11px] font-mono font-bold text-muted-foreground">
+                    <span className="text-xs sm:text-sm font-mono font-bold text-muted-foreground">
                       /{leaveBalances.casual.limit}
                     </span>
-                    <span className="text-[10px] font-semibold text-muted-foreground ml-0.5">d</span>
+                    <span className="text-xs font-semibold text-muted-foreground ml-0.5">d</span>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Widget Footer Action: My Attendance Logs */}
-            <div className="pt-0.5 w-full">
+            <div className="w-full shrink-0">
               <button
                 type="button"
                 onClick={() => setCurrentView && setCurrentView(myLogsTarget)}

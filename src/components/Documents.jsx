@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
 import Icon from "@/components/ui/Icon.jsx"
 import { uploadDocumentFile, deleteDocumentFile } from '../services/bridge.js'
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardTitle } from "@/components/ui/card"
 import { useConfirm } from '../hooks/useConfirm'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -324,10 +324,6 @@ export default function Documents({
     return Math.min(100, (usedStorageBytes / DEFAULT_COMPANY_STORAGE_LIMIT_BYTES) * 100)
   }, [usedStorageBytes])
 
-  const remainingStorageBytes = useMemo(() => {
-    return Math.max(0, DEFAULT_COMPANY_STORAGE_LIMIT_BYTES - usedStorageBytes)
-  }, [usedStorageBytes])
-
   const checkCategoryScroll = () => {
     const el = categoryScrollRef.current
     if (el) {
@@ -559,16 +555,14 @@ export default function Documents({
         
         {/* Widget Header & Search */}
         <div className="flex flex-col gap-3">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <Icon name="folder_open" className="text-primary" size={18}/>
-              <h3 className="font-bold text-sm text-foreground tracking-tight">
-                All Documents
-              </h3>
-              <Badge variant="outline" className="rounded-full px-2 py-0 text-[10px] font-semibold border-black/10 dark:border-white/10 text-muted-foreground">
-                {filteredDocs.length}
-              </Badge>
-            </div>
+          <div className="flex items-center justify-center gap-2 text-center">
+            <CardTitle className="text-fluid font-bold tracking-tight text-foreground m-0 leading-snug break-words flex items-center justify-center gap-2">
+              <Icon name="folder_open" className="text-primary shrink-0" size="1em"/>
+              <span>Documents</span>
+            </CardTitle>
+            <Badge variant="outline" className="rounded-full px-2 py-0 text-[10px] font-semibold border-black/10 dark:border-white/10 text-muted-foreground">
+              {filteredDocs.length}
+            </Badge>
           </div>
 
           {/* Search Bar at the Top of Widget */}
@@ -621,7 +615,7 @@ export default function Documents({
                   tabIndex={0}
                   onClick={() => handleDownload(doc)}
                   onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleDownload(doc) } }}
-                  className="group relative rounded-xl p-2.5 sm:p-3 bg-white dark:bg-[#1f1f23] border border-black/10 dark:border-white/10 hover:border-primary/40 transition-all duration-200 hover:-translate-y-0.5 shadow-2xs hover:shadow-sm flex items-center justify-between gap-3 cursor-pointer select-none overflow-hidden"
+                  className="group relative rounded-xl p-2.5 sm:p-3 bg-white dark:bg-[#232327] border border-black/10 dark:border-white/10 hover:border-primary/40 transition-all duration-200 hover:-translate-y-0.5 shadow-2xs hover:shadow-sm flex items-center justify-between gap-3 cursor-pointer select-none overflow-hidden"
                 >
                   {/* Left: Bare Icon + Document Info */}
                   <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -699,85 +693,46 @@ export default function Documents({
             })}
           </div>
         )}
-      </div>
 
-      {/* Action Buttons: Generate Document & Upload Document Side-by-Side Below Document Widget */}
-      <div className="flex flex-wrap items-center gap-3">
-        <Button 
-          variant="default" 
-          onClick={() => handleOpenLetterModal('noc')} 
-          className="rounded-2xl h-11 px-5 font-bold shadow-sm flex-1 sm:flex-initial"
-        >
-          <Icon name="assignment" className="mr-2" size={16}/> Generate Document
-        </Button>
-        <Button 
-          variant="outline" 
-          onClick={handleOpenUploadModal} 
-          className="rounded-2xl h-11 px-5 font-bold shadow-sm flex-1 sm:flex-initial"
-        >
-          <Icon name="upload" className="mr-2" size={16}/> Upload Document
-        </Button>
+        {/* Widget Footer Actions: Generate & Upload Side-by-Side, Full Width */}
+        <div className="grid grid-cols-2 gap-2.5 sm:gap-3 pt-1">
+          <Button 
+            variant="outline" 
+            onClick={() => handleOpenLetterModal('noc')} 
+            className="w-full rounded-2xl h-11 px-2 sm:px-4 font-bold shadow-sm text-xs sm:text-sm min-w-0 bg-black/[0.04]! dark:bg-white/[0.06]! hover:bg-black/[0.08]! dark:hover:bg-white/10! active:bg-neutral-900! active:text-white! dark:active:bg-white! dark:active:text-neutral-900! transition-all duration-300"
+          >
+            <Icon name="assignment" className="mr-1.5 shrink-0" size={16}/> 
+            <span className="truncate">Generate Documents</span>
+          </Button>
+          <Button 
+            variant="outline" 
+            onClick={handleOpenUploadModal} 
+            className="w-full rounded-2xl h-11 px-2 sm:px-4 font-bold shadow-sm text-xs sm:text-sm min-w-0 bg-black/[0.04]! dark:bg-white/[0.06]! hover:bg-black/[0.08]! dark:hover:bg-white/10! active:bg-neutral-900! active:text-white! dark:active:bg-white! dark:active:text-neutral-900! transition-all duration-300"
+          >
+            <Icon name="upload" className="mr-1.5 shrink-0" size={16}/> 
+            <span className="truncate">Upload Documents</span>
+          </Button>
+        </div>
       </div>
 
       {/* Cloud Storage Capacity Tracker Card (Compact, Moved to Bottom) */}
       <div className="rounded-2xl px-4 py-3 sm:px-5 sm:py-3.5 glass-kormiis glass-apple text-foreground border border-white/20 dark:border-white/10 shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          
-          {/* Storage Meter Info */}
-          <div className="flex items-center gap-3 flex-1 min-w-0">
-            <div className="size-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-              <Icon name="cloud_sync" size={20} className="text-primary"/>
-            </div>
-            
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-sm text-foreground">Cloud Storage</span>
-                <span className="text-xs text-muted-foreground font-medium">
-                  ({formatFileSize(usedStorageBytes)} / 500 MB • {usagePercentage.toFixed(1)}%)
-                </span>
-                <Badge 
-                  variant="outline" 
-                  className={`text-[10px] font-semibold px-2 py-0 h-4 rounded-full ml-auto sm:ml-0 ${
-                    usagePercentage > 90 
-                      ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/30' 
-                      : usagePercentage > 70 
-                      ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30' 
-                      : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'
-                  }`}
-                >
-                  <span className={`size-1.5 rounded-full mr-1 inline-block ${
-                    usagePercentage > 90 ? 'bg-rose-500' : usagePercentage > 70 ? 'bg-amber-500' : 'bg-emerald-500'
-                  }`}/>
-                  {usagePercentage > 90 ? 'Near Limit' : usagePercentage > 70 ? 'High' : 'Healthy'}
-                </Badge>
-              </div>
+        <p className="font-bold text-sm text-foreground truncate">
+          Cloud Storage <span className="text-xs text-muted-foreground font-medium">({formatFileSize(usedStorageBytes)}/500MB)</span>
+        </p>
 
-              {/* Storage Capacity Progress Bar */}
-              <div className="mt-1.5 w-full h-1.5 rounded-full bg-black/10 dark:bg-white/10 overflow-hidden">
-                <div 
-                  className={`h-full rounded-full transition-all duration-500 ease-out ${
-                    usagePercentage > 90 
-                      ? 'bg-rose-500' 
-                      : usagePercentage > 70 
-                      ? 'bg-amber-500' 
-                      : 'bg-primary'
-                  }`}
-                  style={{ width: `${Math.max(1, usagePercentage)}%` }}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Quick Metrics */}
-          <div className="flex items-center gap-4 text-xs text-muted-foreground font-medium border-t sm:border-t-0 sm:border-l border-border/60 dark:border-white/10 pt-2 sm:pt-0 sm:pl-4 shrink-0">
-            <div>
-              <strong className="text-foreground font-semibold">{documents.length}</strong> Files
-            </div>
-            <div>
-              <strong className="text-foreground font-semibold">{formatFileSize(remainingStorageBytes)}</strong> Free
-            </div>
-          </div>
-
+        {/* Storage Capacity Progress Bar */}
+        <div className="mt-1.5 w-full h-1.5 rounded-full bg-black/10 dark:bg-white/10 overflow-hidden">
+          <div 
+            className={`h-full rounded-full transition-all duration-500 ease-out ${
+              usagePercentage > 90 
+                ? 'bg-rose-500' 
+                : usagePercentage > 70 
+                ? 'bg-amber-500' 
+                : 'bg-primary'
+            }`}
+            style={{ width: `${Math.max(1, usagePercentage)}%` }}
+          />
         </div>
       </div>
 
